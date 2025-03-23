@@ -3,6 +3,36 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Common IntelliJ Platform excludes
+
+# User specific
+**/.idea/**/workspace.xml
+**/.idea/**/tasks.xml
+**/.idea/shelf/*
+**/.idea/dictionaries
+**/.idea/httpRequests/
+
+# Sensitive or high-churn files
+**/.idea/**/dataSources/
+**/.idea/**/dataSources.ids
+**/.idea/**/dataSources.xml
+**/.idea/**/dataSources.local.xml
+**/.idea/**/sqlDataSources.xml
+**/.idea/**/dynamic.xml
+
+# Extensions
+**/.idea/**/discord.xml
+
+# Rider
+# Rider auto-generates .iml files, and contentModel.xml
+**/.idea/**/*.iml
+**/.idea/**/contentModel.xml
+**/.idea/**/modules.xml
+
+Thumbs.db
+Desktop.ini
+.DS_Store
+
 # User-specific files
 *.rsuser
 *.suo
@@ -28,13 +58,13 @@ x86/
 [Aa][Rr][Mm]64/
 bld/
 [Bb]in/
+[Ii]nt/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
-.idea/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
