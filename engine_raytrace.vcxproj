@@ -176,6 +176,10 @@
   <ItemGroup>
     <ClInclude Include="extern\imgui\imgui.h" />
     <ClInclude Include="extern\tiny_bvh.h" />
+    <ClInclude Include="src\Math\vector.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\Core\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
