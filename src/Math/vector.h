@@ -322,8 +322,6 @@ FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec4t<T>&& v) noexce
  * Functions
  */
 
-// TODO: Min, Max, Floor, Ceil, Frac, Abs, Clamp, Mod, Exp, DominantAxis.
-
 FUNC2_TMPL vec2t<T> Min(const vec2t<T>& a, const vec2t<U>& b) noexcept { return { a.x < b.x ? a.x : b.x, a.y < b.y ? a.y : b.y }; }
 FUNC2_TMPL vec3t<T> Min(const vec3t<T>& a, const vec3t<U>& b) noexcept { return { a.x < b.x ? a.x : b.x, a.y < b.y ? a.y : b.y, a.z < b.z ? a.z : b.z }; }
 FUNC2_TMPL vec4t<T> Min(const vec4t<T>& a, const vec4t<U>& b) noexcept { return { a.x < b.x ? a.x : b.x, a.y < b.y ? a.y : b.y, a.z < b.z ? a.z : b.z, a.w < b.w ? a.w : b.w }; }
@@ -384,6 +382,8 @@ FUNC1_TMPL int DominantAxis(const vec4t<T>& v) noexcept {
 FUNC2_TMPL float Dot(const vec2t<T>& a, const vec2t<U>& b) noexcept { return a.x * b.x + a.y * b.y; }
 FUNC2_TMPL float Dot(const vec3t<T>& a, const vec3t<U>& b) noexcept { return a.x * b.x + a.y * b.y + a.z; }
 FUNC2_TMPL float Dot(const vec4t<T>& a, const vec4t<U>& b) noexcept { return a.x * b.x + a.y * b.y + a.z + a.w; }
+
+FUNC2_TMPL vec3t<T> Cross(const vec3t<T>& a, const vec3t<U>& b) noexcept { return { a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y }; }
 
 FUNC1_TMPL float SqrLength(const vec2t<T>& v) noexcept { return Dot<T, T>(v, v); }
 FUNC1_TMPL float SqrLength(const vec3t<T>& v) noexcept { return Dot<T, T>(v, v); }
