@@ -176,6 +176,7 @@
   <ItemGroup>
     <ClInclude Include="extern\imgui\imgui.h" />
     <ClInclude Include="extern\tiny_bvh.h" />
+    <ClInclude Include="src\Math\matrix.h" />
     <ClInclude Include="src\Math\vector.h" />
   </ItemGroup>
   <ItemGroup>
