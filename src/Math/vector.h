@@ -5,6 +5,7 @@
 
 // TODO (Tygo?): Remove when we have a way to define this elsewhere
 #define USE_SIMD
+#define USE_AVX2
 
 #pragma warning ( push )
 #pragma warning ( disable: 4201 /* nameless struct / union */ )
@@ -14,6 +15,8 @@ namespace Engine
 
 template<typename T>
 concept numeric = std::is_arithmetic_v<T>;
+
+#pragma region vec_structs
 
 template<typename T>
 struct vec3t<T>;
@@ -153,6 +156,9 @@ typedef vec4t<int>		vec4i;
 typedef vec4t<unsigned> vec4u;
 typedef vec4t<double>	vec4d;
 
+#pragma endregion
+
+#pragma region vec_oper
 
 // Needed for comparison operators
 template <typename T>
@@ -221,58 +227,58 @@ FUNC2_TMPL std::strong_ordering operator<=>(const vec4t<T>& a, const vec4t<U>& b
 FUNC2_TMPL vec2t<T> operator+(const vec2t<T>& a, const vec2t<U>& b) noexcept { return { a.x + b.x, a.y + b.y }; }
 FUNC2_TMPL vec3t<T> operator+(const vec3t<T>& a, const vec3t<U>& b) noexcept { return { a.x + b.x, a.y + b.y, a.z + b.z }; }
 FUNC2_TMPL vec4t<T> operator+(const vec4t<T>& a, const vec4t<U>& b) noexcept { return { a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w }; }
-FUNC2_TMPL vec2t<T> operator+(const vec2t<T>& a, U b) noexcept { return { a.x + b, a.y + b }; }
-FUNC2_TMPL vec3t<T> operator+(const vec3t<T>& a, U b) noexcept { return { a.x + b, a.y + b, a.z + b }; }
-FUNC2_TMPL vec4t<T> operator+(const vec4t<T>& a, U b) noexcept { return { a.x + b, a.y + b, a.z + b, a.w + b }; }
+FUNC2_TMPL vec2t<T> operator+(const vec2t<T>& a, const U b) noexcept { return { a.x + b, a.y + b }; }
+FUNC2_TMPL vec3t<T> operator+(const vec3t<T>& a, const U b) noexcept { return { a.x + b, a.y + b, a.z + b }; }
+FUNC2_TMPL vec4t<T> operator+(const vec4t<T>& a, const U b) noexcept { return { a.x + b, a.y + b, a.z + b, a.w + b }; }
 
 FUNC2_TMPL void operator+=(vec2t<T>& a, const vec2t<U>& b) noexcept { a.x += b.x; a.y += b.y; }
 FUNC2_TMPL void operator+=(vec3t<T>& a, const vec3t<U>& b) noexcept { a.x += b.x; a.y += b.y; a.z += b.z; }
 FUNC2_TMPL void operator+=(vec4t<T>& a, const vec4t<U>& b) noexcept { a.x += b.x, a.y += b.y; a.z += b.z; a.w += b.w; }
-FUNC2_TMPL void operator+=(vec2t<T>& a, U b) noexcept { a.x += b; a.y += b; }
-FUNC2_TMPL void operator+=(vec3t<T>& a, U b) noexcept { a.x += b; a.y += b; a.z += b; }
-FUNC2_TMPL void operator+=(vec4t<T>& a, U b) noexcept { a.x += b, a.y += b; a.z += b; a.w += b; }
+FUNC2_TMPL void operator+=(vec2t<T>& a, const U b) noexcept { a.x += b; a.y += b; }
+FUNC2_TMPL void operator+=(vec3t<T>& a, const U b) noexcept { a.x += b; a.y += b; a.z += b; }
+FUNC2_TMPL void operator+=(vec4t<T>& a, const U b) noexcept { a.x += b, a.y += b; a.z += b; a.w += b; }
 
 FUNC2_TMPL vec2t<T> operator-(const vec2t<T>& a, const vec2t<U>& b) noexcept { return { a.x - b.x, a.y - b.y }; }
 FUNC2_TMPL vec3t<T> operator-(const vec3t<T>& a, const vec3t<U>& b) noexcept { return { a.x - b.x, a.y - b.y, a.z - b.z }; }
 FUNC2_TMPL vec4t<T> operator-(const vec4t<T>& a, const vec4t<U>& b) noexcept { return { a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w }; }
-FUNC2_TMPL vec2t<T> operator-(const vec2t<T>& a, U b) noexcept { return { a.x - b, a.y - b }; }
-FUNC2_TMPL vec3t<T> operator-(const vec3t<T>& a, U b) noexcept { return { a.x - b, a.y - b, a.z - b }; }
-FUNC2_TMPL vec4t<T> operator-(const vec4t<T>& a, U b) noexcept { return { a.x - b, a.y - b, a.z - b, a.w - b }; }
+FUNC2_TMPL vec2t<T> operator-(const vec2t<T>& a, const U b) noexcept { return { a.x - b, a.y - b }; }
+FUNC2_TMPL vec3t<T> operator-(const vec3t<T>& a, const U b) noexcept { return { a.x - b, a.y - b, a.z - b }; }
+FUNC2_TMPL vec4t<T> operator-(const vec4t<T>& a, const U b) noexcept { return { a.x - b, a.y - b, a.z - b, a.w - b }; }
 
 FUNC2_TMPL void operator-=(vec2t<T>& a, const vec2t<U>& b) noexcept { a.x -= b.x; a.y -= b.y; }
 FUNC2_TMPL void operator-=(vec3t<T>& a, const vec3t<U>& b) noexcept { a.x -= b.x; a.y -= b.y; a.z -= b.z; }
 FUNC2_TMPL void operator-=(vec4t<T>& a, const vec4t<U>& b) noexcept { a.x -= b.x, a.y -= b.y; a.z -= b.z; a.w -= b.w; }
-FUNC2_TMPL void operator-=(vec2t<T>& a, U b) noexcept { a.x -= b; a.y -= b; }
-FUNC2_TMPL void operator-=(vec3t<T>& a, U b) noexcept { a.x -= b; a.y -= b; a.z -= b; }
-FUNC2_TMPL void operator-=(vec4t<T>& a, U b) noexcept { a.x -= b, a.y -= b; a.z -= b; a.w -= b; }
+FUNC2_TMPL void operator-=(vec2t<T>& a, const U b) noexcept { a.x -= b; a.y -= b; }
+FUNC2_TMPL void operator-=(vec3t<T>& a, const U b) noexcept { a.x -= b; a.y -= b; a.z -= b; }
+FUNC2_TMPL void operator-=(vec4t<T>& a, const U b) noexcept { a.x -= b, a.y -= b; a.z -= b; a.w -= b; }
 
 FUNC2_TMPL vec2t<T> operator*(const vec2t<T>& a, const vec2t<U>& b) noexcept { return { a.x * b.x, a.y * b.y }; }
 FUNC2_TMPL vec3t<T> operator*(const vec3t<T>& a, const vec3t<U>& b) noexcept { return { a.x * b.x, a.y * b.y, a.z * b.z }; }
 FUNC2_TMPL vec4t<T> operator*(const vec4t<T>& a, const vec4t<U>& b) noexcept { return { a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w }; }
-FUNC2_TMPL vec2t<T> operator*(const vec2t<T>& a, U b) noexcept { return { a.x * b, a.y * b }; }
-FUNC2_TMPL vec3t<T> operator*(const vec3t<T>& a, U b) noexcept { return { a.x * b, a.y * b, a.z * b }; }
-FUNC2_TMPL vec4t<T> operator*(const vec4t<T>& a, U b) noexcept { return { a.x * b, a.y * b, a.z * b, a.w * b }; }
+FUNC2_TMPL vec2t<T> operator*(const vec2t<T>& a, const U b) noexcept { return { a.x * b, a.y * b }; }
+FUNC2_TMPL vec3t<T> operator*(const vec3t<T>& a, const U b) noexcept { return { a.x * b, a.y * b, a.z * b }; }
+FUNC2_TMPL vec4t<T> operator*(const vec4t<T>& a, const U b) noexcept { return { a.x * b, a.y * b, a.z * b, a.w * b }; }
 
 FUNC2_TMPL void operator*=(vec2t<T>& a, const vec2t<U>& b) noexcept { a.x *= b.x; a.y *= b.y; }
 FUNC2_TMPL void operator*=(vec3t<T>& a, const vec3t<U>& b) noexcept { a.x *= b.x; a.y *= b.y; a.z *= b.z; }
 FUNC2_TMPL void operator*=(vec4t<T>& a, const vec4t<U>& b) noexcept { a.x *= b.x; a.y *= b.y; a.z *= b.z; a.w *= b.w; }
-FUNC2_TMPL void operator*=(vec2t<T>& a, U b) noexcept { a.x *= b; a.y *= b; }
-FUNC2_TMPL void operator*=(vec3t<T>& a, U b) noexcept { a.x *= b; a.y *= b; a.z *= b; }
-FUNC2_TMPL void operator*=(vec4t<T>& a, U b) noexcept { a.x *= b; a.y *= b; a.z *= b; a.w *= b; }
+FUNC2_TMPL void operator*=(vec2t<T>& a, const U b) noexcept { a.x *= b; a.y *= b; }
+FUNC2_TMPL void operator*=(vec3t<T>& a, const U b) noexcept { a.x *= b; a.y *= b; a.z *= b; }
+FUNC2_TMPL void operator*=(vec4t<T>& a, const U b) noexcept { a.x *= b; a.y *= b; a.z *= b; a.w *= b; }
 
 FUNC2_TMPL vec2t<T> operator/(const vec2t<T>& a, const vec2t<U>& b) noexcept { return { a.x / b.x, a.y / b.y }; }
 FUNC2_TMPL vec3t<T> operator/(const vec3t<T>& a, const vec3t<U>& b) noexcept { return { a.x / b.x, a.y / b.y, a.z / b.z }; }
 FUNC2_TMPL vec4t<T> operator/(const vec4t<T>& a, const vec4t<U>& b) noexcept { return { a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w }; }
-FUNC2_TMPL vec2t<T> operator/(const vec2t<T>& a, U b) noexcept { return { a.x / b, a.y / b }; }
-FUNC2_TMPL vec3t<T> operator/(const vec3t<T>& a, U b) noexcept { return { a.x / b, a.y / b, a.z / b }; }
-FUNC2_TMPL vec4t<T> operator/(const vec4t<T>& a, U b) noexcept { return { a.x / b, a.y / b, a.z / b, a.w / b }; }
+FUNC2_TMPL vec2t<T> operator/(const vec2t<T>& a, const U b) noexcept { return { a.x / b, a.y / b }; }
+FUNC2_TMPL vec3t<T> operator/(const vec3t<T>& a, const U b) noexcept { return { a.x / b, a.y / b, a.z / b }; }
+FUNC2_TMPL vec4t<T> operator/(const vec4t<T>& a, const U b) noexcept { return { a.x / b, a.y / b, a.z / b, a.w / b }; }
 
 FUNC2_TMPL void operator/=(vec2t<T>& a, const vec2t<U>& b) noexcept { a.x /= b.x; a.y /= b.y; }
 FUNC2_TMPL void operator/=(vec3t<T>& a, const vec3t<U>& b) noexcept { a.x /= b.x; a.y /= b.y; a.z /= b.z; }
 FUNC2_TMPL void operator/=(vec4t<T>& a, const vec4t<U>& b) noexcept { a.x /= b.x; a.y /= b.y; a.z /= b.z; a.w /= b.w; }
-FUNC2_TMPL void operator/=(vec2t<T>& a, U b) noexcept { a.x /= b; a.y /= b; }
-FUNC2_TMPL void operator/=(vec3t<T>& a, U b) noexcept { a.x /= b; a.y /= b; a.z /= b; }
-FUNC2_TMPL void operator/=(vec4t<T>& a, U b) noexcept { a.x /= b; a.y /= b; a.z /= b; a.w /= b; }
+FUNC2_TMPL void operator/=(vec2t<T>& a, const U b) noexcept { a.x /= b; a.y /= b; }
+FUNC2_TMPL void operator/=(vec3t<T>& a, const U b) noexcept { a.x /= b; a.y /= b; a.z /= b; }
+FUNC2_TMPL void operator/=(vec4t<T>& a, const U b) noexcept { a.x /= b; a.y /= b; a.z /= b; a.w /= b; }
 
 #ifdef USE_SIMD
 
@@ -281,28 +287,28 @@ FUNC2_TMPL void operator/=(vec4t<T>& a, U b) noexcept { a.x /= b; a.y /= b; a.z 
  */
 
 inline vec4f operator+(const vec4f& a, const vec4f& b) noexcept { return vec4f(_mm_add_ps(a.v4, b.v4)); }
-FUNC1_TMPL vec4f operator+(const vec4f& a, T b) noexcept { return vec4f(_mm_add_ps(a.v4, _mm_set1_ps(b))); }
+FUNC1_TMPL vec4f operator+(const vec4f& a, const T b) noexcept { return vec4f(_mm_add_ps(a.v4, _mm_set1_ps(b))); }
 
 inline void operator+=(vec4f& a, const vec4f& b) noexcept { a.v4 = _mm_add_ps(a.v4, b.v4); }
-FUNC1_TMPL void operator+=(vec4f& a, T b) noexcept { a.v4 = _mm_add_ps(a.v4, _mm_set1_ps(b)); }
+FUNC1_TMPL void operator+=(vec4f& a, const T b) noexcept { a.v4 = _mm_add_ps(a.v4, _mm_set1_ps(b)); }
 
 inline vec4f operator-(const vec4f& a, const vec4f& b) noexcept { return vec4f(_mm_sub_ps(a.v4, b.v4)); }
-FUNC1_TMPL vec4f operator-(const vec4f& a, T b) noexcept { return vec4f(_mm_sub_ps(a.v4, _mm_set1_ps(b))); }
+FUNC1_TMPL vec4f operator-(const vec4f& a, const T b) noexcept { return vec4f(_mm_sub_ps(a.v4, _mm_set1_ps(b))); }
 
 inline void operator-=(vec4f& a, const vec4f& b) noexcept { a.v4 = _mm_sub_ps(a.v4, b.v4); }
-FUNC1_TMPL void operator-=(vec4f& a, T b) noexcept { a.v4 = _mm_sub_ps(a.v4, _mm_set1_ps(b)); }
+FUNC1_TMPL void operator-=(vec4f& a, const T b) noexcept { a.v4 = _mm_sub_ps(a.v4, _mm_set1_ps(b)); }
 
 inline vec4f operator*(const vec4f& a, const vec4f& b) noexcept { return vec4f(_mm_mul_ps(a.v4, b.v4)); }
-FUNC1_TMPL vec4f operator*(const vec4f& a, T b) noexcept { return vec4f(_mm_mul_ps(a.v4, _mm_set1_ps(b))); }
+FUNC1_TMPL vec4f operator*(const vec4f& a, const T b) noexcept { return vec4f(_mm_mul_ps(a.v4, _mm_set1_ps(b))); }
 
 inline void operator*=(vec4f& a, const vec4f& b) noexcept { a.v4 = _mm_mul_ps(a.v4, b.v4); }
-FUNC1_TMPL void operator*=(vec4f& a, T b) noexcept { a.v4 = _mm_mul_ps(a.v4, _mm_set1_ps(b)); }
+FUNC1_TMPL void operator*=(vec4f& a, const T b) noexcept { a.v4 = _mm_mul_ps(a.v4, _mm_set1_ps(b)); }
 
 inline vec4f operator/(const vec4f& a, const vec4f& b) noexcept { return vec4f(_mm_div_ps(a.v4, b.v4)); }
-FUNC1_TMPL vec4f operator/(const vec4f& a, T b) noexcept { return vec4f(_mm_div_ps(a.v4, _mm_set1_ps(b))); }
+FUNC1_TMPL vec4f operator/(const vec4f& a, const T b) noexcept { return vec4f(_mm_div_ps(a.v4, _mm_set1_ps(b))); }
 
 inline void operator/=(vec4f& a, const vec4f& b) noexcept { a.v4 = _mm_div_ps(a.v4, b.v4); }
-FUNC1_TMPL void operator/=(vec4f& a, T b) noexcept { a.v4 = _mm_div_ps(a.v4, _mm_set1_ps(b)); }
+FUNC1_TMPL void operator/=(vec4f& a, const T b) noexcept { a.v4 = _mm_div_ps(a.v4, _mm_set1_ps(b)); }
 
 #endif
 
@@ -310,13 +316,16 @@ FUNC1_TMPL void operator/=(vec4f& a, T b) noexcept { a.v4 = _mm_div_ps(a.v4, _mm
  * Stream operators
  */
 
-FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec2t<T>& v)  noexcept { return os << "(" << v.x << ", " << v.y << ")\n"; }
-FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec2t<T>&& v) noexcept { return os << "(" << v.x << ", " << v.y << ")\n"; }
-FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec3t<T>& v)  noexcept { return os << "(" << v.x << ", " << v.y << ", " << v.z << ")\n"; }
-FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec3t<T>&& v) noexcept { return os << "(" << v.x << ", " << v.y << ", " << v.z << ")\n"; }
-FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec4t<T>& v)  noexcept { return os << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")\n"; }
-FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec4t<T>&& v) noexcept { return os << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")\n"; }
+FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec2t<T>& v)  noexcept { return os << "[" << v.x << ", " << v.y << "]"; }
+FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec2t<T>&& v) noexcept { return os << "[" << v.x << ", " << v.y << "]"; }
+FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec3t<T>& v)  noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << "]"; }
+FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec3t<T>&& v) noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << "]"; }
+FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec4t<T>& v)  noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]"; }
+FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec4t<T>&& v) noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]"; }
 
+#pragma endregion
+
+#pragma region vec_func
 
 /*
  * Functions
@@ -347,18 +356,18 @@ FUNC1_TMPL vec3t<T> Abs(const vec3t<T>& v) noexcept { return { std::abs(v.x), st
 FUNC1_TMPL vec4t<T> Abs(const vec4t<T>& v) noexcept { return { std::abs(v.x), std::abs(v.y), std::abs(v.z), std::abs(v.w) }; }
 
 FUNC2_TMPL vec2t<T> Clamp(const vec2t<T>& v, const vec2t<U>& min, const vec2t<U>& max) noexcept { return { std::clamp(v.x, min.x, max.x), std::clamp(v.y, min.y, max.y) }; }
-FUNC2_TMPL vec2t<T> Clamp(const vec2t<T>& v, U min, U max) noexcept { return { std::clamp(v.x, min, max), std::clamp(v.y, min, max) }; }
+FUNC2_TMPL vec2t<T> Clamp(const vec2t<T>& v, const U min, const U max) noexcept { return { std::clamp(v.x, min, max), std::clamp(v.y, min, max) }; }
 FUNC2_TMPL vec3t<T> Clamp(const vec3t<T>& v, const vec3t<U>& min, const vec3t<U>& max) noexcept { return { std::clamp(v.x, min.x, max.x), std::clamp(v.y, min.y, max.y), std::clamp(v.z, min.z, max.z) }; }
-FUNC2_TMPL vec3t<T> Clamp(const vec3t<T>& v, U min, U max) noexcept { return { std::clamp(v.x, min, max), std::clamp(v.y, min, max), std::clamp(v.z, min, max) }; }
+FUNC2_TMPL vec3t<T> Clamp(const vec3t<T>& v, const U min, const U max) noexcept { return { std::clamp(v.x, min, max), std::clamp(v.y, min, max), std::clamp(v.z, min, max) }; }
 FUNC2_TMPL vec4t<T> Clamp(const vec4t<T>& v, const vec4t<U>& min, const vec4t<U>& max) noexcept { return { std::clamp(v.x, min.x, max.x), std::clamp(v.y, min.y, max.y), std::clamp(v.z, min.z, max.z), std::clamp(v.w, min.w) }; }
-FUNC2_TMPL vec4t<T> Clamp(const vec4t<T>& v, U min, U max) noexcept { return { std::clamp(v.x, min, max), std::clamp(v.y, min, max), std::clamp(v.z, min, max), std::clamp(v.w, min, max) }; }
+FUNC2_TMPL vec4t<T> Clamp(const vec4t<T>& v, const U min, const U max) noexcept { return { std::clamp(v.x, min, max), std::clamp(v.y, min, max), std::clamp(v.z, min, max), std::clamp(v.w, min, max) }; }
 
 FUNC2_TMPL vec2t<T> Mod(const vec2t<T>& a, const vec2t<U>& b) noexcept { return { std::fmod(a.x, b.x), std::fmod(a.y, b.y) }; }
-FUNC2_TMPL vec2t<T> Mod(const vec2t<T>& a, U b) noexcept { return { std::fmod(a.x, b), std::fmod(a.y, b) }; }
+FUNC2_TMPL vec2t<T> Mod(const vec2t<T>& a, const U b) noexcept { return { std::fmod(a.x, b), std::fmod(a.y, b) }; }
 FUNC2_TMPL vec3t<T> Mod(const vec3t<T>& a, const vec3t<U>& b) noexcept { return { std::fmod(a.x, b.x), std::fmod(a.y, b.y), std::fmod(a.z, b.z) }; }
-FUNC2_TMPL vec3t<T> Mod(const vec3t<T>& a, U b) noexcept { return { std::fmod(a.x, b), std::fmod(a.y, b), std::fmod(a.z, b) }; }
+FUNC2_TMPL vec3t<T> Mod(const vec3t<T>& a, const U b) noexcept { return { std::fmod(a.x, b), std::fmod(a.y, b), std::fmod(a.z, b) }; }
 FUNC2_TMPL vec4t<T> Mod(const vec4t<T>& a, const vec4t<U>& b) noexcept { return { std::fmod(a.x, b.x), std::fmod(a.y, b.y), std::fmod(a.z, b.z), std::fmod(a.w, b.w) }; }
-FUNC2_TMPL vec4t<T> Mod(const vec4t<T>& a, U b) noexcept { return { std::fmod(a.x, b), std::fmod(a.y, b), std::fmod(a.z, b), std::fmod(a.w, b) }; }
+FUNC2_TMPL vec4t<T> Mod(const vec4t<T>& a, const U b) noexcept { return { std::fmod(a.x, b), std::fmod(a.y, b), std::fmod(a.z, b), std::fmod(a.w, b) }; }
 
 FUNC1_TMPL vec2t<T> Exp(const vec2t<T>& v) noexcept { return { std::exp(v.x), std::exp(v.y) }; }
 FUNC1_TMPL vec3t<T> Exp(const vec3t<T>& v) noexcept { return { std::exp(v.x), std::exp(v.y), std::exp(v.z) }; }
@@ -408,6 +417,8 @@ FUNC2_TMPL float Angle(const vec4t<T>& a, const vec4t<T>& b) noexcept { return a
 FUNC2_TMPL vec2t<T> ProjectOnto(const vec2t<T>& a, const vec2t<T>& b) noexcept { return Normalise(b) * Dot(a, b); }
 FUNC2_TMPL vec2t<T> ProjectOnto(const vec3t<T>& a, const vec3t<T>& b) noexcept { return Normalise(b) * Dot(a, b); }
 FUNC2_TMPL vec2t<T> ProjectOnto(const vec4t<T>& a, const vec4t<T>& b) noexcept { return Normalise(b) * Dot(a, b); }
+
+#pragma endregion
 
 }
 
