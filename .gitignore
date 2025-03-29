@@ -29,6 +29,9 @@
 **/.idea/**/contentModel.xml
 **/.idea/**/modules.xml
 
+# CMake
+cmake-build-**/
+
 Thumbs.db
 Desktop.ini
 .DS_Store
