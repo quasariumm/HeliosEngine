@@ -27,9 +27,9 @@ concept numeric = std::is_arithmetic_v<T>;
 
 #pragma region vec_structs
 
-template<typename T>
+template<typename T> requires numeric<T>
 struct vec3t<T>;
-template<typename T>
+template<typename T> requires numeric<T>
 struct vec4t<T>;
 
 /*
@@ -41,7 +41,7 @@ struct vec4t<T>;
 // - Patrick
 
 template<typename T> requires numeric<T>
-_CRT_ALIGN(8) struct vec2t
+struct _CRT_ALIGN(8) vec2t
 {
 	vec2t() = default;
 	vec2t(const T x, const T y) : x(x), y(y) {}
@@ -115,7 +115,7 @@ typedef vec3t<unsigned> vec3u;
 typedef vec3t<double>	vec3d;
 
 template<typename T> requires numeric<T>
-_CRT_ALIGN(16) struct vec4t
+struct _CRT_ALIGN(16) vec4t
 {
 	vec4t() = default;
 	vec4t(const T x, const T y, const T z, const T w) : x(x), y(y), z(z), w(w) {}
@@ -149,7 +149,7 @@ _CRT_ALIGN(16) struct vec4t
 // SIMD version for float type
 #ifdef USE_SIMD
 template<>
-_CRT_ALIGN(16) struct vec4t<float>
+struct _CRT_ALIGN(16) vec4t<float>
 {
 	vec4t() = default;
 	vec4t(const float x, const float y, const float z, const float w) : v4(_mm_setr_ps(x, y, z, w)) {}
