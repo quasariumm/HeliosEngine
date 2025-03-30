@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "vector.h"
+#include "Vector.h"
 
 #ifdef USE_SIMD
 #include <immintrin.h>

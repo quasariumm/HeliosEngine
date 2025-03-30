@@ -3,9 +3,18 @@
 #include <compare>
 #include <complex>
 
+#include "_VectorSwizzles.h"
+
 // TODO (Tygo?): Remove when we have a way to define this elsewhere
 #define USE_SIMD
 #define USE_AVX2
+
+// NOTE: Temporary
+#define DEFINE_SWIZZLES
+
+#ifdef USE_SIMD
+#include <immintrin.h>
+#endif
 
 #pragma warning ( push )
 #pragma warning ( disable: 4201 /* nameless struct / union */ )
@@ -26,6 +35,10 @@ struct vec4t<T>;
 /*
  * Vector structs
  */
+
+// Alignment is purely from a performance standpoint.
+// I am aware that there might be gaps when using types smaller than 4 bytes
+// - Patrick
 
 template<typename T> requires numeric<T>
 _CRT_ALIGN(8) struct vec2t
@@ -51,6 +64,10 @@ _CRT_ALIGN(8) struct vec2t
 	};
 	T& operator[](const unsigned i) { return cell[i]; }
 	const T& operator[](const unsigned i) const { return cell[i]; }
+
+#ifdef DEFINE_SWIZZLES
+    SWIZZLES_XY(T)
+#endif
 };
 
 typedef vec2t<float>	vec2;
@@ -84,6 +101,11 @@ struct vec3t
 	};
 	T& operator[](const unsigned i) { return cell[i]; }
 	const T& operator[](const unsigned i) const { return cell[i]; }
+
+#ifdef DEFINE_SWIZZLES
+    SWIZZLES_XY(T)
+    SWIZZLES_XYZ(T)
+#endif
 };
 
 typedef vec3t<float>	vec3;
@@ -116,6 +138,12 @@ _CRT_ALIGN(16) struct vec4t
 	};
 	T& operator[](const unsigned i) { return cell[i]; }
 	const T& operator[](const unsigned i) const { return cell[i]; }
+
+#ifdef DEFINE_SWIZZLES
+    SWIZZLES_XY(T)
+    SWIZZLES_XYZ(T)
+    SWIZZLES_XYZW(T)
+#endif
 };
 
 // SIMD version for float type
@@ -147,6 +175,12 @@ _CRT_ALIGN(16) struct vec4t<float>
 	};
 	float& operator[](const unsigned i) { return cell[i]; }
 	const float& operator[](const unsigned i) const { return cell[i]; }
+
+#ifdef DEFINE_SWIZZLES
+    SWIZZLES_XY(float)
+    SWIZZLES_XYZ(float)
+    SWIZZLES_XYZW(float)
+#endif
 };
 #endif
 
