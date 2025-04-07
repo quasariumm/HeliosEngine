@@ -5,7 +5,7 @@
 int main(int argc, char* argv[])
 {
     Engine::GL46_Window window{};
-    window.Init({200, 100}, L"Varför är STL lokaler så irriterande?");
+    window.Init({600, 400}, L"Varför är STL lokaler så irriterande?");
 
     while (!window.ShouldClose())
     {

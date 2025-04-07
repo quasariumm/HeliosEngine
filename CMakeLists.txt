@@ -7,6 +7,15 @@ file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h lib/glad/src/glad.c
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE})
 
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
+        "$<$<C_COMPILER_ID:MSVC>:/utf-8>"
+        "$<$<NOT:$<C_COMPILER_ID:MSVC>>:-finput-charset=UTF-8;-fexec-charset=UTF-8>"
+)
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
+        "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>"
+        "$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-finput-charset=UTF-8;-fexec-charset=UTF-8>"
+)
+
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
         src
         extern

@@ -1,4 +1,5 @@
 #include "GL46_Window.h"
+#include "Core/Common.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -17,14 +18,7 @@ void GL46_Window::Init(const vec2u& size, const std::wstring& title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Why does locale need to be this way
-    std::string titleUTF8 = "";
-    for (const wchar_t wc : title)
-    {
-        std::string mb(MB_CUR_MAX, '\0');
-        std::wctomb(mb.data(), wc);
-        titleUTF8 += mb;
-    }
+    const std::string titleUTF8 = WStringToUTF8(title);
 
     m_window = glfwCreateWindow(size.x, size.y, titleUTF8.c_str(), nullptr, nullptr);
 
