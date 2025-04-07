@@ -1,5 +1,5 @@
 #include "GL46_Window.h"
-// TODO: GLAD
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <cstdlib>
@@ -36,26 +36,26 @@ void GL46_Window::Init(const vec2u& size, const std::wstring& title)
 
     glfwMakeContextCurrent(m_window);
 
-    auto keyCallback = [this](GLFWwindow*, const int key, const int scancode, const int action, const int mods)
-        {
-            this->KeyCallback(key, scancode, action, mods);
-        };
+    // auto keyCallback = [this](GLFWwindow*, const int key, const int scancode, const int action, const int mods)
+    //     {
+    //         this->KeyCallback(key, scancode, action, mods);
+    //     };
+    //
+    // auto buttonCallback = [this](GLFWwindow*, const int button, const int action, const int mods)
+    //     {
+    //         this->ButtonCallback(button, action, mods);
+    //     };
+    //
+    // glfwSetKeyCallback(m_window, &keyCallback.operator());
+    // glfwSetMouseButtonCallback(m_window, &buttonCallback.operator());
 
-    auto buttonCallback = [this](GLFWwindow*, const int button, const int action, const int mods)
-        {
-            this->ButtonCallback(button, action, mods);
-        };
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        glfwTerminate();
+        throw std::runtime_error("Failed to initialise GLAD");
+    }
 
-    glfwSetKeyCallback(m_window, &keyCallback.operator());
-    glfwSetMouseButtonCallback(m_window, &buttonCallback.operator());
-
-    // if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    // {
-    //     glfwTerminate();
-    //     throw std::runtime_error("Failed to initialise GLAD");
-    // }
-
-    // glViewport(size.x, size.y);
+    glViewport(0, 0, size.x, size.y);
 }
 
 
