@@ -28,9 +28,9 @@ concept numeric = std::is_arithmetic_v<T>;
 #pragma region vec_structs
 
 template<typename T> requires numeric<T>
-struct vec3t<T>;
+struct vec3t;
 template<typename T> requires numeric<T>
-struct vec4t<T>;
+struct vec4t;
 
 /*
  * Vector structs
