@@ -2,6 +2,12 @@
 
 #include <string>
 
+static const std::wstring ANSI_OK = L"[\033[32m OK \033[0m] ";
+static const std::wstring ANSI_DONE = L"[\033[32mDONE\033[0m] ";
+static const std::wstring ANSI_ERR = L"[\033[31mERRO\033[0m] ";
+static const std::wstring ANSI_WARN = L"[\033[33mWARN\033[0m] ";
+static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
+
 // TODO: Find alternative to std::wcsrtombs (deprecated)
 /**
  * @brief Converts a wide string to a UTF-8 encoded basic string
