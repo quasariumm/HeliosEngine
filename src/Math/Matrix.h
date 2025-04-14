@@ -160,13 +160,13 @@ struct mat4t<float>
 
 	vec4f& operator[](const int i)
 	{
-		if (i < 0 || i >= 3)
+		if (i < 0 || i > 3)
 			throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
 		return rows[i];
 	}
 	const vec4f& operator[](const int i) const
 	{
-		if (i < 0 || i >= 3)
+		if (i < 0 || i > 3)
 			throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
 		return rows[i];
 	}
