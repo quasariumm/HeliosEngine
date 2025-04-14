@@ -55,14 +55,14 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title)
         throw std::runtime_error("Failed to initialise GLAD");
     }
 
-    glViewport(0, 0, size.x, size.y);
-
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(m_window, true);
     ImGui_ImplOpenGL3_Init(0);
     ImGui::StyleColorsDark();
     ImGuiIO& io    = ImGui::GetIO();
     io.IniFilename = "./imgui.ini";
+
+    glViewport(0, 0, size.x, size.y);
 
     m_currentAPI = GraphicsAPI::OPENGL;
     return true;

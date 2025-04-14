@@ -4,7 +4,15 @@ project(Engine)
 set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h lib/glad/src/glad.c)
-file(GLOB IMGUI CONFIGURE_DEPENDS extern/imgui/*.cpp extern/imgui/*.h)
+file(GLOB IMGUI CONFIGURE_DEPENDS
+        extern/imgui/*.cpp
+        extern/imgui/*.h
+        extern/imgui/backends/imgui_impl_opengl3.h
+        extern/imgui/backends/imgui_impl_opengl3.cpp
+        extern/imgui/backends/imgui_impl_opengl3_loader.h
+        extern/imgui/backends/imgui_impl_glfw.h
+        extern/imgui/backends/imgui_impl_glfw.cpp
+        )
 
 add_executable(${CMAKE_PROJECT_NAME} ${IMGUI} ${SOURCE})
 
