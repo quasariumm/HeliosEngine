@@ -35,13 +35,13 @@ struct mat2t
 
 	vec2t<T>& operator[](const int i)
 	{
-		if (i < 0 || i >= 1)
+		if (i < 0 || i > 1)
 			throw std::out_of_range("Can't index mat2t with index " + std::to_string(i) + ".");
 		return rows[i];
 	}
 	const vec2t<T>& operator[](const int i) const
 	{
-		if (i < 0 || i >= 1)
+		if (i < 0 || i > 1)
 			throw std::out_of_range("Can't index mat2t with index " + std::to_string(i) + ".");
 		return rows[i];
 	}
@@ -72,13 +72,13 @@ struct mat3t
 
 	vec3t<T>& operator[](const int i)
 	{
-		if (i < 0 || i >= 2)
+		if (i < 0 || i > 2)
 			throw std::out_of_range("Can't index mat3t with index " + std::to_string(i) + ".");
 		return rows[i];
 	}
 	const vec3t<T>& operator[](const int i) const
 	{
-		if (i < 0 || i >= 2)
+		if (i < 0 || i > 2)
 			throw std::out_of_range("Can't index mat3t with index " + std::to_string(i) + ".");
 		return rows[i];
 	}
@@ -108,13 +108,13 @@ struct mat4t
 
 	vec4t<T>& operator[](const int i)
 	{
-		if (i < 0 || i >= 3)
+		if (i < 0 || i > 3)
 			throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
 		return rows[i];
 	}
 	const vec4t<T>& operator[](const int i) const
 	{
-		if (i < 0 || i >= 3)
+		if (i < 0 || i > 3)
 			throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
 		return rows[i];
 	}
