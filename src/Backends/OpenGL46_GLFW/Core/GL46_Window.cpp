@@ -81,7 +81,7 @@ int GL46_Window::GetMouseButton(MouseButton button)
 
 int GL46_Window::GetKey(Key key)
 {
-    glfwGetKey( m_window, ConvertKeyGLFW(key) );
+    return glfwGetKey( m_window, ConvertKeyGLFW(key) );
 }
 
 
@@ -101,9 +101,9 @@ void GL46_Window::KeyCallbackGLFW(GLFWwindow* w, int key, int scancode, int acti
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
     Key k = ConvertGLFWKey( key );
-    if( action == GLFW_PRESS )
+    if( action == GLFW_PRESS && win->onKeyDown)
         win->onKeyDown(*win, k);
-    if( action == GLFW_RELEASE )
+    if( action == GLFW_RELEASE && win->onKeyUp)
         win->onKeyUp(*win, k);
 }
 
@@ -112,33 +112,37 @@ void GL46_Window::ButtonCallbackGLFW(GLFWwindow* w, int button, int action, int 
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
     MouseButton b = ConvertGLFWButton( button );
-    if( action == GLFW_PRESS )
+    if( action == GLFW_PRESS && win->onMouseDown)
         win->onMouseDown(*win, b);
-    if( action == GLFW_RELEASE )
+    if( action == GLFW_RELEASE && win->onMouseUp)
         win->onMouseUp(*win, b);
 }
 
 void GL46_Window::ResizeCallbackGLFW(GLFWwindow* w, int width, int height)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
-    win->onResize(*win,vec2u(width,height));
+    if(win->onResize)
+        win->onResize(*win,vec2u(width,height));
 }
 
 void GL46_Window::FocusCallbackGLFW(GLFWwindow* w, int f)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
-    win->onFocus(*win, f == GLFW_TRUE);
+    if(win->onFocus)
+        win->onFocus(*win, f == GLFW_TRUE);
 }
 
 void GL46_Window::MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
-    win->onMouseMove(*win,vec2u(static_cast<uint32_t>(x),static_cast<uint32_t>(y)));
+    if(win->onMouseMove)
+        win->onMouseMove(*win,vec2u(static_cast<uint32_t>(x),static_cast<uint32_t>(y)));
 }
 
 void GL46_Window::MouseScrollCallbackGLFW(GLFWwindow* w, double x, double y)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
-    win->onMouseScroll(*win,static_cast<float>(x),static_cast<float>(y));
+    if(win->onMouseScroll)
+        win->onMouseScroll(*win,static_cast<float>(x),static_cast<float>(y));
 }
 } // Engine
