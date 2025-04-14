@@ -8,6 +8,26 @@ static const std::wstring ANSI_ERR = L"[\033[31mERRO\033[0m] ";
 static const std::wstring ANSI_WARN = L"[\033[33mWARN\033[0m] ";
 static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
 
+/*
+ * Defines
+ */
+
+static constexpr float PI 			= 	std::numbers::pi_v<float>;
+static constexpr float INVPI 		= 	std::numbers::inv_pi_v<float>;
+static constexpr float INV2PI		=	1.f / (2.f * PI);
+static constexpr float TWOPI		=	2.f * PI;
+static constexpr float SQRT_PI_INV	=	std::numbers::inv_sqrtpi_v<float>;
+static constexpr float LARGE_FLOAT	=	1e34f;
+
+/*
+ * Macros
+ */
+
+#define DEG(x) { (x) * 57.2957795131f }
+#define RAD(x) { (x) * 0.0174532925f }
+
+#define CALL(func, ...) if (func) (func).operator()(__VA_ARGS__)
+
 // TODO: Find alternative to std::wcsrtombs (deprecated)
 /**
  * @brief Converts a wide string to a UTF-8 encoded basic string
