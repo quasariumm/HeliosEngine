@@ -4,7 +4,7 @@
 #include <iostream>
 #include <ostream>
 
-#define STBI_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include "Core/Common.h"
@@ -251,16 +251,6 @@ uint8_t* GL46_Texture2D::GetData() const
 float* GL46_Texture2D::GetDataHDR() const
 {
 	return m_dataHDR;
-}
-
-
-uint8_t& GL46_Texture2D::operator[](const uint32_t px, const uint32_t py) const
-{
-	if (m_isHDR)
-		throw std::runtime_error("This operator does not support a HDR texture!");
-	if (px > m_width || py > m_height)
-		throw std::range_error("Pixel is out of range: px = " + std::to_string(px) + " (max " + std::to_string(m_width) + "), py = " + std::to_string(py) + " (max" + std::to_string(m_width) + ")");
-	return m_data[(py * m_width + px) * m_channels];
 }
 
 } // Engine

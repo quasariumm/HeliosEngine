@@ -6,6 +6,12 @@
 namespace Engine
 {
 
+GL46_ShaderBase::~GL46_ShaderBase()
+{
+	glDeleteProgram(programID);
+}
+
+
 void GL46_ShaderBase::Use() const
 {
 	glUseProgram(programID);

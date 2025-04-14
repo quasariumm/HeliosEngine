@@ -88,18 +88,6 @@ public:
 	[[nodiscard]]
 	float* GetDataHDR() const;
 
-	/**
-	 * @brief Returns the pixel at the given coordinate
-	 * @param px Pixel X coordinate
-	 * @param py Pixel Y coordinate
-	 * @return The HDR pixel at the coordinate
-	 * @throws runtime_error The texture is HDR. This function does not work with HDR textures yet.
-	 * @throws range_error The pixel is out of range
-	 */
-	uint8_t& operator[](uint32_t px, uint32_t py) const;
-
-	// TODO: Make an operator[] for HDR
-
 private:
 
 	int32_t m_width = 0;

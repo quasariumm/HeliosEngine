@@ -21,38 +21,29 @@ namespace Engine
 template<typename T> requires numeric<T>
 struct mat2t
 {
-	mat2t() : row1(1, 0), row2(0, 1) {}
+	mat2t() : rows({1, 0}, {0, 1}) {}
 
-	explicit mat2t(T s) : row1(s, 0), row2(0, s) {}
+	explicit mat2t(T s) : rows({s, 0}, {0, s}) {}
 
-	mat2t(const vec2t<T>& r1, const vec2t<T>& r2) : row1(r1), row2(r2) {}
+	mat2t(const vec2t<T>& r1, const vec2t<T>& r2) : rows(r1, r2) {}
 
 	union
 	{
 		T cell[4];
-		struct { vec2t<T> row1, row2; };
+		struct { vec2t<T> rows[2]; };
 	};
 
 	vec2t<T>& operator[](const int i)
 	{
-		switch (i)
-		{
-		case 0:
-			return row1;
-		case 1:
-			return row2;
-		default:
+		if (i < 0 || i >= 1)
 			throw std::out_of_range("Can't index mat2t with index " + std::to_string(i) + ".");
-		}
+		return rows[i];
 	}
 	const vec2t<T>& operator[](const int i) const
 	{
-		switch (i)
-		{
-		case 0: return row1;
-		case 1: return row2;
-		default: throw std::out_of_range("Can't index mat2t with index " + std::to_string(i) + ".");
-		}
+		if (i < 0 || i >= 1)
+			throw std::out_of_range("Can't index mat2t with index " + std::to_string(i) + ".");
+		return rows[i];
 	}
 };
 
@@ -67,37 +58,29 @@ typedef mat2t<double>	mat2d;
 template<typename T> requires numeric<T>
 struct mat3t
 {
-	mat3t() : row1(1, 0, 0), row2(0, 1, 0), row3(0, 0, 1) {}
+	mat3t() : rows({1, 0, 0}, {0, 1, 0}, {0, 0, 1}) {}
 
-	explicit mat3t(T s) : row1(s, 0, 0), row2(0, s, 0), row3(0, 0, s) {}
+	explicit mat3t(T s) : rows({s, 0, 0}, {0, s, 0}, {0, 0, s}) {}
 
-	mat3t(const vec3t<T>& r1, const vec3t<T>& r2, const vec3t<T>& r3) : row1(r1), row2(r2), row3(r3) {}
+	mat3t(const vec3t<T>& r1, const vec3t<T>& r2, const vec3t<T>& r3) : rows(r1, r2, r3) {}
 
 	union
 	{
 		T cell[9];
-		struct { vec3t<T> row1, row2, row3; };
+		struct { vec3t<T> rows[3]; };
 	};
 
 	vec3t<T>& operator[](const int i)
 	{
-		switch (i)
-		{
-		case 0: return row1;
-		case 1: return row2;
-		case 2: return row3;
-		default: throw std::out_of_range("Can't index mat3t with index " + std::to_string(i) + ".");
-		}
+		if (i < 0 || i >= 2)
+			throw std::out_of_range("Can't index mat3t with index " + std::to_string(i) + ".");
+		return rows[i];
 	}
 	const vec3t<T>& operator[](const int i) const
 	{
-		switch (i)
-		{
-		case 0: return row1;
-		case 1: return row2;
-		case 2: return row3;
-		default: throw std::out_of_range("Can't index mat3t with index " + std::to_string(i) + ".");
-		}
+		if (i < 0 || i >= 2)
+			throw std::out_of_range("Can't index mat3t with index " + std::to_string(i) + ".");
+		return rows[i];
 	}
 };
 
@@ -111,39 +94,29 @@ typedef mat3t<double>	mat3d;
 template<typename T> requires numeric<T>
 struct mat4t
 {
-	mat4t() : row1(1, 0, 0, 0), row2(0, 1, 0, 0), row3(0, 0, 1, 0), row4(0, 0, 0, 1) {}
+	mat4t() : rows({1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}) {}
 
-	explicit mat4t(T s) : row1(s, 0, 0, 0), row2(0, s, 0, 0), row3(0, 0, s, 0), row4(0, 0, 0, s) {}
+	explicit mat4t(T s) : rows({s, 0, 0, 0}, {0, s, 0, 0}, {0, 0, s, 0}, {0, 0, 0, s}) {}
 
-	mat4t(const vec4t<T>& r1, const vec4t<T>& r2, const vec4t<T>& r3, const vec4t<T>& r4) : row1(r1), row2(r2), row3(r3), row4(r4) {}
+	mat4t(const vec4t<T>& r1, const vec4t<T>& r2, const vec4t<T>& r3, const vec4t<T>& r4) : rows(r1, r2, r3, r4) {}
 
 	union
 	{
 		T cell[16];
-		struct { vec4t<T> row1, row2, row3, row4; };
+		struct { vec4t<T> rows[4]; };
 	};
 
 	vec4t<T>& operator[](const int i)
 	{
-		switch (i)
-		{
-		case 0: return row1;
-		case 1: return row2;
-		case 2: return row3;
-		case 3: return row4;
-		default: throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
-		}
+		if (i < 0 || i >= 3)
+			throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
+		return rows[i];
 	}
 	const vec4t<T>& operator[](const int i) const
 	{
-		switch (i)
-		{
-		case 0: return row1;
-		case 1: return row2;
-		case 2: return row3;
-		case 3: return row4;
-		default: throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
-		}
+		if (i < 0 || i >= 3)
+			throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
+		return rows[i];
 	}
 };
 
@@ -163,11 +136,11 @@ typedef mat4t<double>	mat4d;
 template<>
 struct mat4t<float>
 {
-	mat4t() : row1(1, 0, 0, 0), row2(0, 1, 0, 0), row3(0, 0, 1, 0), row4(0, 0, 0, 1) {}
+	mat4t() : rows({1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}) {}
 
-	explicit mat4t(float s) : row1(s, 0, 0, 0), row2(0, s, 0, 0), row3(0, 0, s, 0), row4(0, 0, 0, s) {}
+	explicit mat4t(float s) : rows({s, 0, 0, 0}, {0, s, 0, 0}, {0, 0, s, 0}, {0, 0, 0, s}) {}
 
-	mat4t(const vec4f& r1, const vec4f& r2, const vec4f& r3, const vec4f& r4) : row1(r1), row2(r2), row3(r3), row4(r4) {}
+	mat4t(const vec4f& r1, const vec4f& r2, const vec4f& r3, const vec4f& r4) : rows(r1, r2, r3, r4) {}
 
 	mat4t(const __m128& r1, const __m128& r2, const __m128& r3, const __m128& r4) : row14(r1), row24(r2), row34(r3), row44(r4) {}
 
@@ -178,7 +151,7 @@ struct mat4t<float>
 	union
 	{
 		float cell[16];
-		struct { vec4f row1, row2, row3, row4; };
+		struct { vec4f rows[4]; };
 		struct { __m128 row14, row24, row34, row44; };
 #ifdef USE_AVX2
 		struct { __m256 rows12, rows34; };
@@ -187,25 +160,15 @@ struct mat4t<float>
 
 	vec4f& operator[](const int i)
 	{
-		switch (i)
-		{
-		case 0: return row1;
-		case 1: return row2;
-		case 2: return row3;
-		case 3: return row4;
-		default: throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
-		}
+		if (i < 0 || i >= 3)
+			throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
+		return rows[i];
 	}
 	const vec4f& operator[](const int i) const
 	{
-		switch (i)
-		{
-		case 0: return row1;
-		case 1: return row2;
-		case 2: return row3;
-		case 3: return row4;
-		default: throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
-		}
+		if (i < 0 || i >= 3)
+			throw std::out_of_range("Can't index mat4t with index " + std::to_string(i) + ".");
+		return rows[i];
 	}
 };
 
