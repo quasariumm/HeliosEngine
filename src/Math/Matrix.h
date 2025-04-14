@@ -186,19 +186,19 @@ struct mat4t<float>
  * Binary operators
  */
 
-FUNC2_TMPL bool operator==(const mat3t<T>& a, const mat3t<U>& b) noexcept { return a.row1 == b.row1 && a.row2 == b.row2 && a.row3 == b.row3; }
-FUNC2_TMPL bool operator==(const mat2t<T>& a, const mat2t<U>& b) noexcept { return a.row1 == b.row1 && a.row2 == b.row2; }
-FUNC2_TMPL bool operator==(const mat4t<T>& a, const mat4t<U>& b) noexcept { return a.row1 == b.row1 && a.row2 == b.row2 && a.row3 == b.row3 && a.row4 == b.row4; }
-FUNC2_TMPL bool operator==(const mat2t<T>& a, U b) noexcept { return a.row1 == b && a.row2 == b; }
-FUNC2_TMPL bool operator==(const mat3t<T>& a, U b) noexcept { return a.row1 == b && a.row2 == b && a.row3 == b; }
-FUNC2_TMPL bool operator==(const mat4t<T>& a, U b) noexcept { return a.row1 == b && a.row2 == b && a.row3 == b && a.row4 == b; }
+FUNC2_TMPL bool operator==(const mat3t<T>& a, const mat3t<U>& b) noexcept { return a.rows[0] == b.rows[0] && a.rows[1] == b.rows[1] && a.rows[2] == b.rows[2]; }
+FUNC2_TMPL bool operator==(const mat2t<T>& a, const mat2t<U>& b) noexcept { return a.rows[0] == b.rows[0] && a.rows[1] == b.rows[1]; }
+FUNC2_TMPL bool operator==(const mat4t<T>& a, const mat4t<U>& b) noexcept { return a.rows[0] == b.rows[0] && a.rows[1] == b.rows[1] && a.rows[2] == b.rows[2] && a.rows[3] == b.rows[3]; }
+FUNC2_TMPL bool operator==(const mat2t<T>& a, U b) noexcept { return a.rows[0] == b && a.rows[1] == b; }
+FUNC2_TMPL bool operator==(const mat3t<T>& a, U b) noexcept { return a.rows[0] == b && a.rows[1] == b && a.rows[2] == b; }
+FUNC2_TMPL bool operator==(const mat4t<T>& a, U b) noexcept { return a.rows[0] == b && a.rows[1] == b && a.rows[2] == b && a.rows[3] == b; }
 
-FUNC2_TMPL bool operator<(const mat2t<T>& a, const mat2t<U>& b) noexcept { return a.row1 < b.row1 && a.row2 < b.row2; }
-FUNC2_TMPL bool operator<(const mat3t<T>& a, const mat3t<U>& b) noexcept { return a.row1 < b.row1 && a.row2 < b.row2 && a.row3 < b.row3; }
-FUNC2_TMPL bool operator<(const mat4t<T>& a, const mat4t<U>& b) noexcept { return a.row1 < b.row1 && a.row2 < b.row2 && a.row3 < b.row3 && a.row4 < b.row4; }
-FUNC2_TMPL bool operator<(const mat2t<T>& a, U b) noexcept { return a.row1 < b && a.row2 < b; }
-FUNC2_TMPL bool operator<(const mat3t<T>& a, U b) noexcept { return a.row1 < b && a.row2 < b && a.row3 < b; }
-FUNC2_TMPL bool operator<(const mat4t<T>& a, U b) noexcept { return a.row1 < b && a.row2 < b && a.row3 < b && a.row4 < b; }
+FUNC2_TMPL bool operator<(const mat2t<T>& a, const mat2t<U>& b) noexcept { return a.rows[0] < b.rows[0] && a.rows[1] < b.rows[1]; }
+FUNC2_TMPL bool operator<(const mat3t<T>& a, const mat3t<U>& b) noexcept { return a.rows[0] < b.rows[0] && a.rows[1] < b.rows[1] && a.rows[2] < b.rows[2]; }
+FUNC2_TMPL bool operator<(const mat4t<T>& a, const mat4t<U>& b) noexcept { return a.rows[0] < b.rows[0] && a.rows[1] < b.rows[1] && a.rows[2] < b.rows[2] && a.rows[3] < b.rows[3]; }
+FUNC2_TMPL bool operator<(const mat2t<T>& a, U b) noexcept { return a.rows[0] < b && a.rows[1] < b; }
+FUNC2_TMPL bool operator<(const mat3t<T>& a, U b) noexcept { return a.rows[0] < b && a.rows[1] < b && a.rows[2] < b; }
+FUNC2_TMPL bool operator<(const mat4t<T>& a, U b) noexcept { return a.rows[0] < b && a.rows[1] < b && a.rows[2] < b && a.rows[3] < b; }
 
 FUNC2_TMPL bool operator<=(const mat2t<T>& a, const mat2t<U>& b) noexcept { return !(b < a); }
 FUNC2_TMPL bool operator<=(const mat3t<T>& a, const mat3t<U>& b) noexcept { return !(b < a); }
@@ -229,31 +229,31 @@ FUNC2_TMPL std::strong_ordering operator<=>(const mat4t<T>& a, const mat4t<U>& b
  * Arithmetic operators
  */
 
-FUNC2_TMPL mat2t<T> operator+(const mat2t<T>& a, const mat2t<U>& b) noexcept { return mat2t<T>(a.row1 + b.row1, a.row2 + b.row2); }
-FUNC2_TMPL mat3t<T> operator+(const mat3t<T>& a, const mat3t<U>& b) noexcept { return mat3t<T>(a.row1 + b.row1, a.row2 + b.row2, a.row3 + b.row3); }
-FUNC2_TMPL mat4t<T> operator+(const mat4t<T>& a, const mat4t<U>& b) noexcept { return mat4t<T>(a.row1 + b.row1, a.row2 + b.row2, a.row3 + b.row3, a.row4 + b.row4); }
-FUNC2_TMPL mat2t<T> operator+(const mat2t<T>& a, const U b) noexcept { return mat2t<T>(a.row1 + b, a.row2 + b); }
-FUNC2_TMPL mat3t<T> operator+(const mat3t<T>& a, const U b) noexcept { return mat3t<T>(a.row1 + b, a.row2 + b, a.row3 + b); }
-FUNC2_TMPL mat4t<T> operator+(const mat4t<T>& a, const U b) noexcept { return mat4t<T>(a.row1 + b, a.row2 + b, a.row3 + b, a.row4 + b); }
-FUNC2_TMPL void operator+=(mat2t<T>& a, const mat2t<U>& b) noexcept { a.row1 += b.row1; a.row2 += b.row2; }
-FUNC2_TMPL void operator+=(mat3t<T>& a, const mat3t<U>& b) noexcept { a.row1 += b.row1; a.row2 += b.row2; a.row3 += b.row3; }
-FUNC2_TMPL void operator+=(mat4t<T>& a, const mat4t<U>& b) noexcept { a.row1 += b.row1; a.row2 += b.row2; a.row3 += b.row3; a.row4 += b.row4; }
-FUNC2_TMPL void operator+=(mat2t<T>& a, const U b) noexcept { a.row1 += b; a.row2 += b; }
-FUNC2_TMPL void operator+=(mat3t<T>& a, const U b) noexcept { a.row1 += b; a.row2 += b; a.row3 += b; }
-FUNC2_TMPL void operator+=(mat4t<T>& a, const U b) noexcept { a.row1 += b; a.row2 += b; a.row3 += b; a.row4 += b; }
+FUNC2_TMPL mat2t<T> operator+(const mat2t<T>& a, const mat2t<U>& b) noexcept { return mat2t<T>(a.rows[0] + b.rows[0], a.rows[1] + b.rows[1]); }
+FUNC2_TMPL mat3t<T> operator+(const mat3t<T>& a, const mat3t<U>& b) noexcept { return mat3t<T>(a.rows[0] + b.rows[0], a.rows[1] + b.rows[1], a.rows[2] + b.rows[2]); }
+FUNC2_TMPL mat4t<T> operator+(const mat4t<T>& a, const mat4t<U>& b) noexcept { return mat4t<T>(a.rows[0] + b.rows[0], a.rows[1] + b.rows[1], a.rows[2] + b.rows[2], a.rows[3] + b.rows[3]); }
+FUNC2_TMPL mat2t<T> operator+(const mat2t<T>& a, const U b) noexcept { return mat2t<T>(a.rows[0] + b, a.rows[1] + b); }
+FUNC2_TMPL mat3t<T> operator+(const mat3t<T>& a, const U b) noexcept { return mat3t<T>(a.rows[0] + b, a.rows[1] + b, a.rows[2] + b); }
+FUNC2_TMPL mat4t<T> operator+(const mat4t<T>& a, const U b) noexcept { return mat4t<T>(a.rows[0] + b, a.rows[1] + b, a.rows[2] + b, a.rows[3] + b); }
+FUNC2_TMPL void operator+=(mat2t<T>& a, const mat2t<U>& b) noexcept { a.rows[0] += b.rows[0]; a.rows[1] += b.rows[1]; }
+FUNC2_TMPL void operator+=(mat3t<T>& a, const mat3t<U>& b) noexcept { a.rows[0] += b.rows[0]; a.rows[1] += b.rows[1]; a.rows[2] += b.rows[2]; }
+FUNC2_TMPL void operator+=(mat4t<T>& a, const mat4t<U>& b) noexcept { a.rows[0] += b.rows[0]; a.rows[1] += b.rows[1]; a.rows[2] += b.rows[2]; a.rows[3] += b.rows[3]; }
+FUNC2_TMPL void operator+=(mat2t<T>& a, const U b) noexcept { a.rows[0] += b; a.rows[1] += b; }
+FUNC2_TMPL void operator+=(mat3t<T>& a, const U b) noexcept { a.rows[0] += b; a.rows[1] += b; a.rows[2] += b; }
+FUNC2_TMPL void operator+=(mat4t<T>& a, const U b) noexcept { a.rows[0] += b; a.rows[1] += b; a.rows[2] += b; a.rows[3] += b; }
 
-FUNC2_TMPL mat2t<T> operator-(const mat2t<T>& a, const mat2t<U>& b) noexcept { return mat2t<T>(a.row1 - b.row1, a.row2 - b.row2); }
-FUNC2_TMPL mat3t<T> operator-(const mat3t<T>& a, const mat3t<U>& b) noexcept { return mat3t<T>(a.row1 - b.row1, a.row2 - b.row2, a.row3 - b.row3); }
-FUNC2_TMPL mat4t<T> operator-(const mat4t<T>& a, const mat4t<U>& b) noexcept { return mat4t<T>(a.row1 - b.row1, a.row2 - b.row2, a.row3 - b.row3, a.row4 - b.row4); }
-FUNC2_TMPL mat2t<T> operator-(const mat2t<T>& a, const U b) noexcept { return mat2t<T>(a.row1 - b, a.row2 - b); }
-FUNC2_TMPL mat3t<T> operator-(const mat3t<T>& a, const U b) noexcept { return mat3t<T>(a.row1 - b, a.row2 - b, a.row3 - b); }
-FUNC2_TMPL mat4t<T> operator-(const mat4t<T>& a, const U b) noexcept { return mat4t<T>(a.row1 - b, a.row2 - b, a.row3 - b, a.row4 - b); }
-FUNC2_TMPL void operator-=(mat2t<T>& a, const mat2t<U>& b) noexcept { a.row1 -= b.row1; a.row2 -= b.row2; }
-FUNC2_TMPL void operator-=(mat3t<T>& a, const mat3t<U>& b) noexcept { a.row1 -= b.row1; a.row2 -= b.row2; a.row3 -= b.row3; }
-FUNC2_TMPL void operator-=(mat4t<T>& a, const mat4t<U>& b) noexcept { a.row1 -= b.row1; a.row2 -= b.row2; a.row3 -= b.row3; a.row4 -= b.row4; }
-FUNC2_TMPL void operator-=(mat2t<T>& a, const U b) noexcept { a.row1 -= b; a.row2 -= b; }
-FUNC2_TMPL void operator-=(mat3t<T>& a, const U b) noexcept { a.row1 -= b; a.row2 -= b; a.row3 -= b; }
-FUNC2_TMPL void operator-=(mat4t<T>& a, const U b) noexcept { a.row1 -= b; a.row2 -= b; a.row3 -= b; a.row4 -= b; }
+FUNC2_TMPL mat2t<T> operator-(const mat2t<T>& a, const mat2t<U>& b) noexcept { return mat2t<T>(a.rows[0] - b.rows[0], a.rows[1] - b.rows[1]); }
+FUNC2_TMPL mat3t<T> operator-(const mat3t<T>& a, const mat3t<U>& b) noexcept { return mat3t<T>(a.rows[0] - b.rows[0], a.rows[1] - b.rows[1], a.rows[2] - b.rows[2]); }
+FUNC2_TMPL mat4t<T> operator-(const mat4t<T>& a, const mat4t<U>& b) noexcept { return mat4t<T>(a.rows[0] - b.rows[0], a.rows[1] - b.rows[1], a.rows[2] - b.rows[2], a.rows[3] - b.rows[3]); }
+FUNC2_TMPL mat2t<T> operator-(const mat2t<T>& a, const U b) noexcept { return mat2t<T>(a.rows[0] - b, a.rows[1] - b); }
+FUNC2_TMPL mat3t<T> operator-(const mat3t<T>& a, const U b) noexcept { return mat3t<T>(a.rows[0] - b, a.rows[1] - b, a.rows[2] - b); }
+FUNC2_TMPL mat4t<T> operator-(const mat4t<T>& a, const U b) noexcept { return mat4t<T>(a.rows[0] - b, a.rows[1] - b, a.rows[2] - b, a.rows[3] - b); }
+FUNC2_TMPL void operator-=(mat2t<T>& a, const mat2t<U>& b) noexcept { a.rows[0] -= b.rows[0]; a.rows[1] -= b.rows[1]; }
+FUNC2_TMPL void operator-=(mat3t<T>& a, const mat3t<U>& b) noexcept { a.rows[0] -= b.rows[0]; a.rows[1] -= b.rows[1]; a.rows[2] -= b.rows[2]; }
+FUNC2_TMPL void operator-=(mat4t<T>& a, const mat4t<U>& b) noexcept { a.rows[0] -= b.rows[0]; a.rows[1] -= b.rows[1]; a.rows[2] -= b.rows[2]; a.rows[3] -= b.rows[3]; }
+FUNC2_TMPL void operator-=(mat2t<T>& a, const U b) noexcept { a.rows[0] -= b; a.rows[1] -= b; }
+FUNC2_TMPL void operator-=(mat3t<T>& a, const U b) noexcept { a.rows[0] -= b; a.rows[1] -= b; a.rows[2] -= b; }
+FUNC2_TMPL void operator-=(mat4t<T>& a, const U b) noexcept { a.rows[0] -= b; a.rows[1] -= b; a.rows[2] -= b; a.rows[3] -= b; }
 
 FUNC2_TMPL mat2t<T> operator*(const mat2t<T>& a, const mat2t<U>& b) noexcept
 {
@@ -297,9 +297,9 @@ FUNC2_TMPL mat4t<T> operator*(const mat4t<T>& a, const mat4t<U>& b) noexcept
 	}
 	return result;
 }
-FUNC2_TMPL void operator*(const mat2t<T>& a, const U b) noexcept { a.row1 *= b; a.row2 *= b; }
-FUNC2_TMPL void operator*(const mat3t<T>& a, const U b) noexcept { a.row1 *= b; a.row2 *= b; a.row3 *= b; }
-FUNC2_TMPL void operator*(const mat4t<T>& a, const U b) noexcept { a.row1 *= b; a.row2 *= b; a.row3 *= b; a.row4 *= b; }
+FUNC2_TMPL mat2t<T> operator*(const mat2t<T>& a, const U b) noexcept { return {a.rows[0] * b, a.rows[1] * b}; }
+FUNC2_TMPL mat3t<T> operator*(const mat3t<T>& a, const U b) noexcept { return {a.rows[0] * b, a.rows[1] * b, a.rows[2] * b}; }
+FUNC2_TMPL mat4t<T> operator*(const mat4t<T>& a, const U b) noexcept { return {a.rows[0] * b, a.rows[1] * b, a.rows[2] * b, a.rows[3] * b}; }
 FUNC2_TMPL void operator*=(mat2t<T>& a, const mat2t<U>& b) noexcept
 {
 	for (int i = 0; i < 2; i++) {
@@ -336,9 +336,9 @@ FUNC2_TMPL void operator*=(const mat4t<T>& a, const mat4t<U>& b) noexcept
 		}
 	}
 }
-FUNC2_TMPL void operator*=(mat2t<T>& a, const U b) noexcept { a.row1 *= b.row1; a.row2 *= b.row2; }
-FUNC2_TMPL void operator*=(mat3t<T>& a, const U b) noexcept { a.row1 *= b.row1; a.row2 *= b.row2; a.row3 *= b.row3; }
-FUNC2_TMPL void operator*=(mat4t<T>& a, const U b) noexcept { a.row1 *= b.row1; a.row2 *= b.row2; a.row3 *= b.row3; a.row4 *= b.row4; }
+FUNC2_TMPL void operator*=(mat2t<T>& a, const U b) noexcept { a.rows[0] *= b.rows[0]; a.rows[1] *= b.rows[1]; }
+FUNC2_TMPL void operator*=(mat3t<T>& a, const U b) noexcept { a.rows[0] *= b.rows[0]; a.rows[1] *= b.rows[1]; a.rows[2] *= b.rows[2]; }
+FUNC2_TMPL void operator*=(mat4t<T>& a, const U b) noexcept { a.rows[0] *= b.rows[0]; a.rows[1] *= b.rows[1]; a.rows[2] *= b.rows[2]; a.rows[3] *= b.rows[3]; }
 
 
 FUNC2_TMPL vec2t<T> operator*(const mat2t<T>& matrix, const vec2t<U>& vector)
@@ -576,7 +576,7 @@ FUNC1_TMPL mat3t<T> Cofactor(const mat3t<T>& mat)
 
 	return solution;
 }
-FUNC1_TMPL mat4t<T> Cofactor(const mat3t<T>& mat)
+FUNC1_TMPL mat4t<T> Cofactor(const mat4t<T>& mat)
 {
 	mat4t<T> solution;
 	mat3t<T> subMatrix; /* 1x1 matrix */
