@@ -112,6 +112,8 @@ int ConvertKeyGLFW(const Key key)
 		return GLFW_KEY_KP_SUBTRACT;
 	case Key::NUMPAD_MULTIPLY:
 		return GLFW_KEY_KP_MULTIPLY;
+	case Key::NUMPAD_DIVIDE:
+		return GLFW_KEY_KP_DIVIDE;
 	case Key::NUMPAD_DECIMAL:
 		return GLFW_KEY_KP_DECIMAL;
 	case Key::NUMPAD_ENTER:
@@ -175,6 +177,10 @@ int ConvertKeyGLFW(const Key key)
 	case Key::F24:
 		return GLFW_KEY_F24;
 
+	case Key::SPACE:
+		return GLFW_KEY_SPACE;
+	case Key::ESCAPE:
+		return GLFW_KEY_ESCAPE;
 	case Key::MINUS:
 		return GLFW_KEY_MINUS;
 	case Key::EQUAL:
@@ -355,6 +361,8 @@ Key ConvertGLFWKey(const int key)
 		return Key::NUMPAD_SUBTRACT;
 	case GLFW_KEY_KP_MULTIPLY:
 		return Key::NUMPAD_MULTIPLY;
+	case GLFW_KEY_KP_DIVIDE:
+		return Key::NUMPAD_DIVIDE;
 	case GLFW_KEY_KP_ENTER:
 		return Key::NUMPAD_ENTER;
 
@@ -416,6 +424,10 @@ Key ConvertGLFWKey(const int key)
 	case GLFW_KEY_F24:
 		return Key::F24;
 
+	case GLFW_KEY_ESCAPE:
+		return Key::ESCAPE;
+	case GLFW_KEY_SPACE:
+		return Key::SPACE;
 	case GLFW_KEY_MINUS:
 		return Key::MINUS;
 	case GLFW_KEY_EQUAL:
