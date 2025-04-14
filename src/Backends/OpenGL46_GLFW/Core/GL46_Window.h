@@ -8,7 +8,7 @@ class GLFWwindow;
 namespace Engine
 {
 
-class GL46_Window : Window
+class GL46_Window : public Window
 {
 
 public:
@@ -21,7 +21,7 @@ public:
     int GetMouseButton(MouseButton button) override;
     int GetKey(Key key) override;
 
-    bool ShouldClose();
+    bool ShouldClose() override;
 
     void Terminate();
 

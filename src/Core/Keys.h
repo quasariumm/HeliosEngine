@@ -110,7 +110,7 @@ enum class Key
     COMMA,
     PERIOD,
     SLASH,
-    DELETE,
+    DEL,
     HOME,
     END,
     PAGE_UP,
@@ -153,7 +153,7 @@ enum class MouseButton
  * @return The GLFW key code, GLFW_KEY_UNKNOWN if the key is invalid
  */
 [[nodiscard]]
-int ConvertKeyGLFW(Key key);
+int ConvertKeyGLFW(Engine::Key key);
 
 /**
  * @brief Converts a key from GLFW to a Key enum value
@@ -161,7 +161,7 @@ int ConvertKeyGLFW(Key key);
  * @return The key code, Key::MAX if the key is invalid/not supported
  */
 [[nodiscard]]
-Key ConvertGLFWKey(int key);
+Engine::Key ConvertGLFWKey(int key);
 
 /**
  * @brief Converts a button from the MouseButton enum class to a GLFW button

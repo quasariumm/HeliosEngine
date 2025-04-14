@@ -1,8 +1,9 @@
 #include <imgui.h>
+#include <iostream>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
-#include "Backends/OpenGL46_GLFW/Core/GL46_Window.h"
+#include "Core/Window.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
 
@@ -11,10 +12,10 @@ Engine::SceneEditor g_sceneEditor(&g_scene);
 
 int main(int argc, char* argv[])
 {
-    Engine::GL46_Window window{};
-    window.Init({600, 400}, L"Varför är STL lokaler så irriterande?");
+    std::unique_ptr<Engine::Window> window;
+    Engine::CreateWin( window, Engine::vec2u(600, 400), L"Varför är STL lokaler så irriterande?" );
 
-    while (!window.ShouldClose())
+    while (!window->ShouldClose())
     {
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -28,13 +29,11 @@ int main(int argc, char* argv[])
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        window.PollEvents();
+        window->PollEvents();
     }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-
-
     return 0;
 }

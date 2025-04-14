@@ -2,8 +2,10 @@
 
 #include "Keys.h"
 #include <functional>
+#include <memory>
 
 #include "Math/Vector.h"
+#include <string>
 
 
 namespace Engine
@@ -16,7 +18,7 @@ namespace Engine
         OPENGL
     };
 
-class Window 
+class Window
 {
 
 public:
@@ -33,6 +35,7 @@ public:
     virtual bool Init(const vec2u& size, const std::wstring& title) = 0;
 
     virtual void PollEvents() = 0;
+    virtual bool ShouldClose() = 0;
 
     virtual int GetMouseButton(MouseButton button) = 0;
     virtual int GetKey(Key key) = 0;
@@ -70,5 +73,6 @@ protected:
     keyCallback_t onKeyUp;
 };
 
+void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, GraphicsAPI api = GraphicsAPI::OPENGL);
 
 } // Engine

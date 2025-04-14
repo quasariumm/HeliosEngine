@@ -204,7 +204,7 @@ int ConvertKeyGLFW(const Key key)
 	case Key::SLASH:
 		return GLFW_KEY_SLASH;
 
-	case Key::DELETE:
+	case Key::DEL:
 		return GLFW_KEY_DELETE;
 	case Key::HOME:
 		return GLFW_KEY_HOME;
@@ -446,7 +446,7 @@ Key ConvertGLFWKey(const int key)
 		return Key::SLASH;
 
 	case GLFW_KEY_DELETE:
-		return Key::DELETE;
+		return Key::DEL;
 	case GLFW_KEY_HOME:
 		return Key::HOME;
 	case GLFW_KEY_END:
