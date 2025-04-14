@@ -8,9 +8,9 @@ namespace Engine
 {
     void Transform::TransformControllerUI()
     {
-        ImGui::DragFloat3("Position", p.cell, 0.1f);
-        ImGui::DragFloat3("Rotation", r.cell, 1.0f);
-        ImGui::DragFloat3("Scale", s.cell, 0.1f);
+        // ImGui::DragFloat3("Position", p.cell, 0.1f);
+        // ImGui::DragFloat3("Rotation", r.cell, 1.0f);
+        // ImGui::DragFloat3("Scale", s.cell, 0.1f);
         UpdateTransform();
     }
 
