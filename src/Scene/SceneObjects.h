@@ -60,7 +60,7 @@ namespace Engine
         ~SceneObject();
 
         [[nodiscard]]
-        int GetUID() const { return m_UID; }
+        uint8_t GetUID() const { return m_UID; }
         Transform* GetTransform() { return &m_transform; }
 
         [[nodiscard]]
