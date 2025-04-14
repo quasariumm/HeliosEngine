@@ -6,7 +6,7 @@
 namespace Engine
 {
 
-int ConvertKeyToGLFWKey(const Key key)
+int ConvertGLFW(const Key key)
 {
 	switch (key)
 	{
