@@ -73,6 +73,41 @@ public:
 	void Use(uint32_t slot) const;
 
 	/**
+	 * @brief Sets the texture to the active on the given slot. Only used for compute shaders
+	 * @param slot The slot the texture needs to be in
+	 * @throws range_error The slot is not in the bindable range
+	 */
+	void UseCompute(uint32_t slot) const;
+
+	/**
+	 * @brief Gets the ID of the texture
+	 * @return The ID of the texture
+	 */
+	[[nodiscard]]
+	uint32_t GetID() const;
+
+	/**
+	 * @brief Gets the width of the texture
+	 * @return The width of the texture
+	 */
+	[[nodiscard]]
+	int32_t GetWidth() const;
+
+	/**
+	 * @brief Gets the height of the texture
+	 * @return The height of the texture
+	 */
+	[[nodiscard]]
+	int32_t GetHeight() const;
+
+	/**
+	 * @brief Gets the channel count of the texture
+	 * @return The channel count of the texture
+	 */
+	[[nodiscard]]
+	uint32_t GetChannels() const;
+
+	/**
 	 * @brief Gives you the data pointer of the texture
 	 * @return A pointer to the first pixel in the texture data
 	 * @warning Will return nullptr when the texture is HDR. In that case, call GetDataHDR() instead.

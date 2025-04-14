@@ -1,6 +1,21 @@
 #version 460 core
+#extension GL_ARB_shader_storage_buffer_object : require
+#extension GL_ARB_shading_language_include : require
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(rgba32f, binding = 0) uniform image2D OutTexture;
+uniform uint ScreenWidth;
+uniform uint ScreenHeight;
+
+uniform mat4 CamToWorld;
+uniform vec3 ViewParams;
+
+uniform bool Accumulate;
+
+uniform int Frame = 0;
+
+const float PI = 3.14159265357f;
 
 struct Ray
 {
@@ -32,74 +47,106 @@ struct RayHitInfo
 	RayTracingMaterial material;
 };
 
-sampler2D Texture;
 
-vec3 Trace(Ray ray, inout uint seed)
+vec3 GetBRDF(inout RayTracingMaterial material)
+{
+	return material.diffuseColor;
+}
+
+
+vec3 GetPDF(inout RayTracingMaterial material)
+{
+	return vec3(PI);
+}
+
+
+vec3 Trace(Ray ray, uint seed)
 {
 	vec3 incommingLight = vec3(0);
 	vec3 rayColor = vec3(1);
 
-	for (int i = 0; i <= MaxBounces; ++i)
-	{
-		RayHitInfo info = RayCollision(ray);
-
-		if (info.didHit)
-		{
-			ray.origin = info.hitPoint;
-
-			// Directions
-			vec3 diffuseDirection = normalize(info.normal + RandomDirection(seed));
-			vec3 specularDirection = normalize(reflect(ray.dir, info.normal));
-
-			// Specular flag
-			RayTracingMaterial material = info.material;
-
-			float randomValue = RandomFloat(seed);
-			bool isSpecular = (material.shininess == 0.0)
-			? false
-			: randomValue <= material.specularProbability;
-
-			// Refraction flag
-			randomValue = RandomFloat(seed);
-			bool isRefracted = (material.refractionProbability == 0.0)
-			? false
-			: randomValue <= material.refractionProbability;
-
-			// Direction calculation
-			if (isRefracted && material.refractionCoefficient <= 1)
-			{
-				float cos_theta = min(dot(-ray.dir, info.normal), 1.0);
-				vec3 outPerp = material.refractionCoefficient * (ray.dir + cos_theta * info.normal);
-
-				float outPerpLen = dot(outPerp, outPerp);
-				vec3 outParallel = sqrt(abs(1.0 - outPerpLen)) * info.normal * -1.0;
-				ray.dir = normalize(outPerp + outParallel);
-				ray.origin += 0.1 * ray.dir;
-				info.normal *= -1.0;
-			}
-			else
-			{
-				ray.dir = (isSpecular)
-				? mix(diffuseDirection, specularDirection, info.material.shininess)
-				: diffuseDirection;
-			}
-
-			vec3 emittedLight = material.emissionColor * material.emissionStrength;
-			float lightStrength = dot(info.normal, ray.dir);
-			incommingLight += emittedLight * rayColor;
-			rayColor *= ((isSpecular || isRefracted) ? material.specularColor : material.diffuseColor) * lightStrength;
-		}
-		else
-		{
-			incommingLight += rayColor * vec3(0.308, 0.355, 0.375);
-			break;
-		}
-	}
-
-	return incommingLight;
+	return ray.dir;
+//	for (int i = 0; i <= MaxBounces; ++i)
+//	{
+//		RayHitInfo info = RayCollision(ray);
+//
+//		if (info.didHit)
+//		{
+//			ray.origin = info.hitPoint;
+//
+//			// Directions
+//			vec3 diffuseDirection = normalize(info.normal + RandomDirection(seed));
+//			vec3 specularDirection = normalize(reflect(ray.dir, info.normal));
+//
+//			// Specular flag
+//			RayTracingMaterial material = info.material;
+//
+//			float randomValue = RandomFloat(seed);
+//			bool isSpecular = (material.shininess == 0.0)
+//			? false
+//			: randomValue <= material.specularProbability;
+//
+//			// Refraction flag
+//			randomValue = RandomFloat(seed);
+//			bool isRefracted = (material.refractionProbability == 0.0)
+//			? false
+//			: randomValue <= material.refractionProbability;
+//
+//			// Direction calculation
+//			if (isRefracted && material.refractionCoefficient <= 1)
+//			{
+//				float cos_theta = min(dot(-ray.dir, info.normal), 1.0);
+//				vec3 outPerp = material.refractionCoefficient * (ray.dir + cos_theta * info.normal);
+//
+//				float outPerpLen = dot(outPerp, outPerp);
+//				vec3 outParallel = sqrt(abs(1.0 - outPerpLen)) * info.normal * -1.0;
+//				ray.dir = normalize(outPerp + outParallel);
+//				ray.origin += 0.1 * ray.dir;
+//				info.normal *= -1.0;
+//			}
+//			else
+//			{
+//				ray.dir = (isSpecular)
+//				? mix(diffuseDirection, specularDirection, info.material.shininess)
+//				: diffuseDirection;
+//			}
+//
+//			vec3 emittedLight = material.emissionColor * material.emissionStrength;
+//			float lightStrength = dot(info.normal, ray.dir);
+//			incommingLight += emittedLight * rayColor;
+//			rayColor *= ((isSpecular || isRefracted) ? material.specularColor : material.diffuseColor) * lightStrength;
+//		}
+//		else
+//		{
+//			incommingLight += rayColor * vec3(0.308, 0.355, 0.375);
+//			break;
+//		}
+//	}
+//
+//	return incommingLight;
 }
 
 void main()
 {
+	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+	vec2 tc = vec2(texelCoord.x / float(ScreenWidth), texelCoord.y / float(ScreenHeight)) - 0.5;
 
+	Ray ray;
+
+	vec3 focusDirLocal = vec3((tc - 0.5) * ViewParams.xy, ViewParams.z);
+	ray.dir = (CamToWorld * vec4(focusDirLocal, 1.0)).xyz;
+	ray.origin = CamToWorld[3].xyz;
+
+	// Generate a random number based on the focus dir and the time
+	// Since the x and y of the texture coordinate give an 'index', I use those
+	uint seed = uint(floor(
+		tc.y * ScreenHeight * ScreenWidth
+		+ tc.x * ScreenWidth)
+		* Frame
+	);
+
+	//vec4 pixel = vec4(Trace(ray, seed), 1.0);
+	vec4 pixel = vec4(0.5);
+
+	imageStore(OutTexture, texelCoord, pixel);
 }

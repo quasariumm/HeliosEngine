@@ -242,6 +242,41 @@ void GL46_Texture2D::Use(const uint32_t slot) const
 }
 
 
+void GL46_Texture2D::UseCompute( const uint32_t slot ) const
+{
+	if (slot > 31)
+		throw std::range_error("Slot is out of range (0-31)!");
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, m_ID);
+	// TODO: Update to use dynamic format
+	glBindImageTexture(0, m_ID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+}
+
+
+uint32_t GL46_Texture2D::GetID() const
+{
+	return m_ID;
+}
+
+
+int32_t GL46_Texture2D::GetWidth() const
+{
+	return m_width;
+}
+
+
+int32_t GL46_Texture2D::GetHeight() const
+{
+	return m_height;
+}
+
+
+uint32_t GL46_Texture2D::GetChannels() const
+{
+	return m_channels;
+}
+
+
 uint8_t* GL46_Texture2D::GetData() const
 {
 	return m_data;

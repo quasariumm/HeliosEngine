@@ -52,11 +52,12 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename)
 	std::stringstream contentStream;
 	contentStream << filestream.rdbuf();
 
-	const char* contentString = contentStream.str().c_str();
+	std::string contentString = contentStream.str();
+	const char* content = contentString.c_str();
 
 	// Create and compile shader
 	m_shaderID = glCreateShader(GL_COMPUTE_SHADER);
-	glShaderSource(m_shaderID, 1, &contentString, nullptr);
+	glShaderSource(m_shaderID, 1, &content, nullptr);
 	glCompileShader(m_shaderID);
 
 	GLint success;
@@ -94,7 +95,6 @@ void GL46_ComputeShader::Dispatch(const vec3u& threads) const
 	if (!m_initialised)
 		throw std::runtime_error("Compute shader cannot be dispatched when no shader is loaded!");
 
-	glUseProgram(programID);
 	glDispatchCompute(threads.x, threads.y, threads.z);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }

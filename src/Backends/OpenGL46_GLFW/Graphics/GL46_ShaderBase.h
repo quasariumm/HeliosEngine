@@ -13,15 +13,12 @@ namespace Engine {
 class GL46_ShaderBase
 {
 
-protected:
-
-	GL46_ShaderBase() = default;
-	~GL46_ShaderBase();
+public:
 
 	/**
 	 * @brief Sets the current program as the active one
 	 */
-	inline void Use() const;
+	void Use() const;
 
 	/**
 	 * @brief Sets a boolean value in the active shader
@@ -29,7 +26,7 @@ protected:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetBool(const std::string& name, bool value) const;
+	void SetBool(const std::string& name, bool value) const;
 
 	/**
 	 * @brief Sets a boolean value in the active shader by index
@@ -37,7 +34,7 @@ protected:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetBool(int index, bool value) const;
+	void SetBool(int index, bool value) const;
 
 	/**
 	 * @brief Sets an integer value in the active shader
@@ -45,7 +42,7 @@ protected:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetInt(const std::string& name, int value) const;
+	void SetInt(const std::string& name, int value) const;
 
 	/**
 	 * @brief Sets an integer value in the active shader by index
@@ -53,7 +50,7 @@ protected:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetInt(int index, int value) const;
+	void SetInt(int index, int value) const;
 
 	/**
 	 * @brief Sets a floating point value in the active shader
@@ -61,7 +58,7 @@ protected:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetFloat(const std::string& name, float value) const;
+	void SetFloat(const std::string& name, float value) const;
 
 	/**
 	 * @brief Sets a floating point value in the active shader by index
@@ -69,7 +66,7 @@ protected:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetFloat(int index, float value) const;
+	void SetFloat(int index, float value) const;
 
 	/**
 	 * @brief Sets a floating point 2D vector value in the active shader
@@ -77,7 +74,7 @@ protected:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetVec2(const std::string& name, const vec2f& value) const;
+	void SetVec2(const std::string& name, const vec2f& value) const;
 
 	/**
 	 * @brief Sets a floating point 2D vector value in the active shader by index
@@ -85,7 +82,7 @@ protected:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetVec2(int index, const vec2f& value) const;
+	void SetVec2(int index, const vec2f& value) const;
 
 	/**
 	 * @brief Sets a floating point 3D vector value in the active shader
@@ -93,7 +90,7 @@ protected:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetVec3(const std::string& name, const vec3f& value) const;
+	void SetVec3(const std::string& name, const vec3f& value) const;
 
 	/**
 	 * @brief Sets a floating point 3D vector value in the active shader by index
@@ -101,7 +98,7 @@ protected:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetVec3(int index, const vec3f& value) const;
+	void SetVec3(int index, const vec3f& value) const;
 
 	/**
 	 * @brief Sets a floating point 4D vector value in the active shader
@@ -109,7 +106,7 @@ protected:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetVec4(const std::string& name, const vec4f& value) const;
+	void SetVec4(const std::string& name, const vec4f& value) const;
 
 	/**
 	 * @brief Sets a floating point 4D vector value in the active shader by index
@@ -117,7 +114,7 @@ protected:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetVec4(int index, const vec4f& value) const;
+	void SetVec4(int index, const vec4f& value) const;
 
 	/**
 	 * @brief Sets a 4x4 floating point matrix value in the active shader
@@ -125,7 +122,7 @@ protected:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetMat4(const std::string& name, const mat4f& value) const;
+	void SetMat4(const std::string& name, const mat4f& value) const;
 
 	/**
 	 * @brief Sets a 4x4 floating point matrix value in the active shader by index
@@ -133,8 +130,12 @@ protected:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	inline void SetMat4(int index, const mat4f& value) const;
+	void SetMat4(int index, const mat4f& value) const;
 
+protected:
+
+	GL46_ShaderBase() = default;
+	~GL46_ShaderBase();
 
 	uint32_t programID = 0;
 
