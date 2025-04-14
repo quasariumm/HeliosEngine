@@ -1,44 +1,37 @@
 #include "SceneEditor.h"
 
-void Engine::DisplayObjectTree(SceneObject* object)
+void Engine::SceneEditor::DrawInterface()
 {
-    // Display parent object
-    if (ImGui::Selectable(object->GetName().c_str(), gSelectedObject == object->GetUID()))
-        gSelectedObject = object->GetUID();
-
-    ImGui::Indent();
-    // Display each child object
-    for (SceneObject* child : object->GetChildren())
-        DisplayObjectTree(child);
-    ImGui::Unindent();
+    TreeEditor();
+    ObjectEditor();
 }
 
-void Engine::SceneEditor::SceneTreeEditor() const
+void Engine::SceneEditor::TreeEditor()
 {
-    ImGui::Begin("Scene Editor");
+    ImGui::Begin("Scene");
 
     if (ImGui::Button("New Empty"))
-        mTargetScene->NewObject();
+        m_targetScene->NewObject();
 
-    if (gSelectMode == PARENT && gPreviousSelectedObject != gSelectedObject)
+    if (m_selectMode == PARENT && m_prvSelectedObject != m_selectedObject)
     {
-        mTargetScene->GetSceneObject(gPreviousSelectedObject)->SetParent(mTargetScene->GetSceneObject(gSelectedObject));
-        gSelectMode = SELECT;
+        m_targetScene->GetSceneObject(m_prvSelectedObject)->SetParent(m_targetScene->GetSceneObject(m_selectedObject));
+        m_selectMode = SELECT;
     }
 
-    for (SceneObject* object : mTargetScene->GetSceneObjectList())
+    for (SceneObject* object : m_targetScene->GetSceneObjectList())
         if (object->GetParent() == nullptr)
             DisplayObjectTree(object);
 
     ImGui::End();
 }
 
-void Engine::SceneEditor::ObjectEditor() const
+void Engine::SceneEditor::ObjectEditor()
 {
-    ImGui::Begin("Object Editor");
+    ImGui::Begin("Object");
 
     // Show text of no object selected
-    if (gSelectedObject == 0)
+    if (m_selectedObject == 0)
     {
         ImGui::Text("Please select an object...");
         ImGui::End();
@@ -49,10 +42,10 @@ void Engine::SceneEditor::ObjectEditor() const
     static SceneObject* selectedObject = nullptr;
 
     if (selectedObject == nullptr)
-        selectedObject = mTargetScene->GetSceneObject(gSelectedObject);
+        selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
 
-    if (selectedObject->GetUID() != gSelectedObject)
-        selectedObject = mTargetScene->GetSceneObject(gSelectedObject);
+    if (selectedObject->GetUID() != selectedObject->GetParent()->GetUID())
+        selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
 
     // Show basic info
     ImGui::Text(selectedObject->GetName().c_str());
@@ -60,8 +53,8 @@ void Engine::SceneEditor::ObjectEditor() const
 
     if (ImGui::Button("Set Parent"))
     {
-        gPreviousSelectedObject = gSelectedObject;
-        gSelectMode = PARENT;
+        m_prvSelectedObject = m_selectedObject;
+        m_selectMode = PARENT;
     }
 
     // Renaming
@@ -84,7 +77,7 @@ void Engine::SceneEditor::ObjectEditor() const
     // Deleting
     ImGui::SameLine();
     if (ImGui::Button("Delete"))
-        mTargetScene->DeleteObject(selectedObject);
+        m_targetScene->DeleteObject(selectedObject);
 
     if (ImGui::CollapsingHeader("Transform"))
         selectedObject->GetTransform()->TransformControllerUI();
@@ -109,4 +102,17 @@ void Engine::SceneEditor::ObjectEditor() const
     }
 
     ImGui::End();
+}
+
+void Engine::SceneEditor::DisplayObjectTree(SceneObject* object)
+{
+    // Display parent object
+    if (ImGui::Selectable(object->GetName().c_str(), m_selectedObject == object->GetUID()))
+        m_selectedObject = object->GetUID();
+
+    ImGui::Indent();
+    // Display each child object
+    for (SceneObject* child : object->GetChildren())
+        DisplayObjectTree(child);
+    ImGui::Unindent();
 }

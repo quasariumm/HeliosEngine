@@ -36,12 +36,13 @@ public:
 
     virtual void PollEvents() = 0;
 	virtual void SwapBuffers() = 0;
+	virtual void ClearViewport() = 0;
     virtual bool ShouldClose() = 0;
 
     virtual int GetMouseButton(MouseButton button) = 0;
     virtual int GetKey(Key key) = 0;
 
-	virtual vec2u GetSize() = 0;
+	virtual vec2u GetSize() const = 0;
 
     /*
      * Window callbacks

@@ -56,12 +56,10 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title)
         throw std::runtime_error("Failed to initialise GLAD");
     }
 
+    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(m_window, true);
     ImGui_ImplOpenGL3_Init(0);
-    ImGui::StyleColorsDark();
-    ImGuiIO& io    = ImGui::GetIO();
-    io.IniFilename = "./imgui.ini";
 
     glViewport(0, 0, size.x, size.y);
 
@@ -78,7 +76,18 @@ void GL46_Window::PollEvents()
 
 void GL46_Window::SwapBuffers()
 {
+    // Have to reset the context for ImGui (Otherwise it flickers)
+    glfwMakeContextCurrent(m_window);
 	glfwSwapBuffers(m_window);
+}
+
+void GL46_Window::ClearViewport()
+{
+    int display_w, display_h;
+    glfwGetFramebufferSize(m_window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 
@@ -93,7 +102,7 @@ int GL46_Window::GetKey(Key key)
 }
 
 
-vec2u GL46_Window::GetSize()
+vec2u GL46_Window::GetSize() const
 {
 	return m_screenSize;
 }

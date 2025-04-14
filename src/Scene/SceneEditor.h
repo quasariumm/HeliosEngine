@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "Scene.h"
+#include "Editor/EditorInterface.h"
 
 namespace Engine
 {
@@ -11,23 +12,24 @@ namespace Engine
         PARENT
     };
 
-    static uint8_t gSelectedObject = 0;
-    static uint8_t gPreviousSelectedObject = 0;
-    static TreeSelectMode gSelectMode = SELECT;
-
-    static void DisplayObjectTree(SceneObject* object);
-
-    class SceneEditor
+    class SceneEditor : public EditorInterface
     {
     public:
         SceneEditor() = delete;
-        explicit SceneEditor(Scene* scene) : mTargetScene(scene) {}
-        
-        void SceneTreeEditor() const;
-        void ObjectEditor() const;
+        explicit SceneEditor(Scene* scene) : m_targetScene(scene) {}
+
+        void DrawInterface() override;
+
+        void TreeEditor();
+        void ObjectEditor();
+        void DisplayObjectTree(SceneObject* object);
 
     private:
-        Scene* mTargetScene;
+        Scene* m_targetScene;
+
+        uint8_t m_selectedObject = 0;
+        uint8_t m_prvSelectedObject = 0;
+        TreeSelectMode m_selectMode = SELECT;
     };
 
 }

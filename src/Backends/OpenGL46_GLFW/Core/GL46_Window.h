@@ -19,10 +19,11 @@ public:
 
     void PollEvents() override;
 	void SwapBuffers() override;
+    void ClearViewport() override;
     int GetMouseButton(MouseButton button) override;
     int GetKey(Key key) override;
 
-	vec2u GetSize() override;
+	vec2u GetSize() const override;
 
     bool ShouldClose() override;
 
