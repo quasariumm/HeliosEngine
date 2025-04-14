@@ -2,13 +2,15 @@
 #include "Core/Common.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "Core/Keys.h"
 
 #include <cstdlib>
+#include <iostream>
 
 namespace Engine
 {
 
-void GL46_Window::Init(const vec2u& size, const std::wstring& title)
+bool GL46_Window::Init(const vec2u& size, const std::wstring& title)
 {
     if (!glfwInit())
     {
@@ -25,23 +27,21 @@ void GL46_Window::Init(const vec2u& size, const std::wstring& title)
     if (!m_window)
     {
         glfwTerminate();
-        throw std::runtime_error("Failed to create GLFW window");
+        printf("ANSI_ERR, Failed to create OpenGL GLFW window\n");
+        std::wcout << ANSI_ERR << "Failed to create OpenGL GLFW window" << std::endl;
+        return false;
     }
 
-    glfwMakeContextCurrent(m_window);
+    glfwMakeContextCurrent( m_window );
 
-    // auto keyCallback = [this](GLFWwindow*, const int key, const int scancode, const int action, const int mods)
-    //     {
-    //         this->KeyCallback(key, scancode, action, mods);
-    //     };
-    //
-    // auto buttonCallback = [this](GLFWwindow*, const int button, const int action, const int mods)
-    //     {
-    //         this->ButtonCallback(button, action, mods);
-    //     };
-    //
-    // glfwSetKeyCallback(m_window, &keyCallback.operator());
-    // glfwSetMouseButtonCallback(m_window, &buttonCallback.operator());
+    glfwSetWindowUserPointer( m_window, this );
+    glfwSetKeyCallback( m_window, KeyCallbackGLFW );
+    glfwSetMouseButtonCallback( m_window, &ButtonCallbackGLFW) ;
+
+    glfwSetWindowSizeCallback( m_window, ResizeCallbackGLFW );
+    glfwSetWindowFocusCallback( m_window,  FocusCallbackGLFW );
+    glfwSetCursorPosCallback( m_window, MouseMoveCallbackGLFW ) ;
+    glfwSetScrollCallback( m_window, MouseScrollCallbackGLFW );
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -50,12 +50,25 @@ void GL46_Window::Init(const vec2u& size, const std::wstring& title)
     }
 
     glViewport(0, 0, size.x, size.y);
+
+    m_currentAPI = GraphicsAPI::OPENGL;
+    return true;
 }
 
 
 void GL46_Window::PollEvents()
 {
     glfwPollEvents();
+}
+
+int GL46_Window::GetMouseButton(MouseButton button)
+{
+    return glfwGetMouseButton( m_window, ConvertButtonGLFW(button) );
+}
+
+int GL46_Window::GetKey(Key key)
+{
+    glfwGetKey( m_window, ConvertKeyGLFW(key) );
 }
 
 
@@ -71,18 +84,48 @@ void GL46_Window::Terminate()
     glfwTerminate();
 }
 
-
-void GL46_Window::KeyCallback(int key, int scancode, int action, int mods)
+void GL46_Window::KeyCallbackGLFW(GLFWwindow* w, int key, int scancode, int action, int mods)
 {
-    printf("%d", key);
-    if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE)
-        glfwSetWindowShouldClose(m_window, true);
+    GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+    Key k = ConvertGLFWKey( key );
+    if( action == GLFW_PRESS )
+        win->onKeyDown(*win, k);
+    if( action == GLFW_RELEASE )
+        win->onKeyUp(*win, k);
 }
 
 
-void GL46_Window::ButtonCallback(int button, int action, int mods)
+void GL46_Window::ButtonCallbackGLFW(GLFWwindow* w, int button, int action, int mods)
 {
-    printf("%d", button);
+    GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+    MouseButton b = ConvertGLFWButton( button );
+    if( action == GLFW_PRESS )
+        win->onMouseDown(*win, b);
+    if( action == GLFW_RELEASE )
+        win->onMouseUp(*win, b);
 }
 
+void GL46_Window::ResizeCallbackGLFW(GLFWwindow* w, int width, int height)
+{
+    GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+    win->onResize(*win,vec2u(width,height));
+}
+
+void GL46_Window::FocusCallbackGLFW(GLFWwindow* w, int f)
+{
+    GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+    win->onFocus(*win, f == GLFW_TRUE);
+}
+
+void GL46_Window::MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y)
+{
+    GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+    win->onMouseMove(*win,vec2u(static_cast<uint32_t>(x),static_cast<uint32_t>(y)));
+}
+
+void GL46_Window::MouseScrollCallbackGLFW(GLFWwindow* w, double x, double y)
+{
+    GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+    win->onMouseScroll(*win,static_cast<float>(x),static_cast<float>(y));
+}
 } // Engine

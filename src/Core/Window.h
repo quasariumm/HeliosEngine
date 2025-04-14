@@ -8,6 +8,13 @@
 
 namespace Engine
 {
+    enum class GraphicsAPI
+    {
+        NONE,
+        VULKAN,
+        DIRECTX12,
+        OPENGL
+    };
 
 class Window 
 {
@@ -15,6 +22,7 @@ class Window
 public:
 
     typedef std::function<void(Window&, const vec2u&)>  resizeCallback_t;
+    typedef std::function<void(Window&, bool)>          focusCallback_t;
     typedef resizeCallback_t                            mouseMoveCallback_t;
     typedef std::function<void(Window&, MouseButton)>   mouseButtonCallback_t;
     typedef std::function<void(Window&, float, float)>  mouseScrollCallback_t;
@@ -22,16 +30,19 @@ public:
 
     Window() = default;
 
-    void PollEvents();
+    virtual bool Init(const vec2u& size, const std::wstring& title) = 0;
 
-    bool GetMouseButton(MouseButton button);
-    bool GetKey(Key key);
+    virtual void PollEvents() = 0;
+
+    virtual int GetMouseButton(MouseButton button) = 0;
+    virtual int GetKey(Key key) = 0;
 
     /*
      * Window callbacks
      */
 
     void SetResizeCallback(const resizeCallback_t& callback);
+    void SetFocusCallback(const focusCallback_t& callback);
 
     void SetMouseMoveCallback(const mouseMoveCallback_t& callback);
 
@@ -42,21 +53,22 @@ public:
     void SetKeyDownCallback(const keyCallback_t& callback);
     void SetKeyUpCallback(const keyCallback_t& callback);
 
-private:
+protected:
+    GraphicsAPI m_currentAPI = GraphicsAPI::NONE;
 
     vec2u m_screenSize;
 
     resizeCallback_t onResize;
+    focusCallback_t onFocus;
 
     mouseMoveCallback_t onMouseMove;
     mouseButtonCallback_t onMouseDown;
     mouseButtonCallback_t onMouseUp;
-
     mouseScrollCallback_t onMouseScroll;
 
     keyCallback_t onKeyDown;
     keyCallback_t onKeyUp;
-
 };
+
 
 } // Engine
