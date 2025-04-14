@@ -18,8 +18,11 @@ public:
     bool Init(const vec2u& size, const std::wstring& title) override;
 
     void PollEvents() override;
+	void SwapBuffers() override;
     int GetMouseButton(MouseButton button) override;
     int GetKey(Key key) override;
+
+	vec2u GetSize() override;
 
     bool ShouldClose() override;
 
@@ -28,6 +31,9 @@ public:
 private:
 
     GLFWwindow* m_window;
+
+	vec2u m_screenSize;
+
     static void ResizeCallbackGLFW(GLFWwindow* w, int width, int height);
     static void FocusCallbackGLFW(GLFWwindow* w, int f);
 

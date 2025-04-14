@@ -35,10 +35,13 @@ public:
     virtual bool Init(const vec2u& size, const std::wstring& title) = 0;
 
     virtual void PollEvents() = 0;
+	virtual void SwapBuffers() = 0;
     virtual bool ShouldClose() = 0;
 
     virtual int GetMouseButton(MouseButton button) = 0;
     virtual int GetKey(Key key) = 0;
+
+	virtual vec2u GetSize() = 0;
 
     /*
      * Window callbacks
@@ -58,8 +61,6 @@ public:
 
 protected:
     GraphicsAPI m_currentAPI = GraphicsAPI::NONE;
-
-    vec2u m_screenSize;
 
     resizeCallback_t onResize;
     focusCallback_t onFocus;

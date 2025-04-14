@@ -18,6 +18,7 @@ namespace Engine
 
 bool GL46_Window::Init(const vec2u& size, const std::wstring& title)
 {
+	m_screenSize = size;
     if (!glfwInit())
     {
         throw std::runtime_error("Failed to initialize GLFW3");
@@ -74,6 +75,13 @@ void GL46_Window::PollEvents()
     glfwPollEvents();
 }
 
+
+void GL46_Window::SwapBuffers()
+{
+	glfwSwapBuffers(m_window);
+}
+
+
 int GL46_Window::GetMouseButton(MouseButton button)
 {
     return glfwGetMouseButton( m_window, ConvertButtonGLFW(button) );
@@ -82,6 +90,12 @@ int GL46_Window::GetMouseButton(MouseButton button)
 int GL46_Window::GetKey(Key key)
 {
     return glfwGetKey( m_window, ConvertKeyGLFW(key) );
+}
+
+
+vec2u GL46_Window::GetSize()
+{
+	return m_screenSize;
 }
 
 
@@ -121,6 +135,7 @@ void GL46_Window::ButtonCallbackGLFW(GLFWwindow* w, int button, int action, int 
 void GL46_Window::ResizeCallbackGLFW(GLFWwindow* w, int width, int height)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+	win->m_screenSize = vec2u(width, height);
     if(win->onResize)
         win->onResize(*win,vec2u(width,height));
 }
