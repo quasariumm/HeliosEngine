@@ -60,6 +60,7 @@ enum class Key
     NUMPAD_ADD,
     NUMPAD_SUBTRACT,
     NUMPAD_MULTIPLY,
+    NUMPAD_DIVIDE,
     NUMPAD_DECIMAL,
     NUMPAD_ENTER,
 
@@ -96,6 +97,8 @@ enum class Key
     F24,
 
     // Etc.
+	ESCAPE,
+	SPACE,
     MINUS,
     EQUAL,
     BACKSPACE,
