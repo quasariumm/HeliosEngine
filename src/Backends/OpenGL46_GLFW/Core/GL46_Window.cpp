@@ -5,6 +5,12 @@
 
 #include <cstdlib>
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_opengl3_loader.h>
+
 namespace Engine
 {
 
@@ -50,6 +56,13 @@ void GL46_Window::Init(const vec2u& size, const std::wstring& title)
     }
 
     glViewport(0, 0, size.x, size.y);
+
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+    ImGui_ImplOpenGL3_Init(0);
+    ImGui::StyleColorsDark();
+    ImGuiIO& io    = ImGui::GetIO();
+    io.IniFilename = "./imgui.ini";
 }
 
 
