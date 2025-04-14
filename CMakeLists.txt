@@ -4,8 +4,9 @@ project(Engine)
 set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h lib/glad/src/glad.c)
+file(GLOB IMGUI CONFIGURE_DEPENDS extern/imgui/*.cpp extern/imgui/*.h)
 
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCE})
+add_executable(${CMAKE_PROJECT_NAME} ${IMGUI} ${SOURCE})
 
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
         "$<$<C_COMPILER_ID:MSVC>:/utf-8>"
