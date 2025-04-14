@@ -153,7 +153,7 @@ enum class MouseButton
  * @return The GLFW key code, GLFW_KEY_UNKNOWN if the key is invalid
  */
 [[nodiscard]]
-static int ConvertKeyGLFW(Key key);
+int ConvertKeyGLFW(Key key);
 
 /**
  * @brief Converts a key from GLFW to a Key enum value
@@ -161,7 +161,7 @@ static int ConvertKeyGLFW(Key key);
  * @return The key code, Key::MAX if the key is invalid/not supported
  */
 [[nodiscard]]
-static Key ConvertGLFWKey(int key);
+Key ConvertGLFWKey(int key);
 
 /**
  * @brief Converts a button from the MouseButton enum class to a GLFW button
@@ -169,7 +169,7 @@ static Key ConvertGLFWKey(int key);
  * @return The GLFW button code, GLFW_MOUSE_BUTTON_LAST if the button is invalid
  */
 [[nodiscard]]
-static int ConvertButtonGLFW(MouseButton button);
+int ConvertButtonGLFW(MouseButton button);
 
 /**
  * @brief Converts a key from GLFW to a MouseButton enum value
@@ -177,6 +177,6 @@ static int ConvertButtonGLFW(MouseButton button);
  * @return The key code, MouseButton::MAX if the key is invalid/not supported
  */
 [[nodiscard]]
-static MouseButton ConvertGLFWButton(int button);
+MouseButton ConvertGLFWButton(int button);
 
 }
