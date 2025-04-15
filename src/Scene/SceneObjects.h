@@ -62,6 +62,8 @@ namespace Engine
         [[nodiscard]]
         uint32_t GetUID() const { return m_UID; }
         Transform* GetTransform() { return &m_transform; }
+        /// Completely overwrite the transform
+        void SetTransform(const Transform& transform) { m_transform = transform; }
 
         [[nodiscard]]
         std::string GetName() const { return m_displayName; }

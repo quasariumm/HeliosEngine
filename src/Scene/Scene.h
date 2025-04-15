@@ -9,6 +9,7 @@ namespace Engine
     {
     public:
         /// Generate a new random UID.
+        [[nodiscard]]
         uint32_t NewUID()
         {
             int i = 0;
@@ -36,15 +37,32 @@ namespace Engine
             return 0;
         }
 
-        /// Create and empty object for the scene. Returns the newly created object.
-        SceneObject* NewObject()
+        /// Check if the given UID is allowed
+        [[nodiscard]]
+        bool ValidUID(const uint32_t UID) const
         {
-            auto object = new SceneObject(NewUID());
+            if (UID == 0)
+                return false;
+
+            for (const SceneObject* object : m_sceneObjects)
+                if (object->GetUID() == UID)
+                    return false;
+            return true;
+        }
+
+        /// Create and empty object for the scene. Returns the newly created object.
+        SceneObject* NewObject(uint32_t UID = 0)
+        {
+            if (!ValidUID(UID))
+                UID = NewUID();
+
+            auto object = new SceneObject(UID);
 
             // Check for valid UID
             if (object->GetUID() == 0)
             {
                 delete object;
+                DebugLog(LogSeverity::ERROR, "Creating new object failed");
                 return nullptr;
             }
 
@@ -65,6 +83,14 @@ namespace Engine
 
         /// Delete an object from the scene, also deletes any child objects.
         void DeleteObject(const SceneObject* object) { DeleteObject(object->GetUID()); }
+
+        /// Delete all objects from the scene
+        void ClearObjects()
+        {
+            for (SceneObject* object : m_sceneObjects)
+                delete object;
+            m_sceneObjects.clear();
+        }
 
         /// Find object by UID.
         [[nodiscard]] SceneObject* GetSceneObject(uint32_t UID) const

@@ -1,5 +1,7 @@
 #include "SceneEditor.h"
 
+#include "SceneStorage.h"
+
 void Engine::SceneEditor::DrawInterface()
 {
     TreeEditor();
@@ -18,10 +20,17 @@ void Engine::SceneEditor::TreeEditor()
                 m_targetScene->NewObject();
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Save"))
+                SceneLoader::SaveToFile(m_targetScene, "scene.scn");
+            if (ImGui::MenuItem("Load"))
+                SceneLoader::LoadFromFile(m_targetScene, "scene.scn");
+            ImGui::EndMenu();
+        }
         ImGui::EndMenuBar();
     }
-
-    ImGui::Separator();
 
     if (m_selectMode == PARENT)
     {
@@ -98,7 +107,11 @@ void Engine::SceneEditor::ObjectEditor()
     // Deleting
     ImGui::SameLine();
     if (ImGui::Button("Delete"))
+    {
+        m_selectedObject = 0;
+        m_prvSelectedObject = 0;
         m_targetScene->DeleteObject(selectedObject);
+    }
 
     if (ImGui::CollapsingHeader("Transform"))
         selectedObject->GetTransform()->TransformControllerUI();
@@ -108,9 +121,9 @@ void Engine::SceneEditor::ObjectEditor()
             c->DisplayProperties();
 
     if (ImGui::Button("Add component"))
-        ImGui::OpenPopup("AddComponentToObject");
+        ImGui::OpenPopup("Select component");
 
-    if (ImGui::BeginPopupModal("AddComponentToObject", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopupModal("Select component", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         // if (ImGui::Button("Sphere"))
         // {
@@ -118,6 +131,9 @@ void Engine::SceneEditor::ObjectEditor()
         //     selectedObject->AddComponent(&s->mComponent);
         //     ImGui::CloseCurrentPopup();
         // }
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
 
         ImGui::EndPopup();
     }
