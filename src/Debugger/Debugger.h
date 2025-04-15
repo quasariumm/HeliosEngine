@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <ostream>
+#include <source_location>
 #include <string>
 #include <typeinfo>
 #include <utility>
@@ -30,12 +31,19 @@ public:
     /// Log data with type, message and a level (Level 0 means always visible, while a higher level can be ignored)
     struct Log
     {
-        explicit Log(const LogSeverity type, std::string message, const int level = 0) : type(type), message(std::move(message)), level(level), timestamp(time(nullptr)) { }
+        explicit Log(const LogSeverity type, std::string message, const int level = 0, std::source_location location = std::source_location::current()) :
+        type(type),
+        message(std::move(message)),
+        level(level),
+        timestamp(time(nullptr)),
+        source(location)
+        { }
 
         LogSeverity type = LogSeverity::INFO;
         time_t timestamp = 0;
         int level = 0;
         std::string message;
+        std::source_location source;
     };
 
     struct Watch
@@ -50,9 +58,9 @@ public:
 };
 
 /// Add a log to the debug viewer
-static void DebugLog(const LogSeverity type, const std::string& message, const int level = 0)
+inline void DebugLog(const LogSeverity type, const std::string& message, const int level = 0, std::source_location location = std::source_location::current())
 {
-    Logger::g_logs.emplace_back(type, message, level);
+    Logger::g_logs.emplace_back(type, message, level, location);
 }
 
 /// Add a value to the value debugger. Can be modified from the menu

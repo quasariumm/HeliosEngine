@@ -21,14 +21,27 @@ void Debugger::DrawInterface()
 
 void Debugger::DrawLogs()
 {
-    static bool lockToBottom = true;
-    static bool showTimestamp = true;
+    // Options
+    static bool lockToBottom = true, showTimestamp = true, showSource = true;
+
+    // Severities
+    static bool showInfo = true, showWarn = true, showError = true, showDone = true;
+
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("Options"))
         {
             ImGui::MenuItem("Lock to bottom", nullptr, &lockToBottom);
             ImGui::MenuItem("Show timestamp", nullptr, &showTimestamp);
+            ImGui::MenuItem("Show source", nullptr, &showSource);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Severity"))
+        {
+            ImGui::MenuItem(ICON_FA_INFO" Info", nullptr, &showInfo);
+            ImGui::MenuItem(ICON_FA_TRIANGLE_EXCLAMATION " Warnings", nullptr, &showWarn);
+            ImGui::MenuItem(ICON_FA_CIRCLE_EXCLAMATION " Errors", nullptr, &showError);
+            ImGui::MenuItem(ICON_FA_CHECK " Completion", nullptr, &showDone);
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -36,7 +49,25 @@ void Debugger::DrawLogs()
 
     for (const Logger::Log& log : Logger::g_logs)
     {
-        float spacing = 0;
+        if (log.type == LogSeverity::INFO && !showInfo) continue;
+        if (log.type == LogSeverity::WARNING && !showWarn) continue;
+        if (log.type == LogSeverity::ERROR && !showError) continue;
+        if (log.type == LogSeverity::DONE && !showDone) continue;
+
+
+        ImGui::Text(ICON_FA_ARROW_RIGHT);
+        float spacing = 30;
+        ImGui::SameLine(spacing);
+
+
+        if (showSource)
+        {
+            ImGui::Text(ICON_FA_CODE);
+            ImGui::SetItemTooltip("%s\n%o:%o " ICON_FA_ARROW_RIGHT " %s", log.source.file_name(), log.source.line(), log.source.column(), log.source.function_name());
+            spacing += 25;
+            ImGui::SameLine(spacing);
+        }
+
         if (showTimestamp)
         {
             char timestamp[48];
@@ -45,6 +76,7 @@ void Debugger::DrawLogs()
             spacing += 75;
             ImGui::SameLine(spacing);
         }
+
 
         switch (log.type)
         {
