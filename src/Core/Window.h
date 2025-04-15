@@ -8,7 +8,12 @@
 #include <string>
 
 
-#define EngineWindowFlags_NoVsync 0b00000001
+#define EngineWindowFlags_None					0x00000000u
+#define EngineWindowFlags_NoVsync 				0x00000001u
+#define EngineWindowFlags_NoResize 				0x00000002u
+#define EngineWindowFlags_NoDecoration 			0x00000004u
+#define EngineWindowFlags_Fullscreen			0x00000008u
+#define EngineWindowFlags_WindowedBorderless	0x00000010u
 
 
 namespace Engine
@@ -36,7 +41,7 @@ public:
 
     Window() = default;
 
-    virtual bool Init(const vec2u& size, const std::wstring& title, uint64_t flags) = 0;
+    virtual bool Init(const vec2u& size, const std::wstring& title, uint32_t flags) = 0;
 
     virtual void PollEvents() = 0;
 	virtual void SwapBuffers() = 0;
@@ -53,6 +58,8 @@ public:
 	virtual const std::wstring& GetTitle() const = 0;
 
 	virtual void SetTitle(const std::wstring& title) = 0;
+
+	virtual void SetShouldClose(bool shouldClose) = 0;
 
     /*
      * Window callbacks
@@ -86,6 +93,11 @@ protected:
     keyCallback_t onKeyUp;
 };
 
-void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, uint64_t flags = 0ull, GraphicsAPI api = GraphicsAPI::OPENGL);
+void CreateWin(
+	std::unique_ptr<Window>& window,
+	const vec2u& size, const std::wstring& title,
+	uint32_t flags = EngineWindowFlags_None,
+	GraphicsAPI api = GraphicsAPI::OPENGL
+);
 
 } // Engine

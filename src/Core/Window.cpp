@@ -55,7 +55,7 @@ void Window::SetKeyUpCallback(const keyCallback_t& callback)
 }
 
 
-void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, const uint64_t flags, const GraphicsAPI api)
+void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, const uint32_t flags, const GraphicsAPI api)
 {
 	switch (api)
 	{

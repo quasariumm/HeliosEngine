@@ -15,7 +15,7 @@ public:
 
     GL46_Window() = default;
 
-    bool Init(const vec2u& size, const std::wstring& title, uint64_t flags) override;
+    bool Init(const vec2u& size, const std::wstring& title, uint32_t flags) override;
 
     void PollEvents() override;
 	void SwapBuffers() override;
@@ -30,6 +30,8 @@ public:
 	const std::wstring& GetTitle() const override;
 
 	void SetTitle(const std::wstring& title) override;
+
+	void SetShouldClose(bool shouldClose) override;
 
     bool ShouldClose() override;
 

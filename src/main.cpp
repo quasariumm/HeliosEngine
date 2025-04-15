@@ -32,6 +32,12 @@ void GLAPIENTRY MessageCallback(
 	    << "\n\t\tmessage = " << message << std::endl;
 }
 
+void temp(Engine::Window& window, Engine::Key key)
+{
+	if (key == Engine::Key::ESCAPE)
+		window.SetShouldClose(true);
+}
+
 static Engine::Scene g_scene;
 
 int main(int, char**)
@@ -43,6 +49,8 @@ int main(int, char**)
     	L"Varför är STL lokaler så irriterande?",
     	EngineWindowFlags_NoVsync
     );
+
+	window->SetKeyDownCallback(temp);
 
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( MessageCallback, nullptr );

@@ -16,7 +16,7 @@
 namespace Engine
 {
 
-bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint64_t flags)
+bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint32_t flags)
 {
 	m_screenSize = size;
 	m_title = title;
@@ -30,7 +30,39 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint6
 
     const std::string titleUTF8 = WStringToUTF8(title);
 
-    m_window = glfwCreateWindow(size.x, size.y, titleUTF8.c_str(), nullptr, nullptr);
+	const bool fullscreen = flags & EngineWindowFlags_Fullscreen;
+	const bool borderless = flags & EngineWindowFlags_WindowedBorderless;
+
+	if (fullscreen && borderless)
+		throw std::logic_error("A window cannot be both fullscreen and borderless!");
+
+	GLFWmonitor* monitor = nullptr;
+	const GLFWvidmode* mode = nullptr;
+
+	uint32_t sizeX = size.x;
+	uint32_t sizeY = size.y;
+
+	if (fullscreen || borderless)
+	{
+		monitor = glfwGetPrimaryMonitor();
+		mode = glfwGetVideoMode( monitor );
+
+		sizeX = mode->width;
+		sizeY = mode->height;
+
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+	}
+
+	const bool resizable = !(flags & EngineWindowFlags_NoResize);
+	glfwWindowHint( GLFW_RESIZABLE, resizable ? GLFW_TRUE : GLFW_FALSE );
+
+	const bool decorated = !(flags & EngineWindowFlags_NoDecoration);
+	glfwWindowHint( GLFW_DECORATED, decorated ? GLFW_TRUE : GLFW_FALSE );
+
+    m_window = glfwCreateWindow(sizeX, sizeY, titleUTF8.c_str(), monitor, nullptr);
 
     if (!m_window)
     {
@@ -53,6 +85,14 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint6
 
 	if (flags & EngineWindowFlags_NoVsync)
 		glfwSwapInterval(0);
+
+	if (borderless)
+	{
+		glfwSetWindowSize( m_window, mode->width, mode->height );
+		m_screenSize.x = mode->width;
+		m_screenSize.y = mode->height;
+		glfwSetWindowMonitor(m_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+	}
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -125,6 +165,12 @@ void GL46_Window::SetTitle(const std::wstring& title)
 	const std::string titleUTF8 = WStringToUTF8(title);
 
 	glfwSetWindowTitle( m_window, titleUTF8.c_str() );
+}
+
+
+void GL46_Window::SetShouldClose( const bool shouldClose )
+{
+	glfwSetWindowShouldClose(m_window, shouldClose);
 }
 
 
