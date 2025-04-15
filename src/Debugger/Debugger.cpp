@@ -22,11 +22,13 @@ void Debugger::DrawInterface()
 void Debugger::DrawLogs()
 {
     static bool lockToBottom = true;
+    static bool showTimestamp = true;
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("Options"))
         {
             ImGui::MenuItem("Lock to bottom", nullptr, &lockToBottom);
+            ImGui::MenuItem("Show timestamp", nullptr, &showTimestamp);
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -34,6 +36,16 @@ void Debugger::DrawLogs()
 
     for (const Logger::Log& log : Logger::g_logs)
     {
+        float spacing = 0;
+        if (showTimestamp)
+        {
+            char timestamp[48];
+            strftime(timestamp, 48, "%H:%M:%S", localtime(&log.timestamp));
+            ImGui::Text(timestamp);
+            spacing += 75;
+            ImGui::SameLine(spacing);
+        }
+
         switch (log.type)
         {
         case LogSeverity::INFO: ImGui::TextColored({0.3f, 0.5f, 0.8f, 1.0f}, ICON_FA_INFO);
@@ -46,7 +58,8 @@ void Debugger::DrawLogs()
             break;
         }
 
-        ImGui::SameLine(30);
+        spacing += 30;
+        ImGui::SameLine(spacing);
         ImGui::Text(log.message.c_str());
     }
 

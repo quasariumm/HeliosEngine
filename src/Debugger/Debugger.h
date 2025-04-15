@@ -30,9 +30,10 @@ public:
     /// Log data with type, message and a level (Level 0 means always visible, while a higher level can be ignored)
     struct Log
     {
-        explicit Log(const LogSeverity type, std::string message, const int level = 0) : type(type), message(std::move(message)), level(level) { }
+        explicit Log(const LogSeverity type, std::string message, const int level = 0) : type(type), message(std::move(message)), level(level), timestamp(time(nullptr)) { }
 
         LogSeverity type = LogSeverity::INFO;
+        time_t timestamp = 0;
         int level = 0;
         std::string message;
     };
