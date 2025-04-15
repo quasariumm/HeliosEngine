@@ -10,7 +10,7 @@
 namespace Engine
 {
 
-enum LogType
+enum class LogSeverity
 {
     INFO,
     WARNING,
@@ -30,9 +30,9 @@ public:
     /// Log data with type, message and a level (Level 0 means always visible, while a higher level can be ignored)
     struct Log
     {
-        explicit Log(const LogType type, std::string message, const int level = 0) : type(type), message(std::move(message)), level(level) { }
+        explicit Log(const LogSeverity type, std::string message, const int level = 0) : type(type), message(std::move(message)), level(level) { }
 
-        LogType type = INFO;
+        LogSeverity type = LogSeverity::INFO;
         int level = 0;
         std::string message;
     };
@@ -49,10 +49,9 @@ public:
 };
 
 /// Add a log to the debug viewer
-static void DebugLog(const LogType type, const std::string& message, const int level = 0)
+static void DebugLog(const LogSeverity type, const std::string& message, const int level = 0)
 {
     Logger::g_logs.emplace_back(type, message, level);
-    std::cout << Logger::g_logs.size() << std::endl;
 }
 
 /// Add a value to the value debugger. Can be modified from the menu

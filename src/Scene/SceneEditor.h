@@ -12,7 +12,7 @@ namespace Engine
         PARENT
     };
 
-    class SceneEditor : public EditorInterface
+    class SceneEditor final : public EditorInterface
     {
     public:
         SceneEditor() = delete;
@@ -27,8 +27,8 @@ namespace Engine
     private:
         Scene* m_targetScene;
 
-        uint8_t m_selectedObject = 0;
-        uint8_t m_prvSelectedObject = 0;
+        uint32_t m_selectedObject = 0;
+        uint32_t m_prvSelectedObject = 0;
         TreeSelectMode m_selectMode = SELECT;
     };
 

@@ -56,11 +56,11 @@ namespace Engine
     class SceneObject
     {
     public:
-        explicit SceneObject(uint8_t UID) : m_UID(UID) { }
+        explicit SceneObject(const uint32_t UID) : m_UID(UID) { }
         ~SceneObject();
 
         [[nodiscard]]
-        uint8_t GetUID() const { return m_UID; }
+        uint32_t GetUID() const { return m_UID; }
         Transform* GetTransform() { return &m_transform; }
 
         [[nodiscard]]
@@ -94,7 +94,7 @@ namespace Engine
         SceneObject* GetParent() const { return m_parentObject; }
 
     private:
-        uint8_t m_UID = 0;
+        const uint32_t m_UID = 0;
         std::string m_displayName = "Object";
         Transform m_transform = Transform();
         SceneObject* m_parentObject = nullptr;

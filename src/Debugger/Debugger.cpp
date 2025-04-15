@@ -4,39 +4,56 @@
 
 namespace Engine
 {
-
 std::vector<Logger::Log> Logger::g_logs = {};
 std::vector<Logger::Watch> Logger::g_watchList = {};
 
 void Debugger::DrawInterface()
 {
-    ImGui::Begin("Debugger");
+    ImGui::Begin("Logs", nullptr, ImGuiWindowFlags_MenuBar);
+    DrawLogs();
+    ImGui::End();
 
-    if (!ImGui::BeginTabBar("DebugTab"))
-        return;
-
-    if (ImGui::BeginTabItem("Logging"))
-    {
-        DrawLogs();
-        ImGui::EndTabItem();
-    }
-
-    if (ImGui::BeginTabItem("Watch List"))
-    {
-        DrawWatchList();
-        ImGui::EndTabItem();
-    }
-
-    ImGui::EndTabBar();
-
+    ImGui::Begin("Watch List");
+    DrawWatchList();
     ImGui::End();
 }
 
 void Debugger::DrawLogs()
 {
+    static bool lockToBottom = true;
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("Options"))
+        {
+            ImGui::MenuItem("Lock to bottom", nullptr, &lockToBottom);
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+
     for (const Logger::Log& log : Logger::g_logs)
     {
+        switch (log.type)
+        {
+        case LogSeverity::INFO: ImGui::TextColored({0.3f, 0.5f, 0.8f, 1.0f}, "INFO");
+            break;
+        case LogSeverity::WARNING: ImGui::TextColored({1.0f, 1.0f, 0, 1.0f}, "WARNING");
+            break;
+        case LogSeverity::ERROR: ImGui::TextColored({1.0f, 0, 0, 1.0f}, "ERROR");
+            break;
+        case LogSeverity::DONE: ImGui::TextColored({0, 0.5f, 0, 1.0f}, "DONE");
+            break;
+        }
+
+        ImGui::SameLine(100);
         ImGui::Text(log.message.c_str());
+    }
+
+    static int oldSize = 0;
+    if (Logger::g_logs.size() != oldSize && lockToBottom)
+    {
+        oldSize = (int)Logger::g_logs.size();
+        ImGui::SetScrollHereY(1.0f);
     }
 }
 

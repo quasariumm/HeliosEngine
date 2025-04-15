@@ -8,10 +8,29 @@ void Engine::SceneEditor::DrawInterface()
 
 void Engine::SceneEditor::TreeEditor()
 {
-    ImGui::Begin("Scene");
+    ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_MenuBar);
 
-    if (ImGui::Button("New Empty"))
-        m_targetScene->NewObject();
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("Object"))
+        {
+            if (ImGui::MenuItem("New"))
+                m_targetScene->NewObject();
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+
+    ImGui::Separator();
+
+    if (m_selectMode == PARENT)
+    {
+        ImGui::TextColored({1.0f, 1.0f, 0.0f, 1.0f}, "Click object to set as parent");
+        if (ImGui::Button("Cancel"))
+            m_selectMode = SELECT;
+        ImGui::Separator();
+    }
+
 
     if (m_selectMode == PARENT && m_prvSelectedObject != m_selectedObject)
     {
@@ -38,14 +57,16 @@ void Engine::SceneEditor::ObjectEditor()
         return;
     }
 
-    // Make sure correct object is in variable
-    static SceneObject* selectedObject = nullptr;
+    // Get the actual object
+    SceneObject* selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
 
+    // Make sure the object exists in the scene
     if (selectedObject == nullptr)
-        selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
-
-    // if (selectedObject->GetUID() != selectedObject->GetParent()->GetUID())
-    //     selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
+    {
+        m_selectedObject = 0;
+        ImGui::End();
+        return;
+    }
 
     // Show basic info
     ImGui::Text(selectedObject->GetName().c_str());
@@ -107,8 +128,13 @@ void Engine::SceneEditor::ObjectEditor()
 void Engine::SceneEditor::DisplayObjectTree(SceneObject* object)
 {
     // Display parent object
-    ImGui::PushID(object->GetUID());
-    if (ImGui::Selectable(object->GetName().c_str(), m_selectedObject == object->GetUID()))
+    ImGui::PushID((int)object->GetUID());
+
+    std::string prefix;
+    if (m_selectMode == PARENT && m_prvSelectedObject == object->GetUID())
+        prefix = "> ";
+
+    if (ImGui::Selectable((prefix + object->GetName()).c_str(), m_selectedObject == object->GetUID()))
         m_selectedObject = object->GetUID();
     ImGui::PopID();
 

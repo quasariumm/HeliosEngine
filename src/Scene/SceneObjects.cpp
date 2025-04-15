@@ -17,8 +17,11 @@ namespace Engine
     SceneObject::~SceneObject()
     {
         // Make sure there are no more references
-        for (const SceneObject* child : m_childObjects)
+        for (SceneObject* child : m_childObjects)
+        {
+            child->SetParent(nullptr);
             RemoveChild(child);
+        }
         SetParent(nullptr);
     }
 

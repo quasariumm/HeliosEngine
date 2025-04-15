@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "SceneObjects.h"
+#include "Debugger/Debugger.h"
+#include "Math/Random.h"
 
 namespace Engine
 {
@@ -7,29 +9,31 @@ namespace Engine
     {
     public:
         /// Generate a new random UID.
-        int NewUID()
+        uint32_t NewUID()
         {
             int i = 0;
+            while (i < 100)
+            {
+                uint32_t seed = RandomSeed(m_sceneObjects.size());
+                uint32_t newUID = RandomUInt(seed);
 
-            return (int)m_sceneObjects.size() + 1;
+                if (newUID == 0)
+                {
+                    i++;
+                    continue;
+                }
 
-            // while (i < 100)
-            // {
-            //     uint newUID = Rand();
-            //     bool failed = false;
-            //     for (SceneObject* object : m_sceneObjects)
-            //         if (object->GetUID() == newUID && NewUID() != 0)
-            //             failed = true;
-            //
-            //     if (!failed)
-            //         return newUID;
-            //     i++;
-            // }
-            //
-            // std::cout << ANSI_ERR <<
-            //     "Creation of new UID took too long, Try again or remove some objects.\n";
+                const bool failed = std::ranges::any_of(m_sceneObjects, [&](const SceneObject* o)
+                    {return o->GetUID() == newUID; });
 
-            // return 0;
+                if (!failed)
+                    return newUID;
+                i++;
+            }
+
+            DebugLog(LogSeverity::ERROR, "Creating UID for object took too long");
+
+            return 0;
         }
 
         /// Create and empty object for the scene. Returns the newly created object.
@@ -49,7 +53,7 @@ namespace Engine
         }
 
         /// Delete an object from the scene, also deletes any child objects.
-        void DeleteObject(int UID)
+        void DeleteObject(const uint32_t UID)
         {
             for (int i = 0; i < (int)m_sceneObjects.size(); i++)
                 if (m_sceneObjects[i]->GetUID() == UID)
@@ -60,14 +64,15 @@ namespace Engine
         }
 
         /// Delete an object from the scene, also deletes any child objects.
-        void DeleteObject(SceneObject* object) { DeleteObject(object->GetUID()); }
+        void DeleteObject(const SceneObject* object) { DeleteObject(object->GetUID()); }
 
         /// Find object by UID.
-        [[nodiscard]] SceneObject* GetSceneObject(int UID) const
+        [[nodiscard]] SceneObject* GetSceneObject(uint32_t UID) const
         {
             for (SceneObject* object : m_sceneObjects)
                 if (object->GetUID() == UID)
                     return object;
+            DebugLog(LogSeverity::ERROR, "Object not found");
             return nullptr;
         }
 

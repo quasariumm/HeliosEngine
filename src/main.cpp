@@ -39,7 +39,13 @@ void temp(Engine::Window& window, Engine::Key key)
 		window.SetShouldClose(true);
 
 	if (key == Engine::Key::B)
-		Engine::DebugLog(Engine::INFO, "Pressed B");
+	{
+		DebugLog(Engine::LogSeverity::DONE, "Pressed B");
+		DebugLog(Engine::LogSeverity::INFO, "Pressed B");
+		DebugLog(Engine::LogSeverity::WARNING, "Pressed B");
+		DebugLog(Engine::LogSeverity::ERROR, "Pressed B");
+
+	}
 }
 
 static Engine::Scene g_scene;
@@ -49,7 +55,7 @@ int main(int, char**)
     std::unique_ptr<Engine::Window> window;
     Engine::CreateWin(
     	window,
-    	Engine::vec2u(600, 400),
+    	Engine::vec2u(1280, 720),
     	L"Varför är STL lokaler så irriterande?",
     	EngineWindowFlags_NoVsync
     );
@@ -62,10 +68,12 @@ int main(int, char**)
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard;
 
+	io.Fonts->AddFontFromFileTTF("extern/imgui/misc/fonts/Roboto-Medium.ttf", 16.0f);
+
     Engine::SceneEditor sceneEditor(&g_scene);
 	Engine::Debugger logMenu;
 
-	int test;
+	int test = 0;
 	Engine::DebugWatch<int>("Test Int", &test);
 
 	Engine::GL46_Texture2D rayTexture;
