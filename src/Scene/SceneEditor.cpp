@@ -44,8 +44,8 @@ void Engine::SceneEditor::ObjectEditor()
     if (selectedObject == nullptr)
         selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
 
-    if (selectedObject->GetUID() != selectedObject->GetParent()->GetUID())
-        selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
+    // if (selectedObject->GetUID() != selectedObject->GetParent()->GetUID())
+    //     selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
 
     // Show basic info
     ImGui::Text(selectedObject->GetName().c_str());
@@ -107,8 +107,10 @@ void Engine::SceneEditor::ObjectEditor()
 void Engine::SceneEditor::DisplayObjectTree(SceneObject* object)
 {
     // Display parent object
+    ImGui::PushID(object->GetUID());
     if (ImGui::Selectable(object->GetName().c_str(), m_selectedObject == object->GetUID()))
         m_selectedObject = object->GetUID();
+    ImGui::PopID();
 
     ImGui::Indent();
     // Display each child object
