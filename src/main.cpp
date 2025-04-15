@@ -10,6 +10,7 @@
 #include "Core/Common.h"
 #include "Core/Timer.h"
 #include "Core/Window.h"
+#include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
@@ -36,6 +37,9 @@ void temp(Engine::Window& window, Engine::Key key)
 {
 	if (key == Engine::Key::ESCAPE)
 		window.SetShouldClose(true);
+
+	if (key == Engine::Key::B)
+		Engine::DebugLog(Engine::INFO, "Pressed B");
 }
 
 static Engine::Scene g_scene;
@@ -58,7 +62,11 @@ int main(int, char**)
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard;
 
-    Engine::SceneEditor editor = Engine::SceneEditor(&g_scene);
+    Engine::SceneEditor sceneEditor(&g_scene);
+	Engine::Debugger logMenu;
+
+	int test;
+	Engine::DebugWatch<int>("Test Int", &test);
 
 	Engine::GL46_Texture2D rayTexture;
 	rayTexture.FillBlank(window->GetSize().x, window->GetSize().y, 4, Engine::TextureFormat::RGBA32F, true);

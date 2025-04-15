@@ -2,8 +2,6 @@
 #include <vector>
 
 #include "imgui.h"
-#include "Core/Window.h"
-
 
 namespace Engine
 {
@@ -19,7 +17,6 @@ namespace Engine
 
         virtual void DrawInterface() = 0;
     };
-
 
     class BaseEditorInterface
     {

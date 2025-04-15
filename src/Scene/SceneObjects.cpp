@@ -42,10 +42,7 @@ namespace Engine
     {
         for (int i = 0; i < (int)m_childObjects.size(); i++)
             if (m_childObjects[i] == object)
-            {
-                m_childObjects[i]->SetParent(nullptr);
                 m_childObjects.erase(m_childObjects.begin() + i);
-            }
     }
 
     template <class T>
