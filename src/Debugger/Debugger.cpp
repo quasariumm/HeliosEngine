@@ -59,7 +59,7 @@ void Debugger::DrawLogs()
         if (log.type == LogSeverity::DONE && !showDone) continue;
 
 
-        ImGui::Text(ICON_FA_ARROW_RIGHT);
+        ImGui::TextColored({1,1,1,0.5f}, ICON_FA_ARROW_RIGHT);
         float spacing = 30;
         ImGui::SameLine(spacing);
 
@@ -83,7 +83,7 @@ void Debugger::DrawLogs()
             char timestamp[48];
             strftime(timestamp, 48, "%H:%M:%S", localtime(&log.timestamp));
             ImGui::Text(timestamp);
-            spacing += 75;
+            spacing += 65;
             ImGui::SameLine(spacing);
         }
 

@@ -16,7 +16,7 @@ namespace Engine
     {
     public:
         SceneEditor() = delete;
-        explicit SceneEditor(Scene* scene) : m_targetScene(scene) {}
+        explicit SceneEditor(Scene* scene) : EditorInterface("Scene"), m_targetScene(scene) {}
 
         void DrawInterface() override;
 

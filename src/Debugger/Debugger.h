@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-#include <ostream>
 #include <source_location>
 #include <string>
 #include <typeinfo>
@@ -69,8 +68,11 @@ static void DebugWatch(const std::string& name, T* value) { Logger::g_watchList.
 
 class Debugger final : public EditorInterface
 {
+public:
+    Debugger(): EditorInterface("Debugger") {}
     void DrawInterface() override;
 
+private:
     static void DrawLogs();
     static void DrawWatchList();
 
