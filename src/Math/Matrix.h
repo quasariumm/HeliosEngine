@@ -684,11 +684,11 @@ FUNC1_TMPL mat4t<T> LookAt(const vec3t<T>& eye, const vec3t<T>& center, const ve
 	vec3t<T> s = Cross(f, Normalise(up));
 	vec3t<T> u = Cross(Normalise(s), f);
 
-	result.cell[0] =  s.x; result.cell[1] =  s.y; result.cell[2]  =  s.z;
-	result.cell[4] =  u.x; result.cell[5] =  u.y; result.cell[6]  =  u.z;
-	result.cell[8] = -f.x; result.cell[9] = -f.y; result.cell[10] = -f.z;
+	result.cell[0] =  s.x; result.cell[1] =  s.y; result.cell[2]  =  s.z; result.cell[3]  = -eye.x;
+	result.cell[4] =  u.x; result.cell[5] =  u.y; result.cell[6]  =  u.z; result.cell[7]  = -eye.y;
+	result.cell[8] = -f.x; result.cell[9] = -f.y; result.cell[10] = -f.z; result.cell[11] = -eye.z;
 
-	return Translate(result, -eye);
+	return result;
 }
 
 /**

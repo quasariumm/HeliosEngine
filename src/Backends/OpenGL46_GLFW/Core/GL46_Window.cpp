@@ -226,7 +226,7 @@ void GL46_Window::MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
     if(win->onMouseMove)
-        win->onMouseMove(*win,vec2u(static_cast<uint32_t>(x),static_cast<uint32_t>(y)));
+        win->onMouseMove(*win, vec2f(static_cast<float>(x),static_cast<float>(y)));
 }
 
 void GL46_Window::MouseScrollCallbackGLFW(GLFWwindow* w, double x, double y)

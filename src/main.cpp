@@ -12,6 +12,7 @@
 #include "Core/Window.h"
 #include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"
+#include "Graphics/Camera.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
 
@@ -94,10 +95,30 @@ int main(int, char**)
 
     Engine::Timer frameTimer;
 	uint64_t frame = 0;
+	float deltaTime = 0.f;
+
+	Engine::Camera camera;
+
+	window->SetMouseMoveCallback([&camera](Engine::Window&, Engine::vec2f diff)
+	{
+		camera.MouseMove(diff);
+	});
+
     while (!window->ShouldClose())
     {
         window->PollEvents();
+
+    	camera.HandleInput(*window, deltaTime);
+
     	rayCompute.Use();
+
+    	const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
+    	Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);
+    	rayCompute.SetMat4("CamToWorld", camToWorld);
+
+    	Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
+    	rayCompute.SetVec3("ViewParams", viewportParams);
+
     	rayTexture.UseCompute(0);
     	rayCompute.Dispatch(computeThreads);
 
@@ -109,7 +130,17 @@ int main(int, char**)
 
         ImGui::Begin("Texture");
 
-    	ImGui::Image((ImTextureID)(intptr_t)rayTexture.GetID(), ImVec2(static_cast<float>(rayTexture.GetWidth()), static_cast<float>(rayTexture.GetHeight())));
+    	// Thanks envoyious! https://github.com/ocornut/imgui/issues/5118
+    	ImVec2 screenSize = ImGui::GetContentRegionAvail();
+    	float scale = std::min(screenSize.x / static_cast<float>(rayTexture.GetWidth()), screenSize.y / static_cast<float>(rayTexture.GetHeight()));
+
+    	ImGui::Image(
+    		(ImTextureID)(intptr_t)rayTexture.GetID(),
+    		ImVec2(
+    			static_cast<float>(rayTexture.GetWidth()) * scale,
+    			static_cast<float>(rayTexture.GetHeight()) * scale
+			)
+    	);
 
     	ImGui::End();
 
@@ -126,13 +157,13 @@ int main(int, char**)
     	++frame;
 
     	// Count fps
-    	const float frameTime = frameTimer.Elapsed<float>();
+    	const float frameTime = deltaTime = frameTimer.Elapsed<float>();
     	frameTimer.Reset();
 
     	static float avg = 10, alpha = 1;
     	avg = (1 - alpha) * avg + alpha * frameTime * 1000;
     	if (alpha > 0.05f) alpha *= 0.5f;
-    	const float fps = 1000.0f / avg, rps = (static_cast<float>(window->GetSize().x) * static_cast<float>(window->GetSize().y)) / avg;
+    	const float fps = 1000.0f / avg, rps = (static_cast<float>(rayTexture.GetWidth()) * static_cast<float>(rayTexture.GetHeight())) / avg;
 
     	if (frame % 200 == 0)
 			window->SetTitle( std::format(L"{0:5.2f}ms ({1:.1f}fps) - {2:.1f}Mrays/s\n", avg, fps, rps / 1000) );

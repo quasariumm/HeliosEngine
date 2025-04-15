@@ -34,7 +34,7 @@ public:
 
     typedef std::function<void(Window&, const vec2u&)>  resizeCallback_t;
     typedef std::function<void(Window&, bool)>          focusCallback_t;
-    typedef resizeCallback_t                            mouseMoveCallback_t;
+    typedef std::function<void(Window&, vec2f)>  		mouseMoveCallback_t;
     typedef std::function<void(Window&, MouseButton)>   mouseButtonCallback_t;
     typedef std::function<void(Window&, float, float)>  mouseScrollCallback_t;
     typedef std::function<void(Window&, Key)>           keyCallback_t;
