@@ -53,6 +53,22 @@ public:
 	void SetInt(int index, int value) const;
 
 	/**
+	 * @brief Sets an unsigned integer value in the active shader
+	 * @note Don't forget to use the shader before setting values
+	 * @param name The name of the uniform
+	 * @param value The value you want to set
+	 */
+	void SetUInt(const std::string& name, uint32_t value) const;
+
+	/**
+	 * @brief Sets an unsigned integer value in the active shader by index
+	 * @note Don't forget to use the shader before setting values
+	 * @param index The location index of the uniform
+	 * @param value The value you want to set
+	 */
+	void SetUInt(int index, uint32_t value) const;
+
+	/**
 	 * @brief Sets a floating point value in the active shader
 	 * @note Don't forget to use the shader before setting values
 	 * @param name The name of the uniform

@@ -1,21 +1,45 @@
-#include <imgui.h>
 #include <iostream>
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui.h>
+#include <glad/glad.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"
+#include "Core/Common.h"
 #include "Core/Window.h"
 #include "Editor/EditorInterface.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
 
+void GLAPIENTRY MessageCallback(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam
+	)
+{
+	if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+		return;
+	std::wcerr << ANSI_ERR <<
+		"GL CALLBACK: " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "")
+	    << "\n\t\ttype = " << GLDebugTypeToString(type) << ", severity = " << GLSeverityToString(severity)
+	    << "\n\t\tmessage = " << message << std::endl;
+}
+
 static Engine::Scene g_scene;
 
-int main(int argc, char* argv[])
+int main(int, char**)
 {
     std::unique_ptr<Engine::Window> window;
     Engine::CreateWin(window, Engine::vec2u(600, 400), L"Varför är STL lokaler så irriterande?");
+
+	glEnable( GL_DEBUG_OUTPUT );
+	glDebugMessageCallback( MessageCallback, nullptr );
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard;
@@ -35,6 +59,8 @@ int main(int argc, char* argv[])
 
 	rayCompute.Use();
 	rayCompute.SetInt("OutTexture", 0);
+	rayCompute.SetUInt("ScreenWidth", window->GetSize().x);
+	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
 
     while (!window->ShouldClose())
     {

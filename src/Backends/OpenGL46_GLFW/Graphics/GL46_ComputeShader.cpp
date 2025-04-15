@@ -40,12 +40,12 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename)
 
 	if (filestream.is_open())
 	{
-		std::wcout << ANSI_OK << "Vertex shader file " << filename << " successfully loaded." << std::endl;
+		std::wcout << ANSI_OK << "Compute shader file " << filename << " successfully loaded." << std::endl;
 	}
 	else
 	{
-		std::wcout << ANSI_ERR << "Vertex shader file " << filename << " failed to open." << std::endl;
-		throw std::runtime_error("Failed to load vertex shader");
+		std::wcout << ANSI_ERR << "Compute shader file " << filename << " failed to open." << std::endl;
+		throw std::runtime_error("Failed to load compute shader");
 	}
 
 	// Load contents

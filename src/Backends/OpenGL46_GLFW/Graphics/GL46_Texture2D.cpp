@@ -112,54 +112,39 @@ void GL46_Texture2D::FillBlank(
 	const GLenum intFormat = ConvertFormat(format);
 	glGenTextures(1, &m_ID);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Create the buffer for the texture
+	GLenum bufferFormat;
+	switch (m_channels)
+	{
+	case 1:
+		bufferFormat = GL_RED;
+		break;
+	case 2:
+		bufferFormat = GL_RG;
+		break;
+	case 3:
+		bufferFormat = GL_RGB;
+		break;
+	case 4:
+		bufferFormat = GL_RGBA;
+		break;
+	default:
+		bufferFormat = GL_RGB;
+		break;
+	}
 	if (isHDR)
 	{
 		m_dataHDR = new float[m_width * m_height * m_channels];
-		GLenum bufferFormat;
-		switch (m_channels)
-		{
-		case 1:
-			bufferFormat = GL_R32F;
-			break;
-		case 2:
-			bufferFormat = GL_RG32F;
-			break;
-		case 3:
-			bufferFormat = GL_RGB32F;
-			break;
-		case 4:
-			bufferFormat = GL_RGBA32F;
-			break;
-		default:
-			bufferFormat = GL_RGB32F;
-			break;
-		}
-		glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(intFormat), m_width, m_height, 0, bufferFormat, GL_FLOAT, m_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(intFormat), m_width, m_height, 0, bufferFormat, GL_FLOAT, m_dataHDR);
 	}
 	else
 	{
 		m_data = new uint8_t[m_width * m_height * m_channels];
-		GLenum bufferFormat;
-		switch (m_channels)
-		{
-		case 1:
-			bufferFormat = GL_R8;
-			break;
-		case 2:
-			bufferFormat = GL_RG8;
-			break;
-		case 3:
-			bufferFormat = GL_RGB8;
-			break;
-		case 4:
-			bufferFormat = GL_RGBA8;
-			break;
-		default:
-			bufferFormat = GL_RGB8;
-			break;
-		}
 		glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(intFormat), m_width, m_height, 0, bufferFormat, GL_UNSIGNED_BYTE, m_data);
 	}
 
@@ -249,7 +234,7 @@ void GL46_Texture2D::UseCompute( const uint32_t slot ) const
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
 	// TODO: Update to use dynamic format
-	glBindImageTexture(0, m_ID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	glBindImageTexture(slot, m_ID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 }
 
 

@@ -42,6 +42,18 @@ void GL46_ShaderBase::SetInt(const int index, const int value) const
 }
 
 
+void GL46_ShaderBase::SetUInt( const std::string& name, const uint32_t value ) const
+{
+	glUniform1ui(glGetUniformLocation(programID, name.c_str()), value);
+}
+
+
+void GL46_ShaderBase::SetUInt( const int index, const uint32_t value ) const
+{
+	glUniform1ui(index, value);
+}
+
+
 void GL46_ShaderBase::SetFloat(const std::string& name, const float value) const
 {
 	glUniform1f(glGetUniformLocation(programID, name.c_str()), value);

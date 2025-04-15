@@ -129,7 +129,11 @@ vec3 Trace(Ray ray, uint seed)
 void main()
 {
 	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-	vec2 tc = vec2(texelCoord.x / float(ScreenWidth), texelCoord.y / float(ScreenHeight)) - 0.5;
+
+	if (texelCoord.x >= ScreenWidth || texelCoord.y >= ScreenHeight)
+		return;
+
+	vec2 tc = vec2(texelCoord.x / float(ScreenWidth), texelCoord.y / float(ScreenHeight));
 
 	Ray ray;
 
@@ -146,7 +150,7 @@ void main()
 	);
 
 	//vec4 pixel = vec4(Trace(ray, seed), 1.0);
-	vec4 pixel = vec4(0.5);
+	vec4 pixel = vec4(tc, 0.0, 1.0);
 
 	imageStore(OutTexture, texelCoord, pixel);
 }
