@@ -8,6 +8,7 @@
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"
 #include "Core/Common.h"
+#include "Core/Timer.h"
 #include "Core/Window.h"
 #include "Editor/EditorInterface.h"
 #include "Scene/Scene.h"
@@ -36,7 +37,12 @@ static Engine::Scene g_scene;
 int main(int, char**)
 {
     std::unique_ptr<Engine::Window> window;
-    Engine::CreateWin(window, Engine::vec2u(600, 400), L"Varför är STL lokaler så irriterande?");
+    Engine::CreateWin(
+    	window,
+    	Engine::vec2u(600, 400),
+    	L"Varför är STL lokaler så irriterande?",
+    	EngineWindowFlags_NoVsync
+    );
 
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( MessageCallback, nullptr );
@@ -62,6 +68,8 @@ int main(int, char**)
 	rayCompute.SetUInt("ScreenWidth", window->GetSize().x);
 	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
 
+    Engine::Timer frameTimer;
+	uint64_t frame = 0;
     while (!window->ShouldClose())
     {
         window->PollEvents();
@@ -90,6 +98,20 @@ int main(int, char**)
         ImGui::RenderPlatformWindowsDefault();
 
         window->SwapBuffers();
+
+    	++frame;
+
+    	// Count fps
+    	const float frameTime = frameTimer.Elapsed<float>();
+    	frameTimer.Reset();
+
+    	static float avg = 10, alpha = 1;
+    	avg = (1 - alpha) * avg + alpha * frameTime * 1000;
+    	if (alpha > 0.05f) alpha *= 0.5f;
+    	const float fps = 1000.0f / avg, rps = (static_cast<float>(window->GetSize().x) * static_cast<float>(window->GetSize().y)) / avg;
+
+    	if (frame % 200 == 0)
+			window->SetTitle( std::format(L"{0:5.2f}ms ({1:.1f}fps) - {2:.1f}Mrays/s\n", avg, fps, rps / 1000) );
     }
 
     ImGui_ImplOpenGL3_Shutdown();

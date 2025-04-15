@@ -15,7 +15,7 @@ public:
 
     GL46_Window() = default;
 
-    bool Init(const vec2u& size, const std::wstring& title) override;
+    bool Init(const vec2u& size, const std::wstring& title, uint64_t flags) override;
 
     void PollEvents() override;
 	void SwapBuffers() override;
@@ -23,7 +23,13 @@ public:
     int GetMouseButton(MouseButton button) override;
     int GetKey(Key key) override;
 
+	[[nodiscard]]
 	vec2u GetSize() const override;
+
+	[[nodiscard]]
+	const std::wstring& GetTitle() const override;
+
+	void SetTitle(const std::wstring& title) override;
 
     bool ShouldClose() override;
 

@@ -16,9 +16,10 @@
 namespace Engine
 {
 
-bool GL46_Window::Init(const vec2u& size, const std::wstring& title)
+bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint64_t flags)
 {
 	m_screenSize = size;
+	m_title = title;
     if (!glfwInit())
     {
         throw std::runtime_error("Failed to initialize GLFW3");
@@ -49,6 +50,9 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title)
     glfwSetWindowFocusCallback( m_window,  FocusCallbackGLFW );
     glfwSetCursorPosCallback( m_window, MouseMoveCallbackGLFW ) ;
     glfwSetScrollCallback( m_window, MouseScrollCallbackGLFW );
+
+	if (flags & EngineWindowFlags_NoVsync)
+		glfwSwapInterval(0);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -105,6 +109,22 @@ int GL46_Window::GetKey(Key key)
 vec2u GL46_Window::GetSize() const
 {
 	return m_screenSize;
+}
+
+
+const std::wstring& GL46_Window::GetTitle() const
+{
+	return m_title;
+}
+
+
+void GL46_Window::SetTitle(const std::wstring& title)
+{
+	m_title = title;
+
+	const std::string titleUTF8 = WStringToUTF8(title);
+
+	glfwSetWindowTitle( m_window, titleUTF8.c_str() );
 }
 
 

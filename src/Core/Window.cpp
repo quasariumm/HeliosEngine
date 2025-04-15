@@ -55,7 +55,7 @@ void Window::SetKeyUpCallback(const keyCallback_t& callback)
 }
 
 
-void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, GraphicsAPI api)
+void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, const uint64_t flags, const GraphicsAPI api)
 {
 	switch (api)
 	{
@@ -66,7 +66,7 @@ void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::ws
 	case GraphicsAPI::OPENGL:
 	{
 		std::unique_ptr<Engine::GL46_Window> GLwindow = std::make_unique<Engine::GL46_Window>();
-		if( GLwindow->Init( size, title ) )
+		if( GLwindow->Init( size, title, flags ) )
 			window = std::move(GLwindow);
 		break;
 	}
@@ -74,7 +74,7 @@ void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::ws
 	default:
 	{
 		std::unique_ptr<Engine::GL46_Window> GLwindow = std::make_unique<Engine::GL46_Window>();
-		if( GLwindow->Init( size, title ) )
+		if( GLwindow->Init( size, title, flags ) )
 			window = std::move(GLwindow);
 	}
 	}

@@ -8,15 +8,19 @@
 #include <string>
 
 
+#define EngineWindowFlags_NoVsync 0b00000001
+
+
 namespace Engine
 {
-    enum class GraphicsAPI
-    {
-        NONE,
-        VULKAN,
-        DIRECTX12,
-        OPENGL
-    };
+
+enum class GraphicsAPI
+{
+    NONE,
+    VULKAN,
+    DIRECTX12,
+    OPENGL
+};
 
 class Window
 {
@@ -32,7 +36,7 @@ public:
 
     Window() = default;
 
-    virtual bool Init(const vec2u& size, const std::wstring& title) = 0;
+    virtual bool Init(const vec2u& size, const std::wstring& title, uint64_t flags) = 0;
 
     virtual void PollEvents() = 0;
 	virtual void SwapBuffers() = 0;
@@ -42,7 +46,13 @@ public:
     virtual int GetMouseButton(MouseButton button) = 0;
     virtual int GetKey(Key key) = 0;
 
+	[[nodiscard]]
 	virtual vec2u GetSize() const = 0;
+
+	[[nodiscard]]
+	virtual const std::wstring& GetTitle() const = 0;
+
+	virtual void SetTitle(const std::wstring& title) = 0;
 
     /*
      * Window callbacks
@@ -62,6 +72,7 @@ public:
 
 protected:
     GraphicsAPI m_currentAPI = GraphicsAPI::NONE;
+	std::wstring m_title;
 
     resizeCallback_t onResize;
     focusCallback_t onFocus;
@@ -75,6 +86,6 @@ protected:
     keyCallback_t onKeyUp;
 };
 
-void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, GraphicsAPI api = GraphicsAPI::OPENGL);
+void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, uint64_t flags = 0ull, GraphicsAPI api = GraphicsAPI::OPENGL);
 
 } // Engine
