@@ -91,9 +91,9 @@ void Engine::SceneEditor::ObjectEditor()
     // Renaming
     ImGui::SameLine();
     if (ImGui::Button("Rename"))
-        ImGui::OpenPopup("RenameSceneObject");
+        ImGui::OpenPopup("Rename Object");
 
-    if (ImGui::BeginPopupModal("RenameSceneObject", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopupModal("Rename Object", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         static char newName[64] = "";
         ImGui::InputText("New name", newName, 64);

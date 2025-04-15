@@ -1,5 +1,8 @@
 #include "Debugger.h"
 
+#include <bits/fs_fwd.h>
+#include <bits/fs_path.h>
+
 #include "Math/Vector.h"
 #include "Core/IconsFA.h"
 
@@ -22,7 +25,7 @@ void Debugger::DrawInterface()
 void Debugger::DrawLogs()
 {
     // Options
-    static bool lockToBottom = true, showTimestamp = true, showSource = true;
+    static bool lockToBottom = true, showTimestamp = true, showSource = true, showFullPath = false;
 
     // Severities
     static bool showInfo = true, showWarn = true, showError = true, showDone = true;
@@ -34,6 +37,7 @@ void Debugger::DrawLogs()
             ImGui::MenuItem("Lock to bottom", nullptr, &lockToBottom);
             ImGui::MenuItem("Show timestamp", nullptr, &showTimestamp);
             ImGui::MenuItem("Show source", nullptr, &showSource);
+            ImGui::MenuItem("Show full path", nullptr, &showFullPath, showSource);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Severity"))
@@ -63,7 +67,13 @@ void Debugger::DrawLogs()
         if (showSource)
         {
             ImGui::Text(ICON_FA_CODE);
-            ImGui::SetItemTooltip("%s\n%o:%o " ICON_FA_ARROW_RIGHT " %s", log.source.file_name(), log.source.line(), log.source.column(), log.source.function_name());
+            std::string file = std::string(log.source.file_name());
+            std::string origin = std::filesystem::current_path().string();
+
+            if (!showFullPath)
+                file.erase(file.find(origin), origin.length());
+
+            ImGui::SetItemTooltip(ICON_FA_FILE " %s\n" ICON_FA_BARS " %o:%o\n" ICON_FA_CODE " %s", file.c_str(), log.source.line(), log.source.column(), log.source.function_name());
             spacing += 25;
             ImGui::SameLine(spacing);
         }
