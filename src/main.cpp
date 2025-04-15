@@ -15,6 +15,7 @@
 #include "Graphics/Camera.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
+#include "Core/IconsFA.h"
 
 void GLAPIENTRY MessageCallback(
 	GLenum source,
@@ -70,6 +71,12 @@ int main(int, char**)
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard;
 
 	io.Fonts->AddFontFromFileTTF("extern/imgui/misc/fonts/Roboto-Medium.ttf", 16.0f);
+
+	ImFontConfig config;
+	config.MergeMode = true;
+	config.GlyphMinAdvanceX = 16.0f;
+	static constexpr ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+	io.Fonts->AddFontFromFileTTF("extern/fonts/forkawesome-webfont.ttf", 16.0f, &config, icon_ranges);
 
     Engine::SceneEditor sceneEditor(&g_scene);
 	Engine::Debugger logMenu;

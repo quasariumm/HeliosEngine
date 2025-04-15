@@ -1,6 +1,7 @@
 #include "SceneEditor.h"
 
 #include "SceneStorage.h"
+#include "Core/IconsFA.h"
 
 void Engine::SceneEditor::DrawInterface()
 {
@@ -10,7 +11,7 @@ void Engine::SceneEditor::DrawInterface()
 
 void Engine::SceneEditor::TreeEditor()
 {
-    ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_MenuBar);
+    ImGui::Begin(ICON_FA_BARS " Scene", nullptr, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
     {
@@ -56,7 +57,7 @@ void Engine::SceneEditor::TreeEditor()
 
 void Engine::SceneEditor::ObjectEditor()
 {
-    ImGui::Begin("Object");
+    ImGui::Begin(ICON_FA_CUBE" Object");
 
     // Show text of no object selected
     if (m_selectedObject == 0)
@@ -146,11 +147,11 @@ void Engine::SceneEditor::DisplayObjectTree(SceneObject* object)
     // Display parent object
     ImGui::PushID((int)object->GetUID());
 
-    std::string prefix;
+    std::string prefix = ICON_FA_CUBE;
     if (m_selectMode == PARENT && m_prvSelectedObject == object->GetUID())
-        prefix = "> ";
+        prefix += ICON_FA_ARROW_RIGHT;
 
-    if (ImGui::Selectable((prefix + object->GetName()).c_str(), m_selectedObject == object->GetUID()))
+    if (ImGui::Selectable((prefix + " " + object->GetName()).c_str(), m_selectedObject == object->GetUID()))
         m_selectedObject = object->GetUID();
     ImGui::PopID();
 

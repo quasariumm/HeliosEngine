@@ -1,6 +1,7 @@
 #include "Debugger.h"
 
 #include "Math/Vector.h"
+#include "Core/IconsFA.h"
 
 namespace Engine
 {
@@ -9,11 +10,11 @@ std::vector<Logger::Watch> Logger::g_watchList = {};
 
 void Debugger::DrawInterface()
 {
-    ImGui::Begin("Logs", nullptr, ImGuiWindowFlags_MenuBar);
+    ImGui::Begin(ICON_FA_LIST " Logs", nullptr, ImGuiWindowFlags_MenuBar);
     DrawLogs();
     ImGui::End();
 
-    ImGui::Begin("Watch List");
+    ImGui::Begin(ICON_FA_EYE " Watch List");
     DrawWatchList();
     ImGui::End();
 }
@@ -35,17 +36,17 @@ void Debugger::DrawLogs()
     {
         switch (log.type)
         {
-        case LogSeverity::INFO: ImGui::TextColored({0.3f, 0.5f, 0.8f, 1.0f}, "INFO");
+        case LogSeverity::INFO: ImGui::TextColored({0.3f, 0.5f, 0.8f, 1.0f}, ICON_FA_INFO);
             break;
-        case LogSeverity::WARNING: ImGui::TextColored({1.0f, 1.0f, 0, 1.0f}, "WARNING");
+        case LogSeverity::WARNING: ImGui::TextColored({1.0f, 1.0f, 0, 1.0f}, ICON_FA_TRIANGLE_EXCLAMATION);
             break;
-        case LogSeverity::ERROR: ImGui::TextColored({1.0f, 0, 0, 1.0f}, "ERROR");
+        case LogSeverity::ERROR: ImGui::TextColored({1.0f, 0, 0, 1.0f}, ICON_FA_CIRCLE_EXCLAMATION);
             break;
-        case LogSeverity::DONE: ImGui::TextColored({0, 0.5f, 0, 1.0f}, "DONE");
+        case LogSeverity::DONE: ImGui::TextColored({0, 0.5f, 0, 1.0f}, ICON_FA_CHECK);
             break;
         }
 
-        ImGui::SameLine(100);
+        ImGui::SameLine(30);
         ImGui::Text(log.message.c_str());
     }
 
