@@ -4,66 +4,94 @@
 
 #include <nfd.hpp>
 
+#include "Core/IconsFA.h"
+
 namespace Engine
 {
 
+ProjectData ProjectHandler::m_projectData = ProjectData();
 bool ProjectHandler::m_selectorOpen = false;
+bool ProjectHandler::m_creatorOpen = false;
 
-void ProjectHandler::ProjectSelectorWindow()
+void ProjectHandler::ProjectWindows()
 {
-    if (!m_selectorOpen)
-        return;
+    static std::filesystem::path path;
 
-    ImGui::Begin("Project Selector", nullptr, ImGuiWindowFlags_NoDocking);
-
-    std::filesystem::path path;
-
-    if (ImGui::Button("Create Project"))
+    if (m_creatorOpen)
     {
-        if (ShowFileSelect(path))
+        ImGui::Begin("Project Creator", nullptr, ImGuiWindowFlags_NoDocking);
+
+        if (ImGui::Button("Select folder"))
+            ShowFileSelect(path);
+
+        ProjectData newProjectData;
+
+        ImGui::Text(ICON_FA_FOLDER);
+        ImGui::SameLine(30);
+        ImGui::Text( path.string().c_str());
+
+        static char projectName[128];
+        ImGui::Text(ICON_FA_BARS);
+        ImGui::SameLine(30);
+        ImGui::InputText("Project Name", projectName, 128);
+        newProjectData.projectName = projectName;
+
+        if (ImGui::Button("Create"))
         {
-            if (ValidateProject(path))
-                DebugLog(LogSeverity::ERROR, "Project already exists");
+            if (ValidateProjectFolder(path))
+                DebugLog(LogSeverity::ERROR, "There is already a project in this folder");
+            else if (!ValidateProjectData(newProjectData))
+                DebugLog(LogSeverity::ERROR, "Incorrect project settings");
             else
             {
-                ShowProjectSelector(false);
-                CreateProject(path);
-                LoadProject(path);
+                if (CreateProject(path, newProjectData))
+                    if (LoadProject(path))
+                        ShowProjectCreator(false);
             }
         }
+
+        if (ImGui::Button("Cancel"))
+            ShowProjectCreator(false);
+
+        ImGui::End();
+    }
+    else if (m_selectorOpen)
+    {
+        ImGui::Begin("Project Selector", nullptr, ImGuiWindowFlags_NoDocking);
+
+        if (ImGui::Button("Select file"))
+        {
+            if (ShowFileSelect(path, true))
+            {
+                if (!ValidateProjectFolder(path))
+                    DebugLog(LogSeverity::ERROR, "Project doesn't exist");
+                else
+                {
+                    ShowProjectSelector(false);
+                    LoadProject(path);
+                }
+            }
+        }
+
+        if (ImGui::Button("Cancel"))
+            ShowProjectSelector(false);
+
+        ImGui::End();
     }
 
-    if (ImGui::Button("Open Project"))
-    {
-        if (ShowFileSelect(path, true))
-        {
-            if (ValidateProject(path))
-            {
-                ShowProjectSelector(false);
-                LoadProject(path);
-            }
-            else
-                DebugLog(LogSeverity::ERROR, "Project doesn't exist");
-        }
-    }
-    ImGui::End();
 }
 
 bool ProjectHandler::ShowFileSelect(std::filesystem::path& path, bool projectOnly)
 {
     NFD_Init();
 
-    nfdu8filteritem_t filters[1];
-    int filterCount = 0;
-
     nfdu8char_t *outPath;
     nfdresult_t result;
 
     if (projectOnly)
     {
-        filters[0] = {"Projects", "gep" };
-        filterCount++;
-        result = NFD_OpenDialog(&outPath, filters, filterCount, nullptr);
+        constexpr nfdu8filteritem_t filters[1] = {"Projects", "gep" };
+        result = NFD_OpenDialog(&outPath, filters, 1, nullptr);
     }
     else
     {
@@ -80,7 +108,7 @@ bool ProjectHandler::ShowFileSelect(std::filesystem::path& path, bool projectOnl
     return true;
 }
 
-void ProjectHandler::CreateProject(std::filesystem::path& projectPath)
+bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const ProjectData& data)
 {
     if (projectPath.has_extension())
         projectPath.remove_filename();
@@ -94,28 +122,67 @@ void ProjectHandler::CreateProject(std::filesystem::path& projectPath)
     if (!file.is_open())
     {
         DebugLog(LogSeverity::ERROR, "Something went wrong creating project: " + projectFilePath.string());
-        return;
+        return false;
     }
+
+    file << "[Project]\n";
+    file << "Name = " << data.projectName << "\n";
 
     file.close();
 
-    g_projectPath = projectPath;
-
     DebugLog(LogSeverity::DONE, "Project created successfully");
+    return true;
 }
 
-void ProjectHandler::LoadProject(const std::filesystem::path& projectPath)
+bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
 {
-    g_projectPath = projectPath;
+    m_projectData = ProjectData();
+
+    std::ifstream file(projectPath.append("Project.gep"));
+    if (!file.is_open())
+    {
+        DebugLog(LogSeverity::ERROR, "Could not open project file");
+        return false;
+    }
+
+    m_projectData.projectPath = projectPath.remove_filename();
+
+    std::string line;
+
+    while (std::getline(file, line))
+    {
+        if (IsToken(line, "Name"))
+            m_projectData.projectName = TokenValue(line);
+    }
+
+    file.close();
     DebugLog(LogSeverity::DONE, "Project loaded successfully");
+    return true;
 }
 
-
-bool ProjectHandler::ValidateProject(std::filesystem::path& projectPath)
+bool ProjectHandler::ValidateProjectFolder(std::filesystem::path& projectPath)
 {
     if (projectPath.has_extension())
         projectPath.remove_filename();
 
     return std::filesystem::exists(projectPath.string() + "/Project.gep");
 }
+
+bool ProjectHandler::ValidateProjectData(const ProjectData& data)
+{
+    if (data.projectName.empty()) return false;
+    return true;
+}
+
+bool ProjectHandler::IsToken(const std::string& line, const std::string& token)
+{
+    return line.substr(0, line.find(" = ")) == token;
+}
+
+std::string ProjectHandler::TokenValue(const std::string& line)
+{
+    std::string token = line;
+    return token.erase(0, line.find(" = ") + 3);
+}
+
 }

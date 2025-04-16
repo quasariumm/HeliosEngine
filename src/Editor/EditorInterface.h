@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/IconsFA.h"
 #include "Projects/ProjectHandler.h"
 
 namespace Engine
@@ -26,16 +27,24 @@ namespace Engine
 
         static void DrawAllInterfaces()
         {
-            ProjectHandler::ProjectSelectorWindow();
+            ProjectHandler::ProjectWindows();
 
             ImGui::DockSpaceOverViewport();
 
             if (ImGui::BeginMainMenuBar())
             {
-                if (ImGui::BeginMenu("File"))
+                std::string projectName;
+                if (ProjectLoaded())
+                    projectName = std::string(ICON_FA_FOLDER" ") + ProjectName();
+                else
+                    projectName =  ICON_FA_TRIANGLE_EXCLAMATION " No project loaded";
+
+                if (ImGui::BeginMenu(projectName.c_str()))
                 {
-                    if (ImGui::MenuItem("Project Selector"))
+                    if (ImGui::MenuItem("Open project"))
                         ProjectHandler::ShowProjectSelector(true);
+                    if (ImGui::MenuItem("New project"))
+                        ProjectHandler::ShowProjectCreator(true);
 
                     ImGui::EndMenu();
                 }

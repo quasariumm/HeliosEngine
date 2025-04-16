@@ -77,11 +77,17 @@ public:
 
     static void ExportLog()
     {
+        if (!ProjectLoaded())
+        {
+            std::cout << "Could not export log, no project was loaded";
+            return;
+        }
+
         std::ofstream file;
-        file.open(g_projectPath.string() + "latest-log.md", std::ofstream::out | std::ofstream::trunc);
+        file.open(ProjectFolder().append("Latest-Log.md"), std::ofstream::out | std::ofstream::trunc);
         if (!file.is_open())
         {
-            std::cout << "Failed to write log!";
+            std::cout << "Could not export log, failed to write log";
             return;
         }
         file << m_totalLog;
