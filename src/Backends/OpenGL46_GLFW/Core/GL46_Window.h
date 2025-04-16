@@ -30,6 +30,12 @@ public:
 
 	void SetTitle(const std::wstring& title) override;
 
+	[[nodiscard]]
+	CursorMode GetCursorMode() override;
+
+	void SetCursorMode(CursorMode mode) override;
+
+
 	void SetShouldClose(bool shouldClose) override;
 
     bool ShouldClose() override;

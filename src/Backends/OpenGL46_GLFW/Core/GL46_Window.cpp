@@ -166,6 +166,41 @@ void GL46_Window::SetTitle(const std::wstring& title)
 }
 
 
+CursorMode GL46_Window::GetCursorMode()
+{
+	switch (glfwGetInputMode( m_window, GLFW_CURSOR ))
+	{
+	case GLFW_CURSOR_NORMAL:
+		return CursorMode::NORMAL;
+	case GLFW_CURSOR_DISABLED:
+		return CursorMode::DISABLED;
+	case GLFW_CURSOR_HIDDEN:
+		return CursorMode::HIDDEN;
+	default:
+		return CursorMode::NORMAL;
+	}
+}
+
+
+void GL46_Window::SetCursorMode( const CursorMode mode )
+{
+	int glfwMode = GLFW_CURSOR_NORMAL;
+	switch (mode)
+	{
+	case CursorMode::NORMAL:
+		glfwMode = GLFW_CURSOR_NORMAL;
+		break;
+	case CursorMode::HIDDEN:
+		glfwMode = GLFW_CURSOR_HIDDEN;
+		break;
+	case CursorMode::DISABLED:
+		glfwMode = GLFW_CURSOR_DISABLED;
+		break;
+	}
+	glfwSetInputMode( m_window, GLFW_CURSOR, glfwMode );
+}
+
+
 void GL46_Window::SetShouldClose( const bool shouldClose )
 {
 	glfwSetWindowShouldClose(m_window, shouldClose);

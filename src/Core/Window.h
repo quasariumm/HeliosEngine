@@ -22,6 +22,13 @@ enum class GraphicsAPI
     OPENGL
 };
 
+enum class CursorMode
+{
+	NORMAL,
+	HIDDEN,
+	DISABLED
+};
+
 class Window
 {
 
@@ -53,6 +60,11 @@ public:
 	virtual const std::wstring& GetTitle() const = 0;
 
 	virtual void SetTitle(const std::wstring& title) = 0;
+
+	[[nodiscard]]
+	virtual CursorMode GetCursorMode() = 0;
+
+	virtual void SetCursorMode(CursorMode mode) = 0;
 
 	virtual void SetShouldClose(bool shouldClose) = 0;
 

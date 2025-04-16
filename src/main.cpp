@@ -35,6 +35,9 @@ void temp(Engine::Window& window, Engine::Key key)
 	if (key == Engine::Key::ESCAPE)
 		window.SetShouldClose(true);
 
+	if (key == Engine::Key::C)
+		window.SetCursorMode( (window.GetCursorMode() == Engine::CursorMode::NORMAL) ? Engine::CursorMode::DISABLED : Engine::CursorMode::NORMAL );
+
 	if (key == Engine::Key::B)
 	{
 		DebugLog(Engine::LogSeverity::DONE, "Pressed B");
