@@ -1,4 +1,6 @@
 #pragma once
+#include <format>
+#include <fstream>
 #include <iostream>
 #include <source_location>
 #include <string>
@@ -17,6 +19,24 @@ enum class LogSeverity
     ERROR,
     DONE
 };
+
+inline std::string LogSeverityString(LogSeverity severity)
+{
+    switch (severity) {
+    default:
+    case LogSeverity::INFO: return "INFO";
+    case LogSeverity::WARNING: return "WARNING";
+    case LogSeverity::ERROR: return "ERROR";
+    case LogSeverity::DONE: return "DONE";
+    }
+}
+
+inline std::string TimeStamp(time_t time)
+{
+    char timestamp[32];
+    strftime(timestamp, 32, "%H:%M:%S", localtime(&time));
+    return {timestamp};
+}
 
 class Logger
 {
@@ -43,6 +63,11 @@ public:
         int level = 0;
         std::string message;
         std::source_location source;
+
+        std::string FileText() { return std::format("[{}]  \n[{}] [{}]  \n[{}] [{}]  \n**{}**  \n---\n",
+            source.file_name(),
+            "Line: " + std::to_string(source.line()) + ":" + std::to_string(source.column()),
+            source.function_name(), TimeStamp(timestamp), LogSeverityString(type), message); }
     };
 
     struct Watch
@@ -54,12 +79,28 @@ public:
         const std::type_info& type;
         void* var;
     };
+
+    static std::string m_totalLog;
+
+    static void ExportLog()
+    {
+        std::ofstream file;
+        file.open("latest-log.md", std::ofstream::out | std::ofstream::trunc);
+        if (!file.is_open())
+        {
+            std::cout << "Failed to write log!";
+            return;
+        }
+        file << m_totalLog;
+        file.close();
+    }
 };
 
 /// Add a log to the debug viewer
 inline void DebugLog(const LogSeverity type, const std::string& message, const int level = 0, std::source_location location = std::source_location::current())
 {
     Logger::g_logs.emplace_back(type, message, level, location);
+    Logger::m_totalLog += Logger::g_logs.back().FileText();
 }
 
 /// Add a value to the value debugger. Can be modified from the menu
@@ -70,6 +111,8 @@ class Debugger final : public EditorInterface
 {
 public:
     Debugger(): EditorInterface("Debugger") {}
+    ~Debugger() override { Logger::ExportLog(); };
+
     void DrawInterface() override;
 
 private:

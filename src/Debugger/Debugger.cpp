@@ -10,6 +10,7 @@ namespace Engine
 {
 std::vector<Logger::Log> Logger::g_logs = {};
 std::vector<Logger::Watch> Logger::g_watchList = {};
+std::string Logger::m_totalLog;
 
 void Debugger::DrawInterface()
 {
@@ -73,7 +74,7 @@ void Debugger::DrawLogs()
             if (!showFullPath)
                 file = file.lexically_relative(origin);
 
-            ImGui::SetItemTooltip(ICON_FA_FILE " %s\n" ICON_FA_BARS " %o:%o\n" ICON_FA_CODE " %s", file.string().c_str(), log.source.line(), log.source.column(), log.source.function_name());
+            ImGui::SetItemTooltip(ICON_FA_FILE_CODE " %s\n" ICON_FA_BARS " %o:%o\n" ICON_FA_CODE " %s", file.string().c_str(), log.source.line(), log.source.column(), log.source.function_name());
             spacing += 25;
             ImGui::SameLine(spacing);
         }
