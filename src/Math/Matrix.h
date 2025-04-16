@@ -1,11 +1,5 @@
 ﻿#pragma once
 
-#include "Vector.h"
-
-#ifdef USE_SIMD
-#include <immintrin.h>
-#endif
-
 #pragma warning ( push )
 #pragma warning ( disable: 4201 /* nameless struct / union */ )
 

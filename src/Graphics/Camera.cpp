@@ -1,6 +1,5 @@
 #include "Camera.h"
 
-#include "Core/Common.h"
 #include "Core/Window.h"
 
 

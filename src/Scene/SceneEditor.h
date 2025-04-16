@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <cstdint>
 
 #include "Scene.h"
 #include "Editor/EditorInterface.h"

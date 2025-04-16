@@ -14,6 +14,27 @@ file(GLOB IMGUI CONFIGURE_DEPENDS
         extern/imgui/backends/imgui_impl_glfw.cpp
         )
 
+
+include(CheckCXXCompilerFlag)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # For GCC and Clang
+    check_cxx_compiler_flag("-msse2" COMPILER_SUPPORTS_SSE2)
+    check_cxx_compiler_flag("-mavx" COMPILER_SUPPORTS_AVX)
+
+    if(COMPILER_SUPPORTS_SSE2)
+        add_compile_options(-msse2)
+    endif()
+
+    if(COMPILER_SUPPORTS_AVX)
+        add_compile_options(-mavx)
+    endif()
+elseif(MSVC)
+    # For MSVC
+    add_compile_options(/arch:SSE2 /arch:AVX)
+endif()
+
+
 add_executable(${CMAKE_PROJECT_NAME} ${IMGUI} ${SOURCE})
 
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
@@ -26,12 +47,18 @@ target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
+        pch
         src
         extern
         extern/imgui
         lib
         lib/glfw/include
         lib/glad/include
+)
+
+target_precompile_headers(${CMAKE_PROJECT_NAME} PUBLIC
+        "$<$<COMPILE_LANGUAGE:CXX>:PrecompCXX.h>"
+        "$<$<COMPILE_LANGUAGE:C>:PrecompC.h>"
 )
 
 set(MSVC_LIBS

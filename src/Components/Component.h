@@ -1,7 +1,4 @@
 ﻿#pragma once
-#include <imgui.h>
-#include <map>
-#include <utility>
 
 namespace Engine
 {
@@ -43,9 +40,9 @@ namespace Engine
         const std::string m_displayName;
         void* m_rawComponent;
 
-        std::map<std::string, int&> m_intProperties;
-        std::map<std::string, float&> m_floatProperties;
-        std::map<std::string, vec2&> m_vec2Properties;
-        std::map<std::string, vec3&> m_vec3Properties;
+        std::unordered_map<std::string, int&> m_intProperties;
+        std::unordered_map<std::string, float&> m_floatProperties;
+        std::unordered_map<std::string, vec2&> m_vec2Properties;
+        std::unordered_map<std::string, vec3&> m_vec3Properties;
     };
 }

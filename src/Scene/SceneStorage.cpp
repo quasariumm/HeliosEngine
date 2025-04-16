@@ -1,7 +1,5 @@
 #include "SceneStorage.h"
 
-#include <fstream>
-
 namespace Engine
 {
 void SceneLoader::LoadFromFile(Scene* scene, const std::string& fileName)

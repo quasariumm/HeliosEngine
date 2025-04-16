@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <glad/glad.h>
 
 static const std::wstring ANSI_OK = L"[\033[32m OK \033[0m] ";

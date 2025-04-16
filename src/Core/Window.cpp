@@ -1,7 +1,5 @@
 #include "Window.h"
 
-#include <memory>
-
 #include "Backends/OpenGL46_GLFW/Core/GL46_Window.h"
 
 namespace Engine

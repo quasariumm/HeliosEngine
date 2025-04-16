@@ -1,9 +1,5 @@
 #include "Debugger.h"
 
-#include <bits/fs_fwd.h>
-#include <bits/fs_path.h>
-
-#include "Math/Vector.h"
 #include "Core/IconsFA.h"
 
 namespace Engine

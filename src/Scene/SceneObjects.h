@@ -1,9 +1,5 @@
 ﻿#pragma once
-#include <cstdint>
-#include <map>
-#include <vector>
 
-#include "Math/Matrix.h"
 #include "Components/Component.h"
 
 class Model;

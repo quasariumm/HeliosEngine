@@ -1,6 +1,5 @@
 #pragma once
 #include "Core/Window.h"
-#include "Math/Vector.h"
 
 
 class GLFWwindow;

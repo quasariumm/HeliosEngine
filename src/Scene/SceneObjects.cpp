@@ -1,9 +1,5 @@
 ﻿#include "SceneObjects.h"
 
-#include <iostream>
-
-#include "Imgui/imgui.h"
-
 namespace Engine
 {
     void Transform::TransformControllerUI()

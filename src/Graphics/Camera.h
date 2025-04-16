@@ -1,7 +1,4 @@
 #pragma once
-#include "Math/Matrix.h"
-#include "Math/Vector.h"
-
 
 namespace Engine
 {

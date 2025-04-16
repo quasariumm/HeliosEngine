@@ -1,11 +1,6 @@
 #include "GL46_ComputeShader.h"
 
 #include <glad/glad.h>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-
-#include "Core/Common.h"
 
 
 namespace Engine

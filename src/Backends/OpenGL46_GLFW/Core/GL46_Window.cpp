@@ -1,14 +1,8 @@
 #include "GL46_Window.h"
-#include "Core/Common.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Core/Keys.h"
 
-#include <cstdlib>
-#include <iostream>
-
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/backends/imgui_impl_opengl3_loader.h>
@@ -194,10 +188,10 @@ void GL46_Window::KeyCallbackGLFW(GLFWwindow* w, int key, int scancode, int acti
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
     Key k = ConvertGLFWKey( key );
-    if( action == GLFW_PRESS && win->onKeyDown)
-        win->onKeyDown(*win, k);
-    if( action == GLFW_RELEASE && win->onKeyUp)
-        win->onKeyUp(*win, k);
+    if( action == GLFW_PRESS)
+        CALL(win->onKeyDown, *win, k);
+    if( action == GLFW_RELEASE)
+        CALL(win->onKeyUp, *win, k);
 }
 
 
@@ -205,25 +199,23 @@ void GL46_Window::ButtonCallbackGLFW(GLFWwindow* w, int button, int action, int 
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
     MouseButton b = ConvertGLFWButton( button );
-    if( action == GLFW_PRESS && win->onMouseDown)
-        win->onMouseDown(*win, b);
-    if( action == GLFW_RELEASE && win->onMouseUp)
-        win->onMouseUp(*win, b);
+    if( action == GLFW_PRESS)
+        CALL(win->onMouseDown, *win, b);
+    if( action == GLFW_RELEASE)
+        CALL(win->onMouseUp, *win, b);
 }
 
 void GL46_Window::ResizeCallbackGLFW(GLFWwindow* w, int width, int height)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
 	win->m_screenSize = vec2u(width, height);
-    if(win->onResize)
-        win->onResize(*win,vec2u(width,height));
+    CALL(win->onResize, *win,vec2u(width,height));
 }
 
 void GL46_Window::FocusCallbackGLFW(GLFWwindow* w, int f)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
-    if(win->onFocus)
-        win->onFocus(*win, f == GLFW_TRUE);
+    CALL(win->onFocus, *win, f == GLFW_TRUE);
 }
 
 void GL46_Window::MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y)
@@ -233,8 +225,7 @@ void GL46_Window::MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y)
 		static_cast<float>(x) - win->m_mousePos.x,
 		static_cast<float>(y) - win->m_mousePos.y
 	};
-    if(win->onMouseMove)
-        win->onMouseMove(*win, diff);
+    CALL(win->onMouseMove, *win, diff);
 
 	win->m_mousePos = vec2f(static_cast<float>(x), static_cast<float>(y));
 }
@@ -242,7 +233,6 @@ void GL46_Window::MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y)
 void GL46_Window::MouseScrollCallbackGLFW(GLFWwindow* w, double x, double y)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
-    if(win->onMouseScroll)
-        win->onMouseScroll(*win,static_cast<float>(x),static_cast<float>(y));
+   	CALL(win->onMouseScroll, *win,static_cast<float>(x),static_cast<float>(y));
 }
 } // Engine

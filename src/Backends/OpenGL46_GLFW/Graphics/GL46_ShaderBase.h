@@ -1,9 +1,4 @@
 #pragma once
-#include <cstdint>
-#include <string>
-
-#include "Math/Matrix.h"
-
 
 namespace Engine {
 

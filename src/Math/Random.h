@@ -1,9 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
-#include "Vector.h"
-
 
 namespace Engine
 {

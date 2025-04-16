@@ -1,11 +1,6 @@
 #pragma once
 
 #include "Keys.h"
-#include <functional>
-#include <memory>
-
-#include "Math/Vector.h"
-#include <string>
 
 
 #define EngineWindowFlags_None					0x00000000u

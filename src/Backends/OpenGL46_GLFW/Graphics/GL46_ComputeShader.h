@@ -1,10 +1,6 @@
 #pragma once
 
-#include <cstdint>
-#include <string>
-
 #include "GL46_ShaderBase.h"
-#include "Math/Vector.h"
 
 
 namespace Engine {

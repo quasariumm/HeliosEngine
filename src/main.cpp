@@ -1,14 +1,9 @@
-#include <iostream>
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui.h>
 #include <glad/glad.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"
-#include "Core/Common.h"
-#include "Core/Timer.h"
 #include "Core/Window.h"
 #include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"

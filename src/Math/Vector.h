@@ -1,20 +1,9 @@
 ﻿#pragma once
-#include <algorithm>
-#include <compare>
-#include <complex>
 
 #include "_VectorSwizzles.h"
 
-// TODO (Tygo?): Remove when we have a way to define this elsewhere
-#define USE_SIMD
-#define USE_AVX2
-
 // NOTE: Temporary
 #define DEFINE_SWIZZLES
-
-#ifdef USE_SIMD
-#include <immintrin.h>
-#endif
 
 #pragma warning ( push )
 #pragma warning ( disable: 4201 /* nameless struct / union */ )
@@ -25,7 +14,7 @@ namespace Engine
 template<typename T>
 concept numeric = std::is_arithmetic_v<T>;
 
-#pragma region vec_structs
+#pragma region Vector structs
 
 template<typename T> requires numeric<T>
 struct vec3t;
@@ -147,7 +136,7 @@ struct _CRT_ALIGN(16) vec4t
 };
 
 // SIMD version for float type
-#ifdef USE_SIMD
+#ifdef ENGINE_USE_SSE
 template<>
 struct _CRT_ALIGN(16) vec4t<float>
 {
@@ -192,7 +181,7 @@ typedef vec4t<double>	vec4d;
 
 #pragma endregion
 
-#pragma region vec_oper
+#pragma region Vector operators
 
 // Needed for comparison operators
 template <typename T>
@@ -338,7 +327,7 @@ FUNC2_TMPL void operator/=(vec2t<T>& a, const U b) noexcept { a.x /= b; a.y /= b
 FUNC2_TMPL void operator/=(vec3t<T>& a, const U b) noexcept { a.x /= b; a.y /= b; a.z /= b; }
 FUNC2_TMPL void operator/=(vec4t<T>& a, const U b) noexcept { a.x /= b; a.y /= b; a.z /= b; a.w /= b; }
 
-#ifdef USE_SIMD
+#ifdef ENGINE_USE_SSE
 
 /*
  * SIMD Arithmetic operators
@@ -385,7 +374,7 @@ FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec4t<T>&& v) noexce
 
 #pragma endregion
 
-#pragma region vec_func
+#pragma region Vector functions
 
 /*
  * Functions

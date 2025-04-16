@@ -1,11 +1,4 @@
 #pragma once
-#include <format>
-#include <fstream>
-#include <iostream>
-#include <source_location>
-#include <string>
-#include <typeinfo>
-#include <utility>
 
 #include "Editor/EditorInterface.h"
 
