@@ -42,6 +42,7 @@ private:
     GLFWwindow* m_window;
 
 	vec2u m_screenSize;
+	vec2f m_mousePos;
 
     static void ResizeCallbackGLFW(GLFWwindow* w, int width, int height);
     static void FocusCallbackGLFW(GLFWwindow* w, int f);

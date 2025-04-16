@@ -83,6 +83,10 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint3
     glfwSetCursorPosCallback( m_window, MouseMoveCallbackGLFW ) ;
     glfwSetScrollCallback( m_window, MouseScrollCallbackGLFW );
 
+	double x, y;
+	glfwGetCursorPos( m_window, &x, &y );
+	m_mousePos = vec2f(static_cast<float>(x), static_cast<float>(y));
+
 	if (flags & EngineWindowFlags_NoVsync)
 		glfwSwapInterval(0);
 
@@ -225,8 +229,14 @@ void GL46_Window::FocusCallbackGLFW(GLFWwindow* w, int f)
 void GL46_Window::MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+	const vec2f diff{
+		static_cast<float>(x) - win->m_mousePos.x,
+		static_cast<float>(y) - win->m_mousePos.y
+	};
     if(win->onMouseMove)
-        win->onMouseMove(*win, vec2f(static_cast<float>(x),static_cast<float>(y)));
+        win->onMouseMove(*win, diff);
+
+	win->m_mousePos = vec2f(static_cast<float>(x), static_cast<float>(y));
 }
 
 void GL46_Window::MouseScrollCallbackGLFW(GLFWwindow* w, double x, double y)
