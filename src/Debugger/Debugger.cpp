@@ -39,10 +39,10 @@ void Debugger::DrawLogs()
         }
         if (ImGui::BeginMenu("Severity"))
         {
-            ImGui::MenuItem(ICON_FA_INFO" Info", nullptr, &showInfo);
-            ImGui::MenuItem(ICON_FA_TRIANGLE_EXCLAMATION " Warnings", nullptr, &showWarn);
+            ImGui::MenuItem(ICON_FA_CIRCLE_INFO" Info", nullptr, &showInfo);
+            ImGui::MenuItem(ICON_FA_CIRCLE_XMARK " Warnings", nullptr, &showWarn);
             ImGui::MenuItem(ICON_FA_CIRCLE_EXCLAMATION " Errors", nullptr, &showError);
-            ImGui::MenuItem(ICON_FA_CHECK " Completion", nullptr, &showDone);
+            ImGui::MenuItem(ICON_FA_CIRCLE_CHECK " Completion", nullptr, &showDone);
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -87,13 +87,13 @@ void Debugger::DrawLogs()
 
         switch (log.type)
         {
-        case LogSeverity::INFO: ImGui::TextColored({0.3f, 0.5f, 0.8f, 1.0f}, ICON_FA_INFO);
+        case LogSeverity::INFO: ImGui::TextColored({0.3f, 0.5f, 0.8f, 1.0f}, ICON_FA_CIRCLE_INFO);
             break;
-        case LogSeverity::WARNING: ImGui::TextColored({1.0f, 1.0f, 0, 1.0f}, ICON_FA_TRIANGLE_EXCLAMATION);
+        case LogSeverity::WARNING: ImGui::TextColored({1.0f, 1.0f, 0, 1.0f}, ICON_FA_CIRCLE_XMARK);
             break;
         case LogSeverity::ERROR: ImGui::TextColored({1.0f, 0, 0, 1.0f}, ICON_FA_CIRCLE_EXCLAMATION);
             break;
-        case LogSeverity::DONE: ImGui::TextColored({0, 0.5f, 0, 1.0f}, ICON_FA_CHECK);
+        case LogSeverity::DONE: ImGui::TextColored({0, 0.5f, 0, 1.0f}, ICON_FA_CIRCLE_CHECK);
             break;
         }
 
