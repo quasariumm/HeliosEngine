@@ -13,8 +13,8 @@ public:
         OBJECT
     };
 
-    static void LoadFromFile(Scene* scene, const std::string& fileName);
-    static void SaveToFile(Scene* scene, const std::string& fileName);
+    static void LoadFromFile(Scene* scene, const std::filesystem::path& fileName);
+    static void SaveToFile(Scene* scene, const std::filesystem::path& fileName);
 
     static bool IsToken(const std::string& line, const std::string& token);
     static std::string TokenValue(const std::string& line);

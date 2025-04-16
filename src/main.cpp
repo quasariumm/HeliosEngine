@@ -2,6 +2,7 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
+#include "Assets/AssetManager.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"
 #include "Core/Window.h"
@@ -79,6 +80,7 @@ int main(int, char**)
 
     Engine::SceneEditor sceneEditor(&g_scene);
 	Engine::Debugger logMenu;
+	Engine::AssetManager assetManager;
 
 	int test = 0;
 	Engine::DebugWatch<int>("Test Int", &test);

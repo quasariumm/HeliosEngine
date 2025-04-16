@@ -2,7 +2,7 @@
 
 namespace Engine
 {
-void SceneLoader::LoadFromFile(Scene* scene, const std::string& fileName)
+void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileName)
 {
     if (!ProjectLoaded())
     {
@@ -11,7 +11,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::string& fileName)
     }
 
     std::ifstream file;
-    file.open(ProjectFolder().append(fileName));
+    file.open(fileName);
     if (!file.is_open())
     {
         DebugLog(LogSeverity::ERROR, "Failed to open scene file");
@@ -61,7 +61,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::string& fileName)
 
 }
 
-void SceneLoader::SaveToFile(Scene* scene, const std::string& fileName)
+void SceneLoader::SaveToFile(Scene* scene, const std::filesystem::path& fileName)
 {
     if (!ProjectLoaded())
     {
@@ -70,7 +70,7 @@ void SceneLoader::SaveToFile(Scene* scene, const std::string& fileName)
     }
 
     std::ofstream file;
-    file.open(ProjectFolder().append(fileName), std::ofstream::trunc);
+    file.open(fileName, std::ofstream::trunc);
     if (!file.is_open())
     {
         DebugLog(LogSeverity::ERROR, "Failed to create or open scene file");

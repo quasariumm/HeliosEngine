@@ -4,6 +4,7 @@
 
 #include <nfd.hpp>
 
+#include "Assets/AssetManager.h"
 #include "Core/IconsFA.h"
 
 namespace Engine
@@ -156,6 +157,10 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
     }
 
     file.close();
+
+    AssetManager::m_currentPath = m_projectData.projectPath;
+    AssetManager::UpdateAssetList();
+
     DebugLog(LogSeverity::DONE, "Project loaded successfully");
     return true;
 }

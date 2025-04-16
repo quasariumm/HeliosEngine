@@ -3,18 +3,46 @@
 #include "SceneStorage.h"
 #include "Core/IconsFA.h"
 
-void Engine::SceneEditor::DrawInterface()
+namespace Engine
+{
+
+Scene* SceneEditor::m_targetScene = nullptr;
+std::filesystem::path SceneEditor::m_sceneFile = "";
+
+void SceneEditor::DrawInterface()
 {
     TreeEditor();
     ObjectEditor();
 }
 
-void Engine::SceneEditor::TreeEditor()
+void SceneEditor::TreeEditor()
 {
-    ImGui::Begin(ICON_FA_BARS " Scene", nullptr, ImGuiWindowFlags_MenuBar);
+    ImGui::Begin(ICON_FA_MAP" Scene", nullptr, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
     {
+        if (m_sceneFile.empty())
+        {
+            ImGui::Text(ICON_FA_CIRCLE_EXCLAMATION " No scene file loaded");
+            ImGui::EndMenuBar();
+            ImGui::End();
+            return;
+        }
+
+        std::string sceneName = "File";
+        if (!m_sceneFile.empty())
+        {
+            sceneName = m_sceneFile.filename().string();
+            sceneName = sceneName.substr(0, sceneName.size() - 4);
+        }
+
+        if (ImGui::BeginMenu(sceneName.c_str()))
+        {
+            if (ImGui::MenuItem("Save"))
+                SceneLoader::SaveToFile(m_targetScene, m_sceneFile);
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("Object"))
         {
             if (ImGui::MenuItem("New"))
@@ -22,14 +50,6 @@ void Engine::SceneEditor::TreeEditor()
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("File"))
-        {
-            if (ImGui::MenuItem("Save"))
-                SceneLoader::SaveToFile(m_targetScene, "scene.scn");
-            if (ImGui::MenuItem("Load"))
-                SceneLoader::LoadFromFile(m_targetScene, "scene.scn");
-            ImGui::EndMenu();
-        }
         ImGui::EndMenuBar();
     }
 
@@ -40,7 +60,6 @@ void Engine::SceneEditor::TreeEditor()
             m_selectMode = SELECT;
         ImGui::Separator();
     }
-
 
     if (m_selectMode == PARENT && m_prvSelectedObject != m_selectedObject)
     {
@@ -55,9 +74,9 @@ void Engine::SceneEditor::TreeEditor()
     ImGui::End();
 }
 
-void Engine::SceneEditor::ObjectEditor()
+void SceneEditor::ObjectEditor()
 {
-    ImGui::Begin(ICON_FA_CUBE" Object");
+    ImGui::Begin(ICON_FA_CUBE" Object Viewer");
 
     // Show text of no object selected
     if (m_selectedObject == 0)
@@ -71,6 +90,7 @@ void Engine::SceneEditor::ObjectEditor()
     SceneObject* selectedObject = m_targetScene->GetSceneObject(m_selectedObject);
 
     // Make sure the object exists in the scene
+    // ReSharper disable once CppDFAConstantConditions
     if (selectedObject == nullptr)
     {
         m_selectedObject = 0;
@@ -78,7 +98,9 @@ void Engine::SceneEditor::ObjectEditor()
         return;
     }
 
+
     // Show basic info
+    // ReSharper disable once CppDFAUnreachableCode
     ImGui::Text(selectedObject->GetName().c_str());
     ImGui::Text("UID: %u", selectedObject->GetUID());
 
@@ -160,4 +182,6 @@ void Engine::SceneEditor::DisplayObjectTree(SceneObject* object)
     for (SceneObject* child : object->GetChildren())
         DisplayObjectTree(child);
     ImGui::Unindent();
+}
+
 }
