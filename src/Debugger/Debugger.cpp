@@ -45,6 +45,8 @@ void Debugger::DrawLogs()
             ImGui::MenuItem(ICON_FA_CIRCLE_CHECK " Completion", nullptr, &showDone);
             ImGui::EndMenu();
         }
+        if (ImGui::MenuItem("Clear"))
+            Logger::g_logs.clear();
         ImGui::EndMenuBar();
     }
 
