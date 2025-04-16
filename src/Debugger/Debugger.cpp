@@ -67,13 +67,13 @@ void Debugger::DrawLogs()
         if (showSource)
         {
             ImGui::Text(ICON_FA_CODE);
-            std::string file = std::string(log.source.file_name());
-            std::string origin = std::filesystem::current_path().string();
+            std::filesystem::path file = std::filesystem::path(log.source.file_name()).make_preferred();
+            const std::filesystem::path origin = std::filesystem::current_path().make_preferred();
 
             if (!showFullPath)
-                file.erase(file.find(origin), origin.length());
+                file = file.lexically_relative(origin);
 
-            ImGui::SetItemTooltip(ICON_FA_FILE " %s\n" ICON_FA_BARS " %o:%o\n" ICON_FA_CODE " %s", file.c_str(), log.source.line(), log.source.column(), log.source.function_name());
+            ImGui::SetItemTooltip(ICON_FA_FILE " %s\n" ICON_FA_BARS " %o:%o\n" ICON_FA_CODE " %s", file.string().c_str(), log.source.line(), log.source.column(), log.source.function_name());
             spacing += 25;
             ImGui::SameLine(spacing);
         }
