@@ -26,6 +26,8 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::string& fileName)
 
     SceneObject* newObject = nullptr;
 
+    std::unordered_map<SceneObject*, uint32_t> sceneObjectParents;
+
     while (std::getline(file, line))
     {
         switch (loadType)
@@ -36,19 +38,24 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::string& fileName)
             break;
         case OBJECT:
             if (IsToken(line, "UID"))
-                newObject = scene->NewObject(stoul(line.substr(line.find('=') + 2)));
+                newObject = scene->NewObject(stoul(TokenValue(line)));
+        // ReSharper disable once CppDFAConstantConditions
             if (newObject == nullptr) continue;
 
+        // ReSharper disable once CppDFAUnreachableCode
             if (IsToken(line, "Name"))
-                newObject->SetName(line.substr(line.find('=') + 2));
+                newObject->SetName(TokenValue(line));
             if (IsToken(line, "Transform"))
                 LoadTransform(newObject, line.substr(line.find('=') + 2));
+            if (IsToken(line, "Parent"))
+                sceneObjectParents.emplace(newObject, stoul(TokenValue(line)));
             break;
         }
-
-
-
     }
+
+    // Set object parents
+    for (const std::pair<SceneObject*, uint32_t> pair : sceneObjectParents)
+        pair.first->SetParent(scene->GetSceneObject(pair.second));
 
     DebugLog(LogSeverity::DONE, "Scene was successfully loaded");
 
@@ -76,6 +83,8 @@ void SceneLoader::SaveToFile(Scene* scene, const std::string& fileName)
         file << "UID = " << object->GetUID() << std::endl;
         file << "Name = " << object->GetName() << std::endl;
         file << "Transform = " << SaveTransform(object) << std::endl;
+        if (object->GetParent() != nullptr)
+            file << "Parent = " << object->GetParent()->GetUID() << std::endl;
         file << std::endl;
     }
 

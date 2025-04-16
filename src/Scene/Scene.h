@@ -97,7 +97,7 @@ namespace Engine
             for (SceneObject* object : m_sceneObjects)
                 if (object->GetUID() == UID)
                     return object;
-            DebugLog(LogSeverity::ERROR, "Object not found");
+            DebugLog(LogSeverity::ERROR, "Object '" + std::to_string(UID) + "' not found");
             return nullptr;
         }
 
@@ -107,6 +107,7 @@ namespace Engine
             for (SceneObject* object : m_sceneObjects)
                 if (object->GetName() == name)
                     return object;
+            DebugLog(LogSeverity::ERROR, "Object '" + name + "' not found");
             return nullptr;
         }
 
