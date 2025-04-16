@@ -1,4 +1,5 @@
 #pragma once
+#include "Projects/ProjectHandler.h"
 
 namespace Engine
 {
@@ -25,12 +26,17 @@ namespace Engine
 
         static void DrawAllInterfaces()
         {
+            ProjectHandler::ProjectSelectorWindow();
+
             ImGui::DockSpaceOverViewport();
 
             if (ImGui::BeginMainMenuBar())
             {
                 if (ImGui::BeginMenu("File"))
                 {
+                    if (ImGui::MenuItem("Project Selector"))
+                        ProjectHandler::ShowProjectSelector(true);
+
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Tools"))

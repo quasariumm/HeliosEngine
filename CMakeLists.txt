@@ -51,6 +51,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
         src
         extern
         extern/imgui
+        extern/nativefiledialog-extended/src/include
         lib
         lib/glfw/include
         lib/glad/include
@@ -68,6 +69,9 @@ set(MSVC_LIBS
 set(UNIX_LIBS
         glfw3
 )
+
+add_subdirectory(extern/nativefiledialog-extended)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE nfd)
 
 if (MSVC)
 

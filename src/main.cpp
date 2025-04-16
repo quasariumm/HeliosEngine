@@ -11,6 +11,7 @@
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
 #include "Core/IconsFA.h"
+#include "Projects/ProjectHandler.h"
 
 void GLAPIENTRY MessageCallback(
 	GLenum source,
