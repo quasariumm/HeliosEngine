@@ -17,6 +17,9 @@ public:
     static void LoadFromFile(Scene* scene, const std::string& fileName);
     static void SaveToFile(Scene* scene, const std::string& fileName);
 
+    static bool IsToken(const std::string& line, const std::string& token);
+    static std::string TokenValue(const std::string& line);
+
     static std::string SaveTransform(SceneObject* object);
     static void LoadTransform(SceneObject* object, std::string line);
 };

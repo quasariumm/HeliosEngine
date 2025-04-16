@@ -31,13 +31,13 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::string& fileName)
             if (line == "[Object]") loadType = OBJECT;
             break;
         case OBJECT:
-            if (line.find(">UID") != std::string::npos)
+            if (IsToken(line, "UID"))
                 newObject = scene->NewObject(stoul(line.substr(line.find('=') + 2)));
             if (newObject == nullptr) continue;
 
-            if (line.find(">Name") != std::string::npos)
+            if (IsToken(line, "Name"))
                 newObject->SetName(line.substr(line.find('=') + 2));
-            if (line.find(">Transform") != std::string::npos)
+            if (IsToken(line, "Transform"))
                 LoadTransform(newObject, line.substr(line.find('=') + 2));
             break;
         }
@@ -63,14 +63,25 @@ void SceneLoader::SaveToFile(Scene* scene, const std::string& fileName)
     for (SceneObject* object : scene->GetSceneObjectList())
     {
         file << "[Object]" << std::endl;
-        file << ">UID = " << object->GetUID() << std::endl;
-        file << ">Name = " << object->GetName() << std::endl;
-        file << ">Transform = " << SaveTransform(object) << std::endl;
+        file << "UID = " << object->GetUID() << std::endl;
+        file << "Name = " << object->GetName() << std::endl;
+        file << "Transform = " << SaveTransform(object) << std::endl;
         file << std::endl;
     }
 
     DebugLog(LogSeverity::DONE, "Scene was successfully saved");
 
+}
+
+bool SceneLoader::IsToken(const std::string& line, const std::string& token)
+{
+    return line.substr(0, line.find(" = ")) == token;
+}
+
+std::string SceneLoader::TokenValue(const std::string& line)
+{
+    std::string token = line;
+    return token.erase(0, line.find(" = ") + 3);
 }
 
 std::string SceneLoader::SaveTransform(SceneObject* object)
