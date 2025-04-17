@@ -30,7 +30,7 @@ struct vec4t;
 // - Patrick
 
 template<typename T> requires numeric<T>
-struct _CRT_ALIGN(8) vec2t
+struct alignas(8) vec2t
 {
 	vec2t() = default;
 	vec2t(const T x, const T y) : x(x), y(y) {}
@@ -104,7 +104,7 @@ typedef vec3t<unsigned> vec3u;
 typedef vec3t<double>	vec3d;
 
 template<typename T> requires numeric<T>
-struct _CRT_ALIGN(16) vec4t
+struct alignas(16) vec4t
 {
 	vec4t() = default;
 	vec4t(const T x, const T y, const T z, const T w) : x(x), y(y), z(z), w(w) {}
@@ -138,7 +138,7 @@ struct _CRT_ALIGN(16) vec4t
 // SIMD version for float type
 #ifdef ENGINE_USE_SSE
 template<>
-struct _CRT_ALIGN(16) vec4t<float>
+struct alignas(16) vec4t<float>
 {
 	vec4t() = default;
 	vec4t(const float x, const float y, const float z, const float w) : v4(_mm_setr_ps(x, y, z, w)) {}
