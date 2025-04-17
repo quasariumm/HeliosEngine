@@ -1,8 +1,6 @@
 #include "SceneEditor.h"
 
 #include "SceneStorage.h"
-#include "Core/IconsFA.h"
-
 namespace Engine
 {
 
@@ -17,13 +15,13 @@ void SceneEditor::DrawInterface()
 
 void SceneEditor::TreeEditor()
 {
-    ImGui::Begin(ICON_FA_MAP" Scene", nullptr, ImGuiWindowFlags_MenuBar);
+    ImGui::Begin(ICON_MAP" Scene", nullptr, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
     {
         if (m_sceneFile.empty())
         {
-            ImGui::Text(ICON_FA_CIRCLE_EXCLAMATION " No scene file loaded");
+            ImGui::Text(ICON_ALERT" No scene file loaded");
             ImGui::EndMenuBar();
             ImGui::End();
             return;
@@ -76,7 +74,7 @@ void SceneEditor::TreeEditor()
 
 void SceneEditor::ObjectEditor()
 {
-    ImGui::Begin(ICON_FA_CUBE" Object Viewer");
+    ImGui::Begin(ICON_CUBE_SCAN" Object Viewer");
 
     // Show text of no object selected
     if (m_selectedObject == 0)
@@ -148,12 +146,6 @@ void SceneEditor::ObjectEditor()
 
     if (ImGui::BeginPopupModal("Select component", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        // if (ImGui::Button("Sphere"))
-        // {
-        //     Sphere* s = new Sphere();
-        //     selectedObject->AddComponent(&s->mComponent);
-        //     ImGui::CloseCurrentPopup();
-        // }
 
         if (ImGui::Button("Cancel"))
             ImGui::CloseCurrentPopup();
@@ -164,14 +156,14 @@ void SceneEditor::ObjectEditor()
     ImGui::End();
 }
 
-void Engine::SceneEditor::DisplayObjectTree(SceneObject* object)
+void SceneEditor::DisplayObjectTree(SceneObject* object)
 {
     // Display parent object
     ImGui::PushID((int)object->GetUID());
 
-    std::string prefix = ICON_FA_CUBE;
+    std::string prefix = ICON_CUBE;
     if (m_selectMode == PARENT && m_prvSelectedObject == object->GetUID())
-        prefix += ICON_FA_ARROW_RIGHT;
+        prefix += ICON_ARROW_RIGHT_THICK;
 
     if (ImGui::Selectable((prefix + " " + object->GetName()).c_str(), m_selectedObject == object->GetUID()))
         m_selectedObject = object->GetUID();

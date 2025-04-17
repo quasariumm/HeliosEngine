@@ -1,20 +1,19 @@
 #include "Debugger.h"
 
-#include "Core/IconsFA.h"
-
 namespace Engine
 {
 std::vector<Logger::Log> Logger::g_logs = {};
 std::vector<Logger::Watch> Logger::g_watchList = {};
+std::vector<Logger::Watch> Logger::g_tempWatchList = {};
 std::string Logger::m_totalLog;
 
 void Debugger::DrawInterface()
 {
-    ImGui::Begin(ICON_FA_LIST " Logs", nullptr, ImGuiWindowFlags_MenuBar);
+    ImGui::Begin(ICON_VIEW_LIST " Logs", nullptr, ImGuiWindowFlags_MenuBar);
     DrawLogs();
     ImGui::End();
 
-    ImGui::Begin(ICON_FA_EYE " Watch List");
+    ImGui::Begin(ICON_EYE " Watch List");
     DrawWatchList();
     ImGui::End();
 }
@@ -39,10 +38,10 @@ void Debugger::DrawLogs()
         }
         if (ImGui::BeginMenu("Severity"))
         {
-            ImGui::MenuItem(ICON_FA_CIRCLE_INFO" Info", nullptr, &showInfo);
-            ImGui::MenuItem(ICON_FA_CIRCLE_XMARK " Warnings", nullptr, &showWarn);
-            ImGui::MenuItem(ICON_FA_CIRCLE_EXCLAMATION " Errors", nullptr, &showError);
-            ImGui::MenuItem(ICON_FA_CIRCLE_CHECK " Completion", nullptr, &showDone);
+            ImGui::MenuItem(ICON_INFORMATION_VARIANT_BOX" Info", nullptr, &showInfo);
+            ImGui::MenuItem(ICON_ALERT " Warnings", nullptr, &showWarn);
+            ImGui::MenuItem(ICON_ALERT_OCTAGON " Errors", nullptr, &showError);
+            ImGui::MenuItem(ICON_CHECK_BOLD " Completion", nullptr, &showDone);
             ImGui::EndMenu();
         }
         if (ImGui::MenuItem("Clear"))
@@ -58,21 +57,22 @@ void Debugger::DrawLogs()
         if (log.type == LogSeverity::DONE && !showDone) continue;
 
 
-        ImGui::TextColored({1,1,1,0.5f}, ICON_FA_ARROW_RIGHT);
+        ImGui::TextColored({1,1,1,0.5f}, ICON_ARROW_RIGHT_THICK);
         float spacing = 30;
         ImGui::SameLine(spacing);
 
 
         if (showSource)
         {
-            ImGui::Text(ICON_FA_CODE);
+            ImGui::Text(ICON_CODE_BLOCK_BRACES);
             std::filesystem::path file = std::filesystem::path(log.source.file_name()).make_preferred();
             const std::filesystem::path origin = std::filesystem::current_path().make_preferred();
 
             if (!showFullPath)
                 file = file.lexically_relative(origin);
 
-            ImGui::SetItemTooltip(ICON_FA_FILE_CODE " %s\n" ICON_FA_BARS " %o:%o\n" ICON_FA_CODE " %s", file.string().c_str(), log.source.line(), log.source.column(), log.source.function_name());
+            ImGui::SetItemTooltip(ICON_FILE_CODE " %s\n" ICON_FORMAT_LIST_NUMBERED " %o:%o\n" ICON_CODE_BRACES " %s",
+                file.string().c_str(), log.source.line(), log.source.column(), log.source.function_name());
             spacing += 25;
             ImGui::SameLine(spacing);
         }
@@ -89,13 +89,13 @@ void Debugger::DrawLogs()
 
         switch (log.type)
         {
-        case LogSeverity::INFO: ImGui::TextColored({0.3f, 0.5f, 0.8f, 1.0f}, ICON_FA_CIRCLE_INFO);
+        case LogSeverity::INFO: ImGui::TextColored({0.3f, 0.5f, 0.8f, 1.0f}, ICON_INFORMATION_VARIANT_BOX);
             break;
-        case LogSeverity::WARNING: ImGui::TextColored({1.0f, 1.0f, 0, 1.0f}, ICON_FA_CIRCLE_XMARK);
+        case LogSeverity::WARNING: ImGui::TextColored({1.0f, 1.0f, 0, 1.0f}, ICON_ALERT);
             break;
-        case LogSeverity::ERROR: ImGui::TextColored({1.0f, 0, 0, 1.0f}, ICON_FA_CIRCLE_EXCLAMATION);
+        case LogSeverity::ERROR: ImGui::TextColored({1.0f, 0, 0, 1.0f}, ICON_ALERT_OCTAGON);
             break;
-        case LogSeverity::DONE: ImGui::TextColored({0, 0.5f, 0, 1.0f}, ICON_FA_CIRCLE_CHECK);
+        case LogSeverity::DONE: ImGui::TextColored({0, 0.5f, 0, 1.0f}, ICON_CHECK_BOLD);
             break;
         }
 
@@ -123,9 +123,28 @@ void Debugger::DrawWatchList()
         else if (watch.type == typeid(vec2))
             ImGui::InputFloat2(watch.name.c_str(), ((vec2*)watch.var)->cell);
         else if (watch.type == typeid(vec3))
-            ImGui::InputFloat2(watch.name.c_str(), ((vec3*)watch.var)->cell);
+            ImGui::InputFloat3(watch.name.c_str(), ((vec3*)watch.var)->cell);
         else
             ImGui::Text("Watch '%s' does not have a supported type", watch.name);
     }
+
+    ImGui::BeginDisabled();
+    for (Logger::Watch& watch : Logger::g_tempWatchList)
+    {
+        if (watch.type == typeid(int))
+            ImGui::InputInt(watch.name.c_str(), (int*)watch.var);
+        else if (watch.type == typeid(float))
+            ImGui::InputFloat(watch.name.c_str(), (float*)watch.var);
+        else if (watch.type == typeid(vec2))
+            ImGui::InputFloat2(watch.name.c_str(), ((vec2*)watch.var)->cell);
+        else if (watch.type == typeid(vec3))
+            ImGui::InputFloat3(watch.name.c_str(), ((vec3*)watch.var)->cell);
+        else
+            ImGui::Text("Watch '%s' does not have a supported type", watch.name);
+    }
+    ImGui::EndDisabled();
+
+    Logger::g_tempWatchList.clear();
+
 }
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include "Core/IconsFA.h"
 #include "Projects/ProjectHandler.h"
 
 namespace Engine
@@ -31,13 +30,15 @@ namespace Engine
 
             ImGui::DockSpaceOverViewport();
 
+            static bool showImguiDebug = false;
+
             if (ImGui::BeginMainMenuBar())
             {
                 std::string projectName;
                 if (ProjectLoaded())
-                    projectName = std::string(ICON_FA_FOLDER" ") + ProjectName();
+                    projectName = std::string(ICON_CONTROLLER" ") + ProjectName();
                 else
-                    projectName =  ICON_FA_TRIANGLE_EXCLAMATION " No project loaded";
+                    projectName =  ICON_ALERT" No project loaded";
 
                 if (ImGui::BeginMenu(projectName.c_str()))
                 {
@@ -52,11 +53,15 @@ namespace Engine
                 {
                     for (EditorInterface* i : g_editorInterfaces)
                         ImGui::MenuItem(i->name.c_str(), nullptr, &i->active);
+                    ImGui::MenuItem("ImGui Debugger", nullptr, &showImguiDebug);
                     ImGui::EndMenu();
                 }
 
                 ImGui::EndMainMenuBar();
             }
+
+            if (showImguiDebug)
+                ImGui::ShowMetricsWindow();
 
             for (EditorInterface* i : g_editorInterfaces)
                 if (i->active)

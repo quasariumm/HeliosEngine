@@ -11,7 +11,6 @@
 #include "Graphics/Camera.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
-#include "Core/IconsFA.h"
 #include "Projects/ProjectHandler.h"
 
 void GLAPIENTRY MessageCallback(
@@ -75,8 +74,8 @@ int main(int, char**)
 	ImFontConfig config;
 	config.MergeMode = true;
 	config.GlyphMinAdvanceX = 16.0f;
-	static constexpr ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-	io.Fonts->AddFontFromFileTTF("extern/fonts/forkawesome-webfont.ttf", 16.0f, &config, icon_ranges);
+	static constexpr ImWchar32 icon_ranges[] = {ICON_MIN_MDI, ICON_MAX_MDI, 0};
+	io.Fonts->AddFontFromFileTTF("extern/fonts/materialdesignicons-webfont.ttf", 16.0f, &config, icon_ranges);
 
     Engine::SceneEditor sceneEditor(&g_scene);
 	Engine::Debugger logMenu;
@@ -163,6 +162,8 @@ int main(int, char**)
         window->SwapBuffers();
 
     	++frame;
+
+    	Engine::DebugWatchTemp<float>("DeltaTime", &deltaTime);
 
     	// Count fps
     	const float frameTime = deltaTime = frameTimer.Elapsed<float>();
