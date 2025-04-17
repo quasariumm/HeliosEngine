@@ -10,7 +10,8 @@ enum class AssetType
 {
     NONE,
     OTHER,
-    SCENE
+    SCENE,
+    PROJECT
 };
 
 class AssetManager : EditorInterface
@@ -32,6 +33,16 @@ public:
     static void UpdateAssetList();
     static std::string AssetIcon(const std::filesystem::path& asset);
 
+    static AssetType GetAssetType(const std::string& extension)
+    {
+        if (extension.empty()) return AssetType::NONE;
+        if (extension == ".scn") return AssetType::SCENE;
+        if (extension == ".gep") return AssetType::PROJECT;
+        return AssetType::OTHER;
+    }
+    static AssetType GetAssetTypeByPath(const std::filesystem::path& path) { return GetAssetType(path.extension().string()); }
+
+    static void ScenePopup();
 };
 
 }

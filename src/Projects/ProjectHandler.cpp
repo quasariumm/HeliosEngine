@@ -5,7 +5,6 @@
 #include <nfd.hpp>
 
 #include "Assets/AssetManager.h"
-#include "Core/IconsFA.h"
 
 namespace Engine
 {
@@ -27,12 +26,12 @@ void ProjectHandler::ProjectWindows()
 
         ProjectData newProjectData;
 
-        ImGui::Text(ICON_FA_FOLDER);
+        ImGui::Text(ICON_FOLDER);
         ImGui::SameLine(30);
         ImGui::Text( path.string().c_str());
 
         static char projectName[128];
-        ImGui::Text(ICON_FA_BARS);
+        ImGui::Text(ICON_RENAME);
         ImGui::SameLine(30);
         ImGui::InputText("Project Name", projectName, 128);
         newProjectData.projectName = projectName;

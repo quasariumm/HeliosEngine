@@ -43,6 +43,7 @@
 
 // External libraries
 #define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_USE_WCHAR32
 #include <imgui.h>
 
 // SIMD

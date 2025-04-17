@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include "IconDefines.h"
+
 static const std::wstring ANSI_OK = L"[\033[32m OK \033[0m] ";
 static const std::wstring ANSI_DONE = L"[\033[32mDONE\033[0m] ";
 static const std::wstring ANSI_ERR = L"[\033[31mERRO\033[0m] ";
