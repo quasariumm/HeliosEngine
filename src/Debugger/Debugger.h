@@ -39,6 +39,7 @@ public:
 
     static std::vector<Log> g_logs;
     static std::vector<Watch> g_watchList;
+    static std::vector<Watch> g_tempWatchList;
 
     /// Log data with type, message and a level (Level 0 means always visible, while a higher level can be ignored)
     struct Log
@@ -105,6 +106,9 @@ inline void DebugLog(const LogSeverity type, const std::string& message, const i
 /// Add a value to the value debugger. Can be modified from the menu
 template <class T>
 static void DebugWatch(const std::string& name, T* value) { Logger::g_watchList.emplace_back(name, value); };
+/// Add a value to the value debugger. Cannot be modified from the menu. But does not have to constantly exist
+template <class T>
+static void DebugWatchTemp(const std::string& name, T* value) { Logger::g_tempWatchList.emplace_back(name, value); };
 
 class Debugger final : public EditorInterface
 {

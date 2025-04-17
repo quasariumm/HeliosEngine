@@ -4,6 +4,7 @@ namespace Engine
 {
 std::vector<Logger::Log> Logger::g_logs = {};
 std::vector<Logger::Watch> Logger::g_watchList = {};
+std::vector<Logger::Watch> Logger::g_tempWatchList = {};
 std::string Logger::m_totalLog;
 
 void Debugger::DrawInterface()
@@ -122,9 +123,28 @@ void Debugger::DrawWatchList()
         else if (watch.type == typeid(vec2))
             ImGui::InputFloat2(watch.name.c_str(), ((vec2*)watch.var)->cell);
         else if (watch.type == typeid(vec3))
-            ImGui::InputFloat2(watch.name.c_str(), ((vec3*)watch.var)->cell);
+            ImGui::InputFloat3(watch.name.c_str(), ((vec3*)watch.var)->cell);
         else
             ImGui::Text("Watch '%s' does not have a supported type", watch.name);
     }
+
+    ImGui::BeginDisabled();
+    for (Logger::Watch& watch : Logger::g_tempWatchList)
+    {
+        if (watch.type == typeid(int))
+            ImGui::InputInt(watch.name.c_str(), (int*)watch.var);
+        else if (watch.type == typeid(float))
+            ImGui::InputFloat(watch.name.c_str(), (float*)watch.var);
+        else if (watch.type == typeid(vec2))
+            ImGui::InputFloat2(watch.name.c_str(), ((vec2*)watch.var)->cell);
+        else if (watch.type == typeid(vec3))
+            ImGui::InputFloat3(watch.name.c_str(), ((vec3*)watch.var)->cell);
+        else
+            ImGui::Text("Watch '%s' does not have a supported type", watch.name);
+    }
+    ImGui::EndDisabled();
+
+    Logger::g_tempWatchList.clear();
+
 }
 }

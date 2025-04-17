@@ -163,6 +163,8 @@ int main(int, char**)
 
     	++frame;
 
+    	Engine::DebugWatchTemp<float>("DeltaTime", &deltaTime);
+
     	// Count fps
     	const float frameTime = deltaTime = frameTimer.Elapsed<float>();
     	frameTimer.Reset();
