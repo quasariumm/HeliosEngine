@@ -13,74 +13,41 @@ std::vector<std::filesystem::path> AssetManager::m_assetList = {};
 
 void AssetManager::DrawInterface()
 {
-    DrawFolderView();
     DrawAssetView();
     DrawAssetInfo();
-}
-
-void AssetManager::DrawFolderView()
-{
-    ImGui::Begin(ICON_FA_FOLDER" Folders", nullptr, ImGuiWindowFlags_MenuBar);
-
-    if (ImGui::BeginMenuBar())
-    {
-        std::string pathString = std::string(ICON_FA_FOLDER" ") + ProjectName() + "\\";
-        pathString.append(std::filesystem::relative(m_currentPath, ProjectFolder()).string());
-        ImGui::Text(pathString.c_str());
-        ImGui::EndMenuBar();
-    }
-
-    if (!ProjectLoaded())
-    {
-        ImGui::Text("Please load a project");
-        ImGui::End();
-        return;
-    }
-
-    // Using relative path because there is sometimes still a / on the end
-    if (std::filesystem::relative(m_currentPath, ProjectFolder()) != ".")
-        if (ImGui::Selectable(ICON_FA_FOLDER " .."))
-        {
-            m_currentPath = m_currentPath.parent_path();
-            UpdateAssetList();
-        }
-
-    for (auto& dir : m_folderList)
-        if (ImGui::Selectable((std::string(ICON_FA_FOLDER" ") + dir.filename().string()).c_str()))
-        {
-            m_currentPath = dir;
-            UpdateAssetList();
-        }
-
-    ImGui::End();
 }
 
 void AssetManager::DrawAssetView()
 {
     ImGui::Begin(ICON_FA_TABLE_LIST" Assets", nullptr, ImGuiWindowFlags_MenuBar);
 
-    if (!ProjectLoaded())
-    {
-        ImGui::Text("Please load a project");
-        ImGui::End();
-        return;
-    }
-
     if (ImGui::BeginMenuBar())
     {
-        if (ImGui::BeginMenu("New asset"))
+        if (!ProjectLoaded())
         {
-            ImGui::EndMenu();
+            ImGui::Text("Please load a project");
+            ImGui::EndMenuBar();
+            ImGui::End();
+            return;
         }
+
+        // Show back arrow. Using relative path because there is sometimes still a / on the end
+        if (relative(m_currentPath, ProjectFolder()) != ".")
+            if (ImGui::MenuItem(ICON_FA_ARROW_UP))
+                m_currentPath = m_currentPath.parent_path(), UpdateAssetList();
+
+        // Show current folder path
+        std::string pathString = std::string(ICON_FA_FOLDER" ") + ProjectName() + "\\";
+        pathString.append(relative(m_currentPath, ProjectFolder()).string());
+        ImGui::Text(pathString.c_str());
+
         ImGui::EndMenuBar();
     }
 
-    if (!ProjectLoaded())
-    {
-        ImGui::Text("Please load a project");
-        ImGui::End();
-        return;
-    }
+
+    for (auto& dir : m_folderList)
+        if (ImGui::Selectable((std::string(ICON_FA_FOLDER" ") + dir.filename().string()).c_str()))
+            m_currentPath = dir, UpdateAssetList();
 
     for (auto& asset : m_assetList)
         if (ImGui::Selectable((AssetIcon(asset) + asset.filename().string()).c_str(), asset == m_selectedAsset))

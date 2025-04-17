@@ -20,7 +20,6 @@ public:
 
     void DrawInterface() override;
 
-    static void DrawFolderView();
     static void DrawAssetView();
     static void DrawAssetInfo();
 
