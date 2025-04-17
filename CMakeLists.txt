@@ -21,6 +21,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     # For GCC and Clang
     check_cxx_compiler_flag("-msse2" COMPILER_SUPPORTS_SSE2)
     check_cxx_compiler_flag("-mavx" COMPILER_SUPPORTS_AVX)
+    check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
 
     if(COMPILER_SUPPORTS_SSE2)
         add_compile_options(-msse2)
@@ -28,6 +29,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
     if(COMPILER_SUPPORTS_AVX)
         add_compile_options(-mavx)
+    endif()
+
+    if(COMPILER_SUPPORTS_AVX2)
+        add_compile_options(-mavx2)
     endif()
 elseif(MSVC)
     # For MSVC

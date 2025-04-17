@@ -68,7 +68,7 @@
 #define ENGINE_USE_AVX
 #define ENGINE_USE_SSE
 #endif
-#if !defined __AVX2__ || (!defined __FMA__ && !defined _MSC_VER)
+#if !defined ENGINE_USE_SSE && (!defined __AVX2__ || (!defined __FMA__ && !defined _MSC_VER))
 #pragma warning( "AVX2 and FMA not enabled in compilation." )
 #define ENGINE_NO_SIMD
 #else
