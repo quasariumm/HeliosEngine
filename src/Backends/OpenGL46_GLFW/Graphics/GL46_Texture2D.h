@@ -77,6 +77,11 @@ public:
 	void UseCompute(uint32_t slot) const;
 
 	/**
+	 * @brief Updates the pixel unwrap buffer to the data in the texture
+	 */
+	void UpdateData() const;
+
+	/**
 	 * @brief Gets the ID of the texture
 	 * @return The ID of the texture
 	 */
@@ -122,11 +127,18 @@ public:
 
 private:
 
+	TextureFormat m_internalFormat = TextureFormat::RGBA8;
+	uint32_t m_glInternalFormat = 0;
+	TextureFormat m_bufferFormat = TextureFormat::RGBA8;
+	uint32_t m_glBufferFormat = 0;
+
 	int32_t m_width = 0;
 	int32_t m_height = 0;
 	int32_t m_channels = 0;
+	size_t m_textureByteSize = 0ull;
 
 	uint32_t m_ID = 0;
+	uint32_t m_pbo = 0;
 
 	uint8_t* m_data = nullptr;
 	float* m_dataHDR = nullptr;

@@ -23,7 +23,7 @@ void GLAPIENTRY MessageCallback(
 	const void* userParam
 	)
 {
-	if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+	if (severity != GL_DEBUG_SEVERITY_HIGH)
 		return;
 	std::wcerr << ANSI_ERR <<
 		"GL CALLBACK: " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "")
@@ -87,6 +87,10 @@ int main(int, char**)
 	Engine::GL46_Texture2D rayTexture;
 	rayTexture.FillBlank(window->GetSize().x, window->GetSize().y, 4, Engine::TextureFormat::RGBA32F, true);
 
+	Engine::DebugWatch("pixel0", &rayTexture.GetDataHDR()[0]);
+	Engine::DebugWatch("pixel1", &rayTexture.GetDataHDR()[1]);
+	Engine::DebugWatch("pixel2", &rayTexture.GetDataHDR()[2]);
+
 	Engine::GL46_ComputeShader rayCompute;
 	rayCompute.LoadFromFile(L"src/Shaders/raytrace.comp");
 	const Engine::vec3u computeThreads{
@@ -99,6 +103,24 @@ int main(int, char**)
 	rayCompute.SetInt("OutTexture", 0);
 	rayCompute.SetUInt("ScreenWidth", window->GetSize().x);
 	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
+
+	// Add a sphere to the scene
+	rayCompute.SetInt("NumSpheres", 1);
+	const std::string baseName = "Spheres[0]";
+	rayCompute.SetVec3(baseName + ".center", Engine::vec3f(-3.f, 0.f, 0.f));
+	rayCompute.SetFloat(baseName + ".radius", 1.f);
+
+	const std::string matBaseName = baseName + ".material";
+	rayCompute.SetVec3(matBaseName + ".diffuseColor", Engine::vec3f(1.f));
+	rayCompute.SetVec3(matBaseName + ".specularColor", Engine::vec3f(1.f));
+	rayCompute.SetFloat(matBaseName + ".shininess", 0.f);
+	rayCompute.SetFloat(matBaseName + ".specularProbability", 1.f);
+
+	rayCompute.SetVec3(matBaseName + ".emissionColor", Engine::vec3f(1.f));
+	rayCompute.SetFloat(matBaseName + ".emissionStrength", 0.f);
+
+	rayCompute.SetFloat(matBaseName + ".refractionProbability", 0.f);
+	rayCompute.SetFloat(matBaseName + ".refractionCoefficient", 1.f);
 
     Engine::Timer frameTimer;
 	uint64_t frame = 0;
@@ -128,6 +150,7 @@ int main(int, char**)
 
     	rayTexture.UseCompute(0);
     	rayCompute.Dispatch(computeThreads);
+    	rayTexture.UpdateData();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();

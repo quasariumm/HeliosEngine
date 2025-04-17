@@ -59,18 +59,10 @@ static GLuint ConvertFormat(const TextureFormat format)
 
 GL46_Texture2D::~GL46_Texture2D()
 {
-	glDeleteTextures(1, &m_ID);
-	if (m_isSTBBuffer)
+	if (m_initialized)
 	{
-		if (m_data)
-			stbi_image_free(m_data);
-		if (m_dataHDR)
-			stbi_image_free(m_dataHDR);
-	}
-	else
-	{
-		delete[] m_data;
-		delete[] m_dataHDR;
+		glDeleteTextures(1, &m_ID);
+		glDeleteBuffers(1, &m_pbo);
 	}
 }
 
@@ -84,28 +76,20 @@ void GL46_Texture2D::FillBlank(
 	m_width = static_cast<int32_t>(width);
 	m_height = static_cast<int32_t>(height);
 	m_channels = static_cast<int32_t>(channels);
+	m_isHDR = isHDR;
 	// Clean up if initialised
 	if (m_initialized)
 	{
 		glDeleteTextures(1, &m_ID);
-		if (m_isSTBBuffer)
-		{
-			if (m_data)
-				stbi_image_free(m_data);
-			if (m_dataHDR)
-				stbi_image_free(m_dataHDR);
-		}
-		else
-		{
-			delete[] m_data;
-			delete[] m_dataHDR;
-		}
+		glDeleteBuffers(1, &m_pbo);
+		m_pbo = 0;
 		m_data = nullptr;
 		m_dataHDR = nullptr;
 	}
 
 	// Generate GL texture
-	const GLenum intFormat = ConvertFormat(format);
+	m_internalFormat = format;
+	m_glInternalFormat = ConvertFormat(format);
 	glGenTextures(1, &m_ID);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -114,37 +98,49 @@ void GL46_Texture2D::FillBlank(
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Create the buffer for the texture
-	GLenum bufferFormat;
 	switch (m_channels)
 	{
 	case 1:
-		bufferFormat = GL_RED;
+		m_bufferFormat = (isHDR) ? TextureFormat::RED32F : TextureFormat::RED8;
+		m_glBufferFormat = GL_RED;
 		break;
 	case 2:
-		bufferFormat = GL_RG;
+		m_bufferFormat = (isHDR) ? TextureFormat::RG32F : TextureFormat::RG8;
+		m_glBufferFormat = GL_RG;
 		break;
 	case 3:
-		bufferFormat = GL_RGB;
+		m_bufferFormat = (isHDR) ? TextureFormat::RGB32F : TextureFormat::RGB8;
+		m_glBufferFormat = GL_RGB;
 		break;
 	case 4:
-		bufferFormat = GL_RGBA;
+		m_bufferFormat = (isHDR) ? TextureFormat::RGBA32F : TextureFormat::RGBA8;
+		m_glBufferFormat = GL_RGBA;
 		break;
 	default:
-		bufferFormat = GL_RGB;
+		m_bufferFormat = (isHDR) ? TextureFormat::RGB32F : TextureFormat::RGB8;
+		m_glBufferFormat = GL_RGB;
 		break;
 	}
+	glTexStorage2D(GL_TEXTURE_2D, 1, ConvertFormat(m_internalFormat), m_width, m_height);
 	if (isHDR)
 	{
-		m_dataHDR = new float[m_width * m_height * m_channels];
-		glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(intFormat), m_width, m_height, 0, bufferFormat, GL_FLOAT, m_dataHDR);
+		glGenBuffers(1, &m_pbo);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+		m_textureByteSize = m_width * m_height * m_channels * sizeof(float);
+		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, m_textureByteSize, nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		m_dataHDR = (float*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, m_textureByteSize, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 	}
 	else
 	{
-		m_data = new uint8_t[m_width * m_height * m_channels];
-		glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(intFormat), m_width, m_height, 0, bufferFormat, GL_UNSIGNED_BYTE, m_data);
+		glGenBuffers(1, &m_pbo);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+		m_textureByteSize = m_width * m_height * m_channels * sizeof(uint8_t);
+		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, m_textureByteSize, nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		m_data = (uint8_t*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, m_textureByteSize, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 	m_isSTBBuffer = false;
 }
@@ -160,20 +156,8 @@ void GL46_Texture2D::LoadFromFile(
 	if (m_initialized)
 	{
 		glDeleteTextures(1, &m_ID);
-		if (m_isSTBBuffer)
-		{
-			if (m_data)
-				stbi_image_free(m_data);
-			if (m_dataHDR)
-				stbi_image_free(m_dataHDR);
-		}
-		else
-		{
-			delete[] m_data;
-			delete[] m_dataHDR;
-		}
-		m_data = nullptr;
-		m_dataHDR = nullptr;
+		glDeleteBuffers(1, &m_pbo);
+		m_pbo = 0;
 	}
 
 	// Load the image
@@ -193,8 +177,10 @@ void GL46_Texture2D::LoadFromFile(
 
 	fclose(file);
 
-	const GLenum format = ConvertFormat(fileFormat);
-	const GLint intFormat = static_cast<GLint>(ConvertFormat(internalFormat));
+	m_internalFormat = internalFormat;
+	m_glInternalFormat = ConvertFormat(internalFormat);
+	m_bufferFormat = fileFormat;
+	m_glBufferFormat = ConvertFormat(fileFormat);
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
@@ -205,10 +191,31 @@ void GL46_Texture2D::LoadFromFile(
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	if (isHDR)
-		glTexImage2D(GL_TEXTURE_2D, 0, intFormat, m_width, m_height, 0, format, GL_FLOAT, m_dataHDR);
+	{
+		m_textureByteSize = m_width * m_height * m_channels * sizeof(float);
+		glTexImage2D(GL_TEXTURE_2D, 0, m_glInternalFormat, m_width, m_height, 0, m_glBufferFormat, GL_FLOAT, m_dataHDR);
+		glGenBuffers(1, &m_pbo);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, sizeof(m_dataHDR), m_dataHDR, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		float* tmp = (float*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, sizeof(m_dataHDR), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		memcpy(tmp, m_dataHDR, sizeof(m_dataHDR));
+		stbi_image_free(m_dataHDR);
+		m_dataHDR = tmp;
+	}
 	else
-		glTexImage2D(GL_TEXTURE_2D, 0, intFormat, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, m_data);
+	{
+		m_textureByteSize = m_width * m_height * m_channels * sizeof(uint8_t);
+		glTexImage2D(GL_TEXTURE_2D, 0, m_glInternalFormat, m_width, m_height, 0, m_glBufferFormat, GL_UNSIGNED_BYTE, m_data);
+		glGenBuffers(1, &m_pbo);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, sizeof(m_data), m_data, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		uint8_t* tmp = (uint8_t*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, sizeof(m_data), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		memcpy(tmp, m_data, sizeof(m_data));
+		stbi_image_free(m_data);
+		m_data = tmp;
+	}
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 	m_isSTBBuffer = true;
 }
@@ -219,7 +226,11 @@ void GL46_Texture2D::Use(const uint32_t slot) const
 	if (slot > 31)
 		throw std::range_error("Slot is out of range (0-31)!");
 	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
+	const GLenum type = (m_isHDR) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_glBufferFormat, type, nullptr);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
 
@@ -228,9 +239,21 @@ void GL46_Texture2D::UseCompute( const uint32_t slot ) const
 	if (slot > 31)
 		throw std::range_error("Slot is out of range (0-31)!");
 	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
-	// TODO: Update to use dynamic format
-	glBindImageTexture(slot, m_ID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	const GLenum type = (m_isHDR) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_glBufferFormat, type, nullptr);
+	glBindImageTexture(slot, m_ID, 0, GL_FALSE, 0, GL_READ_WRITE, m_glInternalFormat);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+
+void GL46_Texture2D::UpdateData() const
+{
+	if (m_isHDR)
+		glGetTextureSubImage(m_ID, 0, 0, 0, 0, m_width, m_height, 1, m_glBufferFormat, GL_FLOAT, m_textureByteSize, m_dataHDR);
+	else
+		glGetTextureSubImage(m_ID, 0, 0, 0, 0, m_width, m_height, 1, m_glBufferFormat, GL_UNSIGNED_BYTE, m_textureByteSize, m_data);
 }
 
 
