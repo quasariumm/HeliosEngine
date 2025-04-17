@@ -28,15 +28,15 @@ void Debugger::DrawLogs()
 
     if (ImGui::BeginMenuBar())
     {
-        if (ImGui::BeginMenu("Options"))
+        if (ImGui::BeginMenu(ICON_COG" Options"))
         {
-            ImGui::MenuItem("Lock to bottom", nullptr, &lockToBottom);
-            ImGui::MenuItem("Show timestamp", nullptr, &showTimestamp);
-            ImGui::MenuItem("Show source", nullptr, &showSource);
-            ImGui::MenuItem("Show full path", nullptr, &showFullPath, showSource);
+            ImGui::MenuItem(ICON_ARROW_COLLAPSE_DOWN" Lock to bottom", nullptr, &lockToBottom);
+            ImGui::MenuItem(ICON_CLOCK" Show timestamp", nullptr, &showTimestamp);
+            ImGui::MenuItem(ICON_CODE_BRACES" Show source", nullptr, &showSource);
+            ImGui::MenuItem(ICON_FOLDER" Show full path", nullptr, &showFullPath, showSource);
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Severity"))
+        if (ImGui::BeginMenu(ICON_ALERT_BOX" Severity"))
         {
             ImGui::MenuItem(ICON_INFORMATION_VARIANT_BOX" Info", nullptr, &showInfo);
             ImGui::MenuItem(ICON_ALERT " Warnings", nullptr, &showWarn);
@@ -44,7 +44,7 @@ void Debugger::DrawLogs()
             ImGui::MenuItem(ICON_CHECK_BOLD " Completion", nullptr, &showDone);
             ImGui::EndMenu();
         }
-        if (ImGui::MenuItem("Clear"))
+        if (ImGui::MenuItem(ICON_CLOSE_BOX" Clear"))
             Logger::g_logs.clear();
         ImGui::EndMenuBar();
     }
@@ -57,7 +57,7 @@ void Debugger::DrawLogs()
         if (log.type == LogSeverity::DONE && !showDone) continue;
 
 
-        ImGui::TextColored({1,1,1,0.5f}, ICON_ARROW_RIGHT_THICK);
+        ImGui::TextColored({1,1,1,0.5f}, ICON_CHEVRON_RIGHT);
         float spacing = 30;
         ImGui::SameLine(spacing);
 

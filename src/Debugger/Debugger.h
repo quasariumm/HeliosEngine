@@ -7,10 +7,10 @@ namespace Engine
 
 enum class LogSeverity
 {
-    INFO,
-    WARNING,
-    ERROR,
-    DONE
+    INFO = 0,
+    WARNING = 1,
+    ERROR = 2,
+    DONE = 3
 };
 
 inline std::string LogSeverityString(LogSeverity severity)

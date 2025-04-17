@@ -42,14 +42,14 @@ namespace Engine
 
                 if (ImGui::BeginMenu(projectName.c_str()))
                 {
-                    if (ImGui::MenuItem("Open project"))
+                    if (ImGui::MenuItem(ICON_UPLOAD_CIRCLE" Open project"))
                         ProjectHandler::ShowProjectSelector(true);
-                    if (ImGui::MenuItem("New project"))
+                    if (ImGui::MenuItem(ICON_DOWNLOAD_CIRCLE" New project"))
                         ProjectHandler::ShowProjectCreator(true);
 
                     ImGui::EndMenu();
                 }
-                if (ImGui::BeginMenu("Tools"))
+                if (ImGui::BeginMenu(ICON_TOOLS" Tools"))
                 {
                     for (EditorInterface* i : g_editorInterfaces)
                         ImGui::MenuItem(i->name.c_str(), nullptr, &i->active);

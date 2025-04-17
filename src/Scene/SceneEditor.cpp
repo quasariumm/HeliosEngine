@@ -79,7 +79,7 @@ void SceneEditor::ObjectEditor()
     // Show text of no object selected
     if (m_selectedObject == 0)
     {
-        ImGui::Text("Please select an object...");
+        ImGui::Text("No object selected");
         ImGui::End();
         return;
     }

@@ -43,6 +43,9 @@ public:
     static AssetType GetAssetTypeByPath(const std::filesystem::path& path) { return GetAssetType(path.extension().string()); }
 
     static void ScenePopup();
+    static void DeletePopup(std::filesystem::path& deleteFile);
+    static void RenamePopup(std::filesystem::path& renameFile);
+    static void NewFilePopup(bool& show);
 };
 
 }
