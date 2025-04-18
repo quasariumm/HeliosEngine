@@ -19,8 +19,9 @@ public:
 	 * @attention This function deletes the old shader if it was already initialised
 	 * @note Due to GL limits, you might experience weird behaviour if the shader file includes Unicode characters
 	 * @param filename The relative path to the shader file (from the executable working directory)
+	 * @param spirV Whether the shader should be loaded from a GLSL file or a SPIR-V binary file
 	 */
-	void LoadFromFile(const std::wstring& filename);
+	void LoadFromFile( const std::wstring& filename, bool spirV = false );
 
 	/**
 	 * @brief Dispatches the loaded compute shader

@@ -21,7 +21,7 @@ GL46_ComputeShader::~GL46_ComputeShader()
 }
 
 
-void GL46_ComputeShader::LoadFromFile(const std::wstring& filename)
+void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool spirV)
 {
 	if (m_initialised)
 	{
@@ -52,8 +52,16 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename)
 
 	// Create and compile shader
 	m_shaderID = glCreateShader(GL_COMPUTE_SHADER);
-	glShaderSource(m_shaderID, 1, &content, nullptr);
-	glCompileShader(m_shaderID);
+	if (spirV)
+	{
+		glShaderBinary(1, &m_shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, content, sizeof(content));
+		glSpecializeShader(m_shaderID, "main", 0, 0, 0);
+	}
+	else
+	{
+		glShaderSource(m_shaderID, 1, &content, nullptr);
+		glCompileShader(m_shaderID);
+	}
 
 	GLint success;
 	glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &success);
