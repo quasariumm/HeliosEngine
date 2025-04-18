@@ -117,13 +117,16 @@ void AssetManager::DrawAssetView()
 
 void AssetManager::DrawAssetInfo()
 {
-    ImGui::Begin(ICON_CUBE_SEND" Asset Viewer");
+    ImGui::Begin(ICON_CUBE_SEND" Asset Viewer", nullptr, ImGuiWindowFlags_MenuBar);
 
-    if (m_selectedAsset == "")
+    if (ImGui::BeginMenuBar())
     {
-        ImGui::Text("No asset selected");
-        ImGui::End();
-        return;
+        if (m_selectedAsset == "")
+            ImGui::Text(ICON_FILE" No asset selected");
+        else
+            ImGui::Text((AssetIcon(m_selectedAsset) + m_selectedAsset.filename().string()).c_str());
+
+        ImGui::EndMenuBar();
     }
 
     switch (GetAssetTypeByPath(m_selectedAsset))
@@ -167,7 +170,7 @@ std::string AssetManager::AssetIcon(const std::filesystem::path& asset)
     if (t == ".scn") return ICON_MAP" ";
     if (t == ".gep") return ICON_CONTROLLER" ";
     if (t == ".md") return ICON_MATH_LOG" ";
-    return ICON_CUBE" ";
+    return ICON_FILE" ";
 }
 
 void AssetManager::ScenePopup()

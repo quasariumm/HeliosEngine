@@ -10,7 +10,8 @@ public:
     enum LoadType
     {
         NONE,
-        OBJECT
+        OBJECT,
+        COMPONENT
     };
 
     static void LoadFromFile(Scene* scene, const std::filesystem::path& fileName);

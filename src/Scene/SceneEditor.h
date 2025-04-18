@@ -30,6 +30,8 @@ namespace Engine
         uint32_t m_selectedObject = 0;
         uint32_t m_prvSelectedObject = 0;
         TreeSelectMode m_selectMode = SELECT;
+
+        SceneObject* m_renameObject = nullptr;
     };
 
 }

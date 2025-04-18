@@ -5,6 +5,7 @@
 #include "Assets/AssetManager.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"
+#include "Components/Sphere.h"
 #include "Core/Window.h"
 #include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"
