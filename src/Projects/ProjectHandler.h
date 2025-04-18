@@ -29,6 +29,9 @@ class ProjectHandler
     static bool IsToken(const std::string& line, const std::string& token);
     static std::string TokenValue(const std::string& line);
 
+    static void AddRecentProject(const std::filesystem::path& projectPath, const std::string& name);
+    static std::unordered_map<std::string, std::filesystem::path> ReadRecentProjects();
+
     static bool m_selectorOpen;
     static bool m_creatorOpen;
 
