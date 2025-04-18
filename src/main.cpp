@@ -111,7 +111,7 @@ int main(int, char**)
 	rayCompute.SetFloat(baseName + ".radius", 1.f);
 
 	const std::string matBaseName = baseName + ".material";
-	rayCompute.SetVec3(matBaseName + ".diffuseColor", Engine::vec3f(1.f));
+	rayCompute.SetVec3(matBaseName + ".diffuseColor", Engine::vec3f(0.9f, 0.6f, 0.3f));
 	rayCompute.SetVec3(matBaseName + ".specularColor", Engine::vec3f(1.f));
 	rayCompute.SetFloat(matBaseName + ".shininess", 0.f);
 	rayCompute.SetFloat(matBaseName + ".specularProbability", 1.f);

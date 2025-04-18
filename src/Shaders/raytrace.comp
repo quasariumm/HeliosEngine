@@ -10,6 +10,8 @@ uniform mat4 CamToWorld;
 uniform vec3 ViewParams;
 
 const float PI = 3.14159265357f;
+const float TWO_PI = 2.0 * PI;
+
 
 
 struct RayTracingMaterial
@@ -137,6 +139,61 @@ vec3 GetPDF(inout RayTracingMaterial material)
 }
 
 /*
+	Random
+*/
+
+uint Randomise(inout uint seed)
+{
+	seed = seed * 747796405u + 2891336453u;
+	seed = ((seed >> ((seed >> 28u) + 4u)) ^ seed) * 277803737u;
+	seed = (seed >> 22u) ^ seed;
+	return seed;
+}
+
+float RandomFloat(inout uint seed)
+{
+	return Randomise(seed) / 4294967295.f;
+}
+
+// Random value in normal distribution (with mean=0 and sd=1)
+float RandomValueNormalDistribution(inout uint seed)
+{
+	// Thanks to https://stackoverflow.com/a/6178290
+	float theta = TWO_PI * RandomFloat(seed);
+	float rho = sqrt(-2 * log(RandomFloat(seed)));
+	return rho * cos(theta);
+}
+
+
+// Calculate a random direction
+vec3 RandomDirection(inout uint seed)
+{
+	// Thanks to https://math.stackexchange.com/a/1585996
+	float x = RandomValueNormalDistribution(seed);
+	float y = RandomValueNormalDistribution(seed);
+	float z = RandomValueNormalDistribution(seed);
+	return normalize(vec3(x, y, z));
+}
+
+
+vec2 RandomPointInCircle(inout uint seed)
+{
+	float angle = RandomFloat(seed) * TWO_PI;
+	vec2 pointOnCircle = vec2(cos(angle), sin(angle));
+	return pointOnCircle * sqrt(RandomFloat(seed));
+}
+
+/*
+	Bounces
+*/
+
+void LambertianBounce(inout Ray ray, inout uint seed, in RayHitInfo info)
+{
+	ray.dir = normalize(info.normal + RandomDirection(seed));
+	ray.invDir = 1.0 / ray.dir;
+}
+
+/*
 	Lighting
 */
 
@@ -164,14 +221,12 @@ vec3 Trace(Ray ray, uint seed)
 	vec3 incommingLight = vec3(0);
 	vec3 rayColor = vec3(1);
 
-	for (int i = 0; i <= 0; ++i)
+	for (int i = 0; i <= 3; ++i)
 	{
 		RayHitInfo info = RayCollision(ray);
 
 		if (info.didHit)
 		{
-			ray.origin = info.hitPoint + 0.0001 * info.normal;
-
 			vec3 BRDF = GetBRDF(info.material);
 			vec3 PDF = GetPDF(info.material);
 
@@ -179,13 +234,16 @@ vec3 Trace(Ray ray, uint seed)
 
 			vec3 light = SampleDirectionalLight(sun, info.hitPoint, info.normal);
 
-			incommingLight += emittance + BRDF * light * PDF;
+			incommingLight += (emittance + BRDF * light * PDF) * rayColor;
 
-			rayColor *= info.material.diffuseColor;
+			rayColor *= info.material.diffuseColor * light;
+
+			ray.origin = info.hitPoint + 0.0001 * info.normal;
+			LambertianBounce(ray, seed, info);
 		}
 		else
 		{
-			incommingLight += vec3(0.8, 0.8, 1.0);
+			incommingLight += rayColor * vec3(0.2, 0.2, 0.4);
 			break;
 		}
 	}
