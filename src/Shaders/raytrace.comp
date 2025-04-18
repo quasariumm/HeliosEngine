@@ -1,6 +1,4 @@
-#version 460 core
-#extension GL_ARB_shader_storage_buffer_object : require
-#extension GL_ARB_shading_language_include : require
+#version 460
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -11,18 +9,8 @@ uniform uint ScreenHeight;
 uniform mat4 CamToWorld;
 uniform vec3 ViewParams;
 
-uniform bool Accumulate;
-
-uniform int Frame = 0;
-
 const float PI = 3.14159265357f;
 
-struct Ray
-{
-	vec3 origin;
-	vec3 dir;
-	vec3 invDir;
-};
 
 struct RayTracingMaterial
 {
@@ -38,6 +26,8 @@ struct RayTracingMaterial
 	float refractionCoefficient;
 };
 
+const RayTracingMaterial defaultMaterial = RayTracingMaterial(vec3(0.0), vec3(0.0), 0.0, 1.0, vec3(0.0), 0.0, 0.0, 1.0);
+
 struct RayHitInfo
 {
 	bool didHit;
@@ -47,6 +37,93 @@ struct RayHitInfo
 	RayTracingMaterial material;
 };
 
+const RayHitInfo defaultHitInfo = RayHitInfo( false, 1e30, vec3(0.0), vec3(0.0), defaultMaterial );
+
+
+struct Ray
+{
+	vec3 origin;
+	vec3 dir;
+	vec3 invDir;
+};
+
+struct Sphere
+{
+	vec3 center;
+	float radius;
+	RayTracingMaterial material;
+};
+#define SPHERES_MAX 16
+uniform Sphere Spheres[SPHERES_MAX];
+uniform int NumSpheres = 0;
+
+const Sphere testSphere = Sphere(vec3(0.0), 1.0, defaultMaterial);
+
+RayHitInfo RaySphere(Ray ray, Sphere sphere)
+{
+	// Thanks for the code, Sebastian Lague
+	RayHitInfo hitInfo = defaultHitInfo;
+	hitInfo.material = sphere.material;
+
+	vec3 difference = sphere.center - ray.origin;
+	float a = dot(ray.dir, ray.dir);
+	float b = -2.0 * dot(difference, ray.dir);
+	float c = dot(difference, difference) - sphere.radius * sphere.radius;
+	float disc = b*b - 4.0*a*c;
+	if (disc < 0.0)
+	{
+		// Ray truly misses the sphere
+		return hitInfo;
+	}
+
+	float sqrtDisc = sqrt(disc);
+	// Distance to nearest intersection point (from quadratic formula)
+	float dst = (-b - sqrtDisc) / (2.0 * a);
+
+	// Ignore intersections that occur behind the ray
+	if (dst >= 0.0)
+	{
+		hitInfo.didHit = true;
+		hitInfo.dst = dst;
+		hitInfo.hitPoint = ray.origin + ray.dir * dst;
+		hitInfo.normal = normalize(hitInfo.hitPoint - sphere.center);
+		return hitInfo;
+	}
+
+	float dst2 = (-b + sqrtDisc) / (2.0 * a);
+
+	if (dst2 >= 0.0)
+	{
+		hitInfo.didHit = true;
+		hitInfo.dst = dst2;
+		hitInfo.hitPoint = ray.origin + ray.dir * dst2;
+		hitInfo.normal = normalize(hitInfo.hitPoint - sphere.center);
+		return hitInfo;
+	}
+
+	return hitInfo;
+}
+
+RayHitInfo RayCollision(Ray ray)
+{
+	RayHitInfo closest = defaultHitInfo;
+	closest.didHit = false;
+	closest.dst = 1e30;
+	for (int i = 0; i < NumSpheres; ++i)
+	{
+		RayHitInfo sphereInfo = RaySphere(ray, Spheres[i]);
+		if (sphereInfo.didHit
+		&& (sphereInfo.dst < closest.dst))
+		{
+			closest = sphereInfo;
+		}
+	}
+	return closest;
+}
+
+/*
+	Materials
+*/
 
 vec3 GetBRDF(inout RayTracingMaterial material)
 {
@@ -56,16 +133,64 @@ vec3 GetBRDF(inout RayTracingMaterial material)
 
 vec3 GetPDF(inout RayTracingMaterial material)
 {
-	return vec3(PI);
+	return vec3(1.0);
 }
 
+/*
+	Lighting
+*/
+
+struct DirectionalLight
+{
+	vec3 color;
+	vec3 direction;
+	float intensity;
+};
+
+vec3 SampleDirectionalLight(DirectionalLight light, vec3 intersection, vec3 normal)
+{
+	float overlap = dot(light.direction, normal);
+	if (overlap < 0.0)
+	{
+		return vec3(0.0);
+	}
+	return light.color * light.intensity * overlap;
+}
+
+const DirectionalLight sun = DirectionalLight(vec3(0.9), normalize(vec3(1.0, -1.0, 0.0)), 1.0);
 
 vec3 Trace(Ray ray, uint seed)
 {
 	vec3 incommingLight = vec3(0);
 	vec3 rayColor = vec3(1);
 
-	return ray.dir;
+	for (int i = 0; i <= 0; ++i)
+	{
+		RayHitInfo info = RayCollision(ray);
+
+		if (info.didHit)
+		{
+			ray.origin = info.hitPoint + 0.0001 * info.normal;
+
+			vec3 BRDF = GetBRDF(info.material);
+			vec3 PDF = GetPDF(info.material);
+
+			vec3 emittance = info.material.emissionColor * info.material.emissionStrength;
+
+			vec3 light = SampleDirectionalLight(sun, info.hitPoint, info.normal);
+
+			incommingLight += emittance + BRDF * light * PDF;
+
+			rayColor *= info.material.diffuseColor;
+		}
+		else
+		{
+			incommingLight += vec3(0.8, 0.8, 1.0);
+			break;
+		}
+	}
+
+	return incommingLight;
 }
 
 void main()
@@ -73,22 +198,23 @@ void main()
 	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
 
 	if (texelCoord.x >= ScreenWidth || texelCoord.y >= ScreenHeight)
+	{
 		return;
+	}
 
-	vec2 tc = vec2(texelCoord.x / float(ScreenWidth), texelCoord.y / float(ScreenHeight));
-
-	Ray ray;
+	vec2 tc = vec2(float(texelCoord.x) / float(ScreenWidth), float(texelCoord.y) / float(ScreenHeight));
 
 	vec3 focusDirLocal = vec3((tc - 0.5) * ViewParams.xy, ViewParams.z);
-	ray.dir = (CamToWorld * vec4(focusDirLocal, 1.0)).xyz;
-	ray.origin = CamToWorld[3].xyz;
 
-	// Generate a random number based on the focus dir and the time
-	// Since the x and y of the texture coordinate give an 'index', I use those
+	Ray ray = Ray(
+		vec3(CamToWorld[0].w, CamToWorld[1].w, CamToWorld[2].w),
+		normalize((CamToWorld * vec4(focusDirLocal, 1.0)).xyz),
+		1.0 / normalize((CamToWorld * vec4(focusDirLocal, 1.0)).xyz)
+	);
+
 	uint seed = uint(floor(
 		tc.y * ScreenHeight * ScreenWidth
 		+ tc.x * ScreenWidth)
-		* Frame
 	);
 
 	vec4 pixel = vec4(Trace(ray, seed), 1.0);

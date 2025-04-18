@@ -74,7 +74,7 @@ void Camera::HandleInput( Window& window, const float deltaTime )
 void Camera::MouseMove( const vec2f& delta )
 {
 	m_yaw   += 0.1f * delta.x;
-	m_pitch += -0.1f * delta.y;
+	m_pitch += 0.1f * delta.y;
 
 	// make sure that when pitch is out of bounds, screen doesn't get flipped
 	m_pitch = std::clamp(m_pitch, -89.9f, 89.9f);

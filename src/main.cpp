@@ -107,7 +107,7 @@ int main(int, char**)
 	// Add a sphere to the scene
 	rayCompute.SetInt("NumSpheres", 1);
 	const std::string baseName = "Spheres[0]";
-	rayCompute.SetVec3(baseName + ".center", Engine::vec3f(-3.f, 0.f, 0.f));
+	rayCompute.SetVec3(baseName + ".center", Engine::vec3f(0.f, 0.f, -6.f));
 	rayCompute.SetFloat(baseName + ".radius", 1.f);
 
 	const std::string matBaseName = baseName + ".material";
@@ -158,7 +158,7 @@ int main(int, char**)
 
         Engine::BaseEditorInterface::DrawAllInterfaces();
 
-        ImGui::Begin("Texture");
+        ImGui::Begin(ICON_MONITOR_SCREENSHOT" Viewport");
 
     	// Thanks envoyious! https://github.com/ocornut/imgui/issues/5118
     	ImVec2 screenSize = ImGui::GetContentRegionAvail();
@@ -197,7 +197,7 @@ int main(int, char**)
     	if (alpha > 0.05f) alpha *= 0.5f;
     	const float fps = 1000.0f / avg, rps = (static_cast<float>(rayTexture.GetWidth()) * static_cast<float>(rayTexture.GetHeight())) / avg;
 
-    	if (frame % 200 == 0)
+    	if (frame % 50 == 0)
 			window->SetTitle( std::format(L"{0:5.2f}ms ({1:.1f}fps) - {2:.1f}Mrays/s\n", avg, fps, rps / 1000) );
     }
 
