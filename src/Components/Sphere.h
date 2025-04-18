@@ -17,7 +17,6 @@ public:
     }
 
     float m_radius = 1.0f;
-    vec3* m_position = m_attachedObject->GetTransform()->positionRef();
 };
 
 REGISTER_COMPONENT(Sphere);

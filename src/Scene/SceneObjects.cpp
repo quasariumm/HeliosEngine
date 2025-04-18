@@ -46,25 +46,6 @@ void SceneObject::RemoveChild(const SceneObject* object)
             m_childObjects.erase(m_childObjects.begin() + i);
 }
 
-template <typename T>
-T* SceneObject::FindComponent()
-{
-    for (const std::unique_ptr<Component>& c : m_components)
-        if (c->GetType() == typeid(T))
-            return static_cast<T*>(c);
-    DebugLog(LogSeverity::WARNING, "Object did not have requested component");
-    return nullptr;
-}
-
-template <typename T>
-T* SceneObject::AddComponent()
-{
-    auto component = std::make_unique<T>();
-    T* ptr = component.get(); // raw pointer for access
-    m_components.push_back(std::move(component));
-    return ptr;
-}
-
 Component* SceneObject::AddComponentByName(const std::string& name)
 {
     std::unique_ptr<Component> comp = ComponentRegister::Instance().Create(name);

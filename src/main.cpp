@@ -105,10 +105,15 @@ int main(int, char**)
 	rayCompute.SetUInt("ScreenWidth", window->GetSize().x);
 	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
 
+	Engine::SceneObject* testObject = g_scene.NewObject();
+	testObject->GetTransform()->position() = {3,3,3};
+	DebugWatch("Test Object", testObject->GetTransform()->positionRef());
+    Engine::Sphere* sphere = testObject->AddComponent<Engine::Sphere>();
+
 	// Add a sphere to the scene
 	rayCompute.SetInt("NumSpheres", 2);
 	const std::string baseName = "Spheres[0]";
-	rayCompute.SetVec3(baseName + ".center", Engine::vec3f(0.f, 0.f, -6.f));
+	rayCompute.SetVec3(baseName + ".center", testObject->GetTransform()->position());
 	rayCompute.SetFloat(baseName + ".radius", 1.f);
 
 	const std::string matBaseName = baseName + ".material";
@@ -157,6 +162,10 @@ int main(int, char**)
     	camera.HandleInput(*window, deltaTime);
 
     	rayCompute.Use();
+
+    	const std::string baseName = "Spheres[0]";
+    	rayCompute.SetVec3(baseName + ".center", testObject->GetTransform()->position());
+    	rayCompute.SetFloat(baseName + ".radius", sphere->m_radius);
 
     	const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
     	Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);
