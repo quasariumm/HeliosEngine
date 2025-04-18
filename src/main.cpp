@@ -105,7 +105,7 @@ int main(int, char**)
 	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
 
 	// Add a sphere to the scene
-	rayCompute.SetInt("NumSpheres", 1);
+	rayCompute.SetInt("NumSpheres", 2);
 	const std::string baseName = "Spheres[0]";
 	rayCompute.SetVec3(baseName + ".center", Engine::vec3f(0.f, 0.f, -6.f));
 	rayCompute.SetFloat(baseName + ".radius", 1.f);
@@ -121,6 +121,22 @@ int main(int, char**)
 
 	rayCompute.SetFloat(matBaseName + ".refractionProbability", 0.f);
 	rayCompute.SetFloat(matBaseName + ".refractionCoefficient", 1.f);
+
+	const std::string baseName2 = "Spheres[1]";
+	rayCompute.SetVec3(baseName2 + ".center", Engine::vec3f(0.f, -32.f, -6.f));
+	rayCompute.SetFloat(baseName2 + ".radius", 30.f);
+
+	const std::string matBaseName2 = baseName2 + ".material";
+	rayCompute.SetVec3(matBaseName2 + ".diffuseColor", Engine::vec3f(1.f));
+	rayCompute.SetVec3(matBaseName2 + ".specularColor", Engine::vec3f(1.f));
+	rayCompute.SetFloat(matBaseName2 + ".shininess", 0.f);
+	rayCompute.SetFloat(matBaseName2 + ".specularProbability", 1.f);
+
+	rayCompute.SetVec3(matBaseName2 + ".emissionColor", Engine::vec3f(1.f));
+	rayCompute.SetFloat(matBaseName2 + ".emissionStrength", 0.f);
+
+	rayCompute.SetFloat(matBaseName2 + ".refractionProbability", 0.f);
+	rayCompute.SetFloat(matBaseName2 + ".refractionCoefficient", 1.f);
 
     Engine::Timer frameTimer;
 	uint64_t frame = 0;
@@ -150,7 +166,7 @@ int main(int, char**)
 
     	rayTexture.UseCompute(0);
     	rayCompute.Dispatch(computeThreads);
-    	rayTexture.UpdateData();
+    	// rayTexture.UpdateData();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();

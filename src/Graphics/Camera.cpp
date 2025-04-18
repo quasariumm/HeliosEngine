@@ -48,7 +48,7 @@ mat4f Camera::GetCamToWorldMatrix( const vec2u& viewportSize ) const
 {
 	return mat4f(
 	{ m_camRight.x, 	m_camRight.y, 	m_camRight.z, 	m_camPos.x },
-	{ m_camUp.x, 	m_camUp.y, 		m_camUp.z, 		m_camPos.y },
+	{ -m_camUp.x, 	-m_camUp.y, 	-m_camUp.z, 		m_camPos.y },
 	{ m_camFront.x, 	m_camFront.y, 	m_camFront.z, 	m_camPos.z },
 	{ 0, 				0, 			0, 			0 }
 	);
@@ -74,7 +74,7 @@ void Camera::HandleInput( Window& window, const float deltaTime )
 void Camera::MouseMove( const vec2f& delta )
 {
 	m_yaw   += 0.1f * delta.x;
-	m_pitch += 0.1f * delta.y;
+	m_pitch += -0.1f * delta.y;
 
 	// make sure that when pitch is out of bounds, screen doesn't get flipped
 	m_pitch = std::clamp(m_pitch, -89.9f, 89.9f);

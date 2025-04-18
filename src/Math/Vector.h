@@ -70,7 +70,7 @@ struct vec3t
 {
 	vec3t() = default;
 	vec3t(const T x, const T y, const T z) : x(x), y(y), z(z) {}
-	explicit vec3t(const T s) : x(s), y(s), z(z) {}
+	explicit vec3t(const T s) : x(s), y(s), z(s) {}
 
 	template<typename U> requires numeric<U>
 	explicit vec3t(const vec2t<U>& v) : x(v.x), y(v.y), z(0) {}

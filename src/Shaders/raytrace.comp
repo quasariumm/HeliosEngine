@@ -149,7 +149,7 @@ struct DirectionalLight
 
 vec3 SampleDirectionalLight(DirectionalLight light, vec3 intersection, vec3 normal)
 {
-	float overlap = dot(light.direction, normal);
+	float overlap = dot(-light.direction, normal);
 	if (overlap < 0.0)
 	{
 		return vec3(0.0);
