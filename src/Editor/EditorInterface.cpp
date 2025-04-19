@@ -5,10 +5,11 @@
 namespace Engine
 {
 
-void EditorInterfaceManager::Initialize()
+void EditorInterfaceManager::Initialize(Window* window)
 {
+    Instance().m_window = window;
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags = ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard;
 
     io.Fonts->AddFontFromFileTTF("extern/imgui/misc/fonts/Roboto-Medium.ttf", 16.0f);
 
@@ -41,6 +42,8 @@ void EditorInterfaceManager::DrawAllInterfaces() const
                 ProjectHandler::ShowProjectSelector(true);
             if (ImGui::MenuItem(ICON_DOWNLOAD_CIRCLE" New project"))
                 ProjectHandler::ShowProjectCreator(true);
+            if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor"))
+                m_window->SetShouldClose(true);
 
             ImGui::EndMenu();
         }
@@ -61,5 +64,23 @@ void EditorInterfaceManager::DrawAllInterfaces() const
     for (const auto& i : m_editorInterfaces)
         if (i.second->active)
             i.second->DrawInterface();
+}
+
+void EditorInterfaceManager::SetMouseEnabled(bool enable)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    if (enable)
+        io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+    else
+        io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+}
+
+void EditorInterfaceManager::SetKeyboardEnable(bool enable)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    if (enable)
+        io.ConfigFlags &= ~ImGuiConfigFlags_NoKeyboard;
+    else
+        io.ConfigFlags |= ImGuiConfigFlags_NoKeyboard;
 }
 }

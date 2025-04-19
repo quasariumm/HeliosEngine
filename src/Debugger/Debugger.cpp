@@ -116,7 +116,9 @@ void Debugger::DrawWatchList()
 {
     for (Logger::Watch& watch : Logger::g_watchList)
     {
-        if (watch.type == typeid(int))
+        if (watch.type == typeid(bool))
+            ImGui::Checkbox(watch.name.c_str(), (bool*)watch.var);
+        else if (watch.type == typeid(int))
             ImGui::InputInt(watch.name.c_str(), (int*)watch.var);
         else if (watch.type == typeid(float))
             ImGui::InputFloat(watch.name.c_str(), (float*)watch.var);
@@ -131,7 +133,9 @@ void Debugger::DrawWatchList()
     ImGui::BeginDisabled();
     for (Logger::Watch& watch : Logger::g_tempWatchList)
     {
-        if (watch.type == typeid(int))
+        if (watch.type == typeid(bool))
+            ImGui::Checkbox(watch.name.c_str(), (bool*)watch.var);
+        else if (watch.type == typeid(int))
             ImGui::InputInt(watch.name.c_str(), (int*)watch.var);
         else if (watch.type == typeid(float))
             ImGui::InputFloat(watch.name.c_str(), (float*)watch.var);

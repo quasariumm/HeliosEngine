@@ -32,19 +32,12 @@ void GLAPIENTRY MessageCallback(
 
 void temp(Engine::Window& window, Engine::Key key)
 {
-	if (key == Engine::Key::ESCAPE)
-		window.SetShouldClose(true);
-
-	if (key == Engine::Key::C)
-		window.SetCursorMode( (window.GetCursorMode() == Engine::CursorMode::NORMAL) ? Engine::CursorMode::DISABLED : Engine::CursorMode::NORMAL );
-
 	if (key == Engine::Key::B)
 	{
 		DebugLog(Engine::LogSeverity::DONE, "Pressed B");
 		DebugLog(Engine::LogSeverity::INFO, "Pressed B");
 		DebugLog(Engine::LogSeverity::WARNING, "Pressed B");
 		DebugLog(Engine::LogSeverity::ERROR, "Pressed B");
-
 	}
 }
 
@@ -65,12 +58,9 @@ int main(int, char**)
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( MessageCallback, nullptr );
 
-	Engine::EditorInterfaceManager::Initialize();
+	Engine::EditorInterfaceManager::Initialize(window.get());
 
 	Engine::SceneEditor::SetEditingScene(&g_scene);
-
-	int test = 0;
-	Engine::DebugWatch<int>("Test Int", &test);
 
 	Engine::GL46_Texture2D rayTexture;
 	rayTexture.FillBlank(window->GetSize().x, window->GetSize().y, 4, Engine::TextureFormat::RGBA32F, true);
@@ -138,10 +128,22 @@ int main(int, char**)
 
 	Engine::Camera camera;
 
+	window->SetMouseButtonDownCallback([&camera](Engine::Window&, Engine::MouseButton button)
+	{
+		camera.MouseButtonDown(button);
+	});
+
+	window->SetMouseButtonUpCallback([&camera](Engine::Window&, Engine::MouseButton button)
+	{
+		camera.MouseButtonUp(button);
+	});
+
 	window->SetMouseMoveCallback([&camera](Engine::Window&, Engine::vec2f diff)
 	{
 		camera.MouseMove(diff);
 	});
+
+	bool mouseOverViewport = false;
 
     while (!window->ShouldClose())
     {
@@ -171,6 +173,9 @@ int main(int, char**)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+		Engine::EditorInterfaceManager::SetMouseEnabled(!camera.LockedToViewport());
+		Engine::EditorInterfaceManager::SetKeyboardEnable(!camera.LockedToViewport());
 
         Engine::EditorInterfaceManager::Instance().DrawAllInterfaces();
 

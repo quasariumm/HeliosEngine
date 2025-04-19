@@ -57,7 +57,19 @@ mat4f Camera::GetCamToWorldMatrix( const vec2u& viewportSize ) const
 
 void Camera::HandleInput( Window& window, const float deltaTime )
 {
-	const float speed = 20.f * deltaTime;
+	if (m_usingCamera)
+		window.SetCursorMode(CursorMode::DISABLED);
+	else
+	{
+		window.SetCursorMode(CursorMode::NORMAL);
+		return;
+	}
+
+	float speed = 20.f * deltaTime;
+
+	if (window.GetKey( Key::LEFT_SHIFT )) speed *= 5.0f;
+	if (window.GetKey( Key::LEFT_CONTROL )) speed *= 0.2f;
+
 	UpdateCameraVectors();
 	bool changed = false;
 	if (window.GetKey( Key::A )) m_camPos -= m_camRight * speed, changed = true;
@@ -73,6 +85,9 @@ void Camera::HandleInput( Window& window, const float deltaTime )
 
 void Camera::MouseMove( const vec2f& delta )
 {
+	if (!m_usingCamera)
+		return;
+
 	m_yaw   += 0.1f * delta.x;
 	m_pitch += -0.1f * delta.y;
 
@@ -81,6 +96,18 @@ void Camera::MouseMove( const vec2f& delta )
 
 	// update Front, Right and Up Vectors using the updated Euler angles
 	UpdateCameraVectors();
+}
+
+void Camera::MouseButtonDown(const MouseButton& button)
+{
+	if (button == MouseButton::RIGHT)
+		m_usingCamera = true;
+}
+
+void Camera::MouseButtonUp(const MouseButton& button)
+{
+	if (button == MouseButton::RIGHT)
+		m_usingCamera = false;
 }
 
 

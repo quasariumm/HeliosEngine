@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Keys.h"
 
 namespace Engine
 {
@@ -23,6 +24,18 @@ public:
 	 * @param delta The distance the cursor has traveled
 	 */
 	void MouseMove(const vec2f& delta);
+
+	/**
+	 * @brief Handles button presses for the camera
+	 * @param button The button that has been pressed
+	 */
+	void MouseButtonDown(const MouseButton& button);
+
+	/**
+	 * @brief Handles button release for the camera
+	 * @param button The button that has been released
+	 */
+	void MouseButtonUp(const MouseButton& button);
 
 	/**
 	 * @brief Gives the viewport parameters used for raytracing
@@ -55,6 +68,9 @@ public:
 	[[nodiscard]]
 	mat4f GetCamToWorldMatrix(const vec2u& viewportSize) const;
 
+	[[nodiscard]]
+	bool LockedToViewport() const { return m_usingCamera; }
+
 private:
 
 	const vec3f m_worldUp = vec3f( 0, 1, 0 );
@@ -65,6 +81,8 @@ private:
 	float m_fov = 70.0f;
 	// Used for Ray tracing
 	float m_focusPlaneDistance = 1.f;
+
+	bool m_usingCamera = false;
 
 	/**
 	 * @brief Updates the front, right and up vectors of the camera
