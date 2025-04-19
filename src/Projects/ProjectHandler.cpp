@@ -69,6 +69,25 @@ void ProjectHandler::ProjectWindows()
                 {
                     ShowProjectSelector(false);
                     LoadProject(path);
+                    AddRecentProject(path, m_projectData.projectName);
+                }
+            }
+        }
+
+        if (ImGui::CollapsingHeader("Recent Projects"))
+        {
+            std::unordered_map<std::string, std::filesystem::path> recentProjects = ReadRecentProjects();
+            for (std::pair<std::string, std::filesystem::path> recent : recentProjects)
+            {
+                if (ImGui::Selectable(recent.first.c_str()))
+                {
+                    if (!ValidateProjectFolder(recent.second))
+                        DebugLog(LogSeverity::ERROR, "Project doesn't exist");
+                    else
+                    {
+                        ShowProjectSelector(false);
+                        LoadProject(recent.second);
+                    }
                 }
             }
         }
@@ -130,6 +149,8 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
 
     file.close();
 
+    AddRecentProject(projectFilePath, data.projectName);
+
     DebugLog(LogSeverity::DONE, "Project created successfully");
     return true;
 }
@@ -168,6 +189,7 @@ bool ProjectHandler::ValidateProjectFolder(std::filesystem::path& projectPath)
 {
     if (projectPath.has_extension())
         projectPath.remove_filename();
+    projectPath.make_preferred();
 
     return std::filesystem::exists(projectPath.string() + "/Project.gep");
 }
@@ -187,6 +209,34 @@ std::string ProjectHandler::TokenValue(const std::string& line)
 {
     std::string token = line;
     return token.erase(0, line.find(" = ") + 3);
+}
+
+void ProjectHandler::AddRecentProject(const std::filesystem::path& projectPath, const std::string& name)
+{
+    std::ofstream file("RecentProjects.txt", std::ios_base::app);
+    if (!file.is_open())
+        return;
+    file << name << " = " << projectPath.generic_string() << std::endl;
+    file.close();
+}
+
+std::unordered_map<std::string, std::filesystem::path> ProjectHandler::ReadRecentProjects()
+{
+    std::ifstream file("RecentProjects.txt");
+
+    std::string line;
+
+    std::unordered_map<std::string, std::filesystem::path> recentProjects;
+
+    while (std::getline(file, line))
+    {
+        std::string name = line.substr(0, line.find(" = "));
+        std::string path = line;
+        path = path.erase(0, path.find(" = ") + 3);
+        recentProjects[name] = path;
+    }
+
+    return recentProjects;
 }
 
 }

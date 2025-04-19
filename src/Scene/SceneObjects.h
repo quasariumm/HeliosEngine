@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Components/Component.h"
+#include "Debugger/Debugger.h"
 
 class Model;
 
@@ -15,9 +16,15 @@ namespace Engine
         [[nodiscard]]
         vec3 position() const { return p; }
         [[nodiscard]]
+        vec3* positionRef() { return &p; }
+        [[nodiscard]]
         vec3 rotation() const { return r; }
         [[nodiscard]]
+        vec3* rotationRef() { return &r; }
+        [[nodiscard]]
         vec3 scale() const { return s; }
+        [[nodiscard]]
+        vec3* scaleRef() { return &s; }
 
         // Setter functions
         void matrix(const mat4& matrix) { t = matrix, UpdateTransform(); }
@@ -80,11 +87,30 @@ namespace Engine
         /// Remove an object as a child. Also removes parent from the child
         void RemoveChild(const SceneObject* object);
 
-        template<class T>
-        T* FindComponent();
-        void AddComponent(Component* component) { m_components.push_back(component); component->AttachToObject(this);  }
+        template <typename T>
+        T* FindComponent()
+        {
+            for (const std::unique_ptr<Component>& c : m_components)
+                if (c->GetType() == typeid(T))
+                    return static_cast<T*>(c);
+            DebugLog(LogSeverity::WARNING, "Object did not have requested component");
+            return nullptr;
+        }
+
+        template <typename T>
+        T* AddComponent()
+        {
+            auto component = std::make_unique<T>();
+            T* ptr = component.get(); // raw pointer for access
+            m_components.push_back(std::move(component));
+            return ptr;
+        }
+
+        Component* AddComponentByName(const std::string& name);
+
         void RemoveComponent() { }
-        std::vector<Component*> GetComponentList() {return m_components;}
+
+        const std::vector<std::unique_ptr<Component>>& GetComponentList() {return m_components;}
         
         std::vector<SceneObject*>& GetChildren() { return m_childObjects; }
 
@@ -97,6 +123,6 @@ namespace Engine
         Transform m_transform = Transform();
         SceneObject* m_parentObject = nullptr;
         std::vector<SceneObject*> m_childObjects = {};
-        std::vector<Component*> m_components = {};
+        std::vector<std::unique_ptr<Component>> m_components = {};
     };
 }

@@ -14,7 +14,7 @@ enum class AssetType
     PROJECT
 };
 
-class AssetManager : EditorInterface
+class AssetManager : public EditorInterface
 {
 public:
     AssetManager() : EditorInterface("Asset Manager") {}

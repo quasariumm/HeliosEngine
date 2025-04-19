@@ -1,72 +1,48 @@
 #pragma once
-#include "Projects/ProjectHandler.h"
 
 namespace Engine
 {
-    class EditorInterface;
+class EditorInterface;
 
-    static std::vector<EditorInterface*> g_editorInterfaces;
+class EditorInterface
+{
+public:
+    explicit EditorInterface(std::string name): name(std::move(name)) {}
+    virtual ~EditorInterface() = default;
 
-    class EditorInterface
+    virtual void DrawInterface() = 0;
+
+    const std::string name;
+    bool active = true;
+};
+
+class EditorInterfaceManager
+{
+public:
+    EditorInterfaceManager() = default;
+
+    static EditorInterfaceManager& Instance()
     {
-    public:
-        explicit EditorInterface(std::string  name) : name(std::move(name)) { g_editorInterfaces.push_back(this); }
-        virtual ~EditorInterface() = default;
+        static EditorInterfaceManager instance;
+        return instance;
+    }
 
-        virtual void DrawInterface() = 0;
+    void RegisterInterface(const std::string& name, std::unique_ptr<EditorInterface> interface) {
+        m_editorInterfaces[name] = std::move(interface);
+    }
 
-        const std::string name;
-        bool active = true;
-    };
+    static void Initialize();
 
-    class BaseEditorInterface
-    {
-    public:
-        BaseEditorInterface();
+    void DrawAllInterfaces() const;
 
-        static void DrawAllInterfaces()
-        {
-            ProjectHandler::ProjectWindows();
+    std::unordered_map<std::string, std::unique_ptr<EditorInterface>> m_editorInterfaces = {};
+};
 
-            ImGui::DockSpaceOverViewport();
+#define REGISTER_EDITOR_INTERFACE(TYPE) \
+static bool TYPE##_registered = []() { \
+Engine::EditorInterfaceManager::Instance().RegisterInterface(#TYPE, std::make_unique<TYPE>()); \
+return true; \
+}()
 
-            static bool showImguiDebug = false;
-
-            if (ImGui::BeginMainMenuBar())
-            {
-                std::string projectName;
-                if (ProjectLoaded())
-                    projectName = std::string(ICON_CONTROLLER" ") + ProjectName();
-                else
-                    projectName =  ICON_ALERT" No project loaded";
-
-                if (ImGui::BeginMenu(projectName.c_str()))
-                {
-                    if (ImGui::MenuItem(ICON_UPLOAD_CIRCLE" Open project"))
-                        ProjectHandler::ShowProjectSelector(true);
-                    if (ImGui::MenuItem(ICON_DOWNLOAD_CIRCLE" New project"))
-                        ProjectHandler::ShowProjectCreator(true);
-
-                    ImGui::EndMenu();
-                }
-                if (ImGui::BeginMenu(ICON_TOOLS" Tools"))
-                {
-                    for (EditorInterface* i : g_editorInterfaces)
-                        ImGui::MenuItem(i->name.c_str(), nullptr, &i->active);
-                    ImGui::MenuItem("ImGui Debugger", nullptr, &showImguiDebug);
-                    ImGui::EndMenu();
-                }
-
-                ImGui::EndMainMenuBar();
-            }
-
-            if (showImguiDebug)
-                ImGui::ShowMetricsWindow();
-
-            for (EditorInterface* i : g_editorInterfaces)
-                if (i->active)
-                i->DrawInterface();
-        }
-    };
 }
 

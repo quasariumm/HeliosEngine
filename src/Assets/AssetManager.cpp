@@ -117,13 +117,16 @@ void AssetManager::DrawAssetView()
 
 void AssetManager::DrawAssetInfo()
 {
-    ImGui::Begin(ICON_CUBE_SEND" Asset Viewer");
+    ImGui::Begin(ICON_CUBE_SEND" Asset Viewer", nullptr, ImGuiWindowFlags_MenuBar);
 
-    if (m_selectedAsset == "")
+    if (ImGui::BeginMenuBar())
     {
-        ImGui::Text("No asset selected");
-        ImGui::End();
-        return;
+        if (m_selectedAsset == "")
+            ImGui::Text(ICON_FILE" No asset selected");
+        else
+            ImGui::Text((AssetIcon(m_selectedAsset) + m_selectedAsset.filename().string()).c_str());
+
+        ImGui::EndMenuBar();
     }
 
     switch (GetAssetTypeByPath(m_selectedAsset))
@@ -167,7 +170,7 @@ std::string AssetManager::AssetIcon(const std::filesystem::path& asset)
     if (t == ".scn") return ICON_MAP" ";
     if (t == ".gep") return ICON_CONTROLLER" ";
     if (t == ".md") return ICON_MATH_LOG" ";
-    return ICON_CUBE" ";
+    return ICON_FILE" ";
 }
 
 void AssetManager::ScenePopup()
@@ -321,28 +324,7 @@ void AssetManager::NewFilePopup(bool& show)
 
     ImGui::EndPopup();
 }
-}
 
-//
-// if (ImGui::BeginPopupModal("Create scene"))
-// {
-//     static char name[128] = "";
-//     ImGui::InputText("Name", name, 128);
-//     if (ImGui::Button("Confirm"))
-//     {
-//         std::ofstream file;
-//         file.open(m_currentPath.string() + name + std::string(".scn"));
-//         bool validName = std::filesystem::exists(m_currentPath.string() + name + std::string(".scn"));
-//         if (file.is_open() && validName)
-//         {
-//             SceneLoader::LoadFromFile(SceneEditor::m_targetScene, m_selectedAsset);
-//             SceneEditor::m_sceneFile = m_currentPath.string() + name + std::string(".scn");
-//             ImGui::CloseCurrentPopup();
-//         }
-//         else
-//             DebugLog(LogSeverity::ERROR, "Failed to create new scene");
-//     }
-//     if (ImGui::Button("Cancel"))
-//         ImGui::CloseCurrentPopup();
-//     ImGui::EndPopup();
-// }
+REGISTER_EDITOR_INTERFACE(AssetManager);
+
+}

@@ -1,75 +1,37 @@
 ﻿#pragma once
 #include "SceneObjects.h"
-#include "Debugger/Debugger.h"
 
 namespace Engine
 {
     class Scene
     {
     public:
-        /// Generate a new random UID.
+        /**
+         * @brief Generates a new UID for a scene object specific to the scene. Only use in special cases
+         * @return A new UID for a scene object
+         */
         [[nodiscard]]
-        uint32_t NewUID()
-        {
-            int i = 0;
-            while (i < 100)
-            {
-                uint32_t seed = RandomSeed(m_sceneObjects.size());
-                uint32_t newUID = RandomUInt(seed);
+        uint32_t NewUID();
 
-                if (newUID == 0)
-                {
-                    i++;
-                    continue;
-                }
-
-                const bool failed = std::ranges::any_of(m_sceneObjects, [&](const SceneObject* o)
-                    {return o->GetUID() == newUID; });
-
-                if (!failed)
-                    return newUID;
-                i++;
-            }
-
-            DebugLog(LogSeverity::ERROR, "Creating UID for object took too long");
-
-            return 0;
-        }
-
-        /// Check if the given UID is allowed
+        /**
+         * @brief Check if the given UID is valid
+         * @param UID The UID that needs to be validated
+         * @return True if the UId is not 0 and doesn't exist yet
+         */
         [[nodiscard]]
-        bool ValidUID(const uint32_t UID) const
-        {
-            if (UID == 0)
-                return false;
+        bool ValidUID(const uint32_t UID) const;
 
-            for (const SceneObject* object : m_sceneObjects)
-                if (object->GetUID() == UID)
-                    return false;
-            return true;
-        }
+        /**
+         * @brief Creates a new object in the scene
+         * @param UID (OPTIONAL) A specific UID. Used for loading in objects from disk. By default, creates a new UID
+         * @return A pointer to the scene object
+         */
+        SceneObject* NewObject(uint32_t UID = 0);
 
-        /// Create and empty object for the scene. Returns the newly created object.
-        SceneObject* NewObject(uint32_t UID = 0)
-        {
-            if (!ValidUID(UID))
-                UID = NewUID();
-
-            auto object = new SceneObject(UID);
-
-            // Check for valid UID
-            if (object->GetUID() == 0)
-            {
-                delete object;
-                DebugLog(LogSeverity::ERROR, "Creating new object failed");
-                return nullptr;
-            }
-
-            m_sceneObjects.push_back(object);
-            return object;
-        }
-
-        /// Delete an object from the scene, also deletes any child objects.
+        /**
+         * @brief Creates a new object in the scene. Also deletes any child objects
+         * @param UID The UID of the object you want to delete
+         */
         void DeleteObject(const uint32_t UID)
         {
             for (int i = 0; i < (int)m_sceneObjects.size(); i++)
@@ -80,37 +42,35 @@ namespace Engine
                 }
         }
 
-        /// Delete an object from the scene, also deletes any child objects.
+        /**
+         * @brief Creates a new object in the scene. Also deletes any child objects
+         * @param object A pointer to the object you want to delete
+         */
         void DeleteObject(const SceneObject* object) { DeleteObject(object->GetUID()); }
 
-        /// Delete all objects from the scene
-        void ClearObjects()
-        {
-            for (SceneObject* object : m_sceneObjects)
-                delete object;
-            m_sceneObjects.clear();
-        }
+        /**
+         * @brief Delete all the objects in the scene
+         */
+        void ClearScene();
 
-        /// Find object by UID.
-        [[nodiscard]] SceneObject* GetSceneObject(uint32_t UID) const
-        {
-            for (SceneObject* object : m_sceneObjects)
-                if (object->GetUID() == UID)
-                    return object;
-            DebugLog(LogSeverity::ERROR, "Object '" + std::to_string(UID) + "' not found");
-            return nullptr;
-        }
+        /**
+         * @brief Get an object from the scene
+         * @param UID The UID of the object you want to find
+         * @return A pointer to the requested object, or nullptr if it wasn't found
+         */
+        [[nodiscard]] SceneObject* GetSceneObject(uint32_t UID) const;
 
-        /// Find object by name.
-        [[nodiscard]] SceneObject* GetSceneObject(const std::string& name) const
-        {
-            for (SceneObject* object : m_sceneObjects)
-                if (object->GetName() == name)
-                    return object;
-            DebugLog(LogSeverity::ERROR, "Object '" + name + "' not found");
-            return nullptr;
-        }
+        /**
+         * @brief Get an object from the scene
+         * @param name The display name of the object you want to find
+         * @return A pointer to the requested object, or nullptr if it wasn't found
+         */
+        [[nodiscard]] SceneObject* GetSceneObject(const std::string& name) const;
 
+        /**
+         * @brief Get the full list of scene objects
+         * @return A reference to the list of all objects in the scene
+         */
         std::vector<SceneObject*>& GetSceneObjectList() { return m_sceneObjects; }
 
     private:

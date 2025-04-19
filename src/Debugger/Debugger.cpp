@@ -147,4 +147,7 @@ void Debugger::DrawWatchList()
     Logger::g_tempWatchList.clear();
 
 }
+
+REGISTER_EDITOR_INTERFACE(Debugger);
+
 }

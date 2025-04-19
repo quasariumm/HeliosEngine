@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Editor/EditorInterface.h"
+#include "Projects/ProjectHandler.h"
 
 namespace Engine
 {
@@ -80,15 +81,18 @@ public:
     {
         if (!ProjectLoaded())
         {
-            std::cout << "Could not export log, no project was loaded";
+            std::cout << "Could not export log, no project was loaded\n";
             return;
         }
 
+        std::filesystem::path folder = ProjectFolder();
+        std::string logPath = folder.append("Latest-Log.md").generic_string();
+
         std::ofstream file;
-        file.open(ProjectFolder().append("Latest-Log.md"), std::ofstream::out | std::ofstream::trunc);
+        file.open(logPath, std::ofstream::trunc);
         if (!file.is_open())
         {
-            std::cout << "Could not export log, failed to write log";
+            std::cout << "Could not export log, failed to write log\n";
             return;
         }
         file << m_totalLog;
@@ -114,7 +118,6 @@ class Debugger final : public EditorInterface
 {
 public:
     Debugger(): EditorInterface("Debugger") {}
-    ~Debugger() override { Logger::ExportLog(); };
 
     void DrawInterface() override;
 
@@ -124,4 +127,5 @@ private:
 
     int m_debugLevel = 5;
 };
+
 }
