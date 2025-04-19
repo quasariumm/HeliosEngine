@@ -9,6 +9,10 @@ uniform uint ScreenHeight;
 uniform mat4 CamToWorld;
 uniform vec3 ViewParams;
 
+uniform uint Frame = 0;
+
+uniform bool ClearAccumulator = false;
+
 const float PI = 3.14159265357f;
 const float TWO_PI = 2.0 * PI;
 
@@ -263,19 +267,33 @@ void main()
 	vec2 tc = vec2(float(texelCoord.x) / float(ScreenWidth), float(texelCoord.y) / float(ScreenHeight));
 
 	vec3 focusDirLocal = vec3((tc - 0.5) * ViewParams.xy, ViewParams.z);
-
+	vec3 focusDir = normalize((CamToWorld * vec4(focusDirLocal, 1.0)).xyz);
 	Ray ray = Ray(
 		vec3(CamToWorld[0].w, CamToWorld[1].w, CamToWorld[2].w),
-		normalize((CamToWorld * vec4(focusDirLocal, 1.0)).xyz),
-		1.0 / normalize((CamToWorld * vec4(focusDirLocal, 1.0)).xyz)
+		focusDir,
+		1.0 / focusDir
 	);
 
 	uint seed = uint(floor(
 		tc.y * ScreenHeight * ScreenWidth
 		+ tc.x * ScreenWidth)
+		* Frame
 	);
+	// Wang hash initialisation
+	seed = (seed ^ 61u) ^ (seed >> 16u);
+	seed *= 9u, seed = seed ^ (seed >> 4u);
+	seed *= 0x27d4eb2du;
+	seed = seed ^ (seed >> 15u);
 
 	vec4 pixel = vec4(Trace(ray, seed), 1.0);
+//	if (!ClearAccumulator)
+//	{
+//		vec4 accumulatorTexel = imageLoad(OutTexture, texelCoord);
+//		if (accumulatorTexel.a > 0.0)
+//		{
+//			pixel = 0.5 * pixel + 0.5 * accumulatorTexel;
+//		}
+//	}
 
 	imageStore(OutTexture, texelCoord, pixel);
 }

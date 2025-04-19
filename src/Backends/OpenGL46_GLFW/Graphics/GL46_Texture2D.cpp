@@ -121,7 +121,7 @@ void GL46_Texture2D::FillBlank(
 		m_glBufferFormat = GL_RGB;
 		break;
 	}
-	glTexStorage2D(GL_TEXTURE_2D, 1, ConvertFormat(m_internalFormat), m_width, m_height);
+	glTexStorage2D(GL_TEXTURE_2D, 1, m_glInternalFormat, m_width, m_height);
 	if (isHDR)
 	{
 		glGenBuffers(1, &m_pbo);

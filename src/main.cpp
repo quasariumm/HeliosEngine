@@ -151,6 +151,8 @@ int main(int, char**)
 
     	rayCompute.Use();
 
+    	rayCompute.SetUInt("Frame", frame % 2000);
+
     	const std::string baseName = "Spheres[0]";
     	rayCompute.SetVec3(baseName + ".center", testObject->GetTransform()->position());
     	rayCompute.SetFloat(baseName + ".radius", sphere->m_radius);
