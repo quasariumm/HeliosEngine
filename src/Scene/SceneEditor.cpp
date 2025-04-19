@@ -191,4 +191,7 @@ void SceneEditor::DisplayObjectTree(SceneObject* object)
         DisplayObjectTree(child);
     ImGui::Unindent();
 }
+
+REGISTER_EDITOR_INTERFACE(SceneEditor);
+
 }

@@ -45,7 +45,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
     }
 
     // Clean the scene
-    scene->ClearObjects();
+    scene->ClearScene();
 
     std::string line;
     LoadType loadType = NONE;

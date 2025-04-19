@@ -324,28 +324,7 @@ void AssetManager::NewFilePopup(bool& show)
 
     ImGui::EndPopup();
 }
-}
 
-//
-// if (ImGui::BeginPopupModal("Create scene"))
-// {
-//     static char name[128] = "";
-//     ImGui::InputText("Name", name, 128);
-//     if (ImGui::Button("Confirm"))
-//     {
-//         std::ofstream file;
-//         file.open(m_currentPath.string() + name + std::string(".scn"));
-//         bool validName = std::filesystem::exists(m_currentPath.string() + name + std::string(".scn"));
-//         if (file.is_open() && validName)
-//         {
-//             SceneLoader::LoadFromFile(SceneEditor::m_targetScene, m_selectedAsset);
-//             SceneEditor::m_sceneFile = m_currentPath.string() + name + std::string(".scn");
-//             ImGui::CloseCurrentPopup();
-//         }
-//         else
-//             DebugLog(LogSeverity::ERROR, "Failed to create new scene");
-//     }
-//     if (ImGui::Button("Cancel"))
-//         ImGui::CloseCurrentPopup();
-//     ImGui::EndPopup();
-// }
+REGISTER_EDITOR_INTERFACE(AssetManager);
+
+}

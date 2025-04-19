@@ -211,9 +211,6 @@ std::string ProjectHandler::TokenValue(const std::string& line)
     return token.erase(0, line.find(" = ") + 3);
 }
 
-/// @brief Adds a recent project to the recent projects file so it can be read later
-/// @param projectPath Path to the Project.gep file
-/// @param name Name of the project
 void ProjectHandler::AddRecentProject(const std::filesystem::path& projectPath, const std::string& name)
 {
     std::ofstream file("RecentProjects.txt", std::ios_base::app);
@@ -223,7 +220,6 @@ void ProjectHandler::AddRecentProject(const std::filesystem::path& projectPath, 
     file.close();
 }
 
-/// @return A map of all projects and project paths that are in the recent projects file
 std::unordered_map<std::string, std::filesystem::path> ProjectHandler::ReadRecentProjects()
 {
     std::ifstream file("RecentProjects.txt");

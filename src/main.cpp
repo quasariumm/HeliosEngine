@@ -2,7 +2,6 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
-#include "Assets/AssetManager.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"
 #include "Components/Sphere.h"
@@ -12,7 +11,6 @@
 #include "Graphics/Camera.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
-#include "Projects/ProjectHandler.h"
 
 void GLAPIENTRY MessageCallback(
 	GLenum source,
@@ -67,20 +65,9 @@ int main(int, char**)
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( MessageCallback, nullptr );
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard;
+	Engine::EditorInterfaceManager::Initialize();
 
-	io.Fonts->AddFontFromFileTTF("extern/imgui/misc/fonts/Roboto-Medium.ttf", 16.0f);
-
-	ImFontConfig config;
-	config.MergeMode = true;
-	config.GlyphMinAdvanceX = 16.0f;
-	static constexpr ImWchar32 icon_ranges[] = {ICON_MIN_MDI, ICON_MAX_MDI, 0};
-	io.Fonts->AddFontFromFileTTF("extern/fonts/materialdesignicons-webfont.ttf", 16.0f, &config, icon_ranges);
-
-    Engine::SceneEditor sceneEditor(&g_scene);
-	Engine::Debugger logMenu;
-	Engine::AssetManager assetManager;
+	Engine::SceneEditor::SetEditingScene(&g_scene);
 
 	int test = 0;
 	Engine::DebugWatch<int>("Test Int", &test);
@@ -109,6 +96,7 @@ int main(int, char**)
 	testObject->GetTransform()->position() = {3,3,3};
 	DebugWatch("Test Object", testObject->GetTransform()->positionRef());
     Engine::Sphere* sphere = testObject->AddComponent<Engine::Sphere>();
+    Engine::DebugWatch("Radius", &sphere->m_radius);
 
 	// Add a sphere to the scene
 	rayCompute.SetInt("NumSpheres", 2);
@@ -182,7 +170,7 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        Engine::BaseEditorInterface::DrawAllInterfaces();
+        Engine::EditorInterfaceManager::Instance().DrawAllInterfaces();
 
         ImGui::Begin(ICON_MONITOR_SCREENSHOT" Viewport");
 
@@ -226,6 +214,8 @@ int main(int, char**)
     	if (frame % 50 == 0)
 			window->SetTitle( std::format(L"{0:5.2f}ms ({1:.1f}fps) - {2:.1f}Mrays/s\n", avg, fps, rps / 1000) );
     }
+
+	Engine::Logger::ExportLog();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

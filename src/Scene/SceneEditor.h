@@ -14,14 +14,15 @@ namespace Engine
     class SceneEditor final : public EditorInterface
     {
     public:
-        SceneEditor() = delete;
-        explicit SceneEditor(Scene* scene) : EditorInterface("Scene") { m_targetScene = scene; }
+        explicit SceneEditor() : EditorInterface("Scene") { }
 
         void DrawInterface() override;
 
         void TreeEditor();
         void ObjectEditor();
         void DisplayObjectTree(SceneObject* object);
+
+        static void SetEditingScene(Scene* scene) {m_targetScene = scene;}
 
         static Scene* m_targetScene;
         static std::filesystem::path m_sceneFile;
