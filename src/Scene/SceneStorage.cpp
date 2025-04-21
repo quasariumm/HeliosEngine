@@ -62,7 +62,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
                 std::string data = TokenValue(line);
                 std::string name = data.substr(0, data.find(" : "));
                 std::string type = data.substr(data.find(" : ") + 3, data.find(" => ") - (data.find(" : ") + 3));
-                std::string value = data.substr(data.find(" => ") + 3);
+                std::string value = data.substr(data.find(" => ") + 4);
 
                 if (type == Demangle(typeid(bool).name()))
                     newComponent->SetPropertyValue(name, value != "0");

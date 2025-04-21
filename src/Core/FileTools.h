@@ -27,6 +27,7 @@ static vec2 ParseVec2(std::string text)
     result.y = std::stof(text.substr(0, text.find(", "))); // Get the second value
     return result;
 }
+
 static vec3 ParseVec3(std::string text)
 {
     vec3 result = {};
