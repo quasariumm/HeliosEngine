@@ -100,7 +100,7 @@ void Camera::MouseMove( const vec2f& delta )
 
 void Camera::MouseButtonDown(const MouseButton& button)
 {
-	if (button == MouseButton::RIGHT)
+	if (button == MouseButton::RIGHT && m_allowUsingCamera)
 		m_usingCamera = true;
 }
 

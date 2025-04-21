@@ -15,9 +15,10 @@ void EditorInterfaceManager::Initialize(Window* window)
 
     ImFontConfig config;
     config.MergeMode = true;
-    config.GlyphMinAdvanceX = 16.0f;
+    config.GlyphMinAdvanceX = 18.0f;
+    config.GlyphOffset = {0, 2.0f};
     static constexpr ImWchar32 icon_ranges[] = {ICON_MIN_MDI, ICON_MAX_MDI, 0};
-    io.Fonts->AddFontFromFileTTF("extern/fonts/materialdesignicons-webfont.ttf", 16.0f, &config, icon_ranges);
+    io.Fonts->AddFontFromFileTTF("extern/fonts/materialdesignicons-webfont.ttf", 18.0f, &config, icon_ranges);
 }
 
 void EditorInterfaceManager::DrawAllInterfaces() const
@@ -38,9 +39,9 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 
         if (ImGui::BeginMenu(projectName.c_str()))
         {
-            if (ImGui::MenuItem(ICON_UPLOAD_CIRCLE" Open project"))
+            if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project"))
                 ProjectHandler::ShowProjectSelector(true);
-            if (ImGui::MenuItem(ICON_DOWNLOAD_CIRCLE" New project"))
+            if (ImGui::MenuItem(ICON_PLUS_BOX" New project"))
                 ProjectHandler::ShowProjectCreator(true);
             if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor"))
                 m_window->SetShouldClose(true);

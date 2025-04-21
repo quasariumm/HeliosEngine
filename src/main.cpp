@@ -143,8 +143,6 @@ int main(int, char**)
 		camera.MouseMove(diff);
 	});
 
-	bool mouseOverViewport = false;
-
     while (!window->ShouldClose())
     {
         window->PollEvents();
@@ -180,6 +178,8 @@ int main(int, char**)
         Engine::EditorInterfaceManager::Instance().DrawAllInterfaces();
 
         ImGui::Begin(ICON_MONITOR_SCREENSHOT" Viewport");
+
+    	camera.SetAllowUseControls(ImGui::IsWindowHovered());
 
     	// Thanks envoyious! https://github.com/ocornut/imgui/issues/5118
     	ImVec2 screenSize = ImGui::GetContentRegionAvail();
