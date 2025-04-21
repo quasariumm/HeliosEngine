@@ -11,6 +11,7 @@
 #include "Graphics/Camera.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
+#include "Viewport/Viewport.h"
 
 void GLAPIENTRY MessageCallback(
 	GLenum source,
@@ -65,6 +66,8 @@ int main(int, char**)
 	Engine::GL46_Texture2D rayTexture;
 	rayTexture.FillBlank(window->GetSize().x, window->GetSize().y, 4, Engine::TextureFormat::RGBA32F, true);
 
+	Engine::Viewport::AppendRenderedImage(&rayTexture);
+
 	Engine::DebugWatch("pixel0", &rayTexture.GetDataHDR()[0]);
 	Engine::DebugWatch("pixel1", &rayTexture.GetDataHDR()[1]);
 	Engine::DebugWatch("pixel2", &rayTexture.GetDataHDR()[2]);
@@ -85,7 +88,7 @@ int main(int, char**)
 	Engine::SceneObject* testObject = g_scene.NewObject();
 	testObject->GetTransform()->position() = {3,3,3};
 	DebugWatch("Test Object", testObject->GetTransform()->positionRef());
-    Engine::Sphere* sphere = testObject->AddComponent<Engine::Sphere>();
+    auto* sphere = testObject->AddComponent<Engine::Sphere>();
     Engine::DebugWatch("Radius", &sphere->m_radius);
 
 	// Add a sphere to the scene
@@ -127,6 +130,8 @@ int main(int, char**)
 	float deltaTime = 0.f;
 
 	Engine::Camera camera;
+
+	Engine::Viewport::AppendEditorCamera(&camera);
 
 	window->SetMouseButtonDownCallback([&camera](Engine::Window&, Engine::MouseButton button)
 	{
@@ -176,24 +181,6 @@ int main(int, char**)
 		Engine::EditorInterfaceManager::SetKeyboardEnable(!camera.LockedToViewport());
 
         Engine::EditorInterfaceManager::Instance().DrawAllInterfaces();
-
-        ImGui::Begin(ICON_MONITOR_SCREENSHOT" Viewport");
-
-    	camera.SetAllowUseControls(ImGui::IsWindowHovered());
-
-    	// Thanks envoyious! https://github.com/ocornut/imgui/issues/5118
-    	ImVec2 screenSize = ImGui::GetContentRegionAvail();
-    	float scale = std::min(screenSize.x / static_cast<float>(rayTexture.GetWidth()), screenSize.y / static_cast<float>(rayTexture.GetHeight()));
-
-    	ImGui::Image(
-    		(ImTextureID)(intptr_t)rayTexture.GetID(),
-    		ImVec2(
-    			static_cast<float>(rayTexture.GetWidth()) * scale,
-    			static_cast<float>(rayTexture.GetHeight()) * scale
-			)
-    	);
-
-    	ImGui::End();
 
         ImGui::Render();
         window->ClearViewport();
