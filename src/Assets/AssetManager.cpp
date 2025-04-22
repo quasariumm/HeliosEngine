@@ -37,12 +37,14 @@ void AssetManager::DrawAssetView()
         {
             ImGui::BeginDisabled();
             ImGui::MenuItem(ICON_ARROW_UP_THICK);
+            ImGui::SetItemTooltip("Already in project folder");
             ImGui::EndDisabled();
         }
         else
         {
             if (ImGui::MenuItem(ICON_ARROW_UP_THICK))
                 m_currentPath = m_currentPath.parent_path(), UpdateAssetList();
+            ImGui::SetItemTooltip("Go up one folder");
         }
 
         ImGui::Separator();
@@ -50,6 +52,7 @@ void AssetManager::DrawAssetView()
         static bool newItem = false;
         if (ImGui::MenuItem(ICON_PLUS_THICK))
             newItem = true;
+        ImGui::SetItemTooltip("Add a new file or folder");
 
         NewFilePopup(newItem);
 
@@ -57,6 +60,7 @@ void AssetManager::DrawAssetView()
 
         if (ImGui::MenuItem(ICON_SYNC))
             UpdateAssetList();
+        ImGui::SetItemTooltip("Refresh the view");
 
         ImGui::Separator();
 

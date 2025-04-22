@@ -104,7 +104,6 @@ void SceneEditor::ObjectEditor()
     }
 
     // Make sure the object exists in the scene
-    // ReSharper disable once CppDFAConstantConditions
     if (selectedObject == nullptr)
     {
         m_selectedObject = 0;
@@ -113,7 +112,6 @@ void SceneEditor::ObjectEditor()
     }
 
     // Show basic info
-    // ReSharper disable once CppDFAUnreachableCode
     ImGui::BeginDisabled();
     ImGui::Text("UID: %u", selectedObject->GetUID());
     ImGui::EndDisabled();
@@ -132,7 +130,7 @@ void SceneEditor::ObjectEditor()
     if (ImGui::Button("Add component"))
         ImGui::OpenPopup("Select component");
 
-    if (ImGui::BeginPopupModal("Select component", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopupModal("Select component"))
     {
         for (const std::string& componentName : ComponentRegister::Instance().GetComponentNames())
         {
@@ -142,6 +140,8 @@ void SceneEditor::ObjectEditor()
                 ImGui::CloseCurrentPopup();
             }
         }
+
+        ImGui::Separator();
 
         if (ImGui::Button("Cancel"))
             ImGui::CloseCurrentPopup();

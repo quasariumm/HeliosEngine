@@ -68,8 +68,11 @@ public:
 	[[nodiscard]]
 	mat4f GetCamToWorldMatrix(const vec2u& viewportSize) const;
 
+
 	[[nodiscard]]
 	bool LockedToViewport() const { return m_usingCamera; }
+
+	void SetAllowUseControls(bool allow) { m_allowUsingCamera = allow; }
 
 private:
 
@@ -83,6 +86,7 @@ private:
 	float m_focusPlaneDistance = 1.f;
 
 	bool m_usingCamera = false;
+	bool m_allowUsingCamera = true;
 
 	/**
 	 * @brief Updates the front, right and up vectors of the camera
