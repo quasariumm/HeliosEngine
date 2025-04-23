@@ -53,7 +53,7 @@ int main(int, char**)
     Engine::CreateWin(
     	window,
     	Engine::vec2u(1280, 720),
-    	L"Varför är STL lokaler så irriterande?",
+    	L"Varför är STL lokaler så irriterande? ありがとうございます",
     	EngineWindowFlags_NoVsync
     );
 
