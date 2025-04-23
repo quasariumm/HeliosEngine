@@ -13,6 +13,8 @@
 #include "Scene/SceneEditor.h"
 #include "Viewport/Viewport.h"
 
+#include <tracy/Tracy.hpp>
+
 void GLAPIENTRY MessageCallback(
 	GLenum source,
 	GLenum type,
@@ -153,6 +155,7 @@ int main(int, char**)
 
     while (!window->ShouldClose())
     {
+    	ZoneScopedN("Frame");
         window->PollEvents();
 
     	camera.HandleInput(*window, deltaTime);
@@ -172,30 +175,37 @@ int main(int, char**)
     	Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
     	rayCompute.SetVec3("ViewParams", viewportParams);
 
-    	rayTexture.UseCompute(0);
-    	rayCompute.Dispatch(computeThreads);
-    	// rayTexture.UpdateData();
+	    {
+    		ZoneScopedN("Compute shader dispatch");
+		    rayTexture.UseCompute(0);
+    		rayCompute.Dispatch(computeThreads);
+			// rayTexture.UpdateData();
+	    }
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+	    {
+    		ZoneScopedN("UI");
+		    ImGui_ImplOpenGL3_NewFrame();
+    		ImGui_ImplGlfw_NewFrame();
+    		ImGui::NewFrame();
 
-		Engine::EditorInterfaceManager::SetMouseEnabled(!camera.LockedToViewport());
-		Engine::EditorInterfaceManager::SetKeyboardEnable(!camera.LockedToViewport());
+    		Engine::EditorInterfaceManager::SetMouseEnabled(!camera.LockedToViewport());
+    		Engine::EditorInterfaceManager::SetKeyboardEnable(!camera.LockedToViewport());
 
-        Engine::EditorInterfaceManager::Instance().DrawAllInterfaces();
+    		Engine::EditorInterfaceManager::Instance().DrawAllInterfaces();
 
-        ImGui::Render();
-        window->ClearViewport();
+    		ImGui::Render();
+    		window->ClearViewport();
 
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
+    		ImGui::UpdatePlatformWindows();
+    		ImGui::RenderPlatformWindowsDefault();
+	    }
 
         window->SwapBuffers();
 
     	++frame;
+    	FrameMark;
 
     	Engine::DebugWatchTemp<float>(L"DeltaTime", &deltaTime);
 

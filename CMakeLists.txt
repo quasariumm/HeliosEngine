@@ -4,7 +4,7 @@ project(Engine)
 set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h lib/glad/src/glad.c)
-file(GLOB IMGUI CONFIGURE_DEPENDS
+file(GLOB LIBS CONFIGURE_DEPENDS
         extern/imgui/*.cpp
         extern/imgui/*.h
         extern/imgui/backends/imgui_impl_opengl3.h
@@ -39,8 +39,23 @@ elseif(MSVC)
     add_compile_options(/arch:SSE2 /arch:AVX)
 endif()
 
+add_executable(${CMAKE_PROJECT_NAME} ${LIBS} ${SOURCE})
 
-add_executable(${CMAKE_PROJECT_NAME} ${IMGUI} ${SOURCE})
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(TRACY_ENABLE     ON)
+endif()
+
+add_subdirectory(extern/nativefiledialog-extended)
+add_subdirectory(extern/Tracy)
+
+
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
+        "$<$<CONFIG:Debug>:DEBUG=1>"
+        "$<$<CONFIG:Release>:NDEBUG=1>"
+        "$<$<CONFIG:Debug>:TRACY_ENABLE=1>"
+        "$<$<CONFIG:Debug>:TRACY_CALLSTACK=10>"
+)
+
 
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
         "$<$<C_COMPILER_ID:MSVC>:/utf-8>"
@@ -60,6 +75,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
         lib
         lib/glfw/include
         lib/glad/include
+        ${TRACY_PUBLIC_DIR}
 )
 
 target_precompile_headers(${CMAKE_PROJECT_NAME} PUBLIC
@@ -75,8 +91,8 @@ set(UNIX_LIBS
         glfw3
 )
 
-add_subdirectory(extern/nativefiledialog-extended)
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE nfd)
+
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC nfd Tracy::TracyClient)
 
 if (MSVC)
 
