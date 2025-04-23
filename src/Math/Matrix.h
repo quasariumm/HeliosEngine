@@ -121,7 +121,7 @@ typedef mat4t<unsigned> mat4u;
 typedef mat4t<double>	mat4d;
 
 
-#ifdef USE_SIMD
+#ifdef ENGINE_USE_SSE
 
 /*
  * SIMD 4x4 matrix
@@ -138,7 +138,7 @@ struct mat4t<float>
 
 	mat4t(const __m128& r1, const __m128& r2, const __m128& r3, const __m128& r4) : row14(r1), row24(r2), row34(r3), row44(r4) {}
 
-#ifdef USE_AVX2
+#ifdef ENGINE_USE_AVX2
 	mat4t(const __m256& r12, const __m256& r34) : rows12(r12), rows34(r34) {}
 #endif
 
@@ -147,7 +147,7 @@ struct mat4t<float>
 		float cell[16];
 		struct { vec4f rows[4]; };
 		struct { __m128 row14, row24, row34, row44; };
-#ifdef USE_AVX2
+#ifdef ENGINE_USE_AVX2
 		struct { __m256 rows12, rows34; };
 #endif
 	};

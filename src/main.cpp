@@ -40,6 +40,9 @@ void temp(Engine::Window& window, Engine::Key key)
 		DebugLog(Engine::LogSeverity::WARNING, "Pressed B");
 		DebugLog(Engine::LogSeverity::ERROR, "Pressed B");
 	}
+
+	if (key == Engine::Key::TILDE)
+		window.SetShouldClose(true);
 }
 
 static Engine::Scene g_scene;
@@ -156,7 +159,7 @@ int main(int, char**)
 
     	rayCompute.Use();
 
-    	rayCompute.SetUInt("Frame", frame % 2000);
+    	rayCompute.SetUInt("Frame", frame % 1000);
 
     	const std::string baseName = "Spheres[0]";
     	rayCompute.SetVec3(baseName + ".center", testObject->GetTransform()->position());
