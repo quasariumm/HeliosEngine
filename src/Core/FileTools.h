@@ -6,38 +6,39 @@ namespace Engine
 
 std::string Demangle(const char* name);
 
-static bool IsToken(const std::string& line, const std::string& token)
+static bool IsToken(const std::wstring& line, const std::wstring& token)
 {
-    return line.substr(0, line.find(" = ")) == token;
+    return line.substr(0, line.find(L" = ")) == token;
 }
 
-static std::string TokenValue(const std::string& line)
+static std::wstring TokenValue(const std::wstring& line)
 {
-    std::string token = line;
-    return token.erase(0, line.find(" = ") + 3);
+    std::wstring token = line;
+    return token.erase(0, line.find(L" = ") + 3);
 }
 
-static vec2 ParseVec2(std::string text)
+static constexpr const wchar_t* sep = L", ";
+static vec2f ParseVec2(std::wstring text)
 {
-    vec2 result = {};
+    vec2f result;
     text.erase(text.begin(), text.begin() + 1); // Remove first bracket
     text.erase(text.end() - 1, text.end()); // Remove last bracket
-    result.x = std::stof(text.substr(0, text.find(", "))); // Get the first value
-    text.erase(text.begin(), text.begin() + text.find(", ") + 2); // Remove the first value
-    result.y = std::stof(text.substr(0, text.find(", "))); // Get the second value
+    result.x = std::stof(text.substr(0, text.find(sep))); // Get the first value
+    text.erase(text.begin(), text.begin() + text.find(sep) + 2ull); // Remove the first value
+    result.y = std::stof(text.substr(0, text.find(sep))); // Get the second value
     return result;
 }
 
-static vec3 ParseVec3(std::string text)
+static vec3 ParseVec3(std::wstring text)
 {
-    vec3 result = {};
+    vec3 result;
     text.erase(text.begin(), text.begin() + 1); // Remove first bracket
     text.erase(text.end() - 1, text.end()); // Remove last bracket
-    result.x = std::stof(text.substr(0, text.find(", "))); // Get the first value
-    text.erase(text.begin(), text.begin() + text.find(", ") + 2); // Remove the first value
-    result.y = std::stof(text.substr(0, text.find(", "))); // Get the second value
-    text.erase(text.begin(), text.begin() + text.find(", ") + 2); // Remove the second value
-    result.z = std::stof(text.substr(0, text.find(", "))); // Get the third value
+    result.x = std::stof(text.substr(0, text.find(sep))); // Get the first value
+    text.erase(text.begin(), text.begin() + text.find(sep) + 2); // Remove the first value
+    result.y = std::stof(text.substr(0, text.find(sep))); // Get the second value
+    text.erase(text.begin(), text.begin() + text.find(sep) + 2); // Remove the second value
+    result.z = std::stof(text.substr(0, text.find(sep))); // Get the third value
     return result;
 }
 

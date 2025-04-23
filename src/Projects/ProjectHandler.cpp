@@ -34,14 +34,14 @@ void ProjectHandler::ProjectWindows()
         ImGui::Text(ICON_RENAME);
         ImGui::SameLine(30);
         ImGui::InputText("Project Name", projectName, 128);
-        newProjectData.projectName = projectName;
+        newProjectData.projectName = STR_TO_WSTR(projectName);
 
         if (ImGui::Button("Create"))
         {
             if (ValidateProjectFolder(path))
-                DebugLog(LogSeverity::ERROR, "There is already a project in this folder");
+                DebugLog(LogSeverity::ERROR, L"There is already a project in this folder");
             else if (!ValidateProjectData(newProjectData))
-                DebugLog(LogSeverity::ERROR, "Incorrect project settings");
+                DebugLog(LogSeverity::ERROR, L"Incorrect project settings");
             else
             {
                 if (CreateProject(path, newProjectData))
@@ -64,7 +64,7 @@ void ProjectHandler::ProjectWindows()
             if (ShowFileSelect(path, true))
             {
                 if (!ValidateProjectFolder(path))
-                    DebugLog(LogSeverity::ERROR, "Project doesn't exist");
+                    DebugLog(LogSeverity::ERROR, L"Project doesn't exist");
                 else
                 {
                     ShowProjectSelector(false);
@@ -76,13 +76,13 @@ void ProjectHandler::ProjectWindows()
 
         if (ImGui::CollapsingHeader("Recent Projects"))
         {
-            std::unordered_map<std::string, std::filesystem::path> recentProjects = ReadRecentProjects();
-            for (std::pair<std::string, std::filesystem::path> recent : recentProjects)
+            std::unordered_map<std::wstring, std::filesystem::path> recentProjects = ReadRecentProjects();
+            for (std::pair<std::wstring, std::filesystem::path> recent : recentProjects)
             {
-                if (ImGui::Selectable(recent.first.c_str()))
+                if (ImGui::Selectable(WStringToUTF8(recent.first).c_str()))
                 {
                     if (!ValidateProjectFolder(recent.second))
-                        DebugLog(LogSeverity::ERROR, "Project doesn't exist");
+                        DebugLog(LogSeverity::ERROR, L"Project doesn't exist");
                     else
                     {
                         ShowProjectSelector(false);
@@ -137,10 +137,10 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
 
     create_directories(projectPath);
 
-    std::ofstream file(projectFilePath);
+    std::wofstream file(projectFilePath);
     if (!file.is_open())
     {
-        DebugLog(LogSeverity::ERROR, "Something went wrong creating project: " + projectFilePath.string());
+        DebugLog(LogSeverity::ERROR, L"Something went wrong creating project: " + projectFilePath.wstring());
         return false;
     }
 
@@ -151,7 +151,7 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
 
     AddRecentProject(projectFilePath, data.projectName);
 
-    DebugLog(LogSeverity::DONE, "Project created successfully");
+    DebugLog(LogSeverity::DONE, L"Project created successfully");
     return true;
 }
 
@@ -159,20 +159,20 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
 {
     m_projectData = ProjectData();
 
-    std::ifstream file(projectPath.append("Project.gep"));
+    std::wifstream file(projectPath.append("Project.gep"));
     if (!file.is_open())
     {
-        DebugLog(LogSeverity::ERROR, "Could not open project file");
+        DebugLog(LogSeverity::ERROR, L"Could not open project file");
         return false;
     }
 
     m_projectData.projectPath = projectPath.remove_filename();
 
-    std::string line;
+    std::wstring line;
 
     while (std::getline(file, line))
     {
-        if (IsToken(line, "Name"))
+        if (IsToken(line, L"Name"))
             m_projectData.projectName = TokenValue(line);
     }
 
@@ -181,7 +181,7 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
     AssetManager::m_currentPath = m_projectData.projectPath;
     AssetManager::UpdateAssetList();
 
-    DebugLog(LogSeverity::DONE, "Project loaded successfully");
+    DebugLog(LogSeverity::DONE, L"Project loaded successfully");
     return true;
 }
 
@@ -200,39 +200,39 @@ bool ProjectHandler::ValidateProjectData(const ProjectData& data)
     return true;
 }
 
-bool ProjectHandler::IsToken(const std::string& line, const std::string& token)
+bool ProjectHandler::IsToken(const std::wstring& line, const std::wstring& token)
 {
-    return line.substr(0, line.find(" = ")) == token;
+    return line.substr(0, line.find(L" = ")) == token;
 }
 
-std::string ProjectHandler::TokenValue(const std::string& line)
+std::wstring ProjectHandler::TokenValue(const std::wstring& line)
 {
-    std::string token = line;
-    return token.erase(0, line.find(" = ") + 3);
+    std::wstring token = line;
+    return token.erase(0, line.find(L" = ") + 3);
 }
 
-void ProjectHandler::AddRecentProject(const std::filesystem::path& projectPath, const std::string& name)
+void ProjectHandler::AddRecentProject(const std::filesystem::path& projectPath, const std::wstring& name)
 {
-    std::ofstream file("RecentProjects.txt", std::ios_base::app);
+    std::wofstream file("RecentProjects.txt", std::ios_base::app);
     if (!file.is_open())
         return;
-    file << name << " = " << projectPath.generic_string() << std::endl;
+    file << name << " = " << projectPath.generic_wstring() << std::endl;
     file.close();
 }
 
-std::unordered_map<std::string, std::filesystem::path> ProjectHandler::ReadRecentProjects()
+std::unordered_map<std::wstring, std::filesystem::path> ProjectHandler::ReadRecentProjects()
 {
-    std::ifstream file("RecentProjects.txt");
+    std::wifstream file("RecentProjects.txt");
 
-    std::string line;
+    std::wstring line;
 
-    std::unordered_map<std::string, std::filesystem::path> recentProjects;
+    std::unordered_map<std::wstring, std::filesystem::path> recentProjects;
 
     while (std::getline(file, line))
     {
-        std::string name = line.substr(0, line.find(" = "));
-        std::string path = line;
-        path = path.erase(0, path.find(" = ") + 3);
+        std::wstring name = line.substr(0, line.find(L" = "));
+        std::wstring path = line;
+        path = path.erase(0, path.find(L" = ") + 3);
         recentProjects[name] = path;
     }
 

@@ -17,7 +17,7 @@ enum class AssetType
 class AssetManager : public EditorInterface
 {
 public:
-    AssetManager() : EditorInterface("Asset Manager") {}
+    AssetManager() : EditorInterface(L"Asset Manager") {}
 
     void DrawInterface() override;
 

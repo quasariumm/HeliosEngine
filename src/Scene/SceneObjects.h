@@ -69,8 +69,8 @@ namespace Engine
         void SetTransform(const Transform& transform) { m_transform = transform; }
 
         [[nodiscard]]
-        std::string GetName() const { return m_displayName; }
-        void SetName(const std::string& name) { m_displayName = name; }
+        std::wstring GetName() const { return m_displayName; }
+        void SetName(const std::wstring& name) { m_displayName = name; }
 
         [[nodiscard]]
         mat4 GlobalMatrix() const;
@@ -93,7 +93,7 @@ namespace Engine
             for (const std::unique_ptr<Component>& c : m_components)
                 if (c->GetType() == typeid(T))
                     return static_cast<T*>(c);
-            DebugLog(LogSeverity::WARNING, "Object did not have requested component");
+            DebugLog(LogSeverity::WARNING, L"Object did not have requested component");
             return nullptr;
         }
 
@@ -106,7 +106,7 @@ namespace Engine
             return ptr;
         }
 
-        Component* AddComponentByName(const std::string& name);
+        Component* AddComponentByName(const std::wstring& name);
 
         void RemoveComponent() { }
 
@@ -119,7 +119,7 @@ namespace Engine
 
     private:
         const uint32_t m_UID = 0;
-        std::string m_displayName = "Object";
+        std::wstring m_displayName = L"Object";
         Transform m_transform = Transform();
         SceneObject* m_parentObject = nullptr;
         std::vector<SceneObject*> m_childObjects = {};

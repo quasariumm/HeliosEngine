@@ -31,6 +31,20 @@ static constexpr float LARGE_FLOAT	=	1e34f;
 #define CALL(func, ...) if (func) (func).operator()(__VA_ARGS__)
 
 /**
+ * @brief Converts a string to a wide string
+ * @attention This is slow. If you work with string literals, please use TEXT
+ * @param str The string (any std type you want) you want to convert
+ */
+#define STR_TO_WSTR(str) std::filesystem::path(str).wstring()
+
+/**
+ * @brief An alternative way to convert a string literal to the wstrings we use
+ * @attention This only works for inline string literals. E.g. TEXT("Hello")
+ * @param str The string literal
+ */
+#define TEXT(str) L##str
+
+/**
  * @brief Converts a wide string to a UTF-8 encoded basic string
  * @param wstr The wide string to convert
  * @return The converted UTF-8 encoded string

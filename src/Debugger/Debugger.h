@@ -14,22 +14,22 @@ enum class LogSeverity
     DONE = 3
 };
 
-inline std::string LogSeverityString(LogSeverity severity)
+inline std::wstring LogSeverityString(LogSeverity severity)
 {
     switch (severity) {
     default:
-    case LogSeverity::INFO: return "INFO";
-    case LogSeverity::WARNING: return "WARNING";
-    case LogSeverity::ERROR: return "ERROR";
-    case LogSeverity::DONE: return "DONE";
+    case LogSeverity::INFO: return L"INFO";
+    case LogSeverity::WARNING: return L"WARNING";
+    case LogSeverity::ERROR: return L"ERROR";
+    case LogSeverity::DONE: return L"DONE";
     }
 }
 
-inline std::string TimeStamp(time_t time)
+inline std::wstring TimeStamp(time_t time)
 {
     char timestamp[32];
     strftime(timestamp, 32, "%H:%M:%S", localtime(&time));
-    return {timestamp};
+    return STR_TO_WSTR(timestamp);
 }
 
 class Logger
@@ -45,7 +45,7 @@ public:
     /// Log data with type, message and a level (Level 0 means always visible, while a higher level can be ignored)
     struct Log
     {
-        explicit Log(const LogSeverity type, std::string message, const int level = 0, std::source_location location = std::source_location::current()) :
+        explicit Log(const LogSeverity type, std::wstring message, const int level = 0, std::source_location location = std::source_location::current()) :
         type(type),
         message(std::move(message)),
         level(level),
@@ -56,26 +56,26 @@ public:
         LogSeverity type = LogSeverity::INFO;
         time_t timestamp = 0;
         int level = 0;
-        std::string message;
+        std::wstring message;
         std::source_location source;
 
-        std::string FileText() { return std::format("[{}]  \n[{}] [{}]  \n[{}] [{}]  \n**{}**  \n---\n",
-            source.file_name(),
-            "Line: " + std::to_string(source.line()) + ":" + std::to_string(source.column()),
-            source.function_name(), TimeStamp(timestamp), LogSeverityString(type), message); }
+        std::wstring FileText() { return std::format(L"[{}]  \n[{}] [{}]  \n[{}] [{}]  \n**{}**  \n---\n",
+            STR_TO_WSTR(source.file_name()),
+            L"Line: " + std::to_wstring(source.line()) + L":" + std::to_wstring(source.column()),
+            STR_TO_WSTR(source.function_name()), TimeStamp(timestamp), LogSeverityString(type), message); }
     };
 
     struct Watch
     {
         template <class T>
-        explicit Watch(std::string name, T* value) : name(std::move(name)), type(typeid(T)), var((void*)value) { }
+        explicit Watch(std::wstring name, T* value) : name(std::move(name)), type(typeid(T)), var(value) { }
 
-        const std::string name;
+        const std::wstring name;
         const std::type_info& type;
         void* var;
     };
 
-    static std::string m_totalLog;
+    static std::wstring m_totalLog;
 
     static void ExportLog()
     {
@@ -86,10 +86,10 @@ public:
         }
 
         std::filesystem::path folder = ProjectFolder();
-        std::string logPath = folder.append("Latest-Log.md").generic_string();
+        std::wstring logPath = folder.append("Latest-Log.md").generic_wstring();
 
-        std::ofstream file;
-        file.open(logPath, std::ofstream::trunc);
+        std::wofstream file;
+        file.open(logPath.c_str(), std::ofstream::trunc);
         if (!file.is_open())
         {
             std::cout << "Could not export log, failed to write log\n";
@@ -101,7 +101,7 @@ public:
 };
 
 /// Add a log to the debug viewer
-inline void DebugLog(const LogSeverity type, const std::string& message, const int level = 0, std::source_location location = std::source_location::current())
+inline void DebugLog(const LogSeverity type, const std::wstring& message, const int level = 0, std::source_location location = std::source_location::current())
 {
     Logger::g_logs.emplace_back(type, message, level, location);
     Logger::m_totalLog += Logger::g_logs.back().FileText();
@@ -109,15 +109,15 @@ inline void DebugLog(const LogSeverity type, const std::string& message, const i
 
 /// Add a value to the value debugger. Can be modified from the menu
 template <class T>
-static void DebugWatch(const std::string& name, T* value) { Logger::g_watchList.emplace_back(name, value); };
+static void DebugWatch(const std::wstring& name, T* value) { Logger::g_watchList.emplace_back(name, value); };
 /// Add a value to the value debugger. Cannot be modified from the menu. But does not have to constantly exist
 template <class T>
-static void DebugWatchTemp(const std::string& name, T* value) { Logger::g_tempWatchList.emplace_back(name, value); };
+static void DebugWatchTemp(const std::wstring& name, T* value) { Logger::g_tempWatchList.emplace_back(name, value); };
 
 class Debugger final : public EditorInterface
 {
 public:
-    Debugger(): EditorInterface("Debugger") {}
+    Debugger(): EditorInterface(L"Debugger") {}
 
     void DrawInterface() override;
 

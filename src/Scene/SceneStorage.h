@@ -18,6 +18,6 @@ public:
     static void SaveToFile(Scene* scene, const std::filesystem::path& fileName);
 
     static std::string SaveTransform(SceneObject* object);
-    static void LoadTransform(SceneObject* object, const std::string& line);
+    static void LoadTransform(SceneObject* object, const std::wstring& line);
 };
 }

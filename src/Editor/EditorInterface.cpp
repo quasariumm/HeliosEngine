@@ -31,13 +31,13 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 
     if (ImGui::BeginMainMenuBar())
     {
-        std::string projectName;
+        std::wstring projectName;
         if (ProjectLoaded())
-            projectName = std::string(ICON_CONTROLLER" ") + ProjectName();
+            projectName = STR_TO_WSTR(ICON_CONTROLLER) + L" " + ProjectName();
         else
-            projectName =  ICON_ALERT" No project loaded";
+            projectName = STR_TO_WSTR(ICON_ALERT) + L" No project loaded";
 
-        if (ImGui::BeginMenu(projectName.c_str()))
+        if (ImGui::BeginMenu(WStringToUTF8(projectName).c_str()))
         {
             if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project"))
                 ProjectHandler::ShowProjectSelector(true);
@@ -51,7 +51,7 @@ void EditorInterfaceManager::DrawAllInterfaces() const
         if (ImGui::BeginMenu(ICON_TOOLS" Tools"))
         {
             for (const auto& i : m_editorInterfaces)
-                ImGui::MenuItem(i.second->name.c_str(), nullptr, &i.second->active);
+                ImGui::MenuItem(WStringToUTF8(i.second->name).c_str(), nullptr, &i.second->active);
             ImGui::MenuItem("ImGui Debugger", nullptr, &showImguiDebug);
             ImGui::EndMenu();
         }

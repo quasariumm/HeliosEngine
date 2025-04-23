@@ -372,6 +372,13 @@ FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec3t<T>&& v) noexce
 FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec4t<T>& v)  noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]"; }
 FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const vec4t<T>&& v) noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]"; }
 
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const vec2t<T>& v)  noexcept { return os << "[" << v.x << ", " << v.y << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const vec2t<T>&& v) noexcept { return os << "[" << v.x << ", " << v.y << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const vec3t<T>& v)  noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const vec3t<T>&& v) noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const vec4t<T>& v)  noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const vec4t<T>&& v) noexcept { return os << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]"; }
+
 #pragma endregion
 
 #pragma region Vector functions

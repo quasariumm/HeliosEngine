@@ -65,9 +65,9 @@ void AssetManager::DrawAssetView()
         ImGui::Separator();
 
         // Show current folder path
-        std::string pathString = std::string(ICON_FOLDER" ") + ProjectName() + "\\";
-        pathString.append(relative(m_currentPath, ProjectFolder()).string());
-        ImGui::Text(pathString.c_str());
+        std::wstring pathString = STR_TO_WSTR(ICON_FOLDER) + L" " + ProjectName() + L"\\";
+        pathString.append(relative(m_currentPath, ProjectFolder()).wstring());
+        ImGui::Text(WStringToUTF8(pathString).c_str());
 
         ImGui::EndMenuBar();
     }
@@ -79,7 +79,7 @@ void AssetManager::DrawAssetView()
     std::filesystem::path oldPath = m_currentPath;
     for (auto& dir : m_folderList)
     {
-        if (ImGui::Selectable((std::string(ICON_FOLDER" ") + dir.filename().string()).c_str()))
+        if (ImGui::Selectable(WStringToUTF8(STR_TO_WSTR(ICON_FOLDER) + L" " + dir.filename().wstring()).c_str()))
             m_currentPath = dir;
 
         if (ImGui::BeginPopupContextItem())
@@ -298,7 +298,7 @@ void AssetManager::NewFilePopup(bool& show)
             newPath.append(name);
             create_directories(newPath);
             UpdateAssetList();
-            DebugLog((LogSeverity)3, "New folder created");
+            DebugLog((LogSeverity)3, L"New folder created");
         }
         else
         {
@@ -310,10 +310,10 @@ void AssetManager::NewFilePopup(bool& show)
             if (file.is_open() && !alreadyExists)
             {
                 UpdateAssetList();
-                DebugLog((LogSeverity)3, "New file created");
+                DebugLog((LogSeverity)3, L"New file created");
             }
             else
-                DebugLog((LogSeverity)2, "Failed to create new file");
+                DebugLog((LogSeverity)2, L"Failed to create new file");
         }
 
         show = false;

@@ -35,10 +35,10 @@ void temp(Engine::Window& window, Engine::Key key)
 {
 	if (key == Engine::Key::B)
 	{
-		DebugLog(Engine::LogSeverity::DONE, "Pressed B");
-		DebugLog(Engine::LogSeverity::INFO, "Pressed B");
-		DebugLog(Engine::LogSeverity::WARNING, "Pressed B");
-		DebugLog(Engine::LogSeverity::ERROR, "Pressed B");
+		DebugLog(Engine::LogSeverity::DONE, L"Pressed B");
+		DebugLog(Engine::LogSeverity::INFO, L"Pressed B");
+		DebugLog(Engine::LogSeverity::WARNING, L"Pressed B");
+		DebugLog(Engine::LogSeverity::ERROR, L"Pressed B");
 	}
 
 	if (key == Engine::Key::TILDE)
@@ -71,9 +71,9 @@ int main(int, char**)
 
 	Engine::Viewport::AppendRenderedImage(&rayTexture);
 
-	Engine::DebugWatch("pixel0", &rayTexture.GetDataHDR()[0]);
-	Engine::DebugWatch("pixel1", &rayTexture.GetDataHDR()[1]);
-	Engine::DebugWatch("pixel2", &rayTexture.GetDataHDR()[2]);
+	Engine::DebugWatch(L"pixel0", &rayTexture.GetDataHDR()[0]);
+	Engine::DebugWatch(L"pixel1", &rayTexture.GetDataHDR()[1]);
+	Engine::DebugWatch(L"pixel2", &rayTexture.GetDataHDR()[2]);
 
 	Engine::GL46_ComputeShader rayCompute;
 	rayCompute.LoadFromFile(L"src/Shaders/raytrace.comp");
@@ -90,9 +90,9 @@ int main(int, char**)
 
 	Engine::SceneObject* testObject = g_scene.NewObject();
 	testObject->GetTransform()->position() = {3,3,3};
-	DebugWatch("Test Object", testObject->GetTransform()->positionRef());
+	DebugWatch(L"Test Object", testObject->GetTransform()->positionRef());
     auto* sphere = testObject->AddComponent<Engine::Sphere>();
-    Engine::DebugWatch("Radius", &sphere->m_radius);
+    Engine::DebugWatch(L"Radius", &sphere->m_radius);
 
 	// Add a sphere to the scene
 	rayCompute.SetInt("NumSpheres", 2);
@@ -197,7 +197,7 @@ int main(int, char**)
 
     	++frame;
 
-    	Engine::DebugWatchTemp<float>("DeltaTime", &deltaTime);
+    	Engine::DebugWatchTemp<float>(L"DeltaTime", &deltaTime);
 
     	// Count fps
     	const float frameTime = deltaTime = frameTimer.Elapsed<float>();

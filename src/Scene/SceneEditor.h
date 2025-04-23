@@ -14,7 +14,7 @@ namespace Engine
     class SceneEditor final : public EditorInterface
     {
     public:
-        explicit SceneEditor() : EditorInterface("Scene") { }
+        explicit SceneEditor() : EditorInterface(L"Scene") { }
 
         void DrawInterface() override;
 

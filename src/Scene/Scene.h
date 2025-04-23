@@ -65,7 +65,7 @@ namespace Engine
          * @param name The display name of the object you want to find
          * @return A pointer to the requested object, or nullptr if it wasn't found
          */
-        [[nodiscard]] SceneObject* GetSceneObject(const std::string& name) const;
+        [[nodiscard]] SceneObject* GetSceneObject(const std::wstring& name) const;
 
         /**
          * @brief Get the full list of scene objects

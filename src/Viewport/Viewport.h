@@ -12,7 +12,7 @@ struct Line2D { ImVec2 a, b; };
 class Viewport : public EditorInterface
 {
 public:
-    Viewport() : EditorInterface("Viewport") {}
+    Viewport() : EditorInterface(L"Viewport") {}
 
     void DrawInterface() override;
 

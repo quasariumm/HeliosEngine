@@ -46,7 +46,7 @@ void SceneObject::RemoveChild(const SceneObject* object)
             m_childObjects.erase(m_childObjects.begin() + i);
 }
 
-Component* SceneObject::AddComponentByName(const std::string& name)
+Component* SceneObject::AddComponentByName(const std::wstring& name)
 {
     std::unique_ptr<Component> comp = ComponentRegister::Instance().Create(name);
     if (comp)
@@ -56,7 +56,7 @@ Component* SceneObject::AddComponentByName(const std::string& name)
         return ptr;
     }
 
-    std::cerr << "Component not found: " << name << std::endl;
+    std::wcerr << "Component not found: " << name << std::endl;
     return nullptr;
 }
 }

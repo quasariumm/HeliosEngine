@@ -66,7 +66,7 @@ void SceneEditor::TreeEditor()
         ImGui::InputText("New name", newName, 64);
         if (ImGui::Button("Set new name"))
         {
-            m_renameObject->SetName(std::string(newName));
+            m_renameObject->SetName(std::wstring(std::begin(newName), std::end(newName)));
             m_renameObject = nullptr;
             ImGui::CloseCurrentPopup();
         }
@@ -98,7 +98,7 @@ void SceneEditor::ObjectEditor()
         if (m_selectedObject == 0)
             ImGui::Text(ICON_CUBE" No object selected");
         else
-            ImGui::Text((std::string(ICON_CUBE) + " " + selectedObject->GetName()).c_str());
+            ImGui::Text(WStringToUTF8(STR_TO_WSTR(ICON_CUBE) + L" " + selectedObject->GetName()).c_str());
 
         ImGui::EndMenuBar();
     }
@@ -122,7 +122,7 @@ void SceneEditor::ObjectEditor()
         selectedObject->GetTransform()->TransformControllerUI();
 
     for (const std::unique_ptr<Component>& c : selectedObject->GetComponentList())
-        if (ImGui::CollapsingHeader(c->GetName().c_str()))
+        if (ImGui::CollapsingHeader(WStringToUTF8(c->GetName()).c_str()))
             c->DisplayProperties();
 
     ImGui::Separator();
@@ -132,9 +132,9 @@ void SceneEditor::ObjectEditor()
 
     if (ImGui::BeginPopupModal("Select component"))
     {
-        for (const std::string& componentName : ComponentRegister::Instance().GetComponentNames())
+        for (const std::wstring& componentName : ComponentRegister::Instance().GetComponentNames())
         {
-            if (ImGui::Button(componentName.c_str()))
+            if (ImGui::Button(WStringToUTF8(componentName).c_str()))
             {
                 selectedObject->AddComponentByName(componentName);
                 ImGui::CloseCurrentPopup();
@@ -157,11 +157,11 @@ void SceneEditor::DisplayObjectTree(SceneObject* object)
     // Display parent object
     ImGui::PushID((int)object->GetUID());
 
-    std::string prefix = ICON_CUBE;
+    std::wstring prefix = STR_TO_WSTR(ICON_CUBE);
     if (m_selectMode == PARENT && m_prvSelectedObject == object->GetUID())
-        prefix += ICON_ARROW_RIGHT_THICK;
+        prefix += STR_TO_WSTR(ICON_ARROW_RIGHT_THICK);
 
-    if (ImGui::Selectable((prefix + " " + object->GetName()).c_str(), m_selectedObject == object->GetUID()))
+    if (ImGui::Selectable(WStringToUTF8(prefix + L" " + object->GetName()).c_str(), m_selectedObject == object->GetUID()))
         m_selectedObject = object->GetUID();
 
     if (ImGui::BeginPopupContextItem())

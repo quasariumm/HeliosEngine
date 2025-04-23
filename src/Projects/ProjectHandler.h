@@ -6,7 +6,7 @@ namespace Engine
 struct ProjectData
 {
    std::filesystem::path projectPath = "";
-   std::string projectName;
+   std::wstring projectName;
 };
 
 class ProjectHandler
@@ -62,7 +62,7 @@ public:
     * @param token The token you want to check
     * @return True if the token in the line is equal to the token that is given
     */
-   static bool IsToken(const std::string& line, const std::string& token);
+   static bool IsToken(const std::wstring& line, const std::wstring& token);
 
    /**
     * @brief Get the value in a specific line
@@ -70,20 +70,20 @@ public:
     * @param line The current line
     * @return The value that is set on this line without the token
     */
-   static std::string TokenValue(const std::string& line);
+   static std::wstring TokenValue(const std::wstring& line);
 
    /**
     * @brief Adds a recent project to the recent projects file so it can be read later
     * @param projectPath Path to the Project.gep file
     * @param name Name of the project
     */
-   static void AddRecentProject(const std::filesystem::path& projectPath, const std::string& name);
+   static void AddRecentProject(const std::filesystem::path& projectPath, const std::wstring& name);
 
    /**
     * @brief Read the recent project file that is located in the engine folder
     * @return A map of all projects and project paths that are in the recent projects file
     */
-   static std::unordered_map<std::string, std::filesystem::path> ReadRecentProjects();
+   static std::unordered_map<std::wstring, std::filesystem::path> ReadRecentProjects();
 
    static bool m_selectorOpen;
    static bool m_creatorOpen;
@@ -102,7 +102,7 @@ static std::filesystem::path ProjectFolder() { return ProjectHandler::m_projectD
 /**
  * @return The name of the currently opened project
  */
-static std::string ProjectName() { return ProjectHandler::m_projectData.projectName; }
+static std::wstring ProjectName() { return ProjectHandler::m_projectData.projectName; }
 /**
  * @return A reference to the data of the currently opened project
  */

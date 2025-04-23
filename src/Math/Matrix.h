@@ -373,9 +373,9 @@ FUNC2_TMPL vec4t<T> operator*(const mat4t<T>& matrix, const vec4t<U>& vector)
 }
 
 
-#ifdef USE_SIMD
+#ifdef ENGINE_USE_SSE
 
-#ifndef USE_AVX2
+#ifndef ENGINE_USE_AVX2
 /*
  * SSE operators
  */
@@ -418,6 +418,13 @@ FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const mat3t<T>& m) { retur
 FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const mat3t<T>&& m) { return os << "[" << m.row1 << "\n " << m.row2 << "\n " << m.row3 << "]"; }
 FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const mat4t<T>& m) { return os << "[" << m.row1 << "\n " << m.row2 << "\n " << m.row3 << "\n " << m.row4 << "]"; }
 FUNC1_TMPL std::ostream& operator<<(std::ostream& os, const mat4t<T>&& m) { return os << "[" << m.row1 << "\n " << m.row2 << "\n " << m.row3 << "\n " << m.row4 << "]"; }
+
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const mat2t<T>& m) { return os << "[" << m.row1 << "\n " << m.row2 << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const mat2t<T>&& m) { return os << "[" << m.row1 << "\n " << m.row2 << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const mat3t<T>& m) { return os << "[" << m.row1 << "\n " << m.row2 << "\n " << m.row3 << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const mat3t<T>&& m) { return os << "[" << m.row1 << "\n " << m.row2 << "\n " << m.row3 << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const mat4t<T>& m) { return os << "[" << m.row1 << "\n " << m.row2 << "\n " << m.row3 << "\n " << m.row4 << "]"; }
+FUNC1_TMPL std::wostream& operator<<(std::wostream& os, const mat4t<T>&& m) { return os << "[" << m.row1 << "\n " << m.row2 << "\n " << m.row3 << "\n " << m.row4 << "]"; }
 
 #pragma endregion
 

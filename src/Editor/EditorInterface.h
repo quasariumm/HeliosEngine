@@ -8,12 +8,12 @@ class EditorInterface;
 class EditorInterface
 {
 public:
-    explicit EditorInterface(std::string name): name(std::move(name)) {}
+    explicit EditorInterface(std::wstring name): name(std::move(name)) {}
     virtual ~EditorInterface() = default;
 
     virtual void DrawInterface() = 0;
 
-    const std::string name;
+    const std::wstring name;
     bool active = true;
 };
 
@@ -28,7 +28,7 @@ public:
         return instance;
     }
 
-    void RegisterInterface(const std::string& name, std::unique_ptr<EditorInterface> interface) {
+    void RegisterInterface(const std::wstring& name, std::unique_ptr<EditorInterface> interface) {
         m_editorInterfaces[name] = std::move(interface);
     }
 
@@ -40,13 +40,14 @@ public:
     static void SetKeyboardEnable(bool enable = true);
 
 private:
-    std::unordered_map<std::string, std::unique_ptr<EditorInterface>> m_editorInterfaces = {};
+    std::unordered_map<std::wstring, std::unique_ptr<EditorInterface>> m_editorInterfaces = {};
     Window* m_window = nullptr;
 };
 
 #define REGISTER_EDITOR_INTERFACE(TYPE) \
 static bool TYPE##_registered = []() { \
-Engine::EditorInterfaceManager::Instance().RegisterInterface(#TYPE, std::make_unique<TYPE>()); \
+std::string type = #TYPE; \
+Engine::EditorInterfaceManager::Instance().RegisterInterface(std::wstring(type.begin(), type.end()), std::make_unique<TYPE>()); \
 return true; \
 }()
 

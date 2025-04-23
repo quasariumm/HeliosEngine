@@ -5,7 +5,7 @@ namespace Engine
 std::vector<Logger::Log> Logger::g_logs = {};
 std::vector<Logger::Watch> Logger::g_watchList = {};
 std::vector<Logger::Watch> Logger::g_tempWatchList = {};
-std::string Logger::m_totalLog;
+std::wstring Logger::m_totalLog;
 
 void Debugger::DrawInterface()
 {
@@ -101,7 +101,7 @@ void Debugger::DrawLogs()
 
         spacing += 30;
         ImGui::SameLine(spacing);
-        ImGui::Text(log.message.c_str());
+        ImGui::Text(WStringToUTF8(log.message).c_str());
     }
 
     static int oldSize = 0;
@@ -117,15 +117,15 @@ void Debugger::DrawWatchList()
     for (Logger::Watch& watch : Logger::g_watchList)
     {
         if (watch.type == typeid(bool))
-            ImGui::Checkbox(watch.name.c_str(), (bool*)watch.var);
+            ImGui::Checkbox(WStringToUTF8(watch.name).c_str(), (bool*)watch.var);
         else if (watch.type == typeid(int))
-            ImGui::InputInt(watch.name.c_str(), (int*)watch.var);
+            ImGui::InputInt(WStringToUTF8(watch.name).c_str(), (int*)watch.var);
         else if (watch.type == typeid(float))
-            ImGui::InputFloat(watch.name.c_str(), (float*)watch.var);
+            ImGui::InputFloat(WStringToUTF8(watch.name).c_str(), (float*)watch.var);
         else if (watch.type == typeid(vec2))
-            ImGui::InputFloat2(watch.name.c_str(), ((vec2*)watch.var)->cell);
+            ImGui::InputFloat2(WStringToUTF8(watch.name).c_str(), ((vec2*)watch.var)->cell);
         else if (watch.type == typeid(vec3))
-            ImGui::InputFloat3(watch.name.c_str(), ((vec3*)watch.var)->cell);
+            ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), ((vec3*)watch.var)->cell);
         else
             ImGui::Text("Watch '%s' does not have a supported type", watch.name);
     }
@@ -134,15 +134,15 @@ void Debugger::DrawWatchList()
     for (Logger::Watch& watch : Logger::g_tempWatchList)
     {
         if (watch.type == typeid(bool))
-            ImGui::Checkbox(watch.name.c_str(), (bool*)watch.var);
+            ImGui::Checkbox(WStringToUTF8(watch.name).c_str(), (bool*)watch.var);
         else if (watch.type == typeid(int))
-            ImGui::InputInt(watch.name.c_str(), (int*)watch.var);
+            ImGui::InputInt(WStringToUTF8(watch.name).c_str(), (int*)watch.var);
         else if (watch.type == typeid(float))
-            ImGui::InputFloat(watch.name.c_str(), (float*)watch.var);
+            ImGui::InputFloat(WStringToUTF8(watch.name).c_str(), (float*)watch.var);
         else if (watch.type == typeid(vec2))
-            ImGui::InputFloat2(watch.name.c_str(), ((vec2*)watch.var)->cell);
+            ImGui::InputFloat2(WStringToUTF8(watch.name).c_str(), ((vec2*)watch.var)->cell);
         else if (watch.type == typeid(vec3))
-            ImGui::InputFloat3(watch.name.c_str(), ((vec3*)watch.var)->cell);
+            ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), ((vec3*)watch.var)->cell);
         else
             ImGui::Text("Watch '%s' does not have a supported type", watch.name);
     }
