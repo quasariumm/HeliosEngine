@@ -1,5 +1,6 @@
 #include "EditorInterface.h"
 
+#include "EditorSettings.h"
 #include "Projects/ProjectHandler.h"
 
 namespace Engine
@@ -23,7 +24,9 @@ void EditorInterfaceManager::Initialize(Window* window)
 
 void EditorInterfaceManager::DrawAllInterfaces() const
 {
+    // Primary editor windows
     ProjectHandler::ProjectWindows();
+    EditorSettings::DrawWindow();
 
     ImGui::DockSpaceOverViewport();
 
@@ -48,11 +51,18 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu(ICON_TOOLS" Tools"))
+        if (ImGui::BeginMenu(ICON_TOOLBOX" Editor"))
         {
-            for (const auto& i : m_editorInterfaces)
-                ImGui::MenuItem(WStringToUTF8(i.second->name).c_str(), nullptr, &i.second->active);
-            ImGui::MenuItem("ImGui Debugger", nullptr, &showImguiDebug);
+            if (ImGui::MenuItem(ICON_COG" Settings"))
+                EditorSettings::OpenWindow();
+
+            if (ImGui::BeginMenu(ICON_TOOLS" Tools"))
+            {
+                for (const auto& i : m_editorInterfaces)
+                    ImGui::MenuItem(WStringToUTF8(i.second->name).c_str(), nullptr, &i.second->active);
+                ImGui::MenuItem("ImGui Debugger", nullptr, &showImguiDebug);
+                ImGui::EndMenu();
+            }
             ImGui::EndMenu();
         }
 
