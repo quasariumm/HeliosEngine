@@ -8,6 +8,7 @@
 #include "Core/Window.h"
 #include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"
+#include "Editor/EditorSettings.h"
 #include "Graphics/Camera.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneEditor.h"
@@ -33,13 +34,8 @@ void GLAPIENTRY MessageCallback(
 
 void temp(Engine::Window& window, Engine::Key key)
 {
-	if (key == Engine::Key::B)
-	{
-		DebugLog(Engine::LogSeverity::DONE, L"Pressed B");
-		DebugLog(Engine::LogSeverity::INFO, L"Pressed B");
-		DebugLog(Engine::LogSeverity::WARNING, L"Pressed B");
-		DebugLog(Engine::LogSeverity::ERROR, L"Pressed B");
-	}
+	if (key == Engine::Key::ESCAPE && Engine::EditorSettings::Get().m_closeOnEscape)
+		window.SetShouldClose(true);
 
 	if (key == Engine::Key::TILDE)
 		window.SetShouldClose(true);
@@ -61,6 +57,8 @@ int main(int, char**)
 
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( MessageCallback, nullptr );
+
+	Engine::EditorSettings::Load();
 
 	Engine::EditorInterfaceManager::Initialize(window.get());
 
