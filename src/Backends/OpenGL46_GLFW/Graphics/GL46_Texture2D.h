@@ -65,16 +65,18 @@ public:
 	/**
 	 * @brief Sets the texture to the active on the given slot
 	 * @param slot The slot the texture needs to be in
+	 * @param updateTexture Whether the texture should be filled with the data in this object
 	 * @throws range_error The slot is not in the bindable range
 	 */
-	void Use(uint32_t slot) const;
+	void Use(uint32_t slot, bool updateTexture = false) const;
 
 	/**
 	 * @brief Sets the texture to the active on the given slot. Only used for compute shaders
 	 * @param slot The slot the texture needs to be in
+	 * @param updateTexture Whether the texture should be filled with the data in this object
 	 * @throws range_error The slot is not in the bindable range
 	 */
-	void UseCompute(uint32_t slot) const;
+	void UseCompute(uint32_t slot, bool updateTexture = false) const;
 
 	/**
 	 * @brief Updates the pixel unwrap buffer to the data in the texture

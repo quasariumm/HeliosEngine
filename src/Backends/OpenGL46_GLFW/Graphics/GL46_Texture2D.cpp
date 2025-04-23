@@ -196,9 +196,9 @@ void GL46_Texture2D::LoadFromFile(
 		glTexImage2D(GL_TEXTURE_2D, 0, m_glInternalFormat, m_width, m_height, 0, m_glBufferFormat, GL_FLOAT, m_dataHDR);
 		glGenBuffers(1, &m_pbo);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
-		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, sizeof(m_dataHDR), m_dataHDR, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		float* tmp = (float*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, sizeof(m_dataHDR), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		memcpy(tmp, m_dataHDR, sizeof(m_dataHDR));
+		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, m_textureByteSize, m_dataHDR, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		float* tmp = (float*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, m_textureByteSize, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		memcpy(tmp, m_dataHDR, m_textureByteSize);
 		stbi_image_free(m_dataHDR);
 		m_dataHDR = tmp;
 	}
@@ -208,9 +208,9 @@ void GL46_Texture2D::LoadFromFile(
 		glTexImage2D(GL_TEXTURE_2D, 0, m_glInternalFormat, m_width, m_height, 0, m_glBufferFormat, GL_UNSIGNED_BYTE, m_data);
 		glGenBuffers(1, &m_pbo);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
-		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, sizeof(m_data), m_data, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		uint8_t* tmp = (uint8_t*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, sizeof(m_data), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		memcpy(tmp, m_data, sizeof(m_data));
+		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, m_textureByteSize, m_data, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		uint8_t* tmp = (uint8_t*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, m_textureByteSize, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		memcpy(tmp, m_data, m_textureByteSize);
 		stbi_image_free(m_data);
 		m_data = tmp;
 	}
@@ -221,30 +221,39 @@ void GL46_Texture2D::LoadFromFile(
 }
 
 
-void GL46_Texture2D::Use(const uint32_t slot) const
+void GL46_Texture2D::Use(const uint32_t slot, bool updateTexture) const
 {
 	if (slot > 31)
 		throw std::range_error("Slot is out of range (0-31)!");
 	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+	if (updateTexture)
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
-	const GLenum type = (m_isHDR) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_glBufferFormat, type, nullptr);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	if (updateTexture)
+	{
+		const GLenum type = (m_isHDR) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_glBufferFormat, type, nullptr);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	}
 }
 
 
-void GL46_Texture2D::UseCompute( const uint32_t slot ) const
+void GL46_Texture2D::UseCompute( const uint32_t slot, bool updateTexture ) const
 {
 	if (slot > 31)
 		throw std::range_error("Slot is out of range (0-31)!");
 	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+	if (updateTexture)
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
-	const GLenum type = (m_isHDR) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_glBufferFormat, type, nullptr);
+	if (updateTexture)
+	{
+		const GLenum type = (m_isHDR) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_glBufferFormat, type, nullptr);
+	}
 	glBindImageTexture(slot, m_ID, 0, GL_FALSE, 0, GL_READ_WRITE, m_glInternalFormat);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	if (updateTexture)
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
 
