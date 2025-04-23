@@ -68,7 +68,7 @@ public:
     struct Watch
     {
         template <class T>
-        explicit Watch(std::string name, T* value) : name(std::move(name)), type(typeid(T)), var(value) { }
+        explicit Watch(std::string name, T* value) : name(std::move(name)), type(typeid(T)), var((void*)value) { }
 
         const std::string name;
         const std::type_info& type;

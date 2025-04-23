@@ -74,6 +74,15 @@ public:
 
 	void SetAllowUseControls(bool allow) { m_allowUsingCamera = allow; }
 
+	[[nodiscard]]
+	vec3f GetCameraPosition() const { return m_camPos; }
+	[[nodiscard]]
+	vec3f GetCameraRightVec() const { return m_camRight; }
+	[[nodiscard]]
+	vec3f GetCameraFrontVec() const { return m_camFront; }
+	[[nodiscard]]
+	vec3f GetCameraUpVec() const { return m_camUp; }
+
 private:
 
 	const vec3f m_worldUp = vec3f( 0, 1, 0 );

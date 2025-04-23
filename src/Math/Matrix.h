@@ -690,7 +690,7 @@ FUNC1_TMPL mat4t<T> LookAt(const vec3t<T>& eye, const vec3t<T>& center, const ve
  */
 FUNC1_TMPL mat4t<T> Perspective(T fovy, T aspect, T zNear, T zFar)
 {
-	mat4t<T> matrix;
+	mat4t<T> matrix(0);
 
 	T f = std::cos(0.5 * fovy) / std::sin(0.5 * fovy);
 
@@ -708,7 +708,7 @@ FUNC1_TMPL mat4t<T> Perspective(T fovy, T aspect, T zNear, T zFar)
  */
 FUNC1_TMPL mat4t<T> Orthographic(T left, T right, T bottom, T top, T zNear = -1, T zFar = 1)
 {
-	mat4t<T> matrix;
+	mat4t<T> matrix(0);
 	matrix.cell[0]  = 2 / (right - left);
 	matrix.cell[5]  = 2 / (top - bottom);
 	matrix.cell[10] = -2 / (zFar - zNear);
@@ -719,6 +719,18 @@ FUNC1_TMPL mat4t<T> Orthographic(T left, T right, T bottom, T top, T zNear = -1,
 	matrix.cell[11] = -(zFar + zNear) / (zFar - zNear);
 
 	return matrix;
+}
+
+FUNC1_TMPL vec3t<T> TransformPoint(const vec3t<T>& p, const mat4t<T>& m)
+{
+	vec4t<T> v(p);
+	v.w = 1;
+	return vec3t<T>(m * v);
+}
+
+FUNC1_TMPL vec3t<T> TransformVector(const vec3t<T>& p, const mat4t<T>& m)
+{
+	return vec3t<T>(m * vec4t<T>(p));
 }
 
 #pragma endregion
