@@ -7,4 +7,4 @@
 	url = https://github.com/btzy/nativefiledialog-extended.git
 [submodule "extern/Tracy"]
 	path = extern/Tracy
-	url = https://github.com/wolfpld/tracy
+	url = https://github.com/QuillanW/EngineTracy.git
