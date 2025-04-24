@@ -22,6 +22,8 @@ void EditorInterfaceManager::Initialize(Window* window)
     config.GlyphOffset = {0, 2.0f};
     static constexpr ImWchar32 icon_ranges[] = {ICON_MIN_MDI, ICON_MAX_MDI, 0};
     io.Fonts->AddFontFromFileTTF("extern/fonts/materialdesignicons-webfont.ttf", 18.0f, &config, icon_ranges);
+
+	io.Fonts->Build();
 }
 
 void EditorInterfaceManager::DrawAllInterfaces() const
