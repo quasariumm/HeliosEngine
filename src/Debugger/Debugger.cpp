@@ -1,5 +1,8 @@
 #include "Debugger.h"
 
+#include <tracy/Tracy.hpp>
+
+
 namespace Engine
 {
 std::vector<Logger::Log> Logger::g_logs = {};
@@ -9,13 +12,19 @@ std::wstring Logger::m_totalLog;
 
 void Debugger::DrawInterface()
 {
-    ImGui::Begin(ICON_VIEW_LIST " Logs", nullptr, ImGuiWindowFlags_MenuBar);
-    DrawLogs();
-    ImGui::End();
+	{
+		ZoneScopedNC("Logs", tracy::Color::MediumPurple3);
+		ImGui::Begin(ICON_VIEW_LIST " Logs", nullptr, ImGuiWindowFlags_MenuBar);
+		DrawLogs();
+		ImGui::End();
+	}
 
-    ImGui::Begin(ICON_EYE " Watch List");
-    DrawWatchList();
-    ImGui::End();
+	{
+		ZoneScopedNC("Watch list", tracy::Color::MediumPurple4);
+		ImGui::Begin(ICON_EYE " Watch List");
+		DrawWatchList();
+		ImGui::End();
+	}
 }
 
 void Debugger::DrawLogs()

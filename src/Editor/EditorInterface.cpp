@@ -1,5 +1,7 @@
 #include "EditorInterface.h"
 
+#include <tracy/Tracy.hpp>
+
 #include "EditorSettings.h"
 #include "Projects/ProjectHandler.h"
 
@@ -32,42 +34,45 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 
     static bool showImguiDebug = false;
 
-    if (ImGui::BeginMainMenuBar())
-    {
-        std::wstring projectName;
-        if (ProjectLoaded())
-            projectName = STR_TO_WSTR(ICON_CONTROLLER) + L" " + ProjectName();
-        else
-            projectName = STR_TO_WSTR(ICON_ALERT) + L" No project loaded";
+	{
+    	ZoneScopedNC("Menu bar", tracy::Color::MediumOrchid2);
+		if (ImGui::BeginMainMenuBar())
+		{
+			std::wstring projectName;
+			if (ProjectLoaded())
+				projectName = STR_TO_WSTR(ICON_CONTROLLER) + L" " + ProjectName();
+			else
+				projectName = STR_TO_WSTR(ICON_ALERT) + L" No project loaded";
 
-        if (ImGui::BeginMenu(WStringToUTF8(projectName).c_str()))
-        {
-            if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project"))
-                ProjectHandler::ShowProjectSelector(true);
-            if (ImGui::MenuItem(ICON_PLUS_BOX" New project"))
-                ProjectHandler::ShowProjectCreator(true);
-            if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor"))
-                m_window->SetShouldClose(true);
+			if (ImGui::BeginMenu(WStringToUTF8(projectName).c_str()))
+			{
+				if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project"))
+					ProjectHandler::ShowProjectSelector(true);
+				if (ImGui::MenuItem(ICON_PLUS_BOX" New project"))
+					ProjectHandler::ShowProjectCreator(true);
+				if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor"))
+					m_window->SetShouldClose(true);
 
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu(ICON_TOOLBOX" Editor"))
-        {
-            if (ImGui::MenuItem(ICON_COG" Settings"))
-                EditorSettings::OpenWindow();
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu(ICON_TOOLBOX" Editor"))
+			{
+				if (ImGui::MenuItem(ICON_COG" Settings"))
+					EditorSettings::OpenWindow();
 
-            if (ImGui::BeginMenu(ICON_TOOLS" Tools"))
-            {
-                for (const auto& i : m_editorInterfaces)
-                    ImGui::MenuItem(WStringToUTF8(i.second->name).c_str(), nullptr, &i.second->active);
-                ImGui::MenuItem("ImGui Debugger", nullptr, &showImguiDebug);
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenu();
-        }
+				if (ImGui::BeginMenu(ICON_TOOLS" Tools"))
+				{
+					for (const auto& i : m_editorInterfaces)
+						ImGui::MenuItem(WStringToUTF8(i.second->name).c_str(), nullptr, &i.second->active);
+					ImGui::MenuItem("ImGui Debugger", nullptr, &showImguiDebug);
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenu();
+			}
 
-        ImGui::EndMainMenuBar();
-    }
+			ImGui::EndMainMenuBar();
+		}
+	}
 
     if (showImguiDebug)
         ImGui::ShowMetricsWindow();

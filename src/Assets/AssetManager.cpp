@@ -4,6 +4,8 @@
 #include "Scene/SceneStorage.h"
 
 #include <shlobj.h>
+#include <tracy/Tracy.hpp>
+
 
 namespace Engine
 {
@@ -20,6 +22,7 @@ void AssetManager::DrawInterface()
 
 void AssetManager::DrawAssetView()
 {
+	ZoneScopedNC("Assets", tracy::Color::MediumOrchid);
     ImGui::Begin(ICON_VIEW_GRID" Assets", nullptr, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
@@ -121,6 +124,7 @@ void AssetManager::DrawAssetView()
 
 void AssetManager::DrawAssetInfo()
 {
+	ZoneScopedNC("Asset viewer", tracy::Color::MediumOrchid1);
     ImGui::Begin(ICON_CUBE_SEND" Asset Viewer", nullptr, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())

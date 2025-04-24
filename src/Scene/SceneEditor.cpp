@@ -1,5 +1,7 @@
 #include "SceneEditor.h"
 
+#include <tracy/Tracy.hpp>
+
 #include "SceneStorage.h"
 
 namespace Engine
@@ -15,6 +17,7 @@ void SceneEditor::DrawInterface()
 
 void SceneEditor::TreeEditor()
 {
+	ZoneScopedNC("Scene", tracy::Color::MediumPurple1);
     ImGui::Begin(ICON_MAP" Scene", nullptr, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
@@ -85,6 +88,7 @@ void SceneEditor::TreeEditor()
 
 void SceneEditor::ObjectEditor()
 {
+	ZoneScopedNC("Object viewer", tracy::Color::MediumPurple2);
     ImGui::Begin(ICON_CUBE_SCAN" Object Viewer", nullptr, ImGuiWindowFlags_MenuBar);
 
     // Get the actual object

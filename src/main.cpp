@@ -38,9 +38,6 @@ void temp(Engine::Window& window, Engine::Key key)
 {
 	if (key == Engine::Key::ESCAPE && Engine::EditorSettings::Get().m_closeOnEscape)
 		window.SetShouldClose(true);
-
-	if (key == Engine::Key::TILDE)
-		window.SetShouldClose(true);
 }
 
 static Engine::Scene g_scene;
@@ -153,71 +150,84 @@ int main(int, char**)
 
     while (!window->ShouldClose())
     {
-    	ZoneScopedN("Frame");
-        window->PollEvents();
+    	ZoneScopedNC("Frame", tracy::Color::CornflowerBlue);
 
-    	camera.HandleInput(*window, deltaTime);
-
-    	rayCompute.Use();
-
-    	rayCompute.SetUInt("Frame", frame % 1000);
-
-    	const std::string baseName = "Spheres[0]";
-    	rayCompute.SetVec3(baseName + ".center", testObject->GetTransform()->position());
-    	rayCompute.SetFloat(baseName + ".radius", sphere->m_radius);
-
-    	const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
-    	Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);
-    	rayCompute.SetMat4("CamToWorld", camToWorld);
-
-    	Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
-    	rayCompute.SetVec3("ViewParams", viewportParams);
 
 	    {
-    		ZoneScopedN("Compute shader dispatch");
+    		ZoneScopedNC("Input", tracy::Color::LightCoral);
+		    window->PollEvents();
+			camera.HandleInput(*window, deltaTime);
+	    }
+
+	    {
+    		ZoneScopedNC("Compute shader dispatch", tracy::Color::LightGreen);
+			rayCompute.Use();
+			rayCompute.SetUInt("Frame", frame % 1000);
+
+			const std::string baseName = "Spheres[0]";
+			rayCompute.SetVec3(baseName + ".center", testObject->GetTransform()->position());
+			rayCompute.SetFloat(baseName + ".radius", sphere->m_radius);
+
+			const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
+			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);
+			rayCompute.SetMat4("CamToWorld", camToWorld);
+
+			Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
+			rayCompute.SetVec3("ViewParams", viewportParams);
+
 		    rayTexture.UseCompute(0);
     		rayCompute.Dispatch(computeThreads);
 			// rayTexture.UpdateData();
 	    }
 
 	    {
-    		ZoneScopedN("UI");
-		    ImGui_ImplOpenGL3_NewFrame();
-    		ImGui_ImplGlfw_NewFrame();
-    		ImGui::NewFrame();
+    		ZoneScopedNC("UI", tracy::Color::LightSteelBlue);
+    		{
+    			ZoneScopedNC("New Frame", tracy::Color::LightSkyBlue);
+    			ImGui_ImplOpenGL3_NewFrame();
+    			ImGui_ImplGlfw_NewFrame();
+    			ImGui::NewFrame();
+    		}
 
     		Engine::EditorInterfaceManager::SetMouseEnabled(!camera.LockedToViewport());
     		Engine::EditorInterfaceManager::SetKeyboardEnable(!camera.LockedToViewport());
 
     		Engine::EditorInterfaceManager::Instance().DrawAllInterfaces();
 
-    		ImGui::Render();
-    		window->ClearViewport();
+    		{
+    			ZoneScopedNC("Render", tracy::Color::LightSkyBlue1);
+    			ImGui::Render();
+    			window->ClearViewport();
 
-    		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    		ImGui::UpdatePlatformWindows();
-    		ImGui::RenderPlatformWindowsDefault();
+    			ImGui::UpdatePlatformWindows();
+    			ImGui::RenderPlatformWindowsDefault();
+    		}
 	    }
 
-        window->SwapBuffers();
+	    {
+    		ZoneScopedNC("Frame end", tracy::Color::LightSalmon);
+		    window->SwapBuffers();
 
-    	++frame;
+    		++frame;
+
+    		Engine::DebugWatchTemp<float>(L"DeltaTime", &deltaTime);
+
+    		// Count fps
+    		const float frameTime = deltaTime = frameTimer.Elapsed<float>();
+    		frameTimer.Reset();
+
+    		static float avg = 10, alpha = 1;
+    		avg = (1 - alpha) * avg + alpha * frameTime * 1000;
+    		if (alpha > 0.05f) alpha *= 0.5f;
+    		const float fps = 1000.0f / avg, rps = (static_cast<float>(rayTexture.GetWidth()) * static_cast<float>(rayTexture.GetHeight())) / avg;
+
+    		if (frame % 50 == 0)
+    			window->SetTitle( std::format(L"{0:5.2f}ms ({1:.1f}fps) - {2:.1f}Mrays/s\n", avg, fps, rps / 1000) );
+	    }
+
     	FrameMark;
-
-    	Engine::DebugWatchTemp<float>(L"DeltaTime", &deltaTime);
-
-    	// Count fps
-    	const float frameTime = deltaTime = frameTimer.Elapsed<float>();
-    	frameTimer.Reset();
-
-    	static float avg = 10, alpha = 1;
-    	avg = (1 - alpha) * avg + alpha * frameTime * 1000;
-    	if (alpha > 0.05f) alpha *= 0.5f;
-    	const float fps = 1000.0f / avg, rps = (static_cast<float>(rayTexture.GetWidth()) * static_cast<float>(rayTexture.GetHeight())) / avg;
-
-    	if (frame % 50 == 0)
-			window->SetTitle( std::format(L"{0:5.2f}ms ({1:.1f}fps) - {2:.1f}Mrays/s\n", avg, fps, rps / 1000) );
     }
 
 	Engine::Logger::ExportLog();

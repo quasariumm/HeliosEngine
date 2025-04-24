@@ -1,5 +1,7 @@
 #include "Viewport.h"
 
+#include <tracy/Tracy.hpp>
+
 #include "Debugger/Debugger.h"
 
 namespace Engine
@@ -9,6 +11,7 @@ Camera* Viewport::m_editorCamera = nullptr;
 
 void Viewport::DrawInterface()
 {
+	ZoneScopedNC("Viewport", tracy::Color::MediumPurple);
     ImGui::Begin(ICON_MONITOR_SCREENSHOT" Viewport");
 
     if (m_renderedImage == nullptr || m_editorCamera == nullptr)
