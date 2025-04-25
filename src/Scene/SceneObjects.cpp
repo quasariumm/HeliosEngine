@@ -52,6 +52,7 @@ Component* SceneObject::AddComponentByName(const std::wstring& name)
     if (comp)
     {
         Component* ptr = comp.get();
+        comp->AttachToObject(this);
         m_components.push_back(std::move(comp));
         return ptr;
     }

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Component.h"
+#include "Objects/ObjectRenderer.h"
 
 namespace Engine
 {
@@ -20,6 +21,12 @@ public:
         AssignProperty(L"Test4", &m_testVec2);
         AssignProperty(L"Test5", &m_testVec3);
         AssignProperty(L"Test6", &m_testText);
+    }
+
+    void Init() override
+    {
+        ObjectRenderer::RegisterSphere(m_attachedObject->GetTransform(), &m_radius);
+        ObjectRenderer::SendObjectData();
     }
 
     bool m_testBool = false;

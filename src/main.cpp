@@ -80,50 +80,12 @@ int main(int, char**)
 		1u
 	};
 
+	Engine::ObjectRenderer::SetShader(&rayCompute);
+
 	rayCompute.Use();
 	rayCompute.SetInt("OutTexture", 0);
 	rayCompute.SetUInt("ScreenWidth", window->GetSize().x);
 	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
-
-	Engine::SceneObject* testObject = g_scene.NewObject();
-	testObject->GetTransform()->position() = {3,3,3};
-	DebugWatch(L"Test Object", testObject->GetTransform()->positionRef());
-    auto* sphere = testObject->AddComponent<Engine::Sphere>();
-    Engine::DebugWatch(L"Radius", &sphere->m_radius);
-
-	// Add a sphere to the scene
-	rayCompute.SetInt("NumSpheres", 2);
-	const std::string baseName = "Spheres[0]";
-	rayCompute.SetVec3(baseName + ".center", testObject->GetTransform()->position());
-	rayCompute.SetFloat(baseName + ".radius", 1.f);
-
-	const std::string matBaseName = baseName + ".material";
-	rayCompute.SetVec3(matBaseName + ".diffuseColor", Engine::vec3f(0.9f, 0.6f, 0.3f));
-	rayCompute.SetVec3(matBaseName + ".specularColor", Engine::vec3f(1.f));
-	rayCompute.SetFloat(matBaseName + ".shininess", 0.f);
-	rayCompute.SetFloat(matBaseName + ".specularProbability", 1.f);
-
-	rayCompute.SetVec3(matBaseName + ".emissionColor", Engine::vec3f(1.f));
-	rayCompute.SetFloat(matBaseName + ".emissionStrength", 0.f);
-
-	rayCompute.SetFloat(matBaseName + ".refractionProbability", 0.f);
-	rayCompute.SetFloat(matBaseName + ".refractionCoefficient", 1.f);
-
-	const std::string baseName2 = "Spheres[1]";
-	rayCompute.SetVec3(baseName2 + ".center", Engine::vec3f(0.f, -32.f, -6.f));
-	rayCompute.SetFloat(baseName2 + ".radius", 30.f);
-
-	const std::string matBaseName2 = baseName2 + ".material";
-	rayCompute.SetVec3(matBaseName2 + ".diffuseColor", Engine::vec3f(1.f));
-	rayCompute.SetVec3(matBaseName2 + ".specularColor", Engine::vec3f(1.f));
-	rayCompute.SetFloat(matBaseName2 + ".shininess", 0.f);
-	rayCompute.SetFloat(matBaseName2 + ".specularProbability", 1.f);
-
-	rayCompute.SetVec3(matBaseName2 + ".emissionColor", Engine::vec3f(1.f));
-	rayCompute.SetFloat(matBaseName2 + ".emissionStrength", 0.f);
-
-	rayCompute.SetFloat(matBaseName2 + ".refractionProbability", 0.f);
-	rayCompute.SetFloat(matBaseName2 + ".refractionCoefficient", 1.f);
 
     Engine::Timer frameTimer;
 	uint64_t frame = 0;
@@ -152,6 +114,7 @@ int main(int, char**)
     {
     	ZoneScopedNC("Frame", tracy::Color::CornflowerBlue);
 
+    	Engine::ObjectRenderer::SendObjectData();
 
 	    {
     		ZoneScopedNC("Input", tracy::Color::LightCoral);
@@ -163,10 +126,6 @@ int main(int, char**)
     		ZoneScopedNC("Compute shader dispatch", tracy::Color::LightGreen);
 			rayCompute.Use();
 			rayCompute.SetUInt("Frame", frame % 1000);
-
-			const std::string baseName = "Spheres[0]";
-			rayCompute.SetVec3(baseName + ".center", testObject->GetTransform()->position());
-			rayCompute.SetFloat(baseName + ".radius", sphere->m_radius);
 
 			const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
 			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);

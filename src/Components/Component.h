@@ -19,13 +19,14 @@ namespace Engine
     class Component
     {
     public:
+        virtual ~Component() = default;
         Component() = delete;
 
         template<typename T>
         explicit Component(T* _component, std::wstring displayName):
         m_componentType(typeid(T)), m_displayName(std::move(displayName)) { }
 
-        void AttachToObject(SceneObject* object) { m_attachedObject = object; }
+        void AttachToObject(SceneObject* object) { m_attachedObject = object; Init(); }
         [[nodiscard]] const std::type_info& GetType() const { return m_componentType; }
         [[nodiscard]] std::wstring GetName() const {return m_displayName; }
         [[nodiscard]] SceneObject* GetAttachedObject() const { return m_attachedObject; }
@@ -85,6 +86,12 @@ namespace Engine
         const std::unordered_map<std::wstring, std::wstring&>& GetTextProperties() const { return m_textProperties; }
 
     protected:
+
+        /**
+         * @brief Called when component is added to an object
+         */
+        virtual void Init() {}
+
         SceneObject* m_attachedObject = nullptr;
         const std::type_info& m_componentType;
         const std::wstring m_displayName;
