@@ -91,6 +91,10 @@ void AssetManager::DrawAssetView()
                 deleteFile = dir;
             if (ImGui::Selectable(ICON_RENAME" Rename"))
                 renameFile = dir;
+
+            // TODO: Make implementation for Linux and Mac as well
+            if (ImGui::Selectable(ICON_FOLDER_SEARCH" Open in explorer"))
+                ShellExecuteA(nullptr, "open", dir.string().c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
             ImGui::EndPopup();
         }
     }
@@ -112,6 +116,16 @@ void AssetManager::DrawAssetView()
                 deleteFile = m_selectedAsset;
             if (ImGui::Selectable(ICON_RENAME" Rename"))
                 renameFile = m_selectedAsset;
+
+            // TODO: Make implementation for Linux and Mac as well
+            if (ImGui::Selectable(ICON_OPEN_IN_APP" Open in default app"))
+                ShellExecuteA(nullptr, "open", asset.string().c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
+            if (ImGui::Selectable(ICON_FOLDER_SEARCH" Open in explorer"))
+            {
+                std::filesystem::path folder = asset;
+                ShellExecuteA(nullptr, "open", folder.remove_filename().string().c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
+            }
+
             ImGui::EndPopup();
         }
     }
@@ -139,13 +153,8 @@ void AssetManager::DrawAssetInfo()
 
     switch (GetAssetTypeByPath(m_selectedAsset))
     {
-    case AssetType::NONE: break;
-
-    case AssetType::OTHER:
-        // TODO: Make implementation for Linux and Mac as well
-        if (ImGui::Button(ICON_OPEN_IN_APP" Open in external program"))
-            ShellExecuteW(nullptr, nullptr, m_selectedAsset.c_str(), nullptr, nullptr, SW_SHOW);
-        break;
+    case AssetType::NONE:
+    case AssetType::OTHER: break;
 
     case AssetType::SCENE:
         if (ImGui::Button(ICON_MAP_PLUS" Load Scene"))
