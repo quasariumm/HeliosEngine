@@ -1,4 +1,5 @@
 #version 460
+#extension GL_ARB_shading_language_include : enable
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -18,7 +19,7 @@ const float TWO_PI = 2.0 * PI;
 const float INVPI = 1.0 / 3.14159265357;
 const float INV2PI = 2.0 * INVPI;
 
-
+#include "/Engine/random.glsl"
 
 #define MATERIAL_REFLECTION 	1
 #define MATERIAL_TRANSMISSION 	2
@@ -150,53 +151,6 @@ vec3 GetBRDF(inout RayTracingMaterial material)
 float GetPDF(inout RayTracingMaterial material)
 {
 	return INVPI;
-}
-
-/*
-	Random
-*/
-
-uint Randomise(inout uint seed)
-{
-	seed = seed * 747796405u + 2891336453u;
-	seed = ((seed >> ((seed >> 28u) + 4u)) ^ seed) * 277803737u;
-	seed = (seed >> 22u) ^ seed;
-	return seed;
-}
-
-float RandomFloat(inout uint seed)
-{
-	return Randomise(seed) / 4294967295.f;
-}
-
-// Random value in normal distribution (with mean=0 and sd=1)
-float RandomValueNormalDistribution(inout uint seed)
-{
-	// Thanks to https://stackoverflow.com/a/6178290
-	float theta = TWO_PI * RandomFloat(seed);
-	float rho = sqrt(-2 * log(RandomFloat(seed)));
-	return rho * cos(theta);
-}
-
-
-// Calculate a random direction
-vec3 RandomHemisphericalDirection(inout uint seed)
-{
-	// Thanks to https://math.stackexchange.com/a/1585996
-	float x = RandomValueNormalDistribution(seed);
-	float y = RandomValueNormalDistribution(seed);
-	float z = RandomValueNormalDistribution(seed);
-	if (z < 0)
-		return normalize(vec3(-x, -y, -z));
-	return normalize(vec3(x, y, z));
-}
-
-
-vec2 RandomPointInCircle(inout uint seed)
-{
-	float angle = RandomFloat(seed) * TWO_PI;
-	vec2 pointOnCircle = vec2(cos(angle), sin(angle));
-	return pointOnCircle * sqrt(RandomFloat(seed));
 }
 
 /*

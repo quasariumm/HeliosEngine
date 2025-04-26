@@ -16,6 +16,12 @@
 
 #include <tracy/Tracy.hpp>
 
+#ifdef _WIN32
+extern "C" {
+	__declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
+}
+#endif
+
 void GLAPIENTRY MessageCallback(
 	GLenum source,
 	GLenum type,
@@ -56,6 +62,22 @@ int main(int, char**)
 
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( MessageCallback, nullptr );
+
+	// DEbug to get the version and supported extensions
+	// const GLubyte* version = glGetString(GL_VERSION);
+	// std::string extensions;
+	// GLubyte* extension = nullptr;
+	// uint32_t i = 0;
+	// while (true)
+	// {
+	// 	extension = const_cast<GLubyte*>(glGetStringi(GL_EXTENSIONS, i));
+	// 	try
+	// 	{
+	// 		extensions += std::string((char*)extension) + "\n";
+	// 	} catch (...) {break;}
+	// 	++i;
+	// }
+
 
 	Engine::EditorSettings::Load();
 

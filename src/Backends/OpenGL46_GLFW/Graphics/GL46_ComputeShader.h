@@ -32,6 +32,8 @@ public:
 
 private:
 
+	static uint32_t ManageIncludes(std::wistringstream& contents);
+
 	uint32_t m_shaderID = 0;
 
 	bool m_initialised = false;

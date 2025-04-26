@@ -11,6 +11,12 @@ static const std::wstring ANSI_WARN = L"[\033[33mWARN\033[0m] ";
 static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
 
 /*
+ * Static lists
+ */
+
+static std::unordered_set<std::string> loadedShaders;
+
+/*
  * Defines
  */
 
@@ -36,6 +42,13 @@ static constexpr float LARGE_FLOAT	=	1e34f;
  * @param str The string (any std type you want) you want to convert
  */
 #define STR_TO_WSTR(str) std::filesystem::path(str).wstring()
+
+/**
+ * @brief Converts a wide string to a string
+ * @attention This is slow.
+ * @param wstr The string (any std type you want) you want to convert
+ */
+#define WSTR_TO_STR(wstr) std::filesystem::path(wstr).string()
 
 /**
  * @brief An alternative way to convert a string literal to the wstrings we use

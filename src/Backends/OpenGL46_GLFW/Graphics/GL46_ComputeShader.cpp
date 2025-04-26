@@ -30,7 +30,7 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	}
 
 	// Load the file from disk
-	std::ifstream filestream;
+	std::wifstream filestream;
 	filestream.open(filename.c_str());
 
 	if (filestream.is_open())
@@ -44,11 +44,16 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	}
 
 	// Load contents
-	std::stringstream contentStream;
+	std::wstringstream contentStream;
 	contentStream << filestream.rdbuf();
 
-	std::string contentString = contentStream.str();
+	std::string contentString = WSTR_TO_STR(contentStream.str());
 	const char* content = contentString.c_str();
+
+	// Get the includes
+	std::wistringstream contentSS;
+	contentSS.str(contentStream.str());
+	ManageIncludes(contentSS);
 
 	// Create and compile shader
 	m_shaderID = glCreateShader(GL_COMPUTE_SHADER);
@@ -60,7 +65,8 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	else
 	{
 		glShaderSource(m_shaderID, 1, &content, nullptr);
-		glCompileShader(m_shaderID);
+		static const char* paths[] = { "/\00", "/Engine/\00", "/Project/\00" };
+		glCompileShaderIncludeARB(m_shaderID, 1, paths, nullptr);
 	}
 
 	GLint success;
@@ -100,6 +106,61 @@ void GL46_ComputeShader::Dispatch(const vec3u& threads) const
 
 	glDispatchCompute(threads.x, threads.y, threads.z);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+}
+
+
+uint32_t GL46_ComputeShader::ManageIncludes( std::wistringstream& contents )
+{
+	std::wstring line;
+	uint32_t count = 0;
+	while (std::getline(contents, line))
+	{
+		if (line.starts_with(L"#include"))
+		{
+			size_t firstSlash = line.find_first_of(L'/');
+			std::wstring path = line.substr(firstSlash, line.length() - firstSlash);
+			std::string glslPath = WSTR_TO_STR(path);
+			// Remove trailing "
+			glslPath.erase(glslPath.length() - 1);
+
+			if (loadedShaders.contains(glslPath))
+				continue;
+
+			count++;
+
+			std::wifstream included;
+			if (path.starts_with(L"/Engine"))
+			{
+				path.replace(0, 7, L"src/Shaders");
+				// Remove trailing "
+				path.erase(path.length() - 1);
+
+				included = {path.c_str()};
+
+				if (!included.is_open())
+					continue;
+
+				std::wstringstream contentStream;
+				contentStream << included.rdbuf();
+
+				std::string contentString = WSTR_TO_STR(contentStream.str());
+				const char* content = contentString.c_str();
+
+				glNamedStringARB(GL_SHADER_INCLUDE_ARB, -1, glslPath.c_str(), -1, content);
+
+				std::wistringstream contentSS;
+				contentSS.str(contentStream.str());
+				ManageIncludes(contentSS);
+
+				included.close();
+			}
+			// TODO: Add the /Project/
+
+			loadedShaders.emplace(glslPath);
+		}
+	}
+
+	return count;
 }
 
 }
