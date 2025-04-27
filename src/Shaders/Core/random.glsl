@@ -50,4 +50,4 @@ vec2 RandomPointInCircle(inout uint seed)
 	return pointOnCircle * sqrt(RandomFloat(seed));
 }
 
-#endif
+#endif // RANDOM_GLSL

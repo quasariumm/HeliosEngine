@@ -73,8 +73,8 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
-		char infoLog[512];
-		glGetShaderInfoLog(m_shaderID, 512, nullptr, infoLog);
+		char infoLog[4096];
+		glGetShaderInfoLog(m_shaderID, 4096, nullptr, infoLog);
 		std::wcerr << ANSI_ERR << "Shader compilation error: " << infoLog << std::endl;
 	}
 
@@ -86,8 +86,8 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
-		char infoLog[512];
-		glGetShaderInfoLog(m_shaderID, 512, nullptr, infoLog);
+		char infoLog[4096];
+		glGetShaderInfoLog(m_shaderID, 4096, nullptr, infoLog);
 		std::wcerr << ANSI_ERR << "Shader linking error: " << infoLog << std::endl;
 	}
 

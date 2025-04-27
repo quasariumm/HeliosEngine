@@ -95,7 +95,7 @@ int main(int, char**)
 	Engine::DebugWatch(L"pixel2", &rayTexture.GetDataHDR()[2]);
 
 	Engine::GL46_ComputeShader rayCompute;
-	rayCompute.LoadFromFile(L"src/Shaders/raytrace.comp");
+	rayCompute.LoadFromFile(L"src/Shaders/Raytracing/raytrace.comp");
 	const Engine::vec3u computeThreads{
 		static_cast<unsigned>(std::ceil(window->GetSize().x / 8.f)),
 		static_cast<unsigned>(std::ceil(window->GetSize().y / 8.f)),
