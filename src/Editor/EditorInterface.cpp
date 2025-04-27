@@ -36,6 +36,15 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 
     static bool showImguiDebug = false;
 
+	// Listen for shortcuts
+	static ImGuiInputFlags globalShortcutFlags = ImGuiInputFlags_RouteAlways;
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_N, globalShortcutFlags))
+		ProjectHandler::ShowProjectCreator(true);
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O, globalShortcutFlags))
+		ProjectHandler::ShowProjectSelector(true);
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Comma, globalShortcutFlags))
+		EditorSettings::OpenWindow();
+	// TODO(Quillan): CTRL+SHIFT+O to open the "Open recent menu"
 	{
     	ZoneScopedNC("Menu bar", tracy::Color::MediumOrchid2);
 		if (ImGui::BeginMainMenuBar())
@@ -48,29 +57,35 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 
 			if (ImGui::BeginMenu(WStringToUTF8(projectName).c_str()))
 			{
-				if (ImGui::MenuItem(ICON_PLUS_BOX" New project"))
+				if (ImGui::MenuItem(ICON_PLUS_BOX" New project", "CTRL+N"))
 					ProjectHandler::ShowProjectCreator(true);
-				if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project"))
+				if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project", "CTRL+O"))
 					ProjectHandler::ShowProjectSelector(true);
 				if (ImGui::BeginMenu(ICON_CLOCK" Open recent"))
 				{
-					uint32_t i = 1;
+					static ImGuiInputFlags recentsInputFlags = ImGuiInputFlags_RouteFocused;
+					int32_t i = 1;
 					for (auto& recent : ProjectHandler::ReadRecentProjects())
 					{
-						if (ImGui::MenuItem((std::to_string(i) + ". " + WStringToUTF8(recent.first) + "##" + std::to_string(i)).c_str()))
+						if (i <= 10 && ImGui::Shortcut(ImGuiKey_0 + (i % 10), recentsInputFlags))
+							ProjectHandler::LoadProject(recent.second);
+						if (ImGui::MenuItem(
+							(WStringToUTF8(recent.first) + "##" + std::to_string(i)).c_str(),
+							(i <= 10) ? std::to_string(i).c_str() : nullptr
+							))
 							ProjectHandler::LoadProject(recent.second);
 						++i;
 					}
 					ImGui::EndMenu();
 				}
-				if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor"))
+				if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor", (EditorSettings::Get().m_closeOnEscape) ? "ESC" : nullptr))
 					m_window->SetShouldClose(true);
 
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu(ICON_TOOLBOX" Editor"))
 			{
-				if (ImGui::MenuItem(ICON_COG" Settings"))
+				if (ImGui::MenuItem(ICON_COG" Settings", "CTRL+,"))
 					EditorSettings::OpenWindow();
 
 				if (ImGui::BeginMenu(ICON_TOOLS" Tools"))
