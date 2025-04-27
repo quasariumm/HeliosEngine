@@ -48,10 +48,21 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 
 			if (ImGui::BeginMenu(WStringToUTF8(projectName).c_str()))
 			{
-				if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project"))
-					ProjectHandler::ShowProjectSelector(true);
 				if (ImGui::MenuItem(ICON_PLUS_BOX" New project"))
 					ProjectHandler::ShowProjectCreator(true);
+				if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project"))
+					ProjectHandler::ShowProjectSelector(true);
+				if (ImGui::BeginMenu(ICON_CLOCK" Open recent"))
+				{
+					uint32_t i = 1;
+					for (auto& recent : ProjectHandler::ReadRecentProjects())
+					{
+						if (ImGui::MenuItem((std::to_string(i) + ". " + WStringToUTF8(recent.first) + "##" + std::to_string(i)).c_str()))
+							ProjectHandler::LoadProject(recent.second);
+						++i;
+					}
+					ImGui::EndMenu();
+				}
 				if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor"))
 					m_window->SetShouldClose(true);
 
