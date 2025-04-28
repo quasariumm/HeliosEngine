@@ -104,6 +104,8 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint3
 
     glViewport(0, 0, size.x, size.y);
 
+	m_vendor.assign(reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
+
     m_currentAPI = GraphicsAPI::OPENGL;
     return true;
 }
@@ -197,6 +199,12 @@ void GL46_Window::SetCursorMode( const CursorMode mode )
 		break;
 	}
 	glfwSetInputMode( m_window, GLFW_CURSOR, glfwMode );
+}
+
+
+const std::string& GL46_Window::GetVendor() const
+{
+	return m_vendor;
 }
 
 

@@ -36,6 +36,13 @@ public:
 	void SetCursorMode(CursorMode mode) override;
 
 
+    /**
+     * @brief Gets the vendor from OpenGL
+     * @note This in mostly used for internal purposes
+     */
+    const std::string& GetVendor() const;
+
+
 	void SetShouldClose(bool shouldClose) override;
 
     bool ShouldClose() override;
@@ -48,6 +55,8 @@ private:
 
 	vec2u m_screenSize;
 	vec2f m_mousePos;
+
+	std::string m_vendor;
 
     static void ResizeCallbackGLFW(GLFWwindow* w, int width, int height);
     static void FocusCallbackGLFW(GLFWwindow* w, int f);
