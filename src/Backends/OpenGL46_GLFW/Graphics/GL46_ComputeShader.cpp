@@ -54,7 +54,8 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	std::wostringstream includedStream;
 
 	auto* window = static_cast<GL46_Window*>(glfwGetWindowUserPointer(glfwGetCurrentContext()));
-	ManageIncludes(contentStream, includedStream, window->GetVendor() == "NVIDIA Corporation");
+	bool supportsGLSLIncludes = window->GetVendor() == "NVIDIA Corporation";
+	ManageIncludes(contentStream, includedStream, supportsGLSLIncludes);
 
 	// Set contents to the current version
 	std::string contentString = WSTR_TO_STR(includedStream.str());
@@ -70,8 +71,15 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	else
 	{
 		glShaderSource(m_shaderID, 1, &content, nullptr);
-		static const char* paths[] = { "/\00", "/Engine/\00", "/Project/\00" };
-		glCompileShaderIncludeARB(m_shaderID, 1, paths, nullptr);
+		if (supportsGLSLIncludes)
+		{
+			static const char* paths[] = {"/\00", "/Engine/\00", "/Project/\00"};
+			glCompileShaderIncludeARB(m_shaderID, 1, paths, nullptr);
+		}
+		else
+		{
+			glCompileShader(m_shaderID);
+		}
 	}
 
 	GLint success;
