@@ -153,7 +153,7 @@ void GL46_ComputeShader::ManageIncludes(
 				// Remove trailing "
 				path.erase(path.length() - 1);
 
-				included = {path.c_str()};
+				included = std::wifstream(path.c_str());
 
 				if (!included.is_open())
 					continue;

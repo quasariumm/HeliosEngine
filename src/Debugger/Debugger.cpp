@@ -136,7 +136,7 @@ void Debugger::DrawWatchList()
         else if (watch.type == typeid(vec3))
             ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), ((vec3*)watch.var)->cell);
         else
-            ImGui::Text("Watch '%s' does not have a supported type", watch.name);
+            ImGui::Text("Watch '%s' does not have a supported type", watch.name.c_str());
     }
 
     ImGui::BeginDisabled();
@@ -153,7 +153,7 @@ void Debugger::DrawWatchList()
         else if (watch.type == typeid(vec3))
             ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), ((vec3*)watch.var)->cell);
         else
-            ImGui::Text("Watch '%s' does not have a supported type", watch.name);
+            ImGui::Text("Watch '%s' does not have a supported type", watch.name.c_str());
     }
     ImGui::EndDisabled();
 
