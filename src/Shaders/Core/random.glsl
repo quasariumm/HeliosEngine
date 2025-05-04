@@ -15,6 +15,10 @@ uint Randomise(inout uint seed)
 	return seed;
 }
 
+float Xi(inout uint seed)
+{
+	return Randomise(seed) / 4294967295.f;
+}
 float RandomFloat(inout uint seed)
 {
 	return Randomise(seed) / 4294967295.f;

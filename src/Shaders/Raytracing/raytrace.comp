@@ -30,22 +30,23 @@ vec3 Trace(Ray ray, uint seed)
 	for (int i = 0; i <= 3; ++i)
 	{
 		RayHitInfo info = RayCollision(ray);
+		info.lightVector = normalize(-sun.direction);
 
 		if (info.didHit)
 		{
-			vec3 BRDF = GetBRDF(info.material);
-			float PDF = GetPDF(info.material);
-
 			vec3 emittance = info.material.emissionColor * info.material.emissionStrength;
 
 			vec3 light = SampleDirectionalLight(sun, info.hitPoint, info.normal);
 
+			vec3 BRDF = GetBRDFAndBounce(info.material, ray, seed, info);
+			float PDF = GetPDF(info.material);
+
 			incommingLight += emittance + (BRDF * light) / PDF * rayColor;
 
-			rayColor *= info.material.diffuseColor * light;
+			rayColor *= mix(info.material.diffuseColor, info.material.specularColor, info.material.specularity)
+				* mix(light, vec3(1.0), info.material.specularity);
 
-			ray.origin = info.hitPoint + 0.0001 * info.normal;
-			LambertianBounce(ray, seed, info);
+			ray.origin = info.hitPoint + 0.0001 * ray.dir;
 		}
 		else
 		{
