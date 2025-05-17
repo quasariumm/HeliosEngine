@@ -58,14 +58,14 @@ vec3 Trace(Ray ray, uint seed)
 			vec3 light = SampleDirectionalLight(sun, info.hitPoint, info.normal);
 
 			vec3 BRDF = GetBRDFAndBounce(info.material, ray, seed, info);
-			float PDF = GetPDF(info.material);
+			float PDF = GetPDF(info.material, info.normal, -ray.dir, info.lightVector);
 
 			incommingLight += emittance + (BRDF * light) / PDF * rayColor;
 
 			rayColor *= mix(info.material.diffuseColor, info.material.specularColor, info.material.specularity)
 				* mix(light, vec3(1.0), info.material.specularity);
 
-			ray.origin = info.hitPoint + 0.0001 * ray.dir;
+			ray.origin = info.hitPoint + 0.001 * ray.dir;
 		}
 		else
 		{

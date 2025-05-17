@@ -3,9 +3,11 @@
 
 #include "/Engine/Core/random.glsl"
 #include "/Engine/Raytracing/ray.glsl"
+#include "/Engine/Raytracing/materialStruct.glsl"
+#include "/Engine/Raytracing/microfacet.glsl"
 
 /*
-	Houses the material struct and material-related functions
+	Houses material-related functions
 */
 
 #define MATERIAL_REFLECTION 	1
@@ -14,25 +16,17 @@
 #define MATERIAL_DIFFUSE 		8
 #define MATERIAL_GLOSSY 		16
 #define MATERIAL_SPECULAR 		32
-#define MATERIAL_ALL 			MATERIAL_REFLECTION | MATERIAL_MICROFACET | MATERIAL_TRANSMISSION | MATERIAL_DIFFUSE | MATERIAL_GLOSSY | MATERIAL_SPECULAR
 
-struct RayTracingMaterial
-{
-	int type;
-	vec3 diffuseColor;
-	vec3 specularColor;
-	float specularity;
-	float shininess;
-	float glossiness;
+#define MATERIAL_DEFAULT 		MATERIAL_REFLECTION | MATERIAL_TRANSMISSION | MATERIAL_DIFFUSE | MATERIAL_GLOSSY | MATERIAL_SPECULAR// | MATERIAL_MICROFACET | MICROFACET_BECKMANN
 
-	vec3 emissionColor;
-	float emissionStrength;
-
-	float refractivity;
-	float refractionCoefficient;
-};
-
-const RayTracingMaterial defaultMaterial = RayTracingMaterial(MATERIAL_ALL, vec3(0.0), vec3(0.0), 0.0, 0.0, 0.0, vec3(0.0), 0.0, 0.0, 1.0);
+const RayTracingMaterial defaultMaterial = RayTracingMaterial(
+	MATERIAL_DEFAULT, 		// type
+	vec3(0.0), vec3(0.0), 	// albedo
+	0.0, 0.0, 0.0, 			// specular parameters
+	vec3(0.0), 0.0, 		// emission
+	0.0, 1.0, 				// transmission/dielectric
+	0.3, 0.3, 0.3			// PBR
+);
 
 /*
 	This goes in here for dependecy reasons
@@ -53,19 +47,19 @@ const RayHitInfo defaultHitInfo = RayHitInfo( false, 1e30, vec3(0.0), vec3(0.0),
 	Bounces
 */
 
-vec3 LambertianBounce(inout uint seed, in vec3 normal)
+vec3 LambertianBounce(inout uint seed, vec3 normal)
 {
 	return normalize(normal + RandomHemisphericalDirection(seed));
 }
 
-vec3 Reflect(in vec3 wo, in vec3 normal)
+vec3 Reflect(vec3 wo, vec3 normal)
 {
 	return normalize(-wo + 2.0 * dot(wo, normal) * normal);
 }
 
 // Returns direction in xyz, Fresnel term in w
 // TODO: Support for refraction from non-air to non-air
-vec4 Refract(in vec3 wo, in vec3 normal, in float etaT, out float etaO, out float etaI)
+vec4 Refract(vec3 wo, vec3 normal, float etaT, out float etaO, out float etaI)
 {
 	float eta = etaT;
 	vec3 N = normal;
@@ -116,7 +110,7 @@ struct BRDFInfo
 };
 
 // These functions are combined for the reason that the same values need to be calculated eitherway
-vec3 GetBRDFAndBounce(inout RayTracingMaterial material, inout Ray ray, inout uint seed, in RayHitInfo info)
+vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint seed, RayHitInfo info)
 {
 	BRDFInfo diffuse 		= BRDFInfo(0.0, vec3(0.0), vec3(0.0));
 	BRDFInfo specular 		= BRDFInfo(0.0, vec3(0.0), vec3(0.0));
@@ -124,36 +118,44 @@ vec3 GetBRDFAndBounce(inout RayTracingMaterial material, inout Ray ray, inout ui
 
 	bool glassReflect = false;
 
-	if ((material.type | MATERIAL_DIFFUSE) != 0
+	if ((material.type & MATERIAL_DIFFUSE) != 0
 		&& material.specularity < 1.0)
 	{
 		diffuse.factor = 1.0 - material.specularity;
 		// Direction
-		if ((material.type | MATERIAL_REFLECTION) != 0)
+		if ((material.type & MATERIAL_REFLECTION) != 0)
 			diffuse.direction = LambertianBounce(seed, info.normal);
 
 		// BRDF
 		diffuse.BRDF = material.diffuseColor * INVPI;
 	}
-	if ((material.type | MATERIAL_SPECULAR) != 0
+	if ((material.type & MATERIAL_SPECULAR) != 0
 		&& material.specularity > 0.0)
 	{
 		specular.factor = material.specularity;
 		// Direction
-		if ((material.type | MATERIAL_REFLECTION) != 0)
+		if ((material.type & MATERIAL_REFLECTION) != 0)
 			specular.direction = Reflect(-ray.dir, info.normal);
-		// BRDF
-		// https://www.cs.cmu.edu/afs/cs/academic/class/15462-f09/www/lec/lec8.pdf
-		vec3 H = normalize(info.lightVector - ray.dir);
-		float overlap = max(0.0, dot(H, info.normal));
-		specular.BRDF = material.specularColor * pow(overlap, material.shininess);
+
+		if ((material.type & MATERIAL_MICROFACET) != 0)
+		{
+			specular.BRDF = MicrofacetBRDF(material, info.normal, -ray.dir, info.lightVector);
+		}
+		else
+		{
+			// BRDF
+			// https://www.cs.cmu.edu/afs/cs/academic/class/15462-f09/www/lec/lec8.pdf
+			vec3 H = normalize(info.lightVector - ray.dir);
+			float overlap = max(0.0, dot(H, info.normal));
+			specular.BRDF = material.specularColor * pow(overlap, material.shininess);
+		}
 	}
-	if ((material.type | MATERIAL_TRANSMISSION) != 0
+	if ((material.type & MATERIAL_TRANSMISSION) != 0
 		&& material.refractivity > 0.0)
 	{
 		transmission.factor = material.refractivity;
 
-		if ((material.type | MATERIAL_REFLECTION) != 0)
+		if ((material.type & MATERIAL_REFLECTION) != 0)
 		{
 			float etaI = 1.0;
 			float etaO = material.refractionCoefficient;
@@ -186,7 +188,7 @@ struct PDFInfo
 	float PDF;
 };
 
-float GetPDF(inout RayTracingMaterial material)
+float GetPDF(inout RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 {
 	PDFInfo diffuse = PDFInfo(
 		1.0 - material.specularity,
@@ -196,6 +198,12 @@ float GetPDF(inout RayTracingMaterial material)
 		material.specularity,
 		1.0
 	);
+
+	if ((material.type & MATERIAL_MICROFACET) != 0)
+	{
+		specularTransmission.PDF = MicrofacetPDF(material, normal, wo, wi);
+	}
+
 	return diffuse.PDF * diffuse.factor + specularTransmission.PDF * specularTransmission.factor;
 }
 

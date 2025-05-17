@@ -63,6 +63,7 @@ void ObjectRenderer::SetMaterialData(const std::string& base)
 {
     if (m_computeShader == nullptr) return;
     const std::string matBaseName = base + ".material";
+	m_computeShader->SetInt(matBaseName + ".type", 0b10111111);
     m_computeShader->SetVec3(matBaseName + ".diffuseColor", vec3f(0.9f, 0.6f, 0.3f));
     m_computeShader->SetVec3(matBaseName + ".specularColor", vec3f(1.f));
     m_computeShader->SetFloat(matBaseName + ".specularity", (base == "Spheres[1]" || base == "Spheres[2]") ? 1.0f : 0.f);
@@ -74,6 +75,10 @@ void ObjectRenderer::SetMaterialData(const std::string& base)
 
     m_computeShader->SetFloat(matBaseName + ".refractivity", (base == "Spheres[2]") ? 1.0f : 0.f);
     m_computeShader->SetFloat(matBaseName + ".refractionCoefficient", 1.52f);
+
+	m_computeShader->SetFloat(matBaseName + ".PBR_Roughness", 0.6f);
+	m_computeShader->SetFloat(matBaseName + ".PBR_Metallic", 0.3f);
+	m_computeShader->SetFloat(matBaseName + ".PBR_Reflectance", 0.3f);
 }
 
 }
