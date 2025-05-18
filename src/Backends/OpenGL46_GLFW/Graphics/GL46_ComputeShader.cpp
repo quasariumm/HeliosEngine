@@ -53,8 +53,7 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	// Get the includes
 	std::wostringstream includedStream;
 
-	auto* window = static_cast<GL46_Window*>(glfwGetWindowUserPointer(glfwGetCurrentContext()));
-	bool supportsGLSLIncludes = window->GetVendor() == "NVIDIA Corporation";
+	bool supportsGLSLIncludes = glfwExtensionSupported("ARB_shading_language_include") == GLFW_TRUE;
 	ManageIncludes(contentStream, includedStream, supportsGLSLIncludes);
 
 	// Set contents to the current version
