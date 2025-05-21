@@ -57,6 +57,15 @@ vec3 Trace(Ray ray, uint seed)
 
 			vec3 light = SampleDirectionalLight(sun, info.hitPoint, info.normal);
 
+			// Shadow ray
+			Ray shadowRay = Ray(
+				info.hitPoint + 0.001 * info.normal,
+				-sun.direction,
+				1.0 / -sun.direction
+			);
+			RayHitInfo shadowInfo = RayCollision(shadowRay);
+			light *= float(!shadowInfo.didHit);
+
 			vec3 BRDF = GetBRDFAndBounce(info.material, ray, seed, info);
 			float PDF = GetPDF(info.material, info.normal, -ray.dir, info.lightVector);
 
@@ -75,6 +84,16 @@ vec3 Trace(Ray ray, uint seed)
 	}
 
 	return incommingLight;
+}
+
+uint WangHash(in uint seed)
+{
+	// Wang hash initialisation
+	seed = (seed ^ 61u) ^ (seed >> 16u);
+	seed *= 9u, seed = seed ^ (seed >> 4u);
+	seed *= 0x27d4eb2du;
+	seed = seed ^ (seed >> 15u);
+	return seed;
 }
 
 void main()
@@ -96,26 +115,21 @@ void main()
 		1.0 / focusDir
 	);
 
-	uint seed = uint(floor(
-		tc.y * ScreenHeight * ScreenWidth
-		+ tc.x * ScreenWidth)
-		* Frame
-	);
-	// Wang hash initialisation
-	seed = (seed ^ 61u) ^ (seed >> 16u);
-	seed *= 9u, seed = seed ^ (seed >> 4u);
-	seed *= 0x27d4eb2du;
-	seed = seed ^ (seed >> 15u);
+	uint seed = uint(floor(tc.y * ScreenHeight * ScreenWidth + tc.x * ScreenWidth));
+	seed ^= WangHash(Frame);
+	seed = WangHash(seed);
 
 	vec4 pixel = vec4(Trace(ray, seed), 1.0);
-//	if (!ClearAccumulator)
-//	{
-//		vec4 accumulatorTexel = imageLoad(OutTexture, texelCoord);
-//		if (accumulatorTexel.a > 0.0)
-//		{
-//			pixel = 0.5 * pixel + 0.5 * accumulatorTexel;
-//		}
-//	}
+	pixel = max(pixel, vec4(0.0, 0.0, 0.0, 1.0));
+	if (!ClearAccumulator)
+	{
+		vec4 accumulatorTexel = imageLoad(OutTexture, texelCoord);
+		if (accumulatorTexel.a > 0.0)
+		{
+			pixel = 0.5 * pixel + 0.5 * accumulatorTexel;
+			pixel.a = 1.0;
+		}
+	}
 
 	imageStore(OutTexture, texelCoord, pixel);
 }

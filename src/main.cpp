@@ -5,6 +5,7 @@
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"
 #include "Components/Sphere.h"
+#include "Components/Material.h"
 #include "Core/Window.h"
 #include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"
@@ -110,7 +111,7 @@ int main(int, char**)
 	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
 
     Engine::Timer frameTimer;
-	uint64_t frame = 0;
+	uint32_t frame = 0;
 	float deltaTime = 0.f;
 
 	Engine::Camera camera;
@@ -147,7 +148,7 @@ int main(int, char**)
 	    {
     		ZoneScopedNC("Compute shader dispatch", tracy::Color::LightGreen);
 			rayCompute.Use();
-			rayCompute.SetUInt("Frame", frame % 1000);
+			rayCompute.SetUInt("Frame", frame);
 
 			const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
 			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);
@@ -157,6 +158,7 @@ int main(int, char**)
 			rayCompute.SetVec3("ViewParams", viewportParams);
 
 		    rayTexture.UseCompute(0);
+    		rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
     		rayCompute.Dispatch(computeThreads);
 			// rayTexture.UpdateData();
 	    }

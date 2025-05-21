@@ -8,12 +8,13 @@ namespace Engine
 {
     class SceneObject;
 
-    struct ComponentProperty
+    struct alignas(32) ComponentProperty
     {
         std::wstring name;
         std::wstring type;
         const std::type_info& rawType;
         void* value;
+    	void(* displayFunc)(void*) = nullptr;
     };
 
     class Component
@@ -24,20 +25,37 @@ namespace Engine
 
         template<typename T>
         explicit Component(T* _component, std::wstring displayName):
-        m_componentType(typeid(T)), m_displayName(std::move(displayName)) { }
+			m_componentType(typeid(T)), m_displayName(std::move(displayName)) { }
 
         void AttachToObject(SceneObject* object) { m_attachedObject = object; Init(); }
+
         [[nodiscard]] const std::type_info& GetType() const { return m_componentType; }
         [[nodiscard]] std::wstring GetName() const {return m_displayName; }
         [[nodiscard]] SceneObject* GetAttachedObject() const { return m_attachedObject; }
 
+
+        /**
+         * @brief Assigns a named property to the component
+         * @tparam T The type of the property
+         * @param name The name of the property
+         * @param value A pointer to the value
+         * @param displayFunc (Optional for defaulted types) A custom function to display this property
+         * @attention For non-defaulted types, you MUST supply a custom display function
+         */
         template<typename T>
-        void AssignProperty(const std::wstring& name, T* value)
+        void AssignProperty(const std::wstring& name, T* value, void(* displayFunc)(void*) = nullptr)
         {
         	const std::string demangled = Demangle(typeid(T).name());
-            m_properties.emplace_back(name, std::wstring(demangled.begin(), demangled.end()), typeid(T), value);
+            m_properties.emplace_back(name, std::wstring(demangled.begin(), demangled.end()), typeid(T), value, displayFunc);
         }
 
+
+        /**
+         * @brief Sets the value of a property
+         * @tparam T The property type
+         * @param propertyName The name of the property
+         * @param value The value you want it to have
+         */
         template<typename T>
         void SetPropertyValue(const std::wstring& propertyName, const T value)
         {
@@ -46,44 +64,26 @@ namespace Engine
                     *(T*)p.value = value;
         }
 
-        void AssignProperty(const std::wstring& displayName, bool& valueRef) { m_boolProperties.insert({ displayName, valueRef }); }
-        void AssignProperty(const std::wstring& displayName, int& valueRef) { m_intProperties.insert({ displayName, valueRef }); }
-        void AssignProperty(const std::wstring& displayName, float& valueRef) { m_floatProperties.insert({ displayName, valueRef }); }
-        void AssignProperty(const std::wstring& displayName, vec2& valueRef) { m_vec2Properties.insert({ displayName, valueRef }); }
-        void AssignProperty(const std::wstring& displayName, vec3& valueRef) { m_vec3Properties.insert({ displayName, valueRef }); }
-        void AssignProperty(const std::wstring& displayName, std::wstring& valueRef) { m_textProperties.insert({ displayName, valueRef }); }
 
+        /**
+         * @brief Displays all the properties of the component
+         * @throws std::runtime_error When a non-defaulted type does not have a custom display function set
+         */
         void DisplayProperties() const
         {
             for (const ComponentProperty& p : m_properties)
             {
-                if (p.rawType == typeid(bool)) ImGui::Checkbox(WStringToUTF8(p.name).c_str(), (bool*)p.value);
-                if (p.rawType == typeid(int)) ImGui::InputInt(WStringToUTF8(p.name).c_str(), (int*)p.value);
-                if (p.rawType == typeid(float)) ImGui::InputFloat(WStringToUTF8(p.name).c_str(), (float*)p.value);
-                if (p.rawType == typeid(vec2)) ImGui::InputFloat2(WStringToUTF8(p.name).c_str(), ((vec2*)p.value)->cell);
-                if (p.rawType == typeid(vec3)) ImGui::InputFloat3(WStringToUTF8(p.name).c_str(), ((vec3*)p.value)->cell);
+            	if (p.displayFunc) p.displayFunc(p.value);
+                else if (p.rawType == typeid(bool)) ImGui::Checkbox(WStringToUTF8(p.name).c_str(), (bool*)p.value);
+                else if (p.rawType == typeid(int)) ImGui::InputInt(WStringToUTF8(p.name).c_str(), (int*)p.value);
+                else if (p.rawType == typeid(float)) ImGui::InputFloat(WStringToUTF8(p.name).c_str(), (float*)p.value);
+                else if (p.rawType == typeid(vec2)) ImGui::InputFloat2(WStringToUTF8(p.name).c_str(), ((vec2*)p.value)->cell);
+                else if (p.rawType == typeid(vec3)) ImGui::InputFloat3(WStringToUTF8(p.name).c_str(), ((vec3*)p.value)->cell);
+            	else throw std::runtime_error("The property has a non-defaulted type but does not have a custom display function");
             }
-
-            for (std::pair<std::wstring, bool&> p : m_boolProperties)
-                ImGui::Checkbox(WStringToUTF8(p.first).c_str(), &p.second);
-            for (std::pair<std::wstring, int&> p : m_intProperties)
-                ImGui::InputInt(WStringToUTF8(p.first).c_str(), &p.second);
-            for (std::pair<std::wstring, float&> p : m_floatProperties)
-                ImGui::InputFloat(WStringToUTF8(p.first).c_str(), &p.second);
-            for (std::pair<std::wstring, vec2&> p : m_vec2Properties)
-                ImGui::InputFloat2(WStringToUTF8(p.first).c_str(), p.second.cell);
-            for (std::pair<std::wstring, vec3&> p : m_vec3Properties)
-                ImGui::InputFloat3(WStringToUTF8(p.first).c_str(), p.second.cell);
         }
 
         const std::vector<ComponentProperty>& GetProperties() const { return m_properties; }
-
-        const std::unordered_map<std::wstring, bool&>& GetBoolProperties() const { return m_boolProperties; }
-        const std::unordered_map<std::wstring, int&>& GetIntProperties() const { return m_intProperties; }
-        const std::unordered_map<std::wstring, float&>& GetFloatProperties() const { return m_floatProperties; }
-        const std::unordered_map<std::wstring, vec2&>& GetVec2Properties() const { return m_vec2Properties; }
-        const std::unordered_map<std::wstring, vec3&>& GetVec3Properties() const { return m_vec3Properties; }
-        const std::unordered_map<std::wstring, std::wstring&>& GetTextProperties() const { return m_textProperties; }
 
     protected:
 
@@ -97,13 +97,6 @@ namespace Engine
         const std::wstring m_displayName;
 
         std::vector<ComponentProperty> m_properties;
-
-        std::unordered_map<std::wstring, bool&> m_boolProperties;
-        std::unordered_map<std::wstring, int&> m_intProperties;
-        std::unordered_map<std::wstring, float&> m_floatProperties;
-        std::unordered_map<std::wstring, vec2&> m_vec2Properties;
-        std::unordered_map<std::wstring, vec3&> m_vec3Properties;
-        std::unordered_map<std::wstring, std::wstring&> m_textProperties;
     };
 
     class ComponentRegister
@@ -146,6 +139,7 @@ namespace Engine
 
     };
 
+// This is what we call ChatGPT magic
 #define REGISTER_COMPONENT(TYPE) \
 static bool TYPE##_registered = [](){ \
 std::string type = #TYPE; \

@@ -4,6 +4,13 @@
 
 #include "IconDefines.h"
 
+
+namespace Engine
+{
+class Material;
+}
+
+
 static const std::wstring ANSI_OK = L"[\033[32m OK \033[0m] ";
 static const std::wstring ANSI_DONE = L"[\033[32mDONE\033[0m] ";
 static const std::wstring ANSI_ERR = L"[\033[31mERRO\033[0m] ";
@@ -15,6 +22,7 @@ static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
  */
 
 static std::unordered_set<std::string> loadedShaders;
+static std::vector<Engine::Material*> materials;
 
 /*
  * Defines
