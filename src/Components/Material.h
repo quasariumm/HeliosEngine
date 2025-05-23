@@ -1,7 +1,8 @@
 #pragma once
 
+#include <imgui/imgui.h>
+
 #include "Component.h"
-#include "Core/IconDefines.h"
 
 namespace Engine
 {
@@ -41,17 +42,17 @@ public:
 
 	struct MaterialProperties
 	{
-		uint8_t reflection : 1 = 0u;
+		uint8_t reflection : 1 = 1u;
 		uint8_t microfacet : 1 = 0u;
-		uint8_t transmission : 1 = 0u;
-		uint8_t diffuse : 1 = 0u;
-		uint8_t glossy : 1 = 0u;
-		uint8_t specular : 1 = 0u;
+		uint8_t transmission : 1 = 1u;
+		uint8_t diffuse : 1 = 1u;
+		uint8_t glossy : 1 = 1u;
+		uint8_t specular : 1 = 1u;
 	} m_properties;
 
 	struct MicrofacetModel
 	{
-		uint8_t beckmann: 1 = 0u;
+		uint8_t beckmann: 1 = 1u;
 		uint8_t ggx_iso: 1 = 0u;
 		uint8_t ggx_aniso: 1 = 0u;
 		uint8_t blinnphong: 1 = 0u;
@@ -81,33 +82,33 @@ static void DisplayMaterialProperties(void* data)
 	auto* mat = (Material::MaterialProperties*)data;
 
 	// TODO: Make the material idx display sane
-	const int idx = std::distance(materials.begin(), std::ranges::find(materials, data));
+	const int idx = std::distance(materials.begin(), std::ranges::find(materials, data)) - 1;
 	ImGui::Text("Material idx: %i", idx);
 	ImGui::Separator();
 
-	bool reflection = false;
-	ImGui::Checkbox("Rays reflect", &reflection);
-	mat->reflection = reflection ? 1 : 0;
+	bool reflection = mat->reflection;
+	if (ImGui::Checkbox("Rays reflect", &reflection))
+		mat->reflection = reflection ? 1 : 0;
 
-	bool microfacet = false;
-	ImGui::Checkbox("Use microfacets", &microfacet);
-	mat->microfacet = microfacet ? 1 : 0;
+	bool microfacet = mat->microfacet;
+	if (ImGui::Checkbox("Use microfacets", &microfacet))
+		mat->microfacet = microfacet ? 1 : 0;
 
-	bool transmission = false;
-	ImGui::Checkbox("Transmission", &transmission);
-	mat->transmission = transmission ? 1 : 0;
+	bool transmission = mat->transmission;
+	if (ImGui::Checkbox("Transmission", &transmission))
+		mat->transmission = transmission ? 1 : 0;
 
-	bool diffuse = false;
-	ImGui::Checkbox("Diffuse", &diffuse);
-	mat->diffuse = diffuse ? 1 : 0;
+	bool diffuse = mat->diffuse;
+	if (ImGui::Checkbox("Diffuse", &diffuse))
+		mat->diffuse = diffuse ? 1 : 0;
 
-	bool glossy = false;
-	ImGui::Checkbox("Glossy", &glossy);
-	mat->glossy = glossy ? 1 : 0;
+	bool glossy = mat->glossy;
+	if (ImGui::Checkbox("Glossy", &glossy))
+		mat->glossy = glossy ? 1 : 0;
 
-	bool specular = false;
-	ImGui::Checkbox("Specular", &specular);
-	mat->transmission = specular ? 1 : 0;
+	bool specular = mat->specular;
+	if (ImGui::Checkbox("Specular", &specular))
+		mat->specular = specular ? 1 : 0;
 }
 
 static void DisplayMicrofacetModel(void* data)
@@ -133,18 +134,16 @@ static void DisplayMicrofacetModel(void* data)
 
 REGISTER_COMPONENT(Material);
 
-static bool defaultMaterial = []()
+static Material defaultMaterial;
+
+static bool setDefaultMaterial = []()
 {
-	materials.push_back( new Material(
-		Material::MaterialProperties(1, 0, 1, 1, 1, 1),
-		Material::MicrofacetModel(1, 0, 0 ,0),
-		vec3f(0.9f, 0.6f, 0.3f),
-		vec3f(1.f),
-		0.f, 0.f, 0.f,
-		vec3f(0.f), 0.f,
-		0.f, 1.f,
-		0.3f, 0.3f, 0.3f
-	));
+	defaultMaterial.m_properties = { 1, 0, 1, 1, 1, 1 };
+	defaultMaterial.m_microfacetModel = { 1, 0, 0, 0 };
+	defaultMaterial.m_diffuseColor = vec3f(0.9f, 0.6f, 0.3f);
+	defaultMaterial.m_specularColor = vec3f(1.f, 1.f, 1.f);
+	defaultMaterial.m_refractionCoefficient = 1.f;
+	materials.push_back(&defaultMaterial);
 	return true;
 }();
 

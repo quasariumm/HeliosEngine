@@ -70,17 +70,16 @@ void ObjectRenderer::SetMaterialData(const std::string& base, const int material
 		throw std::range_error("Material index out of range");
 	const Material* mat = materials[materialIdx];
 
-	int type = 0;
-	if (mat->m_properties.reflection)			type += 0b0000000001;
-	if (mat->m_properties.microfacet)			type += 0b0000000010;
-	if (mat->m_properties.transmission)			type += 0b0000000100;
-	if (mat->m_properties.diffuse)				type += 0b0000001000;
-	if (mat->m_properties.glossy)				type += 0b0000010000;
-	if (mat->m_properties.specular)				type += 0b0000100000;
-	if (mat->m_microfacetModel.beckmann)		type += 0b0001000000;
-	if (mat->m_microfacetModel.ggx_iso)			type += 0b0010000000;
-	if (mat->m_microfacetModel.ggx_aniso)		type += 0b0100000000;
-	if (mat->m_microfacetModel.blinnphong)		type += 0b1000000000;
+	const int type = mat->m_properties.reflection
+		| (mat->m_properties.microfacet << 1)
+		| (mat->m_properties.transmission << 2)
+		| (mat->m_properties.diffuse << 3)
+		| (mat->m_properties.glossy << 4)
+		| (mat->m_properties.specular << 5)
+		| (mat->m_microfacetModel.beckmann << 6)
+		| (mat->m_microfacetModel.ggx_iso << 7)
+		| (mat->m_microfacetModel.ggx_aniso << 8)
+		| (mat->m_microfacetModel.blinnphong << 9);
 	m_computeShader->SetInt(matBaseName + ".type", type);
 
     m_computeShader->SetVec3(matBaseName + ".diffuseColor", mat->m_diffuseColor);
