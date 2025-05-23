@@ -6,6 +6,9 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
+#include "stb_image.h"
+
+
 namespace Engine
 {
 
@@ -67,6 +70,12 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint3
         std::wcout << ANSI_ERR << "Failed to create OpenGL GLFW window" << std::endl;
         return false;
     }
+
+	// Set window icon
+	GLFWimage icon[1];
+	icon[0].pixels = stbi_load("assets/HeliosLogo.png", &icon[0].width, &icon[0].height, 0, 4);
+	glfwSetWindowIcon(m_window, 1, icon);
+	stbi_image_free(icon[0].pixels);
 
     glfwMakeContextCurrent( m_window );
 
