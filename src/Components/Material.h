@@ -116,20 +116,21 @@ static void DisplayMicrofacetModel(void* data)
 	auto* model = (Material::MicrofacetModel*)data;
 	ImGui::Text("Microfacet model:");
 	if (ImGui::Selectable("Beckmann", model->selector == 0))
-		model->selector = 0, model->beckmann = 1;
-	else model->beckmann = 0;
+		model->selector = 0;
 
 	if (ImGui::Selectable("Isotropic GGX", model->selector == 1))
-		model->selector = 1, model->ggx_iso = 1;
-	else model->ggx_iso = 0;
+		model->selector = 1;
 
 	if (ImGui::Selectable("Anisotropic GGX", model->selector == 2))
-		model->selector = 2, model->ggx_aniso = 1;
-	else model->ggx_aniso = 0;
+		model->selector = 2;
 
 	if (ImGui::Selectable("Blinn-Phong", model->selector == 3))
-		model->selector = 3, model->blinnphong = 1;
-	else model->blinnphong = 0;
+		model->selector = 3;
+
+	model->beckmann = (model->selector == 0) ? 1 : 0;
+	model->ggx_iso = (model->selector == 1) ? 1 : 0;
+	model->ggx_aniso = (model->selector == 2) ? 1 : 0;
+	model->blinnphong = (model->selector == 3) ? 1 : 0;
 }
 
 REGISTER_COMPONENT(Material);
