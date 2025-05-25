@@ -16,7 +16,7 @@ uint32_t Scene::NewUID()
             return newUID;
     }
 
-    DebugLog(LogSeverity::ERROR, L"Creating UID for object took too long");
+    DebugLog(LogSeverity::SEVERE, L"Creating UID for object took too long");
 
     return 0;
 }
@@ -40,7 +40,7 @@ SceneObject* Scene::NewObject(uint32_t UID)
     if (object->GetUID() == 0)
     {
         delete object;
-        DebugLog(LogSeverity::ERROR, L"Creating new object failed");
+        DebugLog(LogSeverity::SEVERE, L"Creating new object failed");
         return nullptr;
     }
 
@@ -60,7 +60,7 @@ SceneObject* Scene::GetSceneObject(const uint32_t UID) const
     for (SceneObject* object : m_sceneObjects)
         if (object->GetUID() == UID)
             return object;
-    DebugLog(LogSeverity::ERROR, L"Object '" + std::to_wstring(UID) + L"' not found");
+    DebugLog(LogSeverity::SEVERE, L"Object '" + std::to_wstring(UID) + L"' not found");
     return nullptr;
 }
 
@@ -69,7 +69,7 @@ SceneObject* Scene::GetSceneObject(const std::wstring& name) const
     for (SceneObject* object : m_sceneObjects)
         if (object->GetName() == name)
             return object;
-    DebugLog(LogSeverity::ERROR, L"Object '" + name + L"' not found");
+    DebugLog(LogSeverity::SEVERE, L"Object '" + name + L"' not found");
     return nullptr;
 }
 }

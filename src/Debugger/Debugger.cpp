@@ -62,7 +62,7 @@ void Debugger::DrawLogs()
     {
         if (log.type == LogSeverity::INFO && !showInfo) continue;
         if (log.type == LogSeverity::WARNING && !showWarn) continue;
-        if (log.type == LogSeverity::ERROR && !showError) continue;
+        if (log.type == LogSeverity::SEVERE && !showError) continue;
         if (log.type == LogSeverity::DONE && !showDone) continue;
 
 
@@ -102,7 +102,7 @@ void Debugger::DrawLogs()
             break;
         case LogSeverity::WARNING: ImGui::TextColored({1.0f, 1.0f, 0, 1.0f}, ICON_ALERT);
             break;
-        case LogSeverity::ERROR: ImGui::TextColored({1.0f, 0, 0, 1.0f}, ICON_ALERT_OCTAGON);
+        case LogSeverity::SEVERE: ImGui::TextColored({1.0f, 0, 0, 1.0f}, ICON_ALERT_OCTAGON);
             break;
         case LogSeverity::DONE: ImGui::TextColored({0, 0.5f, 0, 1.0f}, ICON_CHECK_BOLD);
             break;

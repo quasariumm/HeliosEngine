@@ -39,7 +39,7 @@ elseif(MSVC)
     add_compile_options(/arch:SSE2 /arch:AVX)
 endif()
 
-add_executable(${CMAKE_PROJECT_NAME} ${LIBS} ${SOURCE})
+add_library(Engine SHARED ${LIBS} ${SOURCE})
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(TRACY_ENABLE     ON)
@@ -49,7 +49,7 @@ add_subdirectory(extern/nativefiledialog-extended)
 add_subdirectory(extern/Tracy)
 
 
-target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
+target_compile_definitions(Engine PRIVATE
         "$<$<CONFIG:Debug>:DEBUG=1>"
         "$<$<CONFIG:Release>:NDEBUG=1>"
         "$<$<CONFIG:Debug>:TRACY_ENABLE=1>"
@@ -57,16 +57,16 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 )
 
 
-target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
+target_compile_options(Engine PRIVATE
         "$<$<C_COMPILER_ID:MSVC>:/utf-8>"
         "$<$<NOT:$<C_COMPILER_ID:MSVC>>:-finput-charset=UTF-8;-fexec-charset=UTF-8>"
 )
-target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
+target_compile_options(Engine PRIVATE
         "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>"
         "$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-finput-charset=UTF-8;-fexec-charset=UTF-8>"
 )
 
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
+target_include_directories(Engine PUBLIC
         pch
         src
         extern
@@ -75,10 +75,11 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
         lib
         lib/glfw/include
         lib/glad/include
+        include
         ${TRACY_PUBLIC_DIR}
 )
 
-target_precompile_headers(${CMAKE_PROJECT_NAME} PUBLIC
+target_precompile_headers(Engine PUBLIC
         "$<$<COMPILE_LANGUAGE:CXX>:PrecompCXX.h>"
         "$<$<COMPILE_LANGUAGE:C>:PrecompC.h>"
 )
@@ -92,28 +93,28 @@ set(UNIX_LIBS
 )
 
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC nfd Tracy::TracyClient)
+target_link_libraries(Engine PUBLIC nfd Tracy::TracyClient)
 
 if (MSVC)
 
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         # 64-bit
-        target_link_directories(${CMAKE_PROJECT_NAME} PUBLIC
+        target_link_directories(Engine PUBLIC
                 lib/glfw/lib-vc2010-64
         )
     else()
         # 32 bit
-        target_link_directories(${CMAKE_PROJECT_NAME} PUBLIC
+        target_link_directories(Engine PUBLIC
                 lib/glfw/lib-vc2010-32
         )
     endif()
 
-    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${MSVC_LIBS})
+    target_link_libraries(Engine PUBLIC ${MSVC_LIBS})
 
 else()
 
-    target_link_directories(${CMAKE_PROJECT_NAME} PUBLIC lib/glfw/lib-mingw)
+    target_link_directories(Engine PUBLIC lib/glfw/lib-mingw)
 
-    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${UNIX_LIBS})
+    target_link_libraries(Engine PUBLIC ${UNIX_LIBS})
 
 endif()

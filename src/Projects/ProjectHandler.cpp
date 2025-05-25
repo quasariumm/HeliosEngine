@@ -5,13 +5,21 @@
 #include <nfd.hpp>
 
 #include "Assets/AssetManager.h"
+#include "backends/imgui_impl_opengl3_loader.h"
+#include "Core/FileTools.h"
+#include <windows.h>
+
+#define TMPFOLDER R"(C:\Users\Gebruiker\Documents\Projects\engine_raytrace\launcher\Tmp)"
 
 namespace Engine
 {
 
-ProjectData ProjectHandler::m_projectData = ProjectData();
 bool ProjectHandler::m_selectorOpen = false;
 bool ProjectHandler::m_creatorOpen = false;
+
+HINSTANCE ProjectHandler::m_projectLibrary = NULL;
+ProjectData ProjectHandler::m_projectData = {};
+EngineProject* ProjectHandler::m_project = nullptr;
 
 void ProjectHandler::ProjectWindows()
 {
@@ -21,27 +29,27 @@ void ProjectHandler::ProjectWindows()
     {
         ImGui::Begin("Project Creator", nullptr, ImGuiWindowFlags_NoDocking);
 
+        ProjectData newProjectData = {};
+
         if (ImGui::Button("Select folder"))
             ShowFileSelect(path);
-
-        ProjectData newProjectData;
 
         ImGui::Text(ICON_FOLDER);
         ImGui::SameLine(30);
         ImGui::Text( path.string().c_str());
 
-        static char projectName[128];
+        static char projectName[64];
         ImGui::Text(ICON_RENAME);
         ImGui::SameLine(30);
-        ImGui::InputText("Project Name", projectName, 128);
+        ImGui::InputText("Project Name", projectName, 64);
         newProjectData.projectName = STR_TO_WSTR(projectName);
 
         if (ImGui::Button("Create"))
         {
             if (ValidateProjectFolder(path))
-                DebugLog(LogSeverity::ERROR, L"There is already a project in this folder");
+                DebugLog(LogSeverity::SEVERE, L"There is already a project in this folder");
             else if (!ValidateProjectData(newProjectData))
-                DebugLog(LogSeverity::ERROR, L"Incorrect project settings");
+                DebugLog(LogSeverity::SEVERE, L"Incorrect project settings");
             else
             {
                 if (CreateProject(path, newProjectData))
@@ -64,7 +72,7 @@ void ProjectHandler::ProjectWindows()
             if (ShowFileSelect(path, true))
             {
                 if (!ValidateProjectFolder(path))
-                    DebugLog(LogSeverity::ERROR, L"Project doesn't exist");
+                    DebugLog(LogSeverity::SEVERE, L"Project doesn't exist");
                 else
                 {
                     ShowProjectSelector(false);
@@ -82,7 +90,7 @@ void ProjectHandler::ProjectWindows()
                 if (ImGui::Selectable(WStringToUTF8(recent.first).c_str()))
                 {
                     if (!ValidateProjectFolder(recent.second))
-                        DebugLog(LogSeverity::ERROR, L"Project doesn't exist");
+                        DebugLog(LogSeverity::SEVERE, L"Project doesn't exist");
                     else
                     {
                         ShowProjectSelector(false);
@@ -137,17 +145,55 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
 
     create_directories(projectPath);
 
+    // Creating the Project.gep file
     std::wofstream file(projectFilePath);
     if (!file.is_open())
     {
-        DebugLog(LogSeverity::ERROR, L"Something went wrong creating project: " + projectFilePath.wstring());
+        DebugLog(LogSeverity::SEVERE, L"Could not create Project.gep");
         return false;
     }
 
+    // Setting all values for the project file
     file << "[Project]\n";
     file << "Name = " << data.projectName << "\n";
 
     file.close();
+
+    // Adding a CMake file
+    std::filesystem::path projectDataPath = projectPath;
+    std::wofstream cmakeFile(projectDataPath.append("CMakeLists.txt"));
+    if (!cmakeFile.is_open())
+    {
+        DebugLog(LogSeverity::SEVERE, L"Could not create CMakeLists.txt");
+        return false;
+    }
+    cmakeFile << DefaultCMakeFile(data.projectName);
+    cmakeFile.close();
+
+    // Creating a source directory with the basics
+    std::filesystem::path sourceFolder = projectPath;
+    create_directories(sourceFolder.append("Source"));
+
+    std::filesystem::path headerPath = sourceFolder;
+    std::wofstream headerFile(headerPath.append(data.projectName + STR_TO_WSTR(".h")));
+    if (!headerFile.is_open())
+    {
+        DebugLog(LogSeverity::SEVERE, L"Could not create header file");
+        return false;
+    }
+    headerFile << DefaultSourceFile(data.projectName);
+    headerFile.close();
+
+    std::filesystem::path sourcePath = sourceFolder;
+    std::wofstream sourceFile(sourcePath.append(data.projectName + STR_TO_WSTR(".cpp")));
+    if (!sourceFile.is_open())
+    {
+        DebugLog(LogSeverity::SEVERE, L"Could not create source file");
+        return false;
+    }
+    sourceFile << "#include \"" << data.projectName << ".h" << "\"";
+    sourceFile.close();
+
 
     AddRecentProject(projectFilePath, data.projectName);
 
@@ -155,18 +201,24 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     return true;
 }
 
+typedef EngineProject* (__stdcall *projectCreateFunc)();
+typedef void (__stdcall *projectDestroyFunc)();
+
 bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
 {
+    FreeLibrary(m_projectLibrary);
+    std::filesystem::remove(TMPFOLDER"\\ProjLib.dll");
+
     m_projectData = ProjectData();
 
-    std::wifstream file(projectPath.append("Project.gep"));
+    std::wifstream file(std::filesystem::path(projectPath.wstring() + L"/Project.gep"));
     if (!file.is_open())
     {
-        DebugLog(LogSeverity::ERROR, L"Could not open project file");
+        DebugLog(LogSeverity::SEVERE, L"Could not open project file");
         return false;
     }
 
-    m_projectData.projectPath = projectPath.remove_filename();
+    m_projectData.projectPath = projectPath.remove_filename().make_preferred();
 
     std::wstring line;
 
@@ -181,7 +233,61 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
     AssetManager::m_currentPath = m_projectData.projectPath;
     AssetManager::UpdateAssetList();
 
+    // Loading the code
+    std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
+
+    std::filesystem::copy(libraryPath, TMPFOLDER"\\ProjLib.dll", std::filesystem::copy_options::overwrite_existing);
+
+    m_projectLibrary = LoadLibrary(TMPFOLDER"\\ProjLib.dll");
+
+    if (!m_projectLibrary) {
+        std::cout << "could not load the dynamic library" << std::endl;
+        return false;
+    }
+
+    projectCreateFunc function = (projectCreateFunc)GetProcAddress(m_projectLibrary, "GenerateProject");
+    if (!function) {
+        std::cout << "could not locate the function" << std::endl;
+        FreeLibrary(m_projectLibrary);
+        std::filesystem::remove(TMPFOLDER"\\ProjLib.dll");
+        return false;
+    }
+
+    m_project = function();
+
+    std::cout << "RTTI type: " << typeid(*m_project).name() << std::endl;
+
+    m_project->Init();
+
     DebugLog(LogSeverity::DONE, L"Project loaded successfully");
+    return true;
+}
+
+bool ProjectHandler::ReloadProject()
+{
+    FreeLibrary(m_projectLibrary);
+    std::filesystem::remove(TMPFOLDER"\\ProjLib.dll");
+
+    // Loading the code
+    std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
+    std::filesystem::copy(libraryPath, TMPFOLDER"\\ProjLib.dll", std::filesystem::copy_options::overwrite_existing);
+    m_projectLibrary = LoadLibrary(TMPFOLDER"\\ProjLib.dll");
+
+    if (!m_projectLibrary) {
+        std::cout << "could not load the dynamic library" << std::endl;
+        return false;
+    }
+
+    projectCreateFunc function = (projectCreateFunc)GetProcAddress(m_projectLibrary, "GenerateProject");
+    if (!function) {
+        std::cout << "could not locate the function" << std::endl;
+        FreeLibrary(m_projectLibrary);
+        std::filesystem::remove(TMPFOLDER"\\ProjLib.dll");
+        return false;
+    }
+
+    m_project = function();
+
     return true;
 }
 
@@ -198,17 +304,6 @@ bool ProjectHandler::ValidateProjectData(const ProjectData& data)
 {
     if (data.projectName.empty()) return false;
     return true;
-}
-
-bool ProjectHandler::IsToken(const std::wstring& line, const std::wstring& token)
-{
-    return line.substr(0, line.find(L" = ")) == token;
-}
-
-std::wstring ProjectHandler::TokenValue(const std::wstring& line)
-{
-    std::wstring token = line;
-    return token.erase(0, line.find(L" = ") + 3);
 }
 
 void ProjectHandler::AddRecentProject(const std::filesystem::path& projectPath, const std::wstring& name)
@@ -239,4 +334,34 @@ std::unordered_map<std::wstring, std::filesystem::path> ProjectHandler::ReadRece
     return recentProjects;
 }
 
+// TODO: There is probably a much better option for this but my 1 AM brain thinks this is fine
+std::wstring ProjectHandler::DefaultSourceFile(const std::wstring& projectName)
+{
+    return L"#pragma once\n"
+    L"#include <Engine.h>\n\n"
+    L"using namespace Engine;\n\n"
+    L"class"+projectName+L"final : public EngineProject\n"
+    L"{\n"
+    L"public:\n"
+    L"   void Init() override {}\n"
+    L"   void Update(float deltaTime) override {}\n"
+    L"   void Shutdown() override {}\n"
+    L"};\n\n"
+    L"// This function is for handling project reloading. It should not be removed!\n"
+    L"extern \"C\" __declspec(dllexport) EngineProject* GenerateProject() { return new "+projectName+L"(); }";
+}
+
+std::wstring ProjectHandler::DefaultCMakeFile(const std::wstring& projectName)
+{
+    return L"cmake_minimum_required(VERSION 3.16)\n\n"
+    L"project("+projectName+L")\n\n"
+    L"set(CMAKE_CXX_STANDARD 20)\n\n"
+    // TODO: Make this based on the actual folder
+    L"set(ENGINE_PATH C:/Users/Gebruiker/Documents/Projects/engine_raytrace)\n\n"
+    L"add_library(Engine STATIC\n\t\t${ENGINE_PATH}/src/main.cpp\n)\n\n"
+    L"target_include_directories(Engine PUBLIC\n\t\t${ENGINE_PATH}/src\n)\n\n"
+    L"add_library("+projectName+L" SHARED\n\t\tSource/"+projectName+L".cpp\n)\n\n"
+    L"target_link_libraries("+projectName+L" PRIVATE\n\t\tEngine\n)\n\n"
+    L"target_include_directories("+projectName+L" PRIVATE\n\t\t${ENGINE_PATH}/src\n)";
+}
 }

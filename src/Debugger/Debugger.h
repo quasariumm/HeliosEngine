@@ -10,7 +10,7 @@ enum class LogSeverity
 {
     INFO = 0,
     WARNING = 1,
-    ERROR = 2,
+    SEVERE = 2,
     DONE = 3
 };
 
@@ -20,7 +20,7 @@ inline std::wstring LogSeverityString(LogSeverity severity)
     default:
     case LogSeverity::INFO: return L"INFO";
     case LogSeverity::WARNING: return L"WARNING";
-    case LogSeverity::ERROR: return L"ERROR";
+    case LogSeverity::SEVERE: return L"ERROR";
     case LogSeverity::DONE: return L"DONE";
     }
 }
@@ -79,13 +79,13 @@ public:
 
     static void ExportLog()
     {
-        if (!ProjectLoaded())
+        if (!ProjectHandler::ProjectLoaded())
         {
             std::cout << "Could not export log, no project was loaded\n";
             return;
         }
 
-        std::filesystem::path folder = ProjectFolder();
+        std::filesystem::path folder = ProjectHandler::ProjectFolder();
         std::wstring logPath = folder.append("Latest-Log.md").generic_wstring();
 
         std::wofstream file;

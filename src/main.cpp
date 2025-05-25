@@ -1,3 +1,4 @@
+#include "main.h"
 #include <glad/glad.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
@@ -45,11 +46,14 @@ void temp(Engine::Window& window, Engine::Key key)
 {
 	if (key == Engine::Key::ESCAPE && Engine::EditorSettings::Get().m_closeOnEscape)
 		window.SetShouldClose(true);
+
+	if (key == Engine::Key::T)
+		Engine::ProjectHandler::m_project->Init();
 }
 
 static Engine::Scene g_scene;
 
-int main(int, char**)
+extern "C" int __declspec(dllexport) __stdcall main()
 {
     std::unique_ptr<Engine::Window> window;
     Engine::CreateWin(

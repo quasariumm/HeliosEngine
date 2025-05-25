@@ -50,8 +50,8 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 		if (ImGui::BeginMainMenuBar())
 		{
 			std::wstring projectName;
-			if (ProjectLoaded())
-				projectName = STR_TO_WSTR(ICON_CONTROLLER) + L" " + ProjectName();
+			if (ProjectHandler::ProjectLoaded())
+				projectName = STR_TO_WSTR(ICON_CONTROLLER) + L" " + ProjectHandler::ProjectName();
 			else
 				projectName = STR_TO_WSTR(ICON_ALERT) + L" No project loaded";
 
@@ -78,6 +78,8 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 					}
 					ImGui::EndMenu();
 				}
+				if (ImGui::MenuItem(ICON_REFRESH" Reload project"))
+					ProjectHandler::ReloadProject();
 				if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor", (EditorSettings::Get().m_closeOnEscape) ? "ESC" : nullptr))
 					m_window->SetShouldClose(true);
 

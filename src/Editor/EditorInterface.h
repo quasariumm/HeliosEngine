@@ -3,7 +3,6 @@
 
 namespace Engine
 {
-class EditorInterface;
 
 class EditorInterface
 {
@@ -28,8 +27,8 @@ public:
         return instance;
     }
 
-    void RegisterInterface(const std::wstring& name, std::unique_ptr<EditorInterface> interface) {
-        m_editorInterfaces[name] = std::move(interface);
+    void RegisterInterface(const std::wstring& name, std::unique_ptr<EditorInterface> editorInterface) {
+        m_editorInterfaces[name] = std::move(editorInterface);
     }
 
     static void Initialize(Window* window);
