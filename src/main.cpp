@@ -17,6 +17,8 @@
 
 #include <tracy/Tracy.hpp>
 
+#include "Scene/SceneStorage.h"
+
 #ifdef _WIN32
 extern "C" {
 	__declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
@@ -133,6 +135,14 @@ int main(int, char**)
 		camera.MouseMove(diff);
 	});
 
+	// Force load scene.
+	// TODO: REMOVE BEFORE PUSHING
+	std::filesystem::path projectPath("D:/Patrick/Documents/EngineProjects/Test");
+	Engine::ProjectHandler::LoadProject(projectPath);
+	std::filesystem::path sceneFile("D:/Patrick/Documents/EngineProjects/Test/Scene.scn");
+	Engine::SceneLoader::LoadFromFile(Engine::SceneEditor::m_targetScene, sceneFile);
+	Engine::SceneEditor::m_sceneFile = sceneFile;
+
     while (!window->ShouldClose())
     {
     	ZoneScopedNC("Frame", tracy::Color::CornflowerBlue);
@@ -158,6 +168,8 @@ int main(int, char**)
 			rayCompute.SetVec3("ViewParams", viewportParams);
 
 		    rayTexture.UseCompute(0);
+    		if (window->GetKey(Engine::Key::Q))
+    			frame = 0;
     		rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
     		rayCompute.Dispatch(computeThreads);
 			// rayTexture.UpdateData();

@@ -25,7 +25,8 @@ const RayTracingMaterial defaultMaterial = RayTracingMaterial(
 	0.0, 0.0, 0.0, 			// specular parameters
 	vec3(0.0), 0.0, 		// emission
 	0.0, 1.0, 				// transmission/dielectric
-	0.3, 0.3, 0.3			// PBR
+	0.3, 0.3, 0.3,			// PBR
+	0.0, 0.0				// Anisotropic alphas
 );
 
 /*
@@ -146,8 +147,9 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 			// BRDF
 			// https://www.cs.cmu.edu/afs/cs/academic/class/15462-f09/www/lec/lec8.pdf
 			vec3 H = normalize(info.lightVector - ray.dir);
-			float overlap = max(0.0, dot(H, info.normal));
-			specular.BRDF = material.specularColor * pow(overlap, material.shininess);
+			float overlap = max(0.001, dot(H, info.normal));
+			float k = (material.shininess + 2.0) * INV2PI;
+			specular.BRDF = k * material.specularColor * pow(overlap, material.shininess);
 		}
 	}
 	if ((material.type & MATERIAL_TRANSMISSION) != 0
@@ -169,7 +171,7 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 			transmission.direction = res.xyz;
 			// BRDF
 			// https://cgg.mff.cuni.cz/~jaroslav/teaching/2017-npgr010/slides/03%20-%20npgr010-2017%20-%20BRDF.pdf
-			float overlap = max(0.0, -dot(res.xyz, ray.dir));
+			float overlap = max(0.001, -dot(res.xyz, ray.dir));
 			float changeOfRadiance = (etaO * etaO) / (etaI * etaI);
 			// Physically-plausible Phong Distributuion
 			vec3 DPPPhong = info.material.specularColor * ((material.shininess + 2.0) / TWO_PI) * pow(overlap, material.shininess);
@@ -192,7 +194,7 @@ float GetPDF(inout RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 {
 	PDFInfo diffuse = PDFInfo(
 		1.0 - material.specularity,
-		INVPI
+		INV2PI
 	);
 	PDFInfo specularTransmission = PDFInfo(
 		material.specularity,

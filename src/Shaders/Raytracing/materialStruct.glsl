@@ -23,6 +23,9 @@ struct RayTracingMaterial
 	float PBR_Roughness;
 	float PBR_Metallic;
 	float PBR_Reflectance;
+
+	float alphaX;
+	float alphaY;
 };
 
 #endif // MATERIAL_STRUCT_GLSL

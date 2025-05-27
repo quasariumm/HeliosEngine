@@ -97,6 +97,9 @@ void ObjectRenderer::SetMaterialData(const std::string& base, const int material
 	m_computeShader->SetFloat(matBaseName + ".PBR_Roughness", mat->m_PBR_Roughness);
 	m_computeShader->SetFloat(matBaseName + ".PBR_Metallic", mat->m_PBR_Metallic);
 	m_computeShader->SetFloat(matBaseName + ".PBR_Reflectance", mat->m_PBR_Reflectance);
+
+	m_computeShader->SetFloat(matBaseName + ".alphaX", mat->m_microfacetModel.alphaX);
+	m_computeShader->SetFloat(matBaseName + ".alphaY", mat->m_microfacetModel.alphaY);
 }
 
 }

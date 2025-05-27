@@ -22,8 +22,8 @@ uniform bool ClearAccumulator = false;
 #include "/Engine/Raytracing/lighting.glsl"
 
 const vec3 GroundColor  = vec3(0.5, 0.8, 0.3);
-const vec3 HorizonColor = vec3(0.5, 0.7, 1.0);
-const vec3 ZenithColor  = vec3(0.2, 0.6, 1.0);
+const vec3 HorizonColor = vec3(0.78, 0.87, 1.0);
+const vec3 ZenithColor  = vec3(0.68, 0.84, 1.0);
 
 const vec3 SunDirection		= normalize(vec3(1.0, -1.0, 0.0));
 const float SunFocus    	= 150.0;
@@ -46,7 +46,7 @@ vec3 Trace(Ray ray, uint seed)
 	vec3 incommingLight = vec3(0);
 	vec3 rayColor = vec3(1);
 
-	for (int i = 0; i <= 3; ++i)
+	for (int i = 0; i <= 10; ++i)
 	{
 		RayHitInfo info = RayCollision(ray);
 		info.lightVector = normalize(-sun.direction);
@@ -69,7 +69,7 @@ vec3 Trace(Ray ray, uint seed)
 			vec3 BRDF = GetBRDFAndBounce(info.material, ray, seed, info);
 			float PDF = GetPDF(info.material, info.normal, -ray.dir, info.lightVector);
 
-			incommingLight += emittance + (BRDF * light) / PDF * rayColor;
+			incommingLight += emittance + BRDF * PDF * light * rayColor;
 
 			rayColor *= mix(info.material.diffuseColor, info.material.specularColor, info.material.specularity)
 				* mix(light, vec3(1.0), info.material.specularity);
@@ -115,20 +115,16 @@ void main()
 		1.0 / focusDir
 	);
 
-	uint seed = uint(floor(tc.y * ScreenHeight * ScreenWidth + tc.x * ScreenWidth));
-	seed ^= WangHash(Frame);
+	uint seed = uint(uint(texelCoord.x) ^ uint(texelCoord.y) ^ Frame ^ uint(texelCoord.x * 1973 + texelCoord.y * 9277));
 	seed = WangHash(seed);
 
 	vec4 pixel = vec4(Trace(ray, seed), 1.0);
 	pixel = max(pixel, vec4(0.0, 0.0, 0.0, 1.0));
 	if (!ClearAccumulator)
 	{
-		vec4 accumulatorTexel = imageLoad(OutTexture, texelCoord);
-		if (accumulatorTexel.a > 0.0)
-		{
-			pixel = 0.5 * pixel + 0.5 * accumulatorTexel;
-			pixel.a = 1.0;
-		}
+		vec4 accumulatorColor = imageLoad(OutTexture, texelCoord);
+		pixel = mix(accumulatorColor, pixel, 1.0 / (Frame + 1));
+		pixel.a = 1.0;
 	}
 
 	imageStore(OutTexture, texelCoord, pixel);

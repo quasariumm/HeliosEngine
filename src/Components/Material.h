@@ -33,6 +33,8 @@ public:
 		AssignProperty(L"PBR Roughness", &m_PBR_Roughness);
 		AssignProperty(L"PBR Metallic", &m_PBR_Metallic);
 		AssignProperty(L"PBR Reflectance", &m_PBR_Reflectance);
+
+		m_properties.parent = this;
 	}
 
 	void Init() override
@@ -48,6 +50,7 @@ public:
 		uint8_t diffuse : 1 = 1u;
 		uint8_t glossy : 1 = 1u;
 		uint8_t specular : 1 = 1u;
+		Material* parent = nullptr;
 	} m_properties;
 
 	struct MicrofacetModel
@@ -57,6 +60,8 @@ public:
 		uint8_t ggx_aniso: 1 = 0u;
 		uint8_t blinnphong: 1 = 0u;
 		uint8_t selector : 4 = 0u; /* for use with Dear ImGUI */
+		float alphaX = 0.f; /* For use with anisotropic GGX */
+		float alphaY = 0.f; /* For use with anisotropic GGX */
 	} m_microfacetModel;
 
 	vec3f m_diffuseColor = {};
@@ -82,7 +87,7 @@ static void DisplayMaterialProperties(void* data)
 	auto* mat = (Material::MaterialProperties*)data;
 
 	// TODO: Make the material idx display sane
-	const int idx = std::distance(materials.begin(), std::ranges::find(materials, data)) - 1;
+	const int idx = std::distance(materials.begin(), std::ranges::find(materials, mat->parent));
 	ImGui::Text("Material idx: %i", idx);
 	ImGui::Separator();
 
@@ -131,6 +136,14 @@ static void DisplayMicrofacetModel(void* data)
 	model->ggx_iso = (model->selector == 1) ? 1 : 0;
 	model->ggx_aniso = (model->selector == 2) ? 1 : 0;
 	model->blinnphong = (model->selector == 3) ? 1 : 0;
+
+	if (model->selector == 2)
+	{
+		ImGui::Separator();
+		ImGui::InputFloat("Alpha X", &model->alphaX);
+		ImGui::InputFloat("Alpha Y", &model->alphaY);
+	}
+	ImGui::Separator();
 }
 
 REGISTER_COMPONENT(Material);

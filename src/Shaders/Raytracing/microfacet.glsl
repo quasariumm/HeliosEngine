@@ -21,9 +21,9 @@ float GGXIsoD(float alpha, vec3 normal, vec3 wh);
 float GGXIsoG1(float alpha, vec3 normal, vec3 w);
 float GGXIsoG(float alpha, vec3 normal, vec3 wo, vec3 wi);
 
-float GGXAnisoD(float alpha, vec3 normal, vec3 wh);
-float GGXAnisoG1(float alpha, vec3 normal, vec3 w);
-float GGXAnisoG(float alpha, vec3 normal, vec3 wo, vec3 wi);
+float GGXAnisoD(vec3 alpha, vec3 normal, vec3 wh);
+float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 w);
+float GGXAnisoG(vec3 alpha, vec3 normal, vec3 wo, vec3 wi);
 
 float BlinnPhongD(float alpha, vec3 normal, vec3 wh);
 float BlinnPhongG1(float alpha, vec3 normal, vec3 w);
@@ -34,7 +34,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0);
 vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 {
 	const vec3 wh = normalize(wo + wi);
-	const vec3 F0 = mix( vec3(0.16 * material.PBR_Reflectance * material.PBR_Reflectance), material.diffuseColor, material.PBR_Metallic );
+	const vec3 F0 = mix( vec3(0.16 * material.PBR_Reflectance * material.PBR_Reflectance), material.specularColor, material.PBR_Metallic );
 
 	float alpha = material.PBR_Roughness * material.PBR_Roughness;
 
@@ -49,17 +49,18 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 	}
 	if ((material.type & MICROFACET_GGX_ANISO) != 0)
 	{
-		DG = GGXAnisoD(alpha, normal, wh) * GGXAnisoG(alpha, normal, wo, wi);
+		vec3 anisoAlpha = vec3(material.alphaX, material.alphaY, sqrt(material.alphaX * material.alphaY));
+		DG = GGXAnisoD(anisoAlpha, normal, wh) * GGXAnisoG(anisoAlpha, normal, wo, wi);
 	}
 	if ((material.type & MICROFACET_BLINNPHONG) != 0)
 	{
 		DG = BlinnPhongD(alpha, normal, wh) * BlinnPhongG(alpha, normal, wo, wi);
 	}
 
-	vec3 F = FresnelSchlick(dot(normal, wo), F0);
-	vec3 spec = (DG * F) / (4.0 * abs(dot(normal, wo)) * abs(dot(normal, wi)));
+	vec3 F = FresnelSchlick(abs(dot(normal, wo)), F0);
+	vec3 spec = (DG * F) / (4.0 * max(0.001, dot(normal, wo)) * max(0.001, dot(normal, wi)));
 
-	vec3 diff = (1.0 - F) * (1.0 - material.PBR_Metallic) * material.specularColor * INVPI;
+	vec3 diff = (1.0 - F) * (1.0 - material.PBR_Metallic) * material.diffuseColor * INVPI;
 
 	return spec + diff;
 }
@@ -80,7 +81,8 @@ float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 	}
 	if ((material.type & MICROFACET_GGX_ANISO) != 0)
 	{
-		DG1 = GGXAnisoD(alpha, normal, wh) * GGXAnisoG1(alpha, normal, wo);
+		vec3 anisoAlpha = vec3(material.alphaX, material.alphaY, sqrt(material.alphaX * material.alphaY));
+		DG1 = GGXAnisoD(anisoAlpha, normal, wh) * GGXAnisoG1(anisoAlpha, normal, wo);
 	}
 	if ((material.type & MICROFACET_BLINNPHONG) != 0)
 	{
@@ -107,7 +109,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 
 float BeckmannD(float alpha, vec3 normal, vec3 wh)
 {
-	float NdotH = dot(normal, wh);
+	float NdotH = max(0.001, dot(normal, wh));
 	float NdotH2 = NdotH * NdotH;
 	float NdotH4 = NdotH2 * NdotH2;
 	float alpha2 = alpha * alpha;
@@ -117,7 +119,7 @@ float BeckmannD(float alpha, vec3 normal, vec3 wh)
 float BeckmannG1(float alpha, vec3 normal, vec3 w)
 {
 	float k = alpha * sqrt(2.0 / PI);
-	float NdotV = dot(normal, w);
+	float NdotV = max(0.001, dot(normal, w));
 	return NdotV / (NdotV * (1.0 - k) + k);
 }
 
@@ -133,7 +135,7 @@ float BeckmannG(float alpha, vec3 normal, vec3 wo, vec3 wi)
 float GGXIsoD(float alpha, vec3 normal, vec3 wh)
 {
 	float alpha2 = alpha * alpha;
-	float NdotH = dot(normal, wh);
+	float NdotH = max(0.001, dot(normal, wh));
 
 	float f = NdotH * NdotH * (alpha2 - 1.0) + 1.0;
 
@@ -142,7 +144,7 @@ float GGXIsoD(float alpha, vec3 normal, vec3 wh)
 
 float GGXIsoG1(float alpha, vec3 normal, vec3 w)
 {
-	float NdotV = dot(normal, w);
+	float NdotV = max(0.001, dot(normal, w));
 	float alpha2 = alpha * alpha;
 	return (2.0 * NdotV) / (NdotV + sqrt( alpha2 + (1.0 - alpha2) * NdotV * NdotV ));
 }
@@ -154,19 +156,26 @@ float GGXIsoG(float alpha, vec3 normal, vec3 wo, vec3 wi)
 
 /*
 	Anisotropic GGX
+	alpha is in the form { alphaX, alhpaY, alpha }
 */
 
-float GGXAnisoD(float alpha, vec3 normal, vec3 wh)
+float GGXAnisoD(vec3 alpha, vec3 normal, vec3 wh)
 {
-	return 0.0; // TODO: Get alphaX and alphaY
+	// TODO: Add the tangent to the equation
+	float cosTheta = max(0.001, dot(normal, wh));
+	float cos2Theta = cosTheta * cosTheta;
+	float x = cos2Theta * alpha.x * alpha.x;
+	float y = cos2Theta * alpha.y * alpha.y;
+	float k = x + y + (1.0 - cos2Theta);
+	return (alpha.z * alpha.z) / (PI * k * k);
 }
 
-float GGXAnisoG1(float alpha, vec3 normal, vec3 w)
+float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 w)
 {
-	return GGXIsoG1(alpha, normal, w);
+	return GGXIsoG1(alpha.z, normal, w);
 }
 
-float GGXAnisoG(float alpha, vec3 normal, vec3 wo, vec3 wi)
+float GGXAnisoG(vec3 alpha, vec3 normal, vec3 wo, vec3 wi)
 {
 	return GGXAnisoG1(alpha, normal, wo) * GGXAnisoG1(alpha, normal, wi);
 }
@@ -179,7 +188,7 @@ float BlinnPhongD(float alpha, vec3 normal, vec3 wh)
 {
 	float alpha2 = alpha * alpha;
 
-	return 1.0 / (PI * alpha2) * pow( dot(normal, wh), 2.0 / alpha2 - 2.0 );
+	return 1.0 / (PI * alpha2) * pow( max(0.001, dot(normal, wh)), 2.0 / alpha2 - 2.0 );
 }
 
 float BlinnPhongG1(float alpha, vec3 normal, vec3 w)
