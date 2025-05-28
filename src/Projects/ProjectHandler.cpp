@@ -9,8 +9,6 @@
 #include "Core/FileTools.h"
 #include <windows.h>
 
-#define TMPFOLDER R"(C:\Users\Gebruiker\Documents\Projects\engine_raytrace\launcher\Tmp)"
-
 namespace Engine
 {
 
@@ -194,6 +192,14 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     sourceFile << "#include \"" << data.projectName << ".h" << "\"";
     sourceFile.close();
 
+    // Tell CMake to build the basic source code so we have a dll to load in
+    int cmakeStatus = std::system(("cmake -S " + projectPath.generic_string() + " -B " + projectPath.generic_string() + "\\cmake-build-debug").c_str());
+    if (cmakeStatus != 0)
+        DebugLog(LogSeverity::SEVERE, L"Loading CMake project failed");
+
+    int buildStatus = std::system(("cmake --build " + projectPath.generic_string() + "\\cmake-build-debug").c_str());
+    if (buildStatus != 0)
+        DebugLog(LogSeverity::SEVERE, L"Building project source failed");
 
     AddRecentProject(projectFilePath, data.projectName);
 
@@ -201,13 +207,12 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     return true;
 }
 
-typedef EngineProject* (__stdcall *projectCreateFunc)();
-typedef void (__stdcall *projectDestroyFunc)();
+typedef EngineProject* (__stdcall *ProjectCreateFunc)();
 
 bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
 {
     FreeLibrary(m_projectLibrary);
-    std::filesystem::remove(TMPFOLDER"\\ProjLib.dll");
+    std::filesystem::remove(GetLibFolder() + L"\\ProjLib.dll");
 
     m_projectData = ProjectData();
 
@@ -236,20 +241,20 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
     // Loading the code
     std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
 
-    std::filesystem::copy(libraryPath, TMPFOLDER"\\ProjLib.dll", std::filesystem::copy_options::overwrite_existing);
+    ForceCopy(libraryPath, GetLibFolder() + L"\\ProjLib.dll");
 
-    m_projectLibrary = LoadLibrary(TMPFOLDER"\\ProjLib.dll");
+    m_projectLibrary = LoadLibraryW((GetLibFolder() + L"\\ProjLib.dll").c_str());
 
     if (!m_projectLibrary) {
-        std::cout << "could not load the dynamic library" << std::endl;
+        std::cout << "Could not load the dynamic library" << std::endl;
         return false;
     }
 
-    projectCreateFunc function = (projectCreateFunc)GetProcAddress(m_projectLibrary, "GenerateProject");
+    const auto function = reinterpret_cast<ProjectCreateFunc>(GetProcAddress(m_projectLibrary, "GenerateProject"));
     if (!function) {
-        std::cout << "could not locate the function" << std::endl;
+        std::cout << "Could not locate the function" << std::endl;
         FreeLibrary(m_projectLibrary);
-        std::filesystem::remove(TMPFOLDER"\\ProjLib.dll");
+        std::filesystem::remove(GetLibFolder() + L"\\ProjLib.dll");
         return false;
     }
 
@@ -266,23 +271,23 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
 bool ProjectHandler::ReloadProject()
 {
     FreeLibrary(m_projectLibrary);
-    std::filesystem::remove(TMPFOLDER"\\ProjLib.dll");
+    std::filesystem::remove(GetLibFolder() + L"\\ProjLib.dll");
 
     // Loading the code
     std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
-    std::filesystem::copy(libraryPath, TMPFOLDER"\\ProjLib.dll", std::filesystem::copy_options::overwrite_existing);
-    m_projectLibrary = LoadLibrary(TMPFOLDER"\\ProjLib.dll");
+    ForceCopy(libraryPath, GetLibFolder() + L"\\ProjLib.dll");
+    m_projectLibrary = LoadLibraryW((GetLibFolder() + L"\\ProjLib.dll").c_str());
 
     if (!m_projectLibrary) {
         std::cout << "could not load the dynamic library" << std::endl;
         return false;
     }
 
-    projectCreateFunc function = (projectCreateFunc)GetProcAddress(m_projectLibrary, "GenerateProject");
+    ProjectCreateFunc function = (ProjectCreateFunc)GetProcAddress(m_projectLibrary, "GenerateProject");
     if (!function) {
         std::cout << "could not locate the function" << std::endl;
         FreeLibrary(m_projectLibrary);
-        std::filesystem::remove(TMPFOLDER"\\ProjLib.dll");
+        std::filesystem::remove(GetLibFolder() + L"\\ProjLib.dll");
         return false;
     }
 
@@ -353,15 +358,17 @@ std::wstring ProjectHandler::DefaultSourceFile(const std::wstring& projectName)
 
 std::wstring ProjectHandler::DefaultCMakeFile(const std::wstring& projectName)
 {
+    std::wstring enginePath = std::filesystem::current_path().wstring();
+    std::ranges::replace(enginePath, '\\', '/');
+
     return L"cmake_minimum_required(VERSION 3.16)\n\n"
     L"project("+projectName+L")\n\n"
     L"set(CMAKE_CXX_STANDARD 20)\n\n"
     // TODO: Make this based on the actual folder
-    L"set(ENGINE_PATH C:/Users/Gebruiker/Documents/Projects/engine_raytrace)\n\n"
-    L"add_library(Engine STATIC\n\t\t${ENGINE_PATH}/src/main.cpp\n)\n\n"
+    L"set(ENGINE_PATH "+enginePath+L")\n\n"
+    L"add_library(Engine SHARED\n\t\t${ENGINE_PATH}/src/main.cpp\n)\n\n"
     L"target_include_directories(Engine PUBLIC\n\t\t${ENGINE_PATH}/src\n)\n\n"
     L"add_library("+projectName+L" SHARED\n\t\tSource/"+projectName+L".cpp\n)\n\n"
-    L"target_link_libraries("+projectName+L" PRIVATE\n\t\tEngine\n)\n\n"
-    L"target_include_directories("+projectName+L" PRIVATE\n\t\t${ENGINE_PATH}/src\n)";
+    L"target_link_libraries("+projectName+L" PRIVATE\n\t\tEngine\n)";
 }
 }

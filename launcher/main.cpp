@@ -4,15 +4,17 @@
 
 typedef int (__stdcall *engineFunc)();
 
-#define ENGINELIBRARY R"(C:\Users\Gebruiker\Documents\Projects\engine_raytrace\cmake-build-debug\libEngine.dll)"
-#define TMPFOLDER R"(C:\Users\Gebruiker\Documents\Projects\engine_raytrace\launcher\Tmp)"
-
 int main()
 {
-    // Try to load the engine library
-    std::filesystem::copy(ENGINELIBRARY, TMPFOLDER"\\Engine.dll", std::filesystem::copy_options::overwrite_existing);
+    const std::wstring TMPFolder = std::filesystem::current_path().append("Launcher\\Tmp");
+    const std::wstring EngineLibrary = std::filesystem::current_path().append("cmake-build-debug\\libEngine.dll");
 
-    HINSTANCE loadedLibrary = LoadLibrary( TMPFOLDER"\\Engine.dll");
+    // Try to load the engine library
+    if (std::filesystem::exists(TMPFolder + L"\\Engine.dll"))
+        std::filesystem::remove(TMPFolder + L"\\Engine.dll");
+    std::filesystem::copy(EngineLibrary, TMPFolder + L"\\Engine.dll", std::filesystem::copy_options::overwrite_existing);
+
+    const HINSTANCE loadedLibrary = LoadLibraryW( (TMPFolder + L"\\Engine.dll").c_str());
 
     if (!loadedLibrary) {
         std::cout << "could not load the dynamic library" << std::endl;

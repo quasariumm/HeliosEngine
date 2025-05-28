@@ -47,7 +47,7 @@ void temp(Engine::Window& window, Engine::Key key)
 	if (key == Engine::Key::ESCAPE && Engine::EditorSettings::Get().m_closeOnEscape)
 		window.SetShouldClose(true);
 
-	if (key == Engine::Key::T)
+	if (key == Engine::Key::T && Engine::ProjectHandler::ProjectLoaded())
 		Engine::ProjectHandler::m_project->Init();
 }
 

@@ -13,6 +13,8 @@ struct ProjectData
     std::filesystem::path projectPath = "";
 };
 
+static std::wstring GetLibFolder() { return std::filesystem::current_path().append(L"Launcher\\Tmp"); }
+
 /**
  * @brief Base class for the user's project. Includes an init and update function that are called when the game is run.
  * @note A basic file is already generated when creating a project. It is possible (but not recommended) to create another class with a different name that inherits this.
