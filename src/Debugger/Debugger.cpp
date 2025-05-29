@@ -5,10 +5,6 @@
 
 namespace Engine
 {
-std::vector<Logger::Log> Logger::g_logs = {};
-std::vector<Logger::Watch> Logger::g_watchList = {};
-std::vector<Logger::Watch> Logger::g_tempWatchList = {};
-std::wstring Logger::m_totalLog;
 
 void Debugger::DrawInterface()
 {
@@ -54,11 +50,11 @@ void Debugger::DrawLogs()
             ImGui::EndMenu();
         }
         if (ImGui::MenuItem(ICON_CLOSE_BOX" Clear"))
-            Logger::g_logs.clear();
+            Logger::Get()->g_logs.clear();
         ImGui::EndMenuBar();
     }
 
-    for (const Logger::Log& log : Logger::g_logs)
+    for (const Logger::Log& log : Logger::Get()->g_logs)
     {
         if (log.type == LogSeverity::INFO && !showInfo) continue;
         if (log.type == LogSeverity::WARNING && !showWarn) continue;
@@ -114,16 +110,16 @@ void Debugger::DrawLogs()
     }
 
     static int oldSize = 0;
-    if (Logger::g_logs.size() != oldSize && lockToBottom)
+    if (Logger::Get()->g_logs.size() != oldSize && lockToBottom)
     {
-        oldSize = (int)Logger::g_logs.size();
+        oldSize = (int)Logger::Get()->g_logs.size();
         ImGui::SetScrollHereY(1.0f);
     }
 }
 
 void Debugger::DrawWatchList()
 {
-    for (Logger::Watch& watch : Logger::g_watchList)
+    for (Logger::Watch& watch : Logger::Get()->g_watchList)
     {
         if (watch.type == typeid(bool))
             ImGui::Checkbox(WStringToUTF8(watch.name).c_str(), (bool*)watch.var);
@@ -140,7 +136,7 @@ void Debugger::DrawWatchList()
     }
 
     ImGui::BeginDisabled();
-    for (Logger::Watch& watch : Logger::g_tempWatchList)
+    for (Logger::Watch& watch : Logger::Get()->g_tempWatchList)
     {
         if (watch.type == typeid(bool))
             ImGui::Checkbox(WStringToUTF8(watch.name).c_str(), (bool*)watch.var);
@@ -157,7 +153,7 @@ void Debugger::DrawWatchList()
     }
     ImGui::EndDisabled();
 
-    Logger::g_tempWatchList.clear();
+    Logger::Get()->g_tempWatchList.clear();
 
 }
 

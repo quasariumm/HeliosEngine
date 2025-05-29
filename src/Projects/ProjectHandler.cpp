@@ -51,8 +51,10 @@ void ProjectHandler::ProjectWindows()
             else
             {
                 if (CreateProject(path, newProjectData))
-                    if (LoadProject(path))
-                        ShowProjectCreator(false);
+                {
+                    LoadProject(path);
+                    ShowProjectCreator(false);
+                }
             }
         }
 
@@ -138,6 +140,8 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     if (projectPath.has_extension())
         projectPath.remove_filename();
 
+    projectPath.append(data.projectName);
+
     std::filesystem::path projectFilePath = projectPath;
     projectFilePath.append("Project.gep");
 
@@ -193,7 +197,8 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     sourceFile.close();
 
     // Tell CMake to build the basic source code so we have a dll to load in
-    int cmakeStatus = std::system(("cmake -S " + projectPath.generic_string() + " -B " + projectPath.generic_string() + "\\cmake-build-debug").c_str());
+    int cmakeStatus = std::system(("cmake -S " + projectPath.generic_string() +
+        " -B " + projectPath.generic_string() + "\\cmake-build-debug" + " -G \"Ninja\"").c_str());
     if (cmakeStatus != 0)
         DebugLog(LogSeverity::SEVERE, L"Loading CMake project failed");
 
@@ -209,12 +214,13 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
 
 typedef EngineProject* (__stdcall *ProjectCreateFunc)();
 
-bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
+bool ProjectHandler::LoadProject(const std::filesystem::path& projectPath)
 {
     FreeLibrary(m_projectLibrary);
-    std::filesystem::remove(GetLibFolder() + L"\\ProjLib.dll");
+    std::filesystem::remove(GetProjectLib());
 
     m_projectData = ProjectData();
+    m_projectData.projectPath = projectPath;
 
     std::wifstream file(std::filesystem::path(projectPath.wstring() + L"/Project.gep"));
     if (!file.is_open())
@@ -222,8 +228,6 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
         DebugLog(LogSeverity::SEVERE, L"Could not open project file");
         return false;
     }
-
-    m_projectData.projectPath = projectPath.remove_filename().make_preferred();
 
     std::wstring line;
 
@@ -235,15 +239,17 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
 
     file.close();
 
-    AssetManager::m_currentPath = m_projectData.projectPath;
     AssetManager::UpdateAssetList();
 
     // Loading the code
-    std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
+    std::filesystem::path libraryPath = m_projectData.projectPath.wstring();
+    libraryPath.append(L"cmake-build-debug/lib" + m_projectData.projectName + L".dll").make_preferred();
 
-    ForceCopy(libraryPath, GetLibFolder() + L"\\ProjLib.dll");
+    ForceCopy(libraryPath, GetProjectLib());
 
-    m_projectLibrary = LoadLibraryW((GetLibFolder() + L"\\ProjLib.dll").c_str());
+    std::cout << libraryPath << std::endl;
+
+    m_projectLibrary = LoadLibraryW(GetProjectLib().c_str());
 
     if (!m_projectLibrary) {
         std::cout << "Could not load the dynamic library" << std::endl;
@@ -254,7 +260,7 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
     if (!function) {
         std::cout << "Could not locate the function" << std::endl;
         FreeLibrary(m_projectLibrary);
-        std::filesystem::remove(GetLibFolder() + L"\\ProjLib.dll");
+        std::filesystem::remove(GetProjectLib());
         return false;
     }
 
@@ -270,29 +276,48 @@ bool ProjectHandler::LoadProject(std::filesystem::path& projectPath)
 
 bool ProjectHandler::ReloadProject()
 {
+    // Tell CMake to build the basic source code so we have a dll to load in
+    int cmakeStatus = std::system(("cmake -S " + ProjectFolder().generic_string() +
+        " -B " + ProjectFolder().generic_string() + "\\cmake-build-debug" + " -G \"Ninja\"").c_str());
+    if (cmakeStatus != 0)
+    {
+        DebugLog(LogSeverity::SEVERE, L"Loading CMake project failed");
+        return false;
+    }
+
+    int buildStatus = std::system(("cmake --build " + ProjectFolder().generic_string() + "\\cmake-build-debug").c_str());
+    if (buildStatus != 0)
+    {
+        DebugLog(LogSeverity::SEVERE, L"Building project source failed");
+        return false;
+    }
+
     FreeLibrary(m_projectLibrary);
-    std::filesystem::remove(GetLibFolder() + L"\\ProjLib.dll");
+    std::filesystem::remove(GetProjectLib());
 
     // Loading the code
     std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
-    ForceCopy(libraryPath, GetLibFolder() + L"\\ProjLib.dll");
-    m_projectLibrary = LoadLibraryW((GetLibFolder() + L"\\ProjLib.dll").c_str());
+    ForceCopy(libraryPath, GetProjectLib());
+    m_projectLibrary = LoadLibraryW((GetProjectLib()).c_str());
 
     if (!m_projectLibrary) {
-        std::cout << "could not load the dynamic library" << std::endl;
+        std::cout << "Could not load the dynamic library" << std::endl;
+        DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
         return false;
     }
 
     ProjectCreateFunc function = (ProjectCreateFunc)GetProcAddress(m_projectLibrary, "GenerateProject");
     if (!function) {
-        std::cout << "could not locate the function" << std::endl;
+        std::cout << "Could not locate project creator function" << std::endl;
+        DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
         FreeLibrary(m_projectLibrary);
-        std::filesystem::remove(GetLibFolder() + L"\\ProjLib.dll");
+        std::filesystem::remove(GetProjectLib());
         return false;
     }
 
     m_project = function();
 
+    DebugLog(LogSeverity::DONE, L"Reloading project completed");
     return true;
 }
 
@@ -345,7 +370,7 @@ std::wstring ProjectHandler::DefaultSourceFile(const std::wstring& projectName)
     return L"#pragma once\n"
     L"#include <Engine.h>\n\n"
     L"using namespace Engine;\n\n"
-    L"class"+projectName+L"final : public EngineProject\n"
+    L"class "+projectName+L" final : public EngineProject\n"
     L"{\n"
     L"public:\n"
     L"   void Init() override {}\n"
@@ -362,13 +387,13 @@ std::wstring ProjectHandler::DefaultCMakeFile(const std::wstring& projectName)
     std::ranges::replace(enginePath, '\\', '/');
 
     return L"cmake_minimum_required(VERSION 3.16)\n\n"
+    L"cmake_policy(SET CMP0077 NEW)\n\n"
     L"project("+projectName+L")\n\n"
     L"set(CMAKE_CXX_STANDARD 20)\n\n"
-    // TODO: Make this based on the actual folder
     L"set(ENGINE_PATH "+enginePath+L")\n\n"
-    L"add_library(Engine SHARED\n\t\t${ENGINE_PATH}/src/main.cpp\n)\n\n"
-    L"target_include_directories(Engine PUBLIC\n\t\t${ENGINE_PATH}/src\n)\n\n"
-    L"add_library("+projectName+L" SHARED\n\t\tSource/"+projectName+L".cpp\n)\n\n"
-    L"target_link_libraries("+projectName+L" PRIVATE\n\t\tEngine\n)";
+    L"add_subdirectory(\n\t\t${ENGINE_PATH}\n\t\t${CMAKE_BINARY_DIR}/engine_raytrace_build\n)\n\n"
+    L"add_library("+projectName+L" SHARED Source/"+projectName+L".cpp)\n\n"
+    L"target_link_libraries("+projectName+L" PRIVATE Engine)\n\n"
+    L"target_include_directories("+projectName+L" PRIVATE\n\t\t${ENGINE_PATH}/include\n\t\t${ENGINE_PATH}/src\n)\n\n";
 }
 }

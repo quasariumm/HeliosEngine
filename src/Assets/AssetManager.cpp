@@ -171,6 +171,9 @@ void AssetManager::DrawAssetInfo()
 
 void AssetManager::UpdateAssetList()
 {
+    if (m_currentPath == L"")
+        m_currentPath = ProjectHandler::ProjectFolder();
+
     m_folderList.clear();
     m_assetList.clear();
     m_selectedAsset = "";

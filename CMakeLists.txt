@@ -41,6 +41,8 @@ endif()
 
 add_library(Engine SHARED ${LIBS} ${SOURCE})
 
+target_compile_definitions(Engine PRIVATE ENGINE_BUILD_DLL)
+
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(TRACY_ENABLE     ON)
 endif()
@@ -118,3 +120,8 @@ else()
     target_link_libraries(Engine PUBLIC ${UNIX_LIBS})
 
 endif()
+
+message(STATUS "CMake is including the following source files:")
+foreach(file ${SOURCE})
+    message(STATUS "  ${file}")
+endforeach()

@@ -13,7 +13,8 @@ struct ProjectData
     std::filesystem::path projectPath = "";
 };
 
-static std::wstring GetLibFolder() { return std::filesystem::current_path().append(L"Launcher\\Tmp"); }
+static std::wstring GetTmpFile(const std::wstring& fileName) { return std::filesystem::current_path().append(L"Launcher\\Tmp").append(fileName); }
+static std::wstring GetProjectLib() { return GetTmpFile(L"ProjLib.dll"); }
 
 /**
  * @brief Base class for the user's project. Includes an init and update function that are called when the game is run.
@@ -61,7 +62,7 @@ public:
      * @param projectPath The folder path of the project
      * @return True if the project loaded successfully
      */
-    static bool LoadProject(std::filesystem::path& projectPath);
+    static bool LoadProject(const std::filesystem::path& projectPath);
 
 
     /**

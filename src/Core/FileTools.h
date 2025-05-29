@@ -45,7 +45,10 @@ static vec3 ParseVec3(std::wstring text)
 static bool ForceCopy(const std::filesystem::path& a, const std::filesystem::path& b)
 {
     if (!std::filesystem::exists(a))
+    {
+        std::cout << "Trying to copy non existing file: " << a << std::endl;
         return false;
+    }
     if (std::filesystem::exists(b))
         std::filesystem::remove(b);
     std::filesystem::copy(a, b, std::filesystem::copy_options::overwrite_existing);
