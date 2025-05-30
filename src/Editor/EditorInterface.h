@@ -21,11 +21,7 @@ class EditorInterfaceManager
 public:
     EditorInterfaceManager() = default;
 
-    static EditorInterfaceManager& Instance()
-    {
-        static EditorInterfaceManager instance;
-        return instance;
-    }
+    static ENGINE_API EditorInterfaceManager& Instance();
 
     void RegisterInterface(const std::wstring& name, std::unique_ptr<EditorInterface> editorInterface) {
         m_editorInterfaces[name] = std::move(editorInterface);

@@ -38,7 +38,7 @@ public:
     struct Log;
     struct Watch;
 
-    static ENGINE_API Logger* Get() { static Logger* instance = new Logger(); return instance; }
+    static ENGINE_API Logger* Get();
 
     std::vector<Log> g_logs = {};
     std::vector<Watch> g_watchList = {};

@@ -4,8 +4,6 @@
 
 #include "IconDefines.h"
 
-#define ENGINE_BUILD_DLL
-
 #ifdef ENGINE_BUILD_DLL
   #define ENGINE_API __declspec(dllexport)
 #else

@@ -6,6 +6,12 @@
 namespace Engine
 {
 
+Logger* Logger::Get()
+{
+    static auto* instance = new Logger();
+    return instance;
+}
+
 void Debugger::DrawInterface()
 {
 	{
@@ -66,7 +72,8 @@ void Debugger::DrawLogs()
         float spacing = 30;
         ImGui::SameLine(spacing);
 
-
+        // TODO: Cannot find source in loaded DLL
+        showSource = false;
         if (showSource)
         {
             ImGui::Text(ICON_CODE_BLOCK_BRACES);

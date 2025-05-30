@@ -8,6 +8,12 @@
 namespace Engine
 {
 
+EditorInterfaceManager& EditorInterfaceManager::Instance()
+{
+	static EditorInterfaceManager instance;
+	return instance;
+}
+
 void EditorInterfaceManager::Initialize(Window* window)
 {
     Instance().m_window = window;

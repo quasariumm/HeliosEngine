@@ -5,7 +5,6 @@
 #include <nfd.hpp>
 
 #include "Assets/AssetManager.h"
-#include "backends/imgui_impl_opengl3_loader.h"
 #include "Core/FileTools.h"
 #include <windows.h>
 
@@ -206,7 +205,7 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     if (buildStatus != 0)
         DebugLog(LogSeverity::SEVERE, L"Building project source failed");
 
-    AddRecentProject(projectFilePath, data.projectName);
+    AddRecentProject(projectPath, data.projectName);
 
     DebugLog(LogSeverity::DONE, L"Project created successfully");
     return true;
@@ -214,8 +213,11 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
 
 typedef EngineProject* (__stdcall *ProjectCreateFunc)();
 
-bool ProjectHandler::LoadProject(const std::filesystem::path& projectPath)
+bool ProjectHandler::LoadProject(std::filesystem::path projectPath)
 {
+    if (projectPath.has_extension())
+        projectPath.remove_filename();
+
     FreeLibrary(m_projectLibrary);
     std::filesystem::remove(GetProjectLib());
 
@@ -242,12 +244,12 @@ bool ProjectHandler::LoadProject(const std::filesystem::path& projectPath)
     AssetManager::UpdateAssetList();
 
     // Loading the code
-    std::filesystem::path libraryPath = m_projectData.projectPath.wstring();
-    libraryPath.append(L"cmake-build-debug/lib" + m_projectData.projectName + L".dll").make_preferred();
+    std::wstring libraryPath = m_projectData.projectPath.wstring();
+    libraryPath += L"\\cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
 
     ForceCopy(libraryPath, GetProjectLib());
 
-    std::cout << libraryPath << std::endl;
+    std::cout << WStringToUTF8(libraryPath) << std::endl;
 
     m_projectLibrary = LoadLibraryW(GetProjectLib().c_str());
 
@@ -296,7 +298,7 @@ bool ProjectHandler::ReloadProject()
     std::filesystem::remove(GetProjectLib());
 
     // Loading the code
-    std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
+    std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"\\cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
     ForceCopy(libraryPath, GetProjectLib());
     m_projectLibrary = LoadLibraryW((GetProjectLib()).c_str());
 

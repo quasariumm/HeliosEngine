@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include <utility>
-
+#include <typeinfo>
 #include "Core/FileTools.h"
 
 namespace Engine
@@ -74,15 +73,16 @@ namespace Engine
             for (const ComponentProperty& p : m_properties)
             {
             	if (p.displayFunc) p.displayFunc(p.value);
-                else if (p.rawType == typeid(bool)) ImGui::Checkbox(WStringToUTF8(p.name).c_str(), (bool*)p.value);
-                else if (p.rawType == typeid(int)) ImGui::InputInt(WStringToUTF8(p.name).c_str(), (int*)p.value);
+                else if (p.rawType == typeid(bool))  ImGui::Checkbox(WStringToUTF8(p.name).c_str(), (bool*)p.value);
+                else if (p.rawType == typeid(int))   ImGui::InputInt(WStringToUTF8(p.name).c_str(), (int*)p.value);
                 else if (p.rawType == typeid(float)) ImGui::InputFloat(WStringToUTF8(p.name).c_str(), (float*)p.value);
-                else if (p.rawType == typeid(vec2)) ImGui::InputFloat2(WStringToUTF8(p.name).c_str(), ((vec2*)p.value)->cell);
-                else if (p.rawType == typeid(vec3)) ImGui::InputFloat3(WStringToUTF8(p.name).c_str(), ((vec3*)p.value)->cell);
+                else if (p.rawType == typeid(vec2))  ImGui::InputFloat2(WStringToUTF8(p.name).c_str(), ((vec2*)p.value)->cell);
+                else if (p.rawType == typeid(vec3))  ImGui::InputFloat3(WStringToUTF8(p.name).c_str(), ((vec3*)p.value)->cell);
             	else throw std::runtime_error("The property has a non-defaulted type but does not have a custom display function");
             }
         }
 
+        [[nodiscard]]
         const std::vector<ComponentProperty>& GetProperties() const { return m_properties; }
 
     protected:
@@ -96,17 +96,14 @@ namespace Engine
         const std::type_info& m_componentType;
         const std::wstring m_displayName;
 
-        std::vector<ComponentProperty> m_properties;
+        std::vector<ComponentProperty> m_properties = {};
     };
 
     class ComponentRegister
     {
         using Creator = std::function<std::unique_ptr<Component>()>;
     public:
-        static ComponentRegister& Instance() {
-            static ComponentRegister instance;
-            return instance;
-        }
+        static ENGINE_API ComponentRegister& Instance();
 
         void Register(const std::wstring& name, Creator creator) {
             m_registry[name] = std::move(creator);

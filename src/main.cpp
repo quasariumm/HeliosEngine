@@ -55,6 +55,12 @@ static Engine::Scene g_scene;
 
 extern "C" int __declspec(dllexport) __stdcall main()
 {
+#ifdef ENGINE_BUILD_DLL
+	std::cout << "Running engine library as engine" << std::endl;
+#else
+	std::cout << "Running engine library as include" << std::endl;
+#endif
+
     std::unique_ptr<Engine::Window> window;
     Engine::CreateWin(
     	window,
