@@ -115,7 +115,8 @@ void main()
 		1.0 / focusDir
 	);
 
-	uint seed = uint(uint(texelCoord.x) ^ uint(texelCoord.y) ^ Frame ^ uint(texelCoord.x * 1973 + texelCoord.y * 9277));
+	uint seed = uint(floor(tc.y * ScreenHeight * ScreenWidth + tc.x * ScreenWidth));
+	seed ^= WangHash(Frame);
 	seed = WangHash(seed);
 
 	vec4 pixel = vec4(Trace(ray, seed), 1.0);

@@ -57,12 +57,8 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 		DG = BlinnPhongD(alpha, normal, wh) * BlinnPhongG(alpha, normal, wo, wi);
 	}
 
-	vec3 F = FresnelSchlick(abs(dot(normal, wo)), F0);
-	vec3 spec = (DG * F) / (4.0 * max(0.001, dot(normal, wo)) * max(0.001, dot(normal, wi)));
-
-	vec3 diff = (1.0 - F) * (1.0 - material.PBR_Metallic) * material.diffuseColor * INVPI;
-
-	return spec + diff;
+	vec3 F = FresnelSchlick(dot(normal, wo), F0);
+	return (DG * F) / (4.0 * dot(normal, wo) * dot(normal, wi));
 }
 
 float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
@@ -70,26 +66,32 @@ float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 	const vec3 wh = normalize(wo + wi);
 	float alpha = material.PBR_Roughness * material.PBR_Roughness;
 
-	float DG1 = 0.0;
+	float D = 0.0;
+	float G1 = 0.0;
 	if ((material.type & MICROFACET_BECKMANN) != 0)
 	{
-		DG1 = BeckmannD(alpha, normal, wh) * BeckmannG1(alpha, normal, wo);
+		D = BeckmannD(alpha, normal, wh);
+		G1 = BeckmannG1(alpha, normal, wo);
 	}
 	if ((material.type & MICROFACET_GGX_ISO) != 0)
 	{
-		DG1 = GGXIsoD(alpha, normal, wh) * GGXIsoG1(alpha, normal, wo);
+		D = GGXIsoD(alpha, normal, wh);
+		G1 = GGXIsoG1(alpha, normal, wo);
 	}
 	if ((material.type & MICROFACET_GGX_ANISO) != 0)
 	{
 		vec3 anisoAlpha = vec3(material.alphaX, material.alphaY, sqrt(material.alphaX * material.alphaY));
-		DG1 = GGXAnisoD(anisoAlpha, normal, wh) * GGXAnisoG1(anisoAlpha, normal, wo);
+		D = GGXAnisoD(anisoAlpha, normal, wh);
+		G1 = GGXAnisoG1(anisoAlpha, normal, wo);
 	}
 	if ((material.type & MICROFACET_BLINNPHONG) != 0)
 	{
-		DG1 = BlinnPhongD(alpha, normal, wh) * BlinnPhongG1(alpha, normal, wo);
+		D = BlinnPhongD(alpha, normal, wh);
+		G1 = BlinnPhongG1(alpha, normal, wo);
 	}
 
-	return DG1 * abs(dot(wo, wh)) / abs(dot(normal, wo));
+	float PDF = G1 / abs(dot(normal, wo)) * D * abs(dot(wo, wh));
+	return 1.0; //PDF / (4.0 * abs(dot(wo, wh)));
 }
 
 
@@ -113,14 +115,21 @@ float BeckmannD(float alpha, vec3 normal, vec3 wh)
 	float NdotH2 = NdotH * NdotH;
 	float NdotH4 = NdotH2 * NdotH2;
 	float alpha2 = alpha * alpha;
-	return 1.0 / (alpha2 * NdotH4) * exp((NdotH2 - 1.0) / (alpha2 * NdotH2));
+	return 1.0 / (PI * alpha2 * NdotH4) * exp((NdotH2 - 1.0) / (alpha2 * NdotH2));
 }
 
 float BeckmannG1(float alpha, vec3 normal, vec3 w)
 {
-	float k = alpha * sqrt(2.0 / PI);
 	float NdotV = max(0.001, dot(normal, w));
-	return NdotV / (NdotV * (1.0 - k) + k);
+	float c = abs(NdotV) / (alpha * sqrt(1.0 - NdotV * NdotV));
+	if (c < 1.6)
+	{
+		return (3.535 * c + 2.181 * c * c) / (1.0 + 2.276 * c + 2.577 * c * c);
+	}
+	else
+	{
+		return 1.0;
+	}
 }
 
 float BeckmannG(float alpha, vec3 normal, vec3 wo, vec3 wi)
