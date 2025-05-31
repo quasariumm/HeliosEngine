@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <future>
 #include <Windows.h>
 
 namespace Engine
@@ -36,9 +37,42 @@ typedef void (*DestroyGameProjectFunc)(EngineProject*);
 class ProjectHandler
 {
 public:
+
+    //====================================================
+    // Helper functions
+    //====================================================
+
+    /**
+     * @brief Necessary function for handling asynchronous tasks
+     */
+    static void Tick();
+
+
+
+    //====================================================
+    // Interfaces
+    //====================================================
+
     static void ShowProjectSelector(bool show) { m_selectorOpen = show; };
     static void ShowProjectCreator(bool show) { m_creatorOpen = show; };
     static void ProjectWindows();
+
+    /**
+     * @brief Show an overlay that locks the user out from using the editor with a specified message
+     * @param message The message that will be shown
+     */
+    static void LockOutOverlay(const std::wstring& message = L"") { m_lockedOutMessage = message; }
+
+    /**
+     * @brief Close the overlay that is locking the user out from using the editor
+     */
+    static void CloseLockOutOverlay() { m_lockedOutMessage = L""; }
+
+
+
+    //====================================================
+    // File handling
+    //====================================================
 
     /**
      * @brief Open the default file selector window for the operating system
@@ -48,6 +82,12 @@ public:
      * @return True if the user has chosen a file / folder
      */
     static bool ShowFileSelect(std::filesystem::path& path, bool projectOnly = false);
+
+
+
+    //====================================================
+    // Project creation and loading
+    //====================================================
 
     /**
      * @brief Create a new project in the given folder, with the given data
@@ -64,12 +104,35 @@ public:
      */
     static bool LoadProject(std::filesystem::path projectPath);
 
+    /**
+     * @brief Same as ReloadProject() but runs it async so an overlay can be displayed with the status
+     */
+    static void ReloadProjectAsync();
 
     /**
-     * @brief Reloads the current project, allowing newer code to be used
+     * @brief Recompiles the currently loaded project, copies the created DLL and loads it in.
+     * @note If the build fails, the old DLL will stay loaded
+     * @return True if reloading succeeded
      */
     static bool ReloadProject();
 
+    /**
+     * @brief Recompile the currently loaded project
+     * @return True if the build succeeded
+     */
+    static bool RecompileProject();
+
+    /**
+     * @brief Reloads the library file
+     * @return True if the reloading succeeded
+     */
+    static bool ReloadLibrary();
+
+
+
+    //====================================================
+    // Validators
+    //====================================================
 
     /**
      * @brief Check if the given folder path contains a valid project file
@@ -85,6 +148,12 @@ public:
      */
     static bool ValidateProjectData(const ProjectData& data);
 
+
+
+    //====================================================
+    // Recent project functions
+    //====================================================
+
     /**
      * @brief Adds a recent project to the recent projects file so it can be read later
      * @param projectPath Path to the Project.gep file
@@ -97,6 +166,12 @@ public:
      * @return A map of all projects and project paths that are in the recent projects file
      */
     static std::unordered_map<std::wstring, std::filesystem::path> ReadRecentProjects();
+
+
+
+    //====================================================
+    // Project info getter functions
+    //====================================================
 
     /**
      * @return True if a project is currently loaded
@@ -133,12 +208,22 @@ public:
      */
     static std::wstring DefaultCMakeFile(const std::wstring& projectName);
 
+
+
+    //====================================================
+    // Data
+    //====================================================
+
     static bool m_selectorOpen;
     static bool m_creatorOpen;
+    static std::wstring m_lockedOutMessage;
 
     static HINSTANCE m_projectLibrary;
     static EngineProject* m_project;
     static ProjectData m_projectData;
+
+    static std::future<bool> m_recompileResult;
+    static bool m_recompiling;
 };
 
 }

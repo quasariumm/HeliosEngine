@@ -72,8 +72,6 @@ void Debugger::DrawLogs()
         float spacing = 30;
         ImGui::SameLine(spacing);
 
-        // TODO: Cannot find source in loaded DLL
-        showSource = false;
         if (showSource)
         {
             ImGui::Text(ICON_CODE_BLOCK_BRACES);

@@ -9,7 +9,7 @@ namespace Engine
 class Sphere final : public Component
 {
 public:
-    Sphere() : Component(this, STR_TO_WSTR(ICON_SPHERE) + L" Sphere")
+    Sphere() : Component(this)
     {
         AssignProperty(L"Radius", &m_radius);
 
@@ -27,6 +27,6 @@ public:
     float m_radius = 1.0f;
 };
 
-REGISTER_COMPONENT(Sphere);
+REGISTER_COMPONENT(Sphere, STR_TO_WSTR(ICON_SPHERE) + L" Sphere");
 
 }

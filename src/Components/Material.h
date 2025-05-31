@@ -13,7 +13,7 @@ static void DisplayMicrofacetModel(void* data);
 class Material final : public Component
 {
 public:
-	Material() : Component(this, STR_TO_WSTR(ICON_PALETTE_SWATCH_VARIANT) + L" Material")
+	Material() : Component(this)
 	{
 		AssignProperty(L"Properties", &m_properties, &DisplayMaterialProperties);
 		AssignProperty(L"MicrofacetModel", &m_microfacetModel, &DisplayMicrofacetModel);
@@ -133,7 +133,7 @@ static void DisplayMicrofacetModel(void* data)
 	model->blinnphong = (model->selector == 3) ? 1 : 0;
 }
 
-REGISTER_COMPONENT(Material);
+REGISTER_COMPONENT(Material, STR_TO_WSTR(ICON_PALETTE_SWATCH_VARIANT) + L" Material");
 
 static Material defaultMaterial;
 

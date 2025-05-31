@@ -13,14 +13,35 @@ namespace Engine
 
 bool ProjectHandler::m_selectorOpen = false;
 bool ProjectHandler::m_creatorOpen = false;
+std::wstring ProjectHandler::m_lockedOutMessage;
 
-HINSTANCE ProjectHandler::m_projectLibrary = NULL;
+HINSTANCE ProjectHandler::m_projectLibrary = nullptr;
 ProjectData ProjectHandler::m_projectData = {};
 EngineProject* ProjectHandler::m_project = nullptr;
+
+std::future<bool> ProjectHandler::m_recompileResult = {};
+bool ProjectHandler::m_recompiling = false;
+
+void ProjectHandler::Tick()
+{
+    if (!m_recompiling) return;
+}
 
 void ProjectHandler::ProjectWindows()
 {
     static std::filesystem::path path;
+
+    if (!m_lockedOutMessage.empty())
+        ImGui::OpenPopup("Lock Out");
+
+    if (ImGui::BeginPopupModal("Lock Out"))
+    {
+        ImGui::Text(WStringToUTF8(m_lockedOutMessage).c_str());
+        ImGui::EndPopup();
+
+        if (m_lockedOutMessage.empty())
+            ImGui::CloseCurrentPopup();
+    }
 
     if (m_creatorOpen)
     {
@@ -195,15 +216,8 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     sourceFile << "#include \"" << data.projectName << ".h" << "\"";
     sourceFile.close();
 
-    // Tell CMake to build the basic source code so we have a dll to load in
-    int cmakeStatus = std::system(("cmake -S " + projectPath.generic_string() +
-        " -B " + projectPath.generic_string() + "\\cmake-build-debug" + " -G \"Ninja\"").c_str());
-    if (cmakeStatus != 0)
-        DebugLog(LogSeverity::SEVERE, L"Loading CMake project failed");
-
-    int buildStatus = std::system(("cmake --build " + projectPath.generic_string() + "\\cmake-build-debug").c_str());
-    if (buildStatus != 0)
-        DebugLog(LogSeverity::SEVERE, L"Building project source failed");
+    if (!RecompileProject())
+        return false;
 
     AddRecentProject(projectPath, data.projectName);
 
@@ -268,19 +282,33 @@ bool ProjectHandler::LoadProject(std::filesystem::path projectPath)
 
     m_project = function();
 
-    std::cout << "RTTI type: " << typeid(*m_project).name() << std::endl;
-
-    m_project->Init();
-
     DebugLog(LogSeverity::DONE, L"Project loaded successfully");
     return true;
 }
 
+void ProjectHandler::ReloadProjectAsync()
+{
+    LockOutOverlay(L"Compiling project source code");
+
+    std::future<bool> result = std::async(ReloadProject);
+}
+
 bool ProjectHandler::ReloadProject()
 {
-    // Tell CMake to build the basic source code so we have a dll to load in
+    if (!RecompileProject())
+        return false;
+
+    ReloadLibrary();
+
+    CloseLockOutOverlay();
+    DebugLog(LogSeverity::DONE, L"Reloading project completed");
+    return true;
+}
+
+bool ProjectHandler::RecompileProject()
+{
     int cmakeStatus = std::system(("cmake -S " + ProjectFolder().generic_string() +
-        " -B " + ProjectFolder().generic_string() + "\\cmake-build-debug" + " -G \"Ninja\"").c_str());
+    " -B " + ProjectFolder().generic_string() + "\\cmake-build-debug" + " -G \"Ninja\"").c_str());
     if (cmakeStatus != 0)
     {
         DebugLog(LogSeverity::SEVERE, L"Loading CMake project failed");
@@ -294,11 +322,16 @@ bool ProjectHandler::ReloadProject()
         return false;
     }
 
+    return true;
+}
+
+bool ProjectHandler::ReloadLibrary()
+{
     FreeLibrary(m_projectLibrary);
     std::filesystem::remove(GetProjectLib());
 
     // Loading the code
-    std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"\\cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
+    const std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"\\cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
     ForceCopy(libraryPath, GetProjectLib());
     m_projectLibrary = LoadLibraryW((GetProjectLib()).c_str());
 
@@ -308,7 +341,7 @@ bool ProjectHandler::ReloadProject()
         return false;
     }
 
-    ProjectCreateFunc function = (ProjectCreateFunc)GetProcAddress(m_projectLibrary, "GenerateProject");
+    auto function = reinterpret_cast<ProjectCreateFunc>(GetProcAddress(m_projectLibrary, "GenerateProject"));
     if (!function) {
         std::cout << "Could not locate project creator function" << std::endl;
         DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
@@ -318,8 +351,6 @@ bool ProjectHandler::ReloadProject()
     }
 
     m_project = function();
-
-    DebugLog(LogSeverity::DONE, L"Reloading project completed");
     return true;
 }
 
@@ -380,7 +411,7 @@ std::wstring ProjectHandler::DefaultSourceFile(const std::wstring& projectName)
     L"   void Shutdown() override {}\n"
     L"};\n\n"
     L"// This function is for handling project reloading. It should not be removed!\n"
-    L"extern \"C\" __declspec(dllexport) EngineProject* GenerateProject() { return new "+projectName+L"(); }";
+    L"extern \"C\" __declspec(dllexport) inline EngineProject* GenerateProject() { return new "+projectName+L"(); }";
 }
 
 std::wstring ProjectHandler::DefaultCMakeFile(const std::wstring& projectName)
