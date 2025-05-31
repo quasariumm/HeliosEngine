@@ -39,34 +39,12 @@ class ProjectHandler
 public:
 
     //====================================================
-    // Helper functions
-    //====================================================
-
-    /**
-     * @brief Necessary function for handling asynchronous tasks
-     */
-    static void Tick();
-
-
-
-    //====================================================
     // Interfaces
     //====================================================
 
     static void ShowProjectSelector(bool show) { m_selectorOpen = show; };
     static void ShowProjectCreator(bool show) { m_creatorOpen = show; };
     static void ProjectWindows();
-
-    /**
-     * @brief Show an overlay that locks the user out from using the editor with a specified message
-     * @param message The message that will be shown
-     */
-    static void LockOutOverlay(const std::wstring& message = L"") { m_lockedOutMessage = message; }
-
-    /**
-     * @brief Close the overlay that is locking the user out from using the editor
-     */
-    static void CloseLockOutOverlay() { m_lockedOutMessage = L""; }
 
 
 
@@ -216,14 +194,13 @@ public:
 
     static bool m_selectorOpen;
     static bool m_creatorOpen;
-    static std::wstring m_lockedOutMessage;
+    static bool m_lockOut;
 
     static HINSTANCE m_projectLibrary;
     static EngineProject* m_project;
     static ProjectData m_projectData;
 
     static std::future<bool> m_recompileResult;
-    static bool m_recompiling;
 };
 
 }

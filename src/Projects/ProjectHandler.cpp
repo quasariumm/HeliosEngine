@@ -13,35 +13,28 @@ namespace Engine
 
 bool ProjectHandler::m_selectorOpen = false;
 bool ProjectHandler::m_creatorOpen = false;
-std::wstring ProjectHandler::m_lockedOutMessage;
+bool ProjectHandler::m_lockOut = false;
 
 HINSTANCE ProjectHandler::m_projectLibrary = nullptr;
 ProjectData ProjectHandler::m_projectData = {};
 EngineProject* ProjectHandler::m_project = nullptr;
 
 std::future<bool> ProjectHandler::m_recompileResult = {};
-bool ProjectHandler::m_recompiling = false;
-
-void ProjectHandler::Tick()
-{
-    if (!m_recompiling) return;
-}
 
 void ProjectHandler::ProjectWindows()
 {
     static std::filesystem::path path;
 
-    if (!m_lockedOutMessage.empty())
-        ImGui::OpenPopup("Lock Out");
-
-    if (ImGui::BeginPopupModal("Lock Out"))
+    if (ImGui::BeginPopupModal("Recompiling Project"))
     {
-        ImGui::Text(WStringToUTF8(m_lockedOutMessage).c_str());
-        ImGui::EndPopup();
-
-        if (m_lockedOutMessage.empty())
+        if (!m_lockOut)
             ImGui::CloseCurrentPopup();
+
+        // ImGui::Text(WStringToUTF8(m_lockedOutMessage).c_str());
+        ImGui::EndPopup();
     }
+    else if (m_lockOut)
+        ImGui::OpenPopup("Recompiling Project");
 
     if (m_creatorOpen)
     {
@@ -288,9 +281,9 @@ bool ProjectHandler::LoadProject(std::filesystem::path projectPath)
 
 void ProjectHandler::ReloadProjectAsync()
 {
-    LockOutOverlay(L"Compiling project source code");
+    m_lockOut = true;
 
-    std::future<bool> result = std::async(ReloadProject);
+    m_recompileResult = std::async(std::launch::async, ReloadProject);
 }
 
 bool ProjectHandler::ReloadProject()
@@ -300,7 +293,7 @@ bool ProjectHandler::ReloadProject()
 
     ReloadLibrary();
 
-    CloseLockOutOverlay();
+    m_lockOut = false;
     DebugLog(LogSeverity::DONE, L"Reloading project completed");
     return true;
 }

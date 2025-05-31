@@ -84,7 +84,7 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 					}
 					ImGui::EndMenu();
 				}
-				if (ImGui::MenuItem(ICON_REFRESH" Recompile project"))
+				if (ImGui::MenuItem(ICON_REFRESH" Recompile project", nullptr, false, ProjectHandler::ProjectLoaded()))
 					ProjectHandler::ReloadProjectAsync();
 				if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor", (EditorSettings::Get().m_closeOnEscape) ? "ESC" : nullptr))
 					m_window->SetShouldClose(true);
