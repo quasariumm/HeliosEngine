@@ -30,7 +30,12 @@ void ProjectHandler::ProjectWindows()
         if (!m_lockOut)
             ImGui::CloseCurrentPopup();
 
-        // ImGui::Text(WStringToUTF8(m_lockedOutMessage).c_str());
+        ImGui::Separator();
+        ImGui::Text("Do not close the editor!");
+        // TODO: Show the console output here
+        ImGui::Text("For detailed compilation log, check the console output in your IDE");
+        ImGui::Separator();
+
         ImGui::EndPopup();
     }
     else if (m_lockOut)

@@ -27,6 +27,5 @@ std::string Demangle(const char* name)
             return name;
 #endif
 }
-
 }
 
