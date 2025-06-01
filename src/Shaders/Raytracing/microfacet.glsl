@@ -33,6 +33,8 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0);
 
 vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 {
+	if (dot(normal, wo) == 0.0 || dot(normal, wi) == 0.0) return vec3(0.0);
+
 	const vec3 wh = normalize(wo + wi);
 	const vec3 F0 = mix( vec3(0.16 * material.PBR_Reflectance * material.PBR_Reflectance), material.specularColor, material.PBR_Metallic );
 
@@ -63,6 +65,8 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 
 float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 {
+	if (dot(wo, wi) < 0.0) return 0.0;
+
 	const vec3 wh = normalize(wo + wi);
 	float alpha = material.PBR_Roughness * material.PBR_Roughness;
 
@@ -91,7 +95,7 @@ float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 	}
 
 	float PDF = G1 / abs(dot(normal, wo)) * D * abs(dot(wo, wh));
-	return 1.0; //PDF / (4.0 * abs(dot(wo, wh)));
+	return PDF / (4.0 * dot(wo, wh));
 }
 
 
