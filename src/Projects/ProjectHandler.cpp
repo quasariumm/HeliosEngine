@@ -25,21 +25,60 @@ void ProjectHandler::ProjectWindows()
 {
     static std::filesystem::path path;
 
+    static bool completed = false;
+    static int result = -1;
+
     if (ImGui::BeginPopupModal("Recompiling Project"))
     {
         if (!m_lockOut)
             ImGui::CloseCurrentPopup();
 
         ImGui::Separator();
-        ImGui::Text("Do not close the editor!");
-        // TODO: Show the console output here
-        ImGui::Text("For detailed compilation log, check the console output in your IDE");
-        ImGui::Separator();
 
+
+        if (!completed)
+        {
+            if (m_recompileResult.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+                completed = true;
+
+            ImGui::Text("Do not close the editor!");
+            ImGui::Separator();
+            // TODO: Show the console output here
+            ImGui::Text("Compiling...");
+        }
+        else
+        {
+            if (result == -1 && m_recompileResult.valid())
+            {
+                if (m_recompileResult.get())
+                    result = 1;
+                else
+                    result = 0;
+            }
+
+            if (result == 1)
+                ImGui::Text("Recompiled successfully!");
+            else if (result == 0)
+            {
+                ImGui::Text("Recompile failed!");
+                ImGui::Text("Please check the console output in your IDE for issues");
+                ImGui::Text("The project will keep running using the latest working version");
+            }
+
+            if (ImGui::Button("Close"))
+                m_lockOut = false;
+        }
+
+        ImGui::Separator();
         ImGui::EndPopup();
+
     }
     else if (m_lockOut)
+    {
         ImGui::OpenPopup("Recompiling Project");
+        completed = false;
+        result = -1;
+    }
 
     if (m_creatorOpen)
     {
@@ -298,7 +337,6 @@ bool ProjectHandler::ReloadProject()
 
     ReloadLibrary();
 
-    m_lockOut = false;
     DebugLog(LogSeverity::DONE, L"Reloading project completed");
     return true;
 }

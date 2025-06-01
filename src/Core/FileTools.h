@@ -4,7 +4,7 @@
 namespace Engine
 {
 
-std::string Demangle(const char* name);
+std::string ENGINE_API Demangle(const char* name);
 
 static bool IsToken(const std::wstring& line, const std::wstring& token)
 {
