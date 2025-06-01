@@ -217,7 +217,7 @@ float GetPDF(inout RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 {
 	PDFInfo diffuse = PDFInfo(
 		1.0 - material.specularity,
-		INV2PI
+		INVPI * dot(normal, wo)
 	);
 	PDFInfo specularTransmission = PDFInfo(
 		material.specularity,
