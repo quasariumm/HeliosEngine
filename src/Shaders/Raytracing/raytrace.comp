@@ -21,7 +21,7 @@ uniform bool ClearAccumulator = false;
 #include "/Engine/Raytracing/intersections.glsl"
 #include "/Engine/Raytracing/lighting.glsl"
 
-const vec3 GroundColor  = vec3(0.5, 0.8, 0.3);
+const vec3 GroundColor  = vec3(0.5, 0.5, 0.5);
 const vec3 HorizonColor = vec3(0.78, 0.87, 1.0);
 const vec3 ZenithColor  = vec3(0.68, 0.84, 1.0);
 
