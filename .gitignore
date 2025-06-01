@@ -5,6 +5,9 @@
 
 # Common IntelliJ Platform excludes
 
+# Other
+**/Tmp/
+
 # User specific
 **/.idea/**/workspace.xml
 **/.idea/**/tasks.xml

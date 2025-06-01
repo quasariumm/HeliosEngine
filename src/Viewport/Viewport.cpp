@@ -16,7 +16,7 @@ void Viewport::DrawInterface()
 
     if (m_renderedImage == nullptr || m_editorCamera == nullptr)
     {
-        DebugLog(LogSeverity::ERROR, L"Something went wrong when trying to show the rendered image");
+        DebugLog(LogSeverity::SEVERE, L"Something went wrong when trying to show the rendered image");
         ImGui::End();
         return;
     }

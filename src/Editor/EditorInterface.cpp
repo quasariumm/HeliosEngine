@@ -8,6 +8,12 @@
 namespace Engine
 {
 
+EditorInterfaceManager& EditorInterfaceManager::Instance()
+{
+	static EditorInterfaceManager instance;
+	return instance;
+}
+
 void EditorInterfaceManager::Initialize(Window* window)
 {
     Instance().m_window = window;
@@ -50,8 +56,8 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 		if (ImGui::BeginMainMenuBar())
 		{
 			std::wstring projectName;
-			if (ProjectLoaded())
-				projectName = STR_TO_WSTR(ICON_CONTROLLER) + L" " + ProjectName();
+			if (ProjectHandler::ProjectLoaded())
+				projectName = STR_TO_WSTR(ICON_CONTROLLER) + L" " + ProjectHandler::ProjectName();
 			else
 				projectName = STR_TO_WSTR(ICON_ALERT) + L" No project loaded";
 
@@ -78,6 +84,8 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 					}
 					ImGui::EndMenu();
 				}
+				if (ImGui::MenuItem(ICON_REFRESH" Recompile project", nullptr, false, ProjectHandler::ProjectLoaded()))
+					ProjectHandler::ReloadProjectAsync();
 				if (ImGui::MenuItem(ICON_EXIT_RUN" Close editor", (EditorSettings::Get().m_closeOnEscape) ? "ESC" : nullptr))
 					m_window->SetShouldClose(true);
 

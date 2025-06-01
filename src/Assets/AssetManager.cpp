@@ -27,7 +27,7 @@ void AssetManager::DrawAssetView()
 
     if (ImGui::BeginMenuBar())
     {
-        if (!ProjectLoaded())
+        if (!ProjectHandler::ProjectLoaded())
         {
             ImGui::Text(ICON_ALERT" Please load a project");
             ImGui::EndMenuBar();
@@ -36,7 +36,7 @@ void AssetManager::DrawAssetView()
         }
 
         // Show back arrow. Using relative path because there is sometimes still a / on the end
-        if (relative(m_currentPath, ProjectFolder()) == ".")
+        if (relative(m_currentPath, ProjectHandler::ProjectFolder()) == ".")
         {
             ImGui::BeginDisabled();
             ImGui::MenuItem(ICON_ARROW_UP_THICK);
@@ -68,8 +68,8 @@ void AssetManager::DrawAssetView()
         ImGui::Separator();
 
         // Show current folder path
-        std::wstring pathString = STR_TO_WSTR(ICON_FOLDER) + L" " + ProjectName() + L"\\";
-        pathString.append(relative(m_currentPath, ProjectFolder()).wstring());
+        std::wstring pathString = STR_TO_WSTR(ICON_FOLDER) + L" " + ProjectHandler::ProjectName() + L"\\";
+        pathString.append(relative(m_currentPath, ProjectHandler::ProjectFolder()).wstring());
         ImGui::Text(WStringToUTF8(pathString).c_str());
 
         ImGui::EndMenuBar();
@@ -171,6 +171,9 @@ void AssetManager::DrawAssetInfo()
 
 void AssetManager::UpdateAssetList()
 {
+    if (m_currentPath == L"")
+        m_currentPath = ProjectHandler::ProjectFolder();
+
     m_folderList.clear();
     m_assetList.clear();
     m_selectedAsset = "";

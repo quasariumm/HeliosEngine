@@ -6,9 +6,9 @@ namespace Engine
 {
 void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileName)
 {
-    if (!ProjectLoaded())
+    if (!ProjectHandler::ProjectLoaded())
     {
-        DebugLog(LogSeverity::ERROR, L"No project selected!");
+        DebugLog(LogSeverity::SEVERE, L"No project selected!");
         return;
     }
 
@@ -16,7 +16,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
     file.open(fileName);
     if (!file.is_open())
     {
-        DebugLog(LogSeverity::ERROR, L"Failed to open scene file");
+        DebugLog(LogSeverity::SEVERE, L"Failed to open scene file");
         return;
     }
 
@@ -90,9 +90,9 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
 
 void SceneLoader::SaveToFile(Scene* scene, const std::filesystem::path& fileName)
 {
-    if (!ProjectLoaded())
+    if (!ProjectHandler::ProjectLoaded())
     {
-        DebugLog(LogSeverity::ERROR, L"No project selected!");
+        DebugLog(LogSeverity::SEVERE, L"No project selected!");
         return;
     }
 
@@ -100,7 +100,7 @@ void SceneLoader::SaveToFile(Scene* scene, const std::filesystem::path& fileName
     file.open(fileName, std::ofstream::trunc);
     if (!file.is_open())
     {
-        DebugLog(LogSeverity::ERROR, L"Failed to create or open scene file");
+        DebugLog(LogSeverity::SEVERE, L"Failed to create or open scene file");
         return;
     }
 

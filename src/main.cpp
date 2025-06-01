@@ -1,3 +1,4 @@
+#include "main.h"
 #include <glad/glad.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
@@ -47,12 +48,21 @@ void temp(Engine::Window& window, Engine::Key key)
 {
 	if (key == Engine::Key::ESCAPE && Engine::EditorSettings::Get().m_closeOnEscape)
 		window.SetShouldClose(true);
+
+	if (key == Engine::Key::T && Engine::ProjectHandler::ProjectLoaded())
+		Engine::ProjectHandler::m_project->Init();
 }
 
 static Engine::Scene g_scene;
 
-int main(int, char**)
+extern "C" int __declspec(dllexport) __stdcall main()
 {
+#ifdef ENGINE_BUILD_DLL
+	std::cout << "Running engine library as engine" << std::endl;
+#else
+	std::cout << "Running engine library as include" << std::endl;
+#endif
+
     std::unique_ptr<Engine::Window> window;
     Engine::CreateWin(
     	window,
