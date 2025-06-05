@@ -14,10 +14,10 @@ enum class AssetType
     PROJECT
 };
 
-class AssetManager : public EditorInterface
+class AssetEditorView : public EditorInterface
 {
 public:
-    AssetManager() : EditorInterface(L"Asset Manager") {}
+    AssetEditorView() : EditorInterface(L"Asset Manager") {}
 
     void DrawInterface() override;
 

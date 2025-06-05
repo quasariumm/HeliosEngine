@@ -4,7 +4,7 @@
 
 #include <nfd.hpp>
 
-#include "Assets/AssetManager.h"
+#include "Assets/AssetEditorView.h"
 #include "Core/FileTools.h"
 #include <windows.h>
 
@@ -292,7 +292,7 @@ bool ProjectHandler::LoadProject(std::filesystem::path projectPath)
 
     file.close();
 
-    AssetManager::UpdateAssetList();
+    AssetEditorView::UpdateAssetList();
 
     // Loading the code
     std::wstring libraryPath = m_projectData.projectPath.wstring();
