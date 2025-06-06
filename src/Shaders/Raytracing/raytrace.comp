@@ -69,7 +69,10 @@ vec3 Trace(Ray ray, uint seed)
 			vec3 BRDF = GetBRDFAndBounce(info.material, ray, seed, info);
 			float PDF = GetPDF(info.material, info.normal, -ray.dir, info.lightVector);
 
-			incommingLight += emittance + BRDF * PDF * light * rayColor;
+			if (PDF == 0.0)
+				incommingLight += emittance;
+			else
+				incommingLight += emittance + BRDF / PDF * light * rayColor * max(0.001, -dot(info.normal, ray.dir));
 
 			rayColor *= mix(info.material.diffuseColor, info.material.specularColor, info.material.specularity)
 				* mix(light, vec3(1.0), info.material.specularity);
