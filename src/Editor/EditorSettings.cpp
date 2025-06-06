@@ -14,7 +14,7 @@ bool EditorSettings::Save()
     file.open("EditorSettings.txt");
     if (!file.is_open())
     {
-        DebugLog(LogSeverity::ERROR, L"Failed to save editor settings");
+        DebugLog(LogSeverity::SEVERE, L"Failed to save editor settings");
         return false;
     }
     // Save all variables in the struct
@@ -29,7 +29,7 @@ bool EditorSettings::Load()
     file.open("EditorSettings.txt");
     if (!file.is_open())
     {
-        DebugLog(LogSeverity::ERROR, L"Failed to load editor settings");
+        DebugLog(LogSeverity::SEVERE, L"Failed to load editor settings");
         return false;
     }
     std::wstring line;

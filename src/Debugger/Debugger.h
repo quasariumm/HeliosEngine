@@ -10,7 +10,7 @@ enum class LogSeverity
 {
     INFO = 0,
     WARNING = 1,
-    ERROR = 2,
+    SEVERE = 2,
     DONE = 3
 };
 
@@ -20,7 +20,7 @@ inline std::wstring LogSeverityString(LogSeverity severity)
     default:
     case LogSeverity::INFO: return L"INFO";
     case LogSeverity::WARNING: return L"WARNING";
-    case LogSeverity::ERROR: return L"ERROR";
+    case LogSeverity::SEVERE: return L"ERROR";
     case LogSeverity::DONE: return L"DONE";
     }
 }
@@ -38,9 +38,12 @@ public:
     struct Log;
     struct Watch;
 
-    static std::vector<Log> g_logs;
-    static std::vector<Watch> g_watchList;
-    static std::vector<Watch> g_tempWatchList;
+    static ENGINE_API Logger* Get();
+
+    std::vector<Log> g_logs = {};
+    std::vector<Watch> g_watchList = {};
+    std::vector<Watch> g_tempWatchList = {};
+    std::wstring m_totalLog = {};
 
     /// Log data with type, message and a level (Level 0 means always visible, while a higher level can be ignored)
     struct Log
@@ -75,17 +78,15 @@ public:
         void* var;
     };
 
-    static std::wstring m_totalLog;
-
     static void ExportLog()
     {
-        if (!ProjectLoaded())
+        if (!ProjectHandler::ProjectLoaded())
         {
             std::cout << "Could not export log, no project was loaded\n";
             return;
         }
 
-        std::filesystem::path folder = ProjectFolder();
+        std::filesystem::path folder = ProjectHandler::ProjectFolder();
         std::wstring logPath = folder.append("Latest-Log.md").generic_wstring();
 
         std::wofstream file;
@@ -95,24 +96,25 @@ public:
             std::cout << "Could not export log, failed to write log\n";
             return;
         }
-        file << m_totalLog;
+        file << Get()->m_totalLog;
         file.close();
     }
 };
 
 /// Add a log to the debug viewer
-inline void DebugLog(const LogSeverity type, const std::wstring& message, const int level = 0, std::source_location location = std::source_location::current())
+inline void DebugLog(const LogSeverity type, const std::wstring& message, const int level = 0,
+                     std::source_location location = std::source_location::current())
 {
-    Logger::g_logs.emplace_back(type, message, level, location);
-    Logger::m_totalLog += Logger::g_logs.back().FileText();
+    Logger::Get()->g_logs.emplace_back(type, message, level, location);
+    Logger::Get()->m_totalLog += Logger::Get()->g_logs.back().FileText();
 }
 
 /// Add a value to the value debugger. Can be modified from the menu
 template <class T>
-static void DebugWatch(const std::wstring& name, T* value) { Logger::g_watchList.emplace_back(name, value); };
+static void DebugWatch(const std::wstring& name, T* value) { Logger::Get()->g_watchList.emplace_back(name, value); };
 /// Add a value to the value debugger. Cannot be modified from the menu. But does not have to constantly exist
 template <class T>
-static void DebugWatchTemp(const std::wstring& name, T* value) { Logger::g_tempWatchList.emplace_back(name, value); };
+static void DebugWatchTemp(const std::wstring& name, T* value) { Logger::Get()->g_tempWatchList.emplace_back(name, value); };
 
 class Debugger final : public EditorInterface
 {

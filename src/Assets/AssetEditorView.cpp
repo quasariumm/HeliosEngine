@@ -1,4 +1,4 @@
-#include "AssetManager.h"
+#include "AssetEditorView.h"
 
 #include "Scene/SceneEditor.h"
 #include "Scene/SceneStorage.h"
@@ -9,25 +9,25 @@
 
 namespace Engine
 {
-std::filesystem::path AssetManager::m_currentPath = "";
-std::filesystem::path AssetManager::m_selectedAsset = "";
-std::vector<std::filesystem::path> AssetManager::m_folderList = {};
-std::vector<std::filesystem::path> AssetManager::m_assetList = {};
+std::filesystem::path AssetEditorView::m_currentPath = "";
+std::filesystem::path AssetEditorView::m_selectedAsset = "";
+std::vector<std::filesystem::path> AssetEditorView::m_folderList = {};
+std::vector<std::filesystem::path> AssetEditorView::m_assetList = {};
 
-void AssetManager::DrawInterface()
+void AssetEditorView::DrawInterface()
 {
     DrawAssetView();
     DrawAssetInfo();
 }
 
-void AssetManager::DrawAssetView()
+void AssetEditorView::DrawAssetView()
 {
 	ZoneScopedNC("Assets", tracy::Color::MediumOrchid);
     ImGui::Begin(ICON_VIEW_GRID" Assets", nullptr, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
     {
-        if (!ProjectLoaded())
+        if (!ProjectHandler::ProjectLoaded())
         {
             ImGui::Text(ICON_ALERT" Please load a project");
             ImGui::EndMenuBar();
@@ -36,7 +36,7 @@ void AssetManager::DrawAssetView()
         }
 
         // Show back arrow. Using relative path because there is sometimes still a / on the end
-        if (relative(m_currentPath, ProjectFolder()) == ".")
+        if (relative(m_currentPath, ProjectHandler::ProjectFolder()) == ".")
         {
             ImGui::BeginDisabled();
             ImGui::MenuItem(ICON_ARROW_UP_THICK);
@@ -68,8 +68,8 @@ void AssetManager::DrawAssetView()
         ImGui::Separator();
 
         // Show current folder path
-        std::wstring pathString = STR_TO_WSTR(ICON_FOLDER) + L" " + ProjectName() + L"\\";
-        pathString.append(relative(m_currentPath, ProjectFolder()).wstring());
+        std::wstring pathString = STR_TO_WSTR(ICON_FOLDER) + L" " + ProjectHandler::ProjectName() + L"\\";
+        pathString.append(relative(m_currentPath, ProjectHandler::ProjectFolder()).wstring());
         ImGui::Text(WStringToUTF8(pathString).c_str());
 
         ImGui::EndMenuBar();
@@ -136,7 +136,7 @@ void AssetManager::DrawAssetView()
     ImGui::End();
 }
 
-void AssetManager::DrawAssetInfo()
+void AssetEditorView::DrawAssetInfo()
 {
 	ZoneScopedNC("Asset viewer", tracy::Color::MediumOrchid1);
     ImGui::Begin(ICON_CUBE_SEND" Asset Viewer", nullptr, ImGuiWindowFlags_MenuBar);
@@ -169,8 +169,11 @@ void AssetManager::DrawAssetInfo()
     ImGui::End();
 }
 
-void AssetManager::UpdateAssetList()
+void AssetEditorView::UpdateAssetList()
 {
+    if (m_currentPath == L"")
+        m_currentPath = ProjectHandler::ProjectFolder();
+
     m_folderList.clear();
     m_assetList.clear();
     m_selectedAsset = "";
@@ -181,7 +184,7 @@ void AssetManager::UpdateAssetList()
             m_assetList.push_back(p.path());
 }
 
-std::string AssetManager::AssetIcon(const std::filesystem::path& asset)
+std::string AssetEditorView::AssetIcon(const std::filesystem::path& asset)
 {
     const std::string t = asset.extension().string();
     if (t == ".scn") return ICON_MAP" ";
@@ -190,7 +193,7 @@ std::string AssetManager::AssetIcon(const std::filesystem::path& asset)
     return ICON_FILE" ";
 }
 
-void AssetManager::ScenePopup()
+void AssetEditorView::ScenePopup()
 {
     if (ImGui::BeginPopupModal("Confirm open scene"))
     {
@@ -213,7 +216,7 @@ void AssetManager::ScenePopup()
     }
 }
 
-void AssetManager::DeletePopup(std::filesystem::path& deleteFile)
+void AssetEditorView::DeletePopup(std::filesystem::path& deleteFile)
 {
     if (deleteFile != "")
     {
@@ -243,7 +246,7 @@ void AssetManager::DeletePopup(std::filesystem::path& deleteFile)
     }
 }
 
-void AssetManager::RenamePopup(std::filesystem::path& renameFile)
+void AssetEditorView::RenamePopup(std::filesystem::path& renameFile)
 {
     if (renameFile != "")
     {
@@ -280,7 +283,7 @@ void AssetManager::RenamePopup(std::filesystem::path& renameFile)
 }
 
 
-void AssetManager::NewFilePopup(bool& show)
+void AssetEditorView::NewFilePopup(bool& show)
 {
     if (!show) return;
     if (!ImGui::BeginPopupModal("Create New File"))
@@ -342,6 +345,6 @@ void AssetManager::NewFilePopup(bool& show)
     ImGui::EndPopup();
 }
 
-REGISTER_EDITOR_INTERFACE(AssetManager);
+REGISTER_EDITOR_INTERFACE(AssetEditorView);
 
 }

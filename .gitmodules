@@ -8,3 +8,6 @@
 [submodule "extern/Tracy"]
 	path = extern/Tracy
 	url = https://github.com/QuillanW/EngineTracy.git
+[submodule "extern/Assimp"]
+	path = extern/Assimp
+	url = https://github.com/assimp/assimp.git

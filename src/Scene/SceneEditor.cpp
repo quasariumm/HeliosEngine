@@ -136,11 +136,11 @@ void SceneEditor::ObjectEditor()
 
     if (ImGui::BeginPopupModal("Select component"))
     {
-        for (const std::wstring& componentName : ComponentRegister::Instance().GetComponentNames())
+        for (std::pair<std::wstring, std::wstring> componentName : ComponentRegister::Instance().GetComponentNames())
         {
-            if (ImGui::Button(WStringToUTF8(componentName).c_str()))
+            if (ImGui::Button(WStringToUTF8(componentName.second).c_str()))
             {
-                selectedObject->AddComponentByName(componentName);
+                selectedObject->AddComponentByName(componentName.first);
                 ImGui::CloseCurrentPopup();
             }
         }

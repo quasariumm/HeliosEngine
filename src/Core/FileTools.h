@@ -4,7 +4,7 @@
 namespace Engine
 {
 
-std::string Demangle(const char* name);
+std::string ENGINE_API Demangle(const char* name);
 
 static bool IsToken(const std::wstring& line, const std::wstring& token)
 {
@@ -40,6 +40,18 @@ static vec3 ParseVec3(std::wstring text)
     text.erase(text.begin(), text.begin() + text.find(sep) + 2); // Remove the second value
     result.z = std::stof(text.substr(0, text.find(sep))); // Get the third value
     return result;
+}
+
+static bool ForceCopy(const std::filesystem::path& a, const std::filesystem::path& b)
+{
+    if (!std::filesystem::exists(a))
+    {
+        std::cout << "Trying to copy non existing file: " << a << std::endl;
+        return false;
+    }
+    if (std::filesystem::exists(b))
+        std::filesystem::remove(b);
+    return std::filesystem::copy_file(a, b, std::filesystem::copy_options::overwrite_existing);
 }
 
 }
