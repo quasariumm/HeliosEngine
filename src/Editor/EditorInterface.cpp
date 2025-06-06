@@ -67,7 +67,7 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 					ProjectHandler::ShowProjectCreator(true);
 				if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project", "CTRL+O"))
 					ProjectHandler::ShowProjectSelector(true);
-				if (ImGui::BeginMenu(ICON_CLOCK" Open recent"))
+				if (ImGui::BeginMenu(ICON_CLOCK" Open recent", !ProjectHandler::ReadRecentProjects().empty()))
 				{
 					static ImGuiInputFlags recentsInputFlags = ImGuiInputFlags_RouteFocused;
 					int32_t i = 1;

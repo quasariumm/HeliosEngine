@@ -253,8 +253,13 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     sourceFile << "#include \"" << data.projectName << ".h" << "\"";
     sourceFile.close();
 
+    m_projectData = {data.projectName, projectPath};
+
     if (!RecompileProject())
+    {
+        DebugLog(LogSeverity::SEVERE, L"Compiling project failed");
         return false;
+    }
 
     AddRecentProject(projectPath, data.projectName);
 
@@ -273,7 +278,7 @@ bool ProjectHandler::LoadProject(std::filesystem::path projectPath)
     std::filesystem::remove(GetProjectLib());
 
     m_projectData = ProjectData();
-    m_projectData.projectPath = projectPath;
+    m_projectData.projectPath = projectPath.make_preferred();
 
     std::wifstream file(std::filesystem::path(projectPath.wstring() + L"/Project.gep"));
     if (!file.is_open())
@@ -294,30 +299,8 @@ bool ProjectHandler::LoadProject(std::filesystem::path projectPath)
 
     AssetEditorView::UpdateAssetList();
 
-    // Loading the code
-    std::wstring libraryPath = m_projectData.projectPath.wstring();
-    libraryPath += L"\\cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
-
-    ForceCopy(libraryPath, GetProjectLib());
-
-    std::cout << WStringToUTF8(libraryPath) << std::endl;
-
-    m_projectLibrary = LoadLibraryW(GetProjectLib().c_str());
-
-    if (!m_projectLibrary) {
-        std::cout << "Could not load the dynamic library" << std::endl;
+    if (!ReloadLibrary())
         return false;
-    }
-
-    const auto function = reinterpret_cast<ProjectCreateFunc>(GetProcAddress(m_projectLibrary, "GenerateProject"));
-    if (!function) {
-        std::cout << "Could not locate the function" << std::endl;
-        FreeLibrary(m_projectLibrary);
-        std::filesystem::remove(GetProjectLib());
-        return false;
-    }
-
-    m_project = function();
 
     DebugLog(LogSeverity::DONE, L"Project loaded successfully");
     return true;
@@ -343,8 +326,8 @@ bool ProjectHandler::ReloadProject()
 
 bool ProjectHandler::RecompileProject()
 {
-    int cmakeStatus = std::system(("cmake -S " + ProjectFolder().generic_string() +
-    " -B " + ProjectFolder().generic_string() + "\\cmake-build-debug" + " -G \"Ninja\"").c_str());
+    std::wstring cmakeCommand = L"cmake -S " + ProjectFolder().wstring() + L" -B " + ProjectFolder().wstring() + L"\\cmake-build-debug" + L" -G \"Ninja\"";
+    int cmakeStatus = std::system(WStringToUTF8(cmakeCommand).c_str());
     if (cmakeStatus != 0)
     {
         DebugLog(LogSeverity::SEVERE, L"Loading CMake project failed");

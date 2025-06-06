@@ -147,11 +147,11 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	// Force load scene.
 	// TODO: REMOVE BEFORE PUSHING
-	std::filesystem::path projectPath("D:/Patrick/Documents/EngineProjects/Test");
-	Engine::ProjectHandler::LoadProject(projectPath);
-	std::filesystem::path sceneFile("D:/Patrick/Documents/EngineProjects/Test/Scene.scn");
-	Engine::SceneLoader::LoadFromFile(Engine::SceneEditor::m_targetScene, sceneFile);
-	Engine::SceneEditor::m_sceneFile = sceneFile;
+	// std::filesystem::path projectPath("D:/Patrick/Documents/EngineProjects/Test");
+	// Engine::ProjectHandler::LoadProject(projectPath);
+	// std::filesystem::path sceneFile("D:/Patrick/Documents/EngineProjects/Test/Scene.scn");
+	// Engine::SceneLoader::LoadFromFile(Engine::SceneEditor::m_targetScene, sceneFile);
+	// Engine::SceneEditor::m_sceneFile = sceneFile;
 
     while (!window->ShouldClose())
     {
