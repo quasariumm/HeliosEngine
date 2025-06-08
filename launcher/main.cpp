@@ -6,7 +6,7 @@ typedef int (__stdcall *engineFunc)();
 
 int main()
 {
-    const std::wstring TMPFolder = std::filesystem::current_path().append("Launcher\\Tmp");
+    const std::wstring TMPFolder = std::filesystem::current_path().append("launcher\\tmp");
     const std::wstring EngineLibrary = std::filesystem::current_path().append("cmake-build-debug\\libEngine.dll");
 
     // Try to load the engine library

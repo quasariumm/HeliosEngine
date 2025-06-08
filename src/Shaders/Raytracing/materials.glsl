@@ -38,11 +38,12 @@ struct RayHitInfo
 	float dst;
 	vec3 hitPoint;
 	vec3 normal;
+	vec3 tangent;
 	vec3 lightVector;
 	RayTracingMaterial material;
 };
 
-const RayHitInfo defaultHitInfo = RayHitInfo( false, 1e30, vec3(0.0), vec3(0.0), vec3(0.0), defaultMaterial );
+const RayHitInfo defaultHitInfo = RayHitInfo( false, 1e30, vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), defaultMaterial );
 
 /*
 	Bounces
@@ -155,7 +156,7 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 		if ((material.type & MATERIAL_MICROFACET) != 0)
 		{
 			specular.factor = 1.0 - material.PBR_Roughness;
-			specular.BRDF = MicrofacetBRDF(material, info.normal, -ray.dir, info.lightVector);
+			specular.BRDF = MicrofacetBRDF(material, info.normal, info.tangent, -ray.dir, info.lightVector);
 		}
 		else
 		{
@@ -188,7 +189,7 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 			// BRDF
 			if ((material.type & MATERIAL_MICROFACET) != 0)
 			{
-				transmission.BRDF = MicrofacetBRDF(material, info.normal, -ray.dir, info.lightVector);
+				transmission.BRDF = MicrofacetBRDF(material, info.normal, info.tangent, -ray.dir, info.lightVector);
 			}
 			else
 			{
@@ -213,7 +214,7 @@ struct PDFInfo
 	float PDF;
 };
 
-float GetPDF(inout RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
+float GetPDF(inout RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
 {
 	PDFInfo diffuse = PDFInfo(
 		1.0 - material.specularity,
@@ -226,7 +227,7 @@ float GetPDF(inout RayTracingMaterial material, vec3 normal, vec3 wo, vec3 wi)
 
 	if ((material.type & MATERIAL_MICROFACET) != 0)
 	{
-		specularTransmission.PDF = MicrofacetPDF(material, normal, wo, wi);
+		specularTransmission.PDF = MicrofacetPDF(material, normal, tangent, wo, wi);
 	}
 
 	return diffuse.PDF * diffuse.factor + specularTransmission.PDF * specularTransmission.factor;
