@@ -67,7 +67,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
     Engine::CreateWin(
     	window,
     	Engine::vec2u(1280, 720),
-    	L"Varför är STL lokaler så irriterande? ありがとうございます",
+    	L"Helios Engine",
     	EngineWindowFlags_NoVsync
     );
 
@@ -229,7 +229,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
     		const float fps = 1000.0f / avg, rps = (static_cast<float>(rayTexture.GetWidth()) * static_cast<float>(rayTexture.GetHeight())) / avg;
 
     		if (frame % 50 == 0)
-    			window->SetTitle( std::format(L"{0:5.2f}ms ({1:.1f}fps) - {2:.1f}Mrays/s\n", avg, fps, rps / 1000) );
+    			window->SetTitle( std::format(L"Helios Engine | {0} | {1:5.2f}ms ({2:.1f}fps) - {3:.1f}Mrays/s\n", Engine::ProjectHandler::ProjectName(), avg, fps, rps / 1000) );
 	    }
 
     	FrameMark;

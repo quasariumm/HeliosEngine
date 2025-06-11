@@ -46,6 +46,13 @@ RayHitInfo RaySphere(Ray ray, Sphere sphere)
 		hitInfo.dst = dst;
 		hitInfo.hitPoint = ray.origin + ray.dir * dst;
 		hitInfo.normal = normalize(hitInfo.hitPoint - sphere.center);
+
+		// Calculate tangent vector
+		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
+		if (dot(hitInfo.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
+		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
+
+		hitInfo.tangent = normalize(cross(hitInfo.normal, arbitraryDirection));
 		return hitInfo;
 	}
 
@@ -57,6 +64,13 @@ RayHitInfo RaySphere(Ray ray, Sphere sphere)
 		hitInfo.dst = dst2;
 		hitInfo.hitPoint = ray.origin + ray.dir * dst2;
 		hitInfo.normal = normalize(hitInfo.hitPoint - sphere.center);
+
+		// Calculate tangent vector
+		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
+		if (dot(hitInfo.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
+		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
+
+		hitInfo.tangent = normalize(cross(hitInfo.normal, arbitraryDirection));
 		return hitInfo;
 	}
 

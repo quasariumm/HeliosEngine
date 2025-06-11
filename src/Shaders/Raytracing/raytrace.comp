@@ -67,15 +67,21 @@ vec3 Trace(Ray ray, uint seed)
 			light *= float(!shadowInfo.didHit);
 
 			vec3 BRDF = GetBRDFAndBounce(info.material, ray, seed, info);
-			float PDF = GetPDF(info.material, info.normal, -ray.dir, info.lightVector);
+			float PDF = GetPDF(info.material, info.normal, info.tangent, -ray.dir, info.lightVector);
 
 			if (PDF == 0.0)
 				incommingLight += emittance;
 			else
 				incommingLight += emittance + BRDF / PDF * light * rayColor * max(0.001, -dot(info.normal, ray.dir));
 
-			rayColor *= mix(info.material.diffuseColor, info.material.specularColor, info.material.specularity)
-				* mix(light, vec3(1.0), info.material.specularity);
+			float specularity = info.material.specularity;
+			if ((info.material.type & MATERIAL_MICROFACET) != 0)
+			{
+				specularity = 1.0 - info.material.PBR_Roughness;
+			}
+
+			rayColor *= mix(info.material.diffuseColor, info.material.specularColor, specularity)
+				* mix(light, vec3(1.0), specularity);
 
 			ray.origin = info.hitPoint + 0.001 * ray.dir;
 		}
