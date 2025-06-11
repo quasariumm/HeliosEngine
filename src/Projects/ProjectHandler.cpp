@@ -318,7 +318,8 @@ bool ProjectHandler::ReloadProject()
     if (!RecompileProject())
         return false;
 
-    ReloadLibrary();
+    if (!ReloadLibrary())
+        return false;
 
     DebugLog(LogSeverity::DONE, L"Reloading project completed");
     return true;
@@ -352,7 +353,7 @@ bool ProjectHandler::ReloadLibrary()
     // Loading the code
     const std::filesystem::path libraryPath = m_projectData.projectPath.wstring() + L"\\cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
     ForceCopy(libraryPath, GetProjectLib());
-    m_projectLibrary = LoadLibraryW((GetProjectLib()).c_str());
+    m_projectLibrary = LoadLibraryW(GetProjectLib().c_str());
 
     if (!m_projectLibrary) {
         std::cout << "Could not load the dynamic library" << std::endl;
@@ -370,6 +371,7 @@ bool ProjectHandler::ReloadLibrary()
     }
 
     m_project = function();
+
     return true;
 }
 
