@@ -1,0 +1,17 @@
+#pragma once
+#include <Engine.h>
+
+using namespace Engine;
+
+class {ProjectName} final : public EngineProject
+{
+    public:
+
+    void Init() override {}
+    void Update(float deltaTime) override {}
+    void Shutdown() override {}
+
+};
+
+// This function is for handling project reloading. It should not be removed!
+extern "C" __declspec(dllexport) inline EngineProject* GenerateProject() { return new {ProjectName}(); }

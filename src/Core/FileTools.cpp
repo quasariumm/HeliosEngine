@@ -1,4 +1,4 @@
-#include "Core/FileTools.h"
+#include "FileTools.h"
 
 #if defined(__GNUG__)
 #include <cxxabi.h>
@@ -27,5 +27,6 @@ std::string Demangle(const char* name)
             return name;
 #endif
 }
+
 }
 

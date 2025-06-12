@@ -176,16 +176,6 @@ public:
      */
     static ProjectData& FullProjectData() { return m_projectData; }
 
-    /**
-     * @return Get the default source file with name of project filled in
-     */
-    static std::wstring DefaultSourceFile(const std::wstring& projectName);
-
-    /**
-     * @return Get the default CMakeLists file with name of project filled in
-     */
-    static std::wstring DefaultCMakeFile(const std::wstring& projectName);
-
 
 
     //====================================================

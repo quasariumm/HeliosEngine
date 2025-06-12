@@ -162,3 +162,11 @@ inline std::wstring GLSeverityToString( const GLenum sev )
 		return std::to_wstring(sev);
 	}
 }
+
+inline std::wstring EnginePath(bool stringSafe = false)
+{
+    std::wstring enginePath = std::filesystem::current_path().wstring();
+    if (!stringSafe) return enginePath;
+    std::ranges::replace(enginePath, '\\', '/');
+    return enginePath;
+}

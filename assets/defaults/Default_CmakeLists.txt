@@ -1,0 +1,23 @@
+﻿cmake_minimum_required(VERSION 3.16)
+
+cmake_policy(SET CMP0077 NEW)
+
+project({ProjectName})
+
+set(CMAKE_CXX_STANDARD 20)
+
+set(ENGINE_PATH {EnginePath})
+
+add_subdirectory(
+        ${ENGINE_PATH}
+        ${CMAKE_BINARY_DIR}/engine_raytrace_build
+)
+
+add_library({ProjectName} SHARED Source/{ProjectName}.cpp)
+
+target_link_libraries({ProjectName} PRIVATE Engine)
+
+target_include_directories({ProjectName} PRIVATE
+        ${ENGINE_PATH}/include
+        ${ENGINE_PATH}/src
+)
