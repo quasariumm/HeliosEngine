@@ -172,18 +172,35 @@ float GGXIsoG(float alpha, vec3 normal, vec3 wo, vec3 wi)
 	alpha is in the form { alphaX, alhpaY, alpha }
 */
 
+// https://pbr-book.org/4ed/Geometry_and_Transformations/Spherical_Geometry#CosPhi
+float CosPhi(vec3 w) {
+	float sinTheta = sqrt(max(0.0, 1.0 - w.y * w.y));
+	return (sinTheta == 0.0) ? 1.0 : clamp(w.x / sinTheta, -1.0, 1.0);
+}
+float SinPhi(vec3 w) {
+	float sinTheta = sqrt(max(0.0, 1.0 - w.y * w.y));
+	return (sinTheta == 0.0) ? 0.0 : clamp(w.z / sinTheta, -1.0, 1.0);
+}
+
 float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh)
 {
-	float cosTheta = dot(normal, wh);
+	// Convert wh to tangent space
+	vec3 wh_tangent = normalize(vec3(dot(wh, tangent) * alpha.x, dot(wh, normal), dot(wh, cross(tangent, normal)) * alpha.y));
+	float cosTheta = wh_tangent.y;
 	float cos2Theta = cosTheta * cosTheta;
+	float cos4Theta = cosTheta * cosTheta * cosTheta * cosTheta;
 
-	float cosThetaX = dot(tangent, wh);
-	float cosThetaY = dot(cross(normal, tangent), wh);
+	float sinTheta = max(0.0, 1.0 - cos2Theta);
+	float tan2Theta = cos2Theta / (sinTheta * sinTheta);
+
+	float cosPhi = CosPhi(wh_tangent);
+	float sinPhi = SinPhi(wh_tangent);
+
 	float c = PI * alpha.x * alpha.y;
-	float x = (cosThetaX * cosThetaX) / (alpha.x * alpha.x);
-	float y = (cosThetaY * cosThetaY) / (alpha.y * alpha.y);
-	float d = x + y + cos2Theta;
-	return 1.0 / (c * d * d);
+	float x = (cosPhi * cosPhi) / (alpha.x * alpha.x);
+	float y = (sinPhi * sinPhi) / (alpha.y * alpha.y);
+	float d = 1.0 + tan2Theta * (x + y);
+	return 1.0 / (c * cos4Theta * d * d);
 }
 
 float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 tangent, vec3 w)

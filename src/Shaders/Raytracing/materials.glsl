@@ -204,7 +204,22 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 		}
 	}
 
-	ray.dir = diffuse.direction * diffuse.factor + specular.direction * specular.factor + transmission.direction * transmission.factor;
+	if ((material.type & MATERIAL_MICROFACET) != 0 && (material.type & MICROFACET_GGX_ANISO) != 0)
+	{
+		vec3 wh = normalize(-ray.dir + info.lightVector);
+		vec3 wh_tangent = normalize(vec3(
+			dot(wh, info.tangent) * material.alphaX,
+			dot(wh, info.normal),
+			dot(wh, cross(info.tangent, info.normal)) * material.alphaY
+		));
+		wh = wh_tangent.x * info.tangent + wh_tangent.y * info.normal + wh_tangent.z * cross(info.tangent, info.normal);
+		vec3 reflected = Reflect(-ray.dir, wh);
+		ray.dir = diffuse.direction * diffuse.factor + reflected * specular.factor;
+	}
+	else
+	{
+		ray.dir = diffuse.direction * diffuse.factor + specular.direction * specular.factor + transmission.direction * transmission.factor;
+	}
 	return diffuse.BRDF * diffuse.factor + specular.BRDF * specular.factor + transmission.BRDF * transmission.factor;
 }
 
