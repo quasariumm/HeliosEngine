@@ -106,7 +106,7 @@ public:
 
 protected:
     /**
-     * @brief Called when component is added to an object
+     * @brief Called when component is added to an object or when the attached component is loaded into the scene
      */
     virtual void Init()
     {

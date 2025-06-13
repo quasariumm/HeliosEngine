@@ -1,0 +1,6 @@
+#include "{FileName}.h"
+
+void {FileName}::Init()
+{
+    DebugLog(LogSeverity::INFO, L"{FileName} was loaded in");
+}

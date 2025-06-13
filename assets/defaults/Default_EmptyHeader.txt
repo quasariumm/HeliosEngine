@@ -1,0 +1,12 @@
+#pragma once
+
+#include <Engine.h>
+
+using namespace Engine;
+
+class {FileName}
+{
+public:
+    {FileName}() = default;
+    ~{FileName}() = default;
+};

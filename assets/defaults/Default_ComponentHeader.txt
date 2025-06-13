@@ -1,0 +1,25 @@
+#pragma once
+
+#include <Engine.h>
+
+using namespace Engine;
+
+class {FileName} final : public Component
+{
+public:
+    // Creating the component
+    {FileName}() : Engine::Component(this)
+    {
+        // Assigning any properties to be shown in the object editor
+        AssignProperty(L"Integer Property", &integer);
+    }
+
+    // Called when the attached component is loaded in or when attached during runtime
+    void Init() override;
+
+    // Your variables
+    int integer = 0;
+};
+
+// Registering the component to the engine
+REGISTER_COMPONENT({FileName}, STR_TO_WSTR(ICON_FILE) + L" {FileName}");

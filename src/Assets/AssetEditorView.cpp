@@ -190,6 +190,8 @@ std::string AssetEditorView::AssetIcon(const std::filesystem::path& asset)
     if (t == ".scn") return ICON_MAP" ";
     if (t == ".gep") return ICON_CONTROLLER" ";
     if (t == ".md") return ICON_MATH_LOG" ";
+    if (t == ".cpp") return ICON_ALPHA_C_BOX" ";
+    if (t == ".h") return ICON_ALPHA_H_BOX" ";
     return ICON_FILE" ";
 }
 
@@ -301,6 +303,13 @@ void AssetEditorView::NewFilePopup(bool& show)
     ImGui::Separator();
     if (ImGui::Selectable(ICON_FOLDER" Folder", fileType == "Folder")) fileType = "Folder";
     if (ImGui::Selectable(ICON_MAP" Scene", fileType == ".scn")) fileType = ".scn";
+    if (ImGui::TreeNode("Source"))
+    {
+        if (ImGui::Selectable(ICON_CODE_BRACES_BOX" Empty Class", fileType == "Source_Empty")) fileType = "Source_Empty";
+        if (ImGui::Selectable(ICON_PUZZLE" Component", fileType == "Source_Component")) fileType = "Source_Component";
+        if (ImGui::Selectable(ICON_TOOLTIP_EDIT" Editor Window", fileType == "Source_Editor")) fileType = "Source_Editor";
+        ImGui::TreePop();
+    }
     if (ImGui::Selectable(ICON_FILE" Other", fileType == "Other")) fileType = "Other";
     if (fileType == "Other") ImGui::InputText("Filetype", otherFileType, 16);
     ImGui::Separator();
@@ -308,13 +317,34 @@ void AssetEditorView::NewFilePopup(bool& show)
     if (ImGui::Button(ICON_CHECK_BOLD" Create"))
     {
         if (fileType == "Other") fileType = otherFileType;
-        if (fileType == "Folder")
+        else if (fileType == "Folder")
         {
             std::filesystem::path newPath = m_currentPath;
             newPath.append(name);
             create_directories(newPath);
             UpdateAssetList();
-            DebugLog((LogSeverity)3, L"New folder created");
+            DebugLog(LogSeverity::DONE, L"New folder created");
+        }
+        else if (fileType.find("Source")  != std::string::npos)
+        {
+            const std::wstring headerFileName = m_currentPath.wstring() + L"/" + STR_TO_WSTR(name) + L".h";
+            const std::wstring sourceFileName = m_currentPath.wstring() + L"/" + STR_TO_WSTR(name) + L".cpp";
+
+            if (fileType.find("Empty")  != std::string::npos)
+            {
+                DefaultFile(DefaultFileType::SOURCE_EMPTY_H, headerFileName);
+                DefaultFile(DefaultFileType::SOURCE_EMPTY_C, sourceFileName);
+            }
+            else if (fileType.find("Component")  != std::string::npos)
+            {
+                DefaultFile(DefaultFileType::SOURCE_COMPONENT_H, headerFileName);
+                DefaultFile(DefaultFileType::SOURCE_COMPONENT_C, sourceFileName);
+            }
+            else if (fileType.find("Editor")  != std::string::npos)
+            {
+                DefaultFile(DefaultFileType::SOURCE_EDITOR_H, headerFileName);
+                DefaultFile(DefaultFileType::SOURCE_EDITOR_C, sourceFileName);
+            }
         }
         else
         {
@@ -334,6 +364,8 @@ void AssetEditorView::NewFilePopup(bool& show)
 
         show = false;
         ImGui::CloseCurrentPopup();
+
+        UpdateAssetList();
     }
     ImGui::SameLine();
     if (ImGui::Button(ICON_CLOSE_THICK" Cancel"))

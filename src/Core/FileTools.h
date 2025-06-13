@@ -64,6 +64,12 @@ enum class DefaultFileType
     MAINSOURCE,
     // Requires project name to be set
     CMAKELISTS,
+    SOURCE_EMPTY_H,
+    SOURCE_EMPTY_C,
+    SOURCE_COMPONENT_H,
+    SOURCE_COMPONENT_C,
+    SOURCE_EDITOR_H,
+    SOURCE_EDITOR_C,
 };
 
 // Thnx Stack overflow person
@@ -91,15 +97,15 @@ static bool DefaultFile(DefaultFileType type, const std::filesystem::path& targe
 
     switch (type)
     {
-        case DefaultFileType::MAINHEADER:
-            defaultFileLocation.append("Default_MainHeader.txt");
-            break;
-        case DefaultFileType::MAINSOURCE:
-            defaultFileLocation.append("Default_MainSource.txt");
-            break;
-        case DefaultFileType::CMAKELISTS:
-            defaultFileLocation.append("Default_CmakeLists.txt");
-            break;
+        case DefaultFileType::MAINHEADER:           defaultFileLocation.append("Default_MainHeader.txt"); break;
+        case DefaultFileType::MAINSOURCE:           defaultFileLocation.append("Default_MainSource.txt"); break;
+        case DefaultFileType::CMAKELISTS:           defaultFileLocation.append("Default_CmakeLists.txt"); break;
+        case DefaultFileType::SOURCE_EMPTY_H:       defaultFileLocation.append("Default_EmptyHeader.txt"); break;
+        case DefaultFileType::SOURCE_EMPTY_C:       defaultFileLocation.append("Default_EmptySource.txt"); break;
+        case DefaultFileType::SOURCE_COMPONENT_H:   defaultFileLocation.append("Default_ComponentHeader.txt"); break;
+        case DefaultFileType::SOURCE_COMPONENT_C:   defaultFileLocation.append("Default_ComponentSource.txt"); break;
+        case DefaultFileType::SOURCE_EDITOR_H:      defaultFileLocation.append("Default_EditorHeader.txt"); break;
+        case DefaultFileType::SOURCE_EDITOR_C:      defaultFileLocation.append("Default_EditorSource.txt"); break;
     }
 
     std::wstring fileBuffer;
@@ -109,6 +115,8 @@ static bool DefaultFile(DefaultFileType type, const std::filesystem::path& targe
     while (std::getline(file, line)) {
         ReplaceAll(line, "{ProjectName}", WStringToUTF8(ProjectHandler::ProjectName()));
         ReplaceAll(line, "{EnginePath}", WStringToUTF8(EnginePath(true)));
+        std::filesystem::path targetName = targetLocation;
+        ReplaceAll(line, "{FileName}", WStringToUTF8(targetName.replace_extension().filename()));
 
         fileBuffer.append(STR_TO_WSTR(line + "\n"));
     }

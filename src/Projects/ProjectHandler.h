@@ -188,7 +188,7 @@ public:
 
     static HINSTANCE m_projectLibrary;
     static EngineProject* m_project;
-    static ProjectData m_projectData;
+    static ENGINE_API ProjectData m_projectData;
 
     static std::future<bool> m_recompileResult;
 };
