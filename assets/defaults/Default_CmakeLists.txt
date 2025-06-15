@@ -20,4 +20,10 @@ target_link_libraries({ProjectName} PRIVATE Engine)
 target_include_directories({ProjectName} PRIVATE
         ${ENGINE_PATH}/include
         ${ENGINE_PATH}/src
+        Source
 )
+
+message(STATUS "CMake is including the following source files:")
+foreach(file ${SOURCE})
+    message(STATUS "  ${file}")
+endforeach()

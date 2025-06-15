@@ -1,0 +1,12 @@
+#include "{FileName}.h"
+
+void {FileName}::DrawInterface()
+{
+    ImGui::Begin(ICON_DOCK_WINDOW" {FileName}");
+
+    ImGui::Text("Hello World!");
+
+    ImGui::End();
+}
+
+REGISTER_EDITOR_INTERFACE({FileName});

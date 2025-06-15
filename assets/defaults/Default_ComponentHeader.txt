@@ -8,7 +8,7 @@ class {FileName} final : public Component
 {
 public:
     // Creating the component
-    {FileName}() : Engine::Component(this)
+    {FileName}() : Component(this)
     {
         // Assigning any properties to be shown in the object editor
         AssignProperty(L"Integer Property", &integer);
