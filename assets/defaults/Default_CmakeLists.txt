@@ -8,22 +8,24 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(ENGINE_PATH {EnginePath})
 
-add_subdirectory(
-        ${ENGINE_PATH}
-        ${CMAKE_BINARY_DIR}/engine_raytrace_build
-)
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS Source/*.cpp Source/*.h)
 
-add_library({ProjectName} SHARED Source/{ProjectName}.cpp)
+add_library({ProjectName}  SHARED ${SOURCE_FILES})
 
 target_link_libraries({ProjectName} PRIVATE Engine)
 
-target_include_directories({ProjectName} PRIVATE
+target_include_directories({ProjectName} PUBLIC
         ${ENGINE_PATH}/include
         ${ENGINE_PATH}/src
         Source
 )
 
-message(STATUS "CMake is including the following source files:")
+add_subdirectory(
+        ${ENGINE_PATH}
+        ${CMAKE_BINARY_DIR}/engine_raytrace_build
+)
+
+message(STATUS "CMake is including the following source files for project:")
 foreach(file ${SOURCE})
     message(STATUS "  ${file}")
 endforeach()
