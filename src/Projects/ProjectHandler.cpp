@@ -312,7 +312,7 @@ namespace Engine {
         m_projectLibrary = LoadLibraryW(GetProjectLib().c_str());
 
         if (!m_projectLibrary) {
-            std::cout << "Could not load the dynamic library" << std::endl;
+            std::cout << "Could not load the dynamic library: " << GetLastError() << std::endl;
             DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
             return false;
         }
