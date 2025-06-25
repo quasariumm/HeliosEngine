@@ -28,6 +28,7 @@ vec3 SampleDirectionalLight(DirectionalLight light, vec3 intersection, vec3 norm
 
 #define MAX_DIR_LIGHTS 32
 uniform DirectionalLight DirectionalLights[MAX_DIR_LIGHTS];
+uniform uint NumDirectionalLights = 0;
 const DirectionalLight sun = DirectionalLight(vec3(0.9), normalize(vec3(1.0, -1.0, 0.0)), 1.0);
 
 /*
@@ -43,6 +44,7 @@ struct PointLight
 
 #define MAX_PNT_LIGHTS 32
 uniform PointLight PointLights[MAX_PNT_LIGHTS];
+uniform uint NumPointLights = 0;
 
 vec3 SamplePointLight(PointLight light, vec3 intersection, vec3 normal)
 {
@@ -67,6 +69,7 @@ struct SimpleSpotLight
 
 #define MAX_SSPT_LIGHTS 32
 uniform SimpleSpotLight SimpleSpotLights[MAX_SSPT_LIGHTS];
+uniform uint NumSimpleSpotLights = 0;
 
 vec3 SampleSimpleSpotLight(SimpleSpotLight light, vec3 intersection, vec3 normal)
 {
@@ -76,6 +79,39 @@ vec3 SampleSimpleSpotLight(SimpleSpotLight light, vec3 intersection, vec3 normal
 	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
 	return light.intensity * intensity * light.color * dot(normal, lightDir);
+}
+
+
+vec3 SampleSceneLights(inout uint seed, vec3 intersection, vec3 normal)
+{
+	uint numLights = NumDirectionalLights + NumPointLights + NumSimpleSpotLights;
+	float chance = 1.0 / numLights;
+
+	uint sampledLight = uint(round(Xi(seed) * numLights));
+	if (sampledLight < NumDirectionalLights)
+	{
+		return SampleDirectionalLight(
+			DirectionalLights[sampledLight],
+			intersection,
+			normal
+		);
+	}
+	else if (sampledLight < NumDirectionalLights + NumPointLights)
+	{
+		return SamplePointLight(
+			PointLights[sampledLight - NumDirectionalLights],
+			intersection,
+			normal
+		);
+	}
+	else
+	{
+		return SampleSimpleSpotLight(
+			SimpleSpotLights[sampledLight - NumDirectionalLights - NumPointLights],
+			intersection,
+			normal
+		);
+	}
 }
 
 #endif // LIGHTING_GLSL
