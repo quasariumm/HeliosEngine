@@ -218,6 +218,7 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
 
     file.close();
 
+<<<<<<< Updated upstream
     // Adding a CMake file
     std::filesystem::path projectDataPath = projectPath;
     std::wofstream cmakeFile(projectDataPath.append("CMakeLists.txt"));
@@ -315,6 +316,33 @@ bool ProjectHandler::LoadProject(std::filesystem::path projectPath)
         FreeLibrary(m_projectLibrary);
         std::filesystem::remove(GetProjectLib());
         return false;
+=======
+        m_projectData = ProjectData();
+        m_projectData.projectPath = projectPath.make_preferred();
+
+        std::wifstream file(std::filesystem::path(projectPath.wstring() + L"/Project.gep"));
+        if (!file.is_open()) {
+            DebugLog(LogSeverity::SEVERE, L"Could not open project file");
+            return false;
+        }
+
+        std::wstring line;
+
+        while (std::getline(file, line)) {
+            if (IsToken(line, L"Name"))
+                m_projectData.projectName = TokenValue(line);
+        }
+
+        file.close();
+
+        AssetEditorView::UpdateAssetList();
+
+        if (!ReloadLibrary())
+            return false;
+
+        DebugLog(LogSeverity::DONE, L"Project loaded successfully");
+        return true;
+>>>>>>> Stashed changes
     }
 
     m_project = function();
@@ -383,7 +411,40 @@ bool ProjectHandler::ReloadLibrary()
         DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
         FreeLibrary(m_projectLibrary);
         std::filesystem::remove(GetProjectLib());
+<<<<<<< Updated upstream
         return false;
+=======
+
+        // Loading the code
+        std::filesystem::path libraryPath = m_projectData.projectPath;
+        libraryPath.append(L"cmake-build-debug\\lib" + m_projectData.projectName + L".dll");
+        libraryPath.make_preferred();
+        if (!ForceCopy(libraryPath, GetProjectLib()))
+        {
+            DebugLog(LogSeverity::SEVERE, L"Copying project library file failed. Please restart the editor to prevent corruption");
+            return false;
+        }
+        m_projectLibrary = LoadLibraryW(GetProjectLib().c_str());
+
+        if (!m_projectLibrary) {
+            std::cout << "Could not load the dynamic library: " << GetLastError() << std::endl;
+            DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
+            return false;
+        }
+
+        auto function = reinterpret_cast<ProjectCreateFunc>(GetProcAddress(m_projectLibrary, "GenerateProject"));
+        if (!function) {
+            std::cout << "Could not locate project creator function" << std::endl;
+            DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
+            FreeLibrary(m_projectLibrary);
+            std::filesystem::remove(GetProjectLib());
+            return false;
+        }
+
+        m_project = function();
+
+        return true;
+>>>>>>> Stashed changes
     }
 
     m_project = function();
@@ -433,6 +494,7 @@ std::unordered_map<std::wstring, std::filesystem::path> ProjectHandler::ReadRece
     return recentProjects;
 }
 
+<<<<<<< Updated upstream
 // TODO: There is probably a much better option for this but my 1 AM brain thinks this is fine
 std::wstring ProjectHandler::DefaultSourceFile(const std::wstring& projectName)
 {
@@ -449,6 +511,21 @@ std::wstring ProjectHandler::DefaultSourceFile(const std::wstring& projectName)
     L"// This function is for handling project reloading. It should not be removed!\n"
     L"extern \"C\" __declspec(dllexport) inline EngineProject* GenerateProject() { return new "+projectName+L"(); }";
 }
+=======
+    void ProjectHandler::AddRecentProject(const std::filesystem::path &projectPath, const std::wstring &name) {
+
+        auto recents = ReadRecentProjects();
+        if (recents.contains(name))
+            if (ReadRecentProjects().at(name) == projectPath)
+                return;
+
+        std::wofstream file("RecentProjects.txt");
+        if (!file.is_open())
+            return;
+        file << name << " = " << projectPath.generic_wstring() << std::endl;
+        file.close();
+    }
+>>>>>>> Stashed changes
 
 std::wstring ProjectHandler::DefaultCMakeFile(const std::wstring& projectName)
 {

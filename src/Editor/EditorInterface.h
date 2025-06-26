@@ -29,7 +29,7 @@ public:
 
     static void Initialize(Window* window);
 
-    void DrawAllInterfaces() const;
+    void DrawAllInterfaces();
 
     static void SetMouseEnabled(bool enable = true);
     static void SetKeyboardEnable(bool enable = true);
@@ -37,6 +37,8 @@ public:
 private:
     std::unordered_map<std::wstring, std::unique_ptr<EditorInterface>> m_editorInterfaces = {};
     Window* m_window = nullptr;
+
+    std::unordered_map<std::wstring, std::filesystem::path> m_recentProjects;
 };
 
 #define REGISTER_EDITOR_INTERFACE(TYPE) \

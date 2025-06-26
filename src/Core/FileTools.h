@@ -51,9 +51,94 @@ static bool ForceCopy(const std::filesystem::path& a, const std::filesystem::pat
     }
     if (std::filesystem::exists(b))
         std::filesystem::remove(b);
+
+    std::filesystem::path folderPath = b;
+    std::filesystem::create_directories(folderPath.remove_filename());
     return std::filesystem::copy_file(a, b, std::filesystem::copy_options::overwrite_existing);
 }
 
+<<<<<<< Updated upstream
+=======
+enum class DefaultFileType
+{
+    MAINHEADER,
+    MAINSOURCE,
+    CMAKELISTS,
+    SOURCE_EMPTY_H,
+    SOURCE_EMPTY_C,
+    SOURCE_COMPONENT_H,
+    SOURCE_COMPONENT_C,
+    SOURCE_EDITOR_H,
+    SOURCE_EDITOR_C,
+};
+
+// Thnx Stack overflow person
+// https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string
+    static void ReplaceAll(std::string &str, const std::string &from, const std::string &to) {
+        if (from.empty())
+            return;
+        size_t start_pos = 0;
+        while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+            str.replace(start_pos, from.length(), to);
+            start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+        }
+    }
+
+
+static bool DefaultFile(DefaultFileType type, const std::filesystem::path& targetLocation)
+{
+    // Check if file already exists
+    if (std::filesystem::exists(targetLocation)) {
+        DebugLog(LogSeverity::SEVERE, L"Did not create default file. File already exists");
+        return false;
+    }
+
+    std::filesystem::path defaultFileLocation = std::filesystem::current_path().append("assets/defaults/");
+
+    switch (type)
+    {
+        case DefaultFileType::MAINHEADER:           defaultFileLocation.append("Default_MainHeader.txt"); break;
+        case DefaultFileType::MAINSOURCE:           defaultFileLocation.append("Default_MainSource.txt"); break;
+        case DefaultFileType::CMAKELISTS:           defaultFileLocation.append("Default_CmakeLists.txt"); break;
+        case DefaultFileType::SOURCE_EMPTY_H:       defaultFileLocation.append("Default_EmptyHeader.txt"); break;
+        case DefaultFileType::SOURCE_EMPTY_C:       defaultFileLocation.append("Default_EmptySource.txt"); break;
+        case DefaultFileType::SOURCE_COMPONENT_H:   defaultFileLocation.append("Default_ComponentHeader.txt"); break;
+        case DefaultFileType::SOURCE_COMPONENT_C:   defaultFileLocation.append("Default_ComponentSource.txt"); break;
+        case DefaultFileType::SOURCE_EDITOR_H:      defaultFileLocation.append("Default_EditorHeader.txt"); break;
+        case DefaultFileType::SOURCE_EDITOR_C:      defaultFileLocation.append("Default_EditorSource.txt"); break;
+    }
+
+    std::wstring fileBuffer;
+    std::ifstream file(defaultFileLocation);
+
+    std::string line;
+    while (std::getline(file, line)) {
+        ReplaceAll(line, "{ProjectName}", WStringToUTF8(ProjectHandler::ProjectName()));
+        ReplaceAll(line, "{EnginePath}", WStringToUTF8(EnginePath(true)));
+        std::filesystem::path targetName = targetLocation;
+        ReplaceAll(line, "{FileName}", WStringToUTF8(targetName.replace_extension().filename()));
+
+        fileBuffer.append(STR_TO_WSTR(line + "\n"));
+    }
+
+    file.close();
+
+    std::ofstream resultFile(targetLocation);
+
+    if (!resultFile.is_open())
+    {
+        DebugLog(LogSeverity::SEVERE, L"Did not create default file. Failed to create new file");
+        return false;
+    }
+
+    resultFile << WStringToUTF8(fileBuffer);
+    resultFile.close();
+
+    DebugLog(LogSeverity::DONE, L"Created default file");
+    return true;
+}
+
+>>>>>>> Stashed changes
 }
 
 

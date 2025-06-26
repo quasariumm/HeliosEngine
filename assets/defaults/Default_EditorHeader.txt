@@ -1,0 +1,18 @@
+#pragma once
+
+#include <Engine.h>
+
+using namespace Engine;
+
+class {FileName} final : public EditorInterface
+{
+public:
+    // Creating the editor window
+    {FileName}() : EditorInterface(L"{FileName}") {}
+
+    // Draw the window
+    void DrawInterface() override;
+};
+
+// Register the editor window
+REGISTER_EDITOR_INTERFACE({FileName});

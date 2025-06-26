@@ -26,6 +26,7 @@ public:
 
     static std::filesystem::path m_currentPath;
     static std::filesystem::path m_selectedAsset;
+    static std::filesystem::path m_relativePath;
 
     static std::vector<std::filesystem::path> m_assetList;
     static std::vector<std::filesystem::path> m_folderList;

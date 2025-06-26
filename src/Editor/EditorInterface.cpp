@@ -32,8 +32,11 @@ void EditorInterfaceManager::Initialize(Window* window)
 	io.Fonts->Build();
 }
 
-void EditorInterfaceManager::DrawAllInterfaces() const
+void EditorInterfaceManager::DrawAllInterfaces()
 {
+	if (m_recentProjects.empty())
+		m_recentProjects = ProjectHandler::ReadRecentProjects();
+
     // Primary editor windows
     ProjectHandler::ProjectWindows();
     EditorSettings::DrawWindow();
@@ -67,11 +70,15 @@ void EditorInterfaceManager::DrawAllInterfaces() const
 					ProjectHandler::ShowProjectCreator(true);
 				if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project", "CTRL+O"))
 					ProjectHandler::ShowProjectSelector(true);
+<<<<<<< Updated upstream
 				if (ImGui::BeginMenu(ICON_CLOCK" Open recent"))
+=======
+				if (ImGui::BeginMenu(ICON_CLOCK" Open recent", !m_recentProjects.empty()))
+>>>>>>> Stashed changes
 				{
 					static ImGuiInputFlags recentsInputFlags = ImGuiInputFlags_RouteFocused;
 					int32_t i = 1;
-					for (auto& recent : ProjectHandler::ReadRecentProjects())
+					for (auto& recent : m_recentProjects)
 					{
 						if (i <= 10 && ImGui::Shortcut(ImGuiKey_0 + (i % 10), recentsInputFlags))
 							ProjectHandler::LoadProject(recent.second);
