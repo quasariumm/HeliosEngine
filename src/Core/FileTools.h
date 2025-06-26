@@ -53,6 +53,8 @@ static bool ForceCopy(const std::filesystem::path& a, const std::filesystem::pat
     }
     if (std::filesystem::exists(b))
         std::filesystem::remove(b);
+    std::filesystem::path folderPath = b;
+    std::filesystem::create_directories(folderPath.remove_filename());
     return std::filesystem::copy_file(a, b, std::filesystem::copy_options::overwrite_existing);
 }
 
