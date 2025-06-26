@@ -11,4 +11,7 @@
 #include "../src/Core/IconDefines.h"
 #include "../src/Editor/EditorInterface.h"
 #include <imgui.h>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

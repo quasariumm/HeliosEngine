@@ -219,6 +219,7 @@ bool ProjectHandler::CreateProject(std::filesystem::path& projectPath, const Pro
     file.close();
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     // Adding a CMake file
     std::filesystem::path projectDataPath = projectPath;
     std::wofstream cmakeFile(projectDataPath.append("CMakeLists.txt"));
@@ -317,6 +318,8 @@ bool ProjectHandler::LoadProject(std::filesystem::path projectPath)
         std::filesystem::remove(GetProjectLib());
         return false;
 =======
+=======
+>>>>>>> Stashed changes
         m_projectData = ProjectData();
         m_projectData.projectPath = projectPath.make_preferred();
 

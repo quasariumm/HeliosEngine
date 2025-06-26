@@ -71,7 +71,11 @@ void EditorInterfaceManager::DrawAllInterfaces()
 				if (ImGui::MenuItem(ICON_UPLOAD_BOX" Open project", "CTRL+O"))
 					ProjectHandler::ShowProjectSelector(true);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 				if (ImGui::BeginMenu(ICON_CLOCK" Open recent"))
+=======
+				if (ImGui::BeginMenu(ICON_CLOCK" Open recent", !m_recentProjects.empty()))
+>>>>>>> Stashed changes
 =======
 				if (ImGui::BeginMenu(ICON_CLOCK" Open recent", !m_recentProjects.empty()))
 >>>>>>> Stashed changes
