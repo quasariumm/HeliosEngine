@@ -14,7 +14,7 @@ struct ProjectData
     std::filesystem::path projectPath = "";
 };
 
-static std::wstring GetTmpFile(const std::wstring& fileName) { return std::filesystem::current_path().append(L"launcher\\Tmp").append(fileName); }
+static std::wstring GetTmpFile(const std::wstring& fileName) { return std::filesystem::current_path().append(L"launcher\\cmake-build-debug").append(fileName); }
 static std::wstring GetProjectLib() { return GetTmpFile(L"ProjLib.dll"); }
 
 /**
