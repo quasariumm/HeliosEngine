@@ -81,7 +81,7 @@ public:
      * @brief Displays all the properties of the component
      * @throws std::runtime_error When a non-defaulted type does not have a custom display function set
      */
-    void DisplayProperties() const
+    virtual void DisplayProperties() const
     {
         for (const ComponentProperty& p : m_properties)
         {
