@@ -10,6 +10,7 @@
 namespace Engine
 {
 std::filesystem::path AssetEditorView::m_currentPath = "";
+std::filesystem::path AssetEditorView::m_relativePath = "";
 std::filesystem::path AssetEditorView::m_selectedAsset = "";
 std::vector<std::filesystem::path> AssetEditorView::m_folderList = {};
 std::vector<std::filesystem::path> AssetEditorView::m_assetList = {};
@@ -36,7 +37,7 @@ void AssetEditorView::DrawAssetView()
         }
 
         // Show back arrow. Using relative path because there is sometimes still a / on the end
-        if (relative(m_currentPath, ProjectHandler::ProjectFolder()) == ".")
+        if (m_relativePath == ".")
         {
             ImGui::BeginDisabled();
             ImGui::MenuItem(ICON_ARROW_UP_THICK);
@@ -69,7 +70,7 @@ void AssetEditorView::DrawAssetView()
 
         // Show current folder path
         std::wstring pathString = STR_TO_WSTR(ICON_FOLDER) + L" " + ProjectHandler::ProjectName() + L"\\";
-        pathString.append(relative(m_currentPath, ProjectHandler::ProjectFolder()).wstring());
+        pathString.append(m_relativePath.wstring());
         ImGui::Text(WStringToUTF8(pathString).c_str());
 
         ImGui::EndMenuBar();
@@ -182,6 +183,8 @@ void AssetEditorView::UpdateAssetList()
             m_folderList.push_back(p.path());
         else
             m_assetList.push_back(p.path());
+
+    m_relativePath = relative(m_currentPath, ProjectHandler::ProjectFolder());
 }
 
 std::string AssetEditorView::AssetIcon(const std::filesystem::path& asset)

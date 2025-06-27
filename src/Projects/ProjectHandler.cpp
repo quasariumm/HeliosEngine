@@ -306,21 +306,25 @@ namespace Engine {
         std::filesystem::remove(GetProjectLib());
 
         // Loading the code
-        const std::filesystem::path libraryPath =
-                m_projectData.projectPath.wstring() + L"\\cmake-build-debug\\lib" + m_projectData.projectName + L".dll";
-        ForceCopy(libraryPath, GetProjectLib());
+        std::filesystem::path libraryPath = m_projectData.projectPath;
+        libraryPath.append(L"cmake-build-debug/lib" + m_projectData.projectName + L".dll").make_preferred();
+        if (!ForceCopy(libraryPath, GetProjectLib()))
+        {
+            DebugLog(LogSeverity::SEVERE, L"Copying project library failed. Please restart the editor to prevent corruption");
+            return false;
+        }
         m_projectLibrary = LoadLibraryW(GetProjectLib().c_str());
 
         if (!m_projectLibrary) {
             std::cout << "Could not load the dynamic library: " << GetLastError() << std::endl;
-            DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
+            DebugLog(LogSeverity::SEVERE, L"Loading project library failed. Please restart the editor to prevent corruption");
             return false;
         }
 
         auto function = reinterpret_cast<ProjectCreateFunc>(GetProcAddress(m_projectLibrary, "GenerateProject"));
         if (!function) {
             std::cout << "Could not locate project creator function" << std::endl;
-            DebugLog(LogSeverity::SEVERE, L"Reloading project failed. Please restart the editor to prevent corruption");
+            DebugLog(LogSeverity::SEVERE, L"Recompiling project failed. Please restart the editor to prevent corruption");
             FreeLibrary(m_projectLibrary);
             std::filesystem::remove(GetProjectLib());
             return false;
@@ -345,7 +349,13 @@ namespace Engine {
     }
 
     void ProjectHandler::AddRecentProject(const std::filesystem::path &projectPath, const std::wstring &name) {
-        std::wofstream file("RecentProjects.txt", std::ios_base::app);
+        auto recents = ReadRecentProjects();
+        if (recents.contains(name))
+            if (ReadRecentProjects().at(name) == projectPath)
+                return;
+
+        std::wofstream file("RecentProjects.txt");
+
         if (!file.is_open())
             return;
         file << name << " = " << projectPath.generic_wstring() << std::endl;
