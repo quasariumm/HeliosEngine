@@ -125,11 +125,15 @@ void SceneEditor::ObjectEditor()
     if (ImGui::CollapsingHeader("Transform"))
         selectedObject->GetTransform()->TransformControllerUI();
 
+	uint32_t idCounter = 0;
     for (const std::unique_ptr<Component>& c : selectedObject->GetComponentList())
-        if (ImGui::CollapsingHeader(WStringToUTF8(c->GetName()).c_str()))
-            c->DisplayProperties();
+    {
+	    if (ImGui::CollapsingHeader(WStringToUTF8(c->GetName() + L"##" + std::to_wstring(idCounter)).c_str()))
+	    	c->DisplayProperties();
+    	idCounter++;
+    }
 
-    ImGui::Separator();
+	ImGui::Separator();
 
     if (ImGui::Button("Add component"))
         ImGui::OpenPopup("Select component");
