@@ -3,6 +3,8 @@ project(Engine)
 
 set(CMAKE_CXX_STANDARD 20)
 
+add_subdirectory(launcher)
+
 file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h lib/glad/src/glad.c)
 file(GLOB LIBS CONFIGURE_DEPENDS
         extern/imgui/*.cpp
