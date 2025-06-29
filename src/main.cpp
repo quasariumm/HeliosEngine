@@ -26,6 +26,8 @@ extern "C" {
 }
 #endif
 
+
+static bool hasWarnedOfBrokenShader = false;
 void GLAPIENTRY MessageCallback(
 	GLenum source,
 	GLenum type,
@@ -38,6 +40,21 @@ void GLAPIENTRY MessageCallback(
 {
 	if (severity != GL_DEBUG_SEVERITY_HIGH)
 		return;
+
+	if (strcmp(message, "GL_INVALID_OPERATION error generated. <program> has not been linked, or is not a program object.") == 0
+		|| strcmp(message, "GL_INVALID_OPERATION error generated. <program> object is not successfully linked, or is not a program object.") == 0
+		|| strcmp(message, "GL_INVALID_OPERATION error generated. No active program.") == 0
+		|| strcmp(message, "GL_INVALID_OPERATION error generated. No active compute shader.") == 0
+		|| strcmp(message, "GL_INVALID_VALUE error generated. Handle does not refer to a shader or program object.") == 0)
+	{
+		if (!hasWarnedOfBrokenShader)
+		{
+			hasWarnedOfBrokenShader = true;
+			std::wcerr << ANSI_ERR << "Shader is broken!!!" << std::endl;
+		}
+		return;
+	}
+
 	std::wcerr << ANSI_ERR <<
 		"GL CALLBACK: " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "")
 	    << "\n\t\ttype = " << GLDebugTypeToString(type) << ", severity = " << GLSeverityToString(severity)
