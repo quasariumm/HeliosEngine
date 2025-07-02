@@ -128,8 +128,10 @@ void SceneEditor::ObjectEditor()
 	uint32_t idCounter = 0;
     for (const std::unique_ptr<Component>& c : selectedObject->GetComponentList())
     {
-	    if (ImGui::CollapsingHeader(WStringToUTF8(c->GetName() + L"##" + std::to_wstring(idCounter)).c_str()))
+    	ImGui::PushID(&idCounter);
+	    if (ImGui::CollapsingHeader(WStringToUTF8(c->GetName()).c_str()))
 	    	c->DisplayProperties();
+    	ImGui::PopID();
     	idCounter++;
     }
 
