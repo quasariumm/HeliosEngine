@@ -1,5 +1,6 @@
 #include "ObjectRenderer.h"
 
+#include "Components/Light.h"
 #include "Components/Material.h"
 
 
@@ -41,6 +42,54 @@ void ObjectRenderer::SendObjectData()
     }
 
      m_computeShader->SetInt("NumSpheres", sphereIdx);
+
+	uint8_t pointIdx = 0;
+	uint8_t directionalIdx = 0;
+	uint8_t simpleSpotIdx = 0;
+	uint8_t iesIdx = 0;
+
+	for (const Light* light : lights)
+	{
+		std::string baseName;
+
+		switch (light->lightType)
+		{
+		case LightType::POINT:
+			baseName = "PointLights[" + std::to_string(pointIdx) + "]";
+			m_computeShader->SetVec3(baseName + ".position", light->position);
+			m_computeShader->SetVec3(baseName + ".color", light->color);
+			m_computeShader->SetFloat(baseName + ".intensity", light->intensity);
+			pointIdx++;
+			break;
+		case LightType::DIRECTIONAL:
+			baseName = "DirectionalLights[" + std::to_string(pointIdx) + "]";
+			m_computeShader->SetVec3(baseName + ".color", light->color);
+			m_computeShader->SetVec3(baseName + ".direction", light->direction);
+			m_computeShader->SetFloat(baseName + ".intensity", light->intensity);
+			directionalIdx++;
+			break;
+		case LightType::SIMPLE_SPOT:
+			baseName = "SimpleSpotLights[" + std::to_string(pointIdx) + "]";
+			m_computeShader->SetVec3(baseName + ".position", light->position);
+			m_computeShader->SetVec3(baseName + ".color", light->color);
+			m_computeShader->SetVec3(baseName + ".direction", light->direction);
+			m_computeShader->SetFloat(baseName + ".intensity", light->intensity);
+			m_computeShader->SetFloat(baseName + ".innerCutOff", light->innerCutOff);
+			m_computeShader->SetFloat(baseName + ".outerCutOff", light->outerCutOff);
+			simpleSpotIdx++;
+			break;
+		case LightType::IES_SPOT:
+			// TODO
+			iesIdx++;
+			break;
+		default:
+			break;
+		}
+	}
+
+	m_computeShader->SetUInt("NumPointLights", pointIdx);
+	m_computeShader->SetUInt("NumDirectionalLights", directionalIdx);
+	m_computeShader->SetUInt("NumSimpleSpotLights", simpleSpotIdx);
 }
 
 void ObjectRenderer::RegisterModelInstance(Transform* transform, uint32_t modelUID)

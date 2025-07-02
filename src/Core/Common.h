@@ -13,6 +13,7 @@
 namespace Engine
 {
 class Material;
+class Light;
 }
 
 
@@ -28,6 +29,7 @@ static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
 
 static std::unordered_set<std::string> loadedShaders;
 static std::vector<Engine::Material*> materials;
+static std::vector<Engine::Light*> lights;
 
 /*
  * Defines

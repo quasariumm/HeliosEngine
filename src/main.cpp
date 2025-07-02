@@ -7,6 +7,7 @@
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"
 #include "Components/Sphere.h"
 #include "Components/Material.h"
+#include "Components/Light.h"
 #include "Core/Window.h"
 #include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"
@@ -161,14 +162,6 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	{
 		camera.MouseMove(diff);
 	});
-
-	// Force load scene.
-	// TODO: REMOVE BEFORE PUSHING
-	// std::filesystem::path projectPath("D:/Patrick/Documents/EngineProjects/Test");
-	// Engine::ProjectHandler::LoadProject(projectPath);
-	// std::filesystem::path sceneFile("D:/Patrick/Documents/EngineProjects/Test/Scene.scn");
-	// Engine::SceneLoader::LoadFromFile(Engine::SceneEditor::m_targetScene, sceneFile);
-	// Engine::SceneEditor::m_sceneFile = sceneFile;
 
     while (!window->ShouldClose())
     {

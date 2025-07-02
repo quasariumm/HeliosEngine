@@ -13,6 +13,7 @@ struct alignas(32) ComponentProperty
     std::wstring type;
     const std::type_info& rawType;
     void* value;
+	size_t typeSize;
     void (*displayFunc)(void*) = nullptr;
 };
 
@@ -57,7 +58,7 @@ public:
     void AssignProperty(const std::wstring& name, T* value, void (*displayFunc)(void*) = nullptr)
     {
         const std::string demangled = Demangle(typeid(T).name());
-        m_properties.emplace_back(name, std::wstring(demangled.begin(), demangled.end()), typeid(T), value,
+        m_properties.emplace_back(name, std::wstring(demangled.begin(), demangled.end()), typeid(T), value, sizeof(*value),
                                   displayFunc);
     }
 
@@ -78,10 +79,24 @@ public:
 
 
     /**
+     * @brief Sets the value of a property from raw data
+     * @warning This function is NOT memory-safe. PLEASE USE THIS FUNCTION WITH CAUTION
+     * @param propertyName The name of the property
+     * @param value The value you want it to have
+     */
+    void SetPropertyValue(const std::wstring& propertyName, const void* value, const size_t size)
+    {
+    	for (const ComponentProperty& p : m_properties)
+    		if (p.name == propertyName)
+    			memcpy(p.value, value, size);
+    }
+
+
+    /**
      * @brief Displays all the properties of the component
      * @throws std::runtime_error When a non-defaulted type does not have a custom display function set
      */
-    virtual void DisplayProperties() const
+    virtual void DisplayProperties()
     {
         for (const ComponentProperty& p : m_properties)
         {

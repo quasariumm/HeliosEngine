@@ -20,16 +20,13 @@ vec3 SampleDirectionalLight(DirectionalLight light, vec3 intersection, vec3 norm
 {
 	float overlap = dot(-light.direction, normal);
 	if (overlap < 0.0)
-	{
 		return vec3(0.0);
-	}
 	return light.color * light.intensity * overlap;
 }
 
 #define MAX_DIR_LIGHTS 32
 uniform DirectionalLight DirectionalLights[MAX_DIR_LIGHTS];
 uniform uint NumDirectionalLights = 0;
-const DirectionalLight sun = DirectionalLight(vec3(0.9), normalize(vec3(1.0, -1.0, 0.0)), 1.0);
 
 /*
 	PointLight
@@ -50,6 +47,8 @@ vec3 SamplePointLight(PointLight light, vec3 intersection, vec3 normal)
 {
 	float diff = length(light.position - intersection);
 	float overlap = dot(normal, (light.position - intersection) / diff);
+	if (overlap < 0.0)
+		return vec3(0.0);
 	return light.intensity * light.color * (1.0 / (diff * diff)) * overlap;
 }
 
@@ -75,6 +74,10 @@ vec3 SampleSimpleSpotLight(SimpleSpotLight light, vec3 intersection, vec3 normal
 {
 	vec3 lightDir = normalize(light.position - intersection);
 	float theta = dot(lightDir, -light.direction);
+
+	if (theta < 0.0)
+		return vec3(0.0);
+
 	float epsilon = (light.innerCutOff - light.outerCutOff);
 	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
@@ -82,35 +85,35 @@ vec3 SampleSimpleSpotLight(SimpleSpotLight light, vec3 intersection, vec3 normal
 }
 
 
-vec3 SampleSceneLights(inout uint seed, vec3 intersection, vec3 normal)
+// Returns lightVector in first column, light in second
+mat2x3 SampleSceneLights(inout uint seed, vec3 intersection, vec3 normal)
 {
 	uint numLights = NumDirectionalLights + NumPointLights + NumSimpleSpotLights;
-	float chance = 1.0 / numLights;
 
-	uint sampledLight = uint(round(Xi(seed) * numLights));
+	if (numLights == 0)
+		return mat2x3(vec3(1.0, 0.0, 0.0), vec3(0.0));
+
+	uint sampledLight = uint(floor(Xi(seed) * numLights));
 	if (sampledLight < NumDirectionalLights)
 	{
-		return SampleDirectionalLight(
-			DirectionalLights[sampledLight],
-			intersection,
-			normal
-		);
+		DirectionalLight light = DirectionalLights[sampledLight];
+		return mat2x3(normalize(-light.direction), float(numLights) * SampleDirectionalLight(light, intersection, normal));
 	}
 	else if (sampledLight < NumDirectionalLights + NumPointLights)
 	{
-		return SamplePointLight(
-			PointLights[sampledLight - NumDirectionalLights],
-			intersection,
-			normal
-		);
+		PointLight light = PointLights[sampledLight - NumDirectionalLights];
+		return mat2x3(normalize(light.position - intersection), float(numLights) * SamplePointLight(light, intersection, normal));
+	}
+	else if (sampledLight < NumDirectionalLights + NumPointLights + NumSimpleSpotLights)
+	{
+		// TODO: Fix this not compiling
+//		SimpleSpotLight light = SimpleSpotLights[sampledLight - NumDirectionalLights - NumPointLights];
+//		return mat2x3(normalize(light.position - intersection), float(numLights) * SampleSimpleSpotLight(light, intersection, normal));
+		return mat2x3(0.0);
 	}
 	else
 	{
-		return SampleSimpleSpotLight(
-			SimpleSpotLights[sampledLight - NumDirectionalLights - NumPointLights],
-			intersection,
-			normal
-		);
+		return mat2x3(0.0);
 	}
 }
 
