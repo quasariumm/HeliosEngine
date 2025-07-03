@@ -89,5 +89,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_USE_WCHAR32
 #include <imgui.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+#include <imgui/backends/imgui_impl_opengl3.h>
 
 #endif // PCH_CXX_H_

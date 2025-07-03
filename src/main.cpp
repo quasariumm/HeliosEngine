@@ -1,7 +1,5 @@
 #include "main.h"
 #include <glad/glad.h>
-#include <imgui/backends/imgui_impl_glfw.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
 
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_Texture2D.h"

@@ -1,5 +1,4 @@
 #include "ProjectHandler.h"
-#include "imgui.h"
 #include "Debugger/Debugger.h"
 
 #include <nfd.hpp>

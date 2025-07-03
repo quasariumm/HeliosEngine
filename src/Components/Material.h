@@ -1,7 +1,5 @@
 #pragma once
 
-#include <imgui/imgui.h>
-
 #include "Component.h"
 
 namespace Engine
