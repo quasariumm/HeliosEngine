@@ -55,7 +55,6 @@ vec3 Trace(Ray ray, uint seed)
 			vec3 emittance = info.material.emissionColor * info.material.emissionStrength;
 
 			mat2x3 sampledLight = SampleSceneLights(seed, info.hitPoint, info.normal);
-			return vec3(sampledLight[0][0]);
 			info.lightVector = sampledLight[0];
 			vec3 light = sampledLight[1];
 
