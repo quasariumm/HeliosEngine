@@ -33,8 +33,6 @@ public:
 		AssignProperty(L"PBR Roughness", &m_PBR_Roughness);
 		AssignProperty(L"PBR Metallic", &m_PBR_Metallic);
 		AssignProperty(L"PBR Reflectance", &m_PBR_Reflectance);
-
-		m_properties.parent = this;
 	}
 
 	void Init() override
@@ -50,7 +48,6 @@ public:
 		uint8_t diffuse : 1 = 1u;
 		uint8_t glossy : 1 = 1u;
 		uint8_t specular : 1 = 1u;
-		Material* parent = nullptr;
 	} m_properties;
 
 	struct MicrofacetModel
@@ -60,6 +57,7 @@ public:
 		uint8_t ggx_aniso: 1 = 0u;
 		uint8_t blinnphong: 1 = 0u;
 		uint8_t selector : 4 = 0u; /* for use with Dear ImGUI */
+		char padding[3]{0};
 		float alphaX = 0.f; /* For use with anisotropic GGX */
 		float alphaY = 0.f; /* For use with anisotropic GGX */
 	} m_microfacetModel;
@@ -86,8 +84,10 @@ static void DisplayMaterialProperties(void* data)
 {
 	auto* mat = (Material::MaterialProperties*)data;
 
-	// TODO: Make the material idx display sane
-	const int idx = std::distance(materials.begin(), std::ranges::find(materials, mat->parent));
+	static Material offsetMaterial = {};
+	static size_t propertiesOffset = (size_t)&offsetMaterial.m_properties - (size_t)&offsetMaterial;
+
+	const int idx = std::distance(materials.begin(), std::ranges::find(materials, (Material*)((intptr_t)mat - (intptr_t)propertiesOffset)));
 	ImGui::Text("Material idx: %i", idx);
 	ImGui::Separator();
 
