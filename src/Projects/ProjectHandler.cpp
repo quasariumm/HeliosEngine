@@ -310,21 +310,21 @@ namespace Engine {
         libraryPath.append(L"cmake-build-debug/lib" + m_projectData.projectName + L".dll").make_preferred();
         if (!ForceCopy(libraryPath, GetProjectLib()))
         {
-            DebugLog(LogSeverity::SEVERE, L"Copying project library failed. Please restart the editor to prevent corruption");
+            DebugLog(LogSeverity::SEVERE, L"Copying project library failed. Please rebuild project from source manually");
             return false;
         }
         m_projectLibrary = LoadLibraryW(GetProjectLib().c_str());
 
         if (!m_projectLibrary) {
             std::cout << "Could not load the dynamic library: " << GetLastError() << std::endl;
-            DebugLog(LogSeverity::SEVERE, L"Loading project library failed. Please restart the editor to prevent corruption");
+            DebugLog(LogSeverity::SEVERE, L"Loading project library failed. Please check console for more details");
             return false;
         }
 
         auto function = reinterpret_cast<ProjectCreateFunc>(GetProcAddress(m_projectLibrary, "GenerateProject"));
         if (!function) {
             std::cout << "Could not locate project creator function" << std::endl;
-            DebugLog(LogSeverity::SEVERE, L"Recompiling project failed. Please restart the editor to prevent corruption");
+            DebugLog(LogSeverity::SEVERE, L"Creating project instance failed. Please check console for more details");
             FreeLibrary(m_projectLibrary);
             std::filesystem::remove(GetProjectLib());
             return false;
