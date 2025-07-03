@@ -24,27 +24,22 @@ RayHitInfo RaySphere(Ray ray, Sphere sphere)
 	RayHitInfo hitInfo = defaultHitInfo;
 	hitInfo.material = sphere.material;
 
-	vec3 difference = sphere.center - ray.origin;
-	float a = dot(ray.dir, ray.dir);
-	float b = -2.0 * dot(difference, ray.dir);
-	float c = dot(difference, difference) - sphere.radius * sphere.radius;
-	float disc = b*b - 4.0*a*c;
-	if (disc < 0.0)
-	{
-		// Ray truly misses the sphere
+	vec3 oc = ray.origin - sphere.center;
+	float b = dot(oc, ray.dir);
+	float d = b * b - (dot(oc, oc) - sphere.radius * sphere.radius);
+
+	if (d <= 0.0)
 		return hitInfo;
-	}
 
-	float sqrtDisc = sqrt(disc);
-	// Distance to nearest intersection point (from quadratic formula)
-	float dst = (-b - sqrtDisc) / (2.0 * a);
+	float sqrt_d = sqrt(d);
+	float t1 = -b - sqrt_d;
+	float t2 = -b + sqrt_d;
 
-	// Ignore intersections that occur behind the ray
-	if (dst >= 0.0)
+	if (t1 >= 0.0)
 	{
 		hitInfo.didHit = true;
-		hitInfo.dst = dst;
-		hitInfo.hitPoint = ray.origin + ray.dir * dst;
+		hitInfo.dst = t1;
+		hitInfo.hitPoint = ray.origin + ray.dir * t1;
 		hitInfo.normal = normalize(hitInfo.hitPoint - sphere.center);
 
 		// Calculate tangent vector
@@ -56,13 +51,11 @@ RayHitInfo RaySphere(Ray ray, Sphere sphere)
 		return hitInfo;
 	}
 
-	float dst2 = (-b + sqrtDisc) / (2.0 * a);
-
-	if (dst2 >= 0.0)
+	if (t2 >= 0.0 && t1 <= 0)
 	{
 		hitInfo.didHit = true;
-		hitInfo.dst = dst2;
-		hitInfo.hitPoint = ray.origin + ray.dir * dst2;
+		hitInfo.dst = t2;
+		hitInfo.hitPoint = ray.origin + ray.dir * t2;
 		hitInfo.normal = normalize(hitInfo.hitPoint - sphere.center);
 
 		// Calculate tangent vector
