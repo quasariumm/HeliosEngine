@@ -66,16 +66,31 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
 
                 if (type == STR_TO_WSTR(Demangle(typeid(bool).name())))
                     newComponent->SetPropertyValue(name, value != L"0");
-                if (type == STR_TO_WSTR(Demangle(typeid(int).name())))
+                else if (type == STR_TO_WSTR(Demangle(typeid(int).name())))
                     newComponent->SetPropertyValue(name, std::stoi(value));
-                if (type == STR_TO_WSTR(Demangle(typeid(float).name())))
+                else if (type == STR_TO_WSTR(Demangle(typeid(float).name())))
                     newComponent->SetPropertyValue(name, std::stof(value));
-                if (type == STR_TO_WSTR(Demangle(typeid(vec2).name())))
+                else if (type == STR_TO_WSTR(Demangle(typeid(vec2).name())))
                     newComponent->SetPropertyValue(name, ParseVec2(value));
-                if (type == STR_TO_WSTR(Demangle(typeid(vec3).name())))
+                else if (type == STR_TO_WSTR(Demangle(typeid(vec3).name())))
                     newComponent->SetPropertyValue(name, ParseVec3(value));
-                if (type == STR_TO_WSTR(Demangle(typeid(std::string).name())))
+                else if (type == STR_TO_WSTR(Demangle(typeid(std::string).name())))
                     newComponent->SetPropertyValue(name, value);
+            	else
+            	{
+            		// Trim the value of any whitespace
+            		value.erase(std::ranges::remove_if(value, isspace).begin(), value.end());
+            		const wchar_t* cstr = value.c_str();
+            		size_t toCopyByteSize = value.length();
+            		char* rawData = (char*)malloc(toCopyByteSize);
+		            for (int i = 0; i < toCopyByteSize; ++i)
+		            {
+		            	// Load one byte (left 4 bits from the first character, right 4 from the next character)
+			            rawData[i] = (char)((cstr[2 * i] & 0xf0) + ((cstr[2 * i + 1] & 0xf0) >> 4));
+		            }
+            		newComponent->SetPropertyValue(name, rawData, value.length());
+            		free(rawData);
+            	}
             }
             break;
         }
@@ -88,6 +103,26 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
     DebugLog(LogSeverity::DONE, L"Scene was successfully loaded");
 }
 
+uint8_t GetCharOffset(const uint8_t c)
+{
+	// Because some characters are control characters, they might cut off the file at a certain point.
+	// Hence, we need to set some offsets to stop this from happening
+	switch (c)
+	{
+	case 0x00:
+	case 0xa0:
+		return 5;
+	case 0x10:
+	case 0x20:
+	case 0x90:
+		return 1;
+	case 0x80:
+		return 8;
+	default:
+		return 0;
+	}
+}
+
 void SceneLoader::SaveToFile(Scene* scene, const std::filesystem::path& fileName)
 {
     if (!ProjectHandler::ProjectLoaded())
@@ -97,7 +132,7 @@ void SceneLoader::SaveToFile(Scene* scene, const std::filesystem::path& fileName
     }
 
     std::wofstream file;
-    file.open(fileName, std::ofstream::trunc);
+    file.open(fileName, std::ios::trunc);
     if (!file.is_open())
     {
         DebugLog(LogSeverity::SEVERE, L"Failed to create or open scene file");
@@ -120,11 +155,29 @@ void SceneLoader::SaveToFile(Scene* scene, const std::filesystem::path& fileName
             {
                 file << "Property = " << p.name << " : " << p.type << " => ";
                 if (p.rawType == typeid(bool)) file << *(bool*)p.value;
-                if (p.rawType == typeid(int)) file << std::to_wstring(*(int*)p.value);
-                if (p.rawType == typeid(float)) file << std::to_wstring(*(float*)p.value);
-                if (p.rawType == typeid(vec2)) file << *(vec2*)p.value;
-                if (p.rawType == typeid(vec3)) file << *(vec3*)p.value;
-                if (p.rawType == typeid(std::string)) file << *(std::wstring*)p.value;
+                else if (p.rawType == typeid(int)) file << std::to_wstring(*(int*)p.value);
+                else if (p.rawType == typeid(float)) file << std::to_wstring(*(float*)p.value);
+                else if (p.rawType == typeid(vec2)) file << *(vec2*)p.value;
+                else if (p.rawType == typeid(vec3)) file << *(vec3*)p.value;
+                else if (p.rawType == typeid(std::string)) file << *(std::wstring*)p.value;
+            	else
+            	{
+            		// Copy raw data
+            		const auto* valueData = static_cast<const unsigned char*>(p.value);
+            		std::wstring out = L"";
+		            for (int i = 0; i < p.typeSize; ++i)
+		            {
+		            	// Because of the control characters, we store on byte of value data in two.
+		            	// We store the left 4 bits in one byte, the right 4 in another.
+		            	uint8_t BE = (uint8_t)(valueData[i] & 0xf0);
+		            	uint8_t BEOffset = GetCharOffset(BE);
+		            	uint8_t LE = (uint8_t)(((valueData[i] & 0x0f) << 4) & 0xff);
+		            	uint8_t LEOffset = GetCharOffset(LE);
+			            out += static_cast<wchar_t>( BE + BEOffset );
+			            out += static_cast<wchar_t>( LE + LEOffset );
+		            }
+            		file << out;
+            	}
                 file << std::endl;
             }
         }
