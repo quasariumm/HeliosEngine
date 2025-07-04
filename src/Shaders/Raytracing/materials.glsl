@@ -7,45 +7,6 @@
 #include "/Engine/Raytracing/microfacet.glsl"
 
 /*
-	Houses material-related functions
-*/
-
-#define MATERIAL_REFLECTION 	1
-#define MATERIAL_MICROFACET		2
-#define MATERIAL_TRANSMISSION 	4
-#define MATERIAL_DIFFUSE 		8
-#define MATERIAL_GLOSSY 		16
-#define MATERIAL_SPECULAR 		32
-
-#define MATERIAL_DEFAULT 		MATERIAL_REFLECTION | MATERIAL_TRANSMISSION | MATERIAL_DIFFUSE | MATERIAL_GLOSSY | MATERIAL_SPECULAR// | MATERIAL_MICROFACET | MICROFACET_BECKMANN
-
-const RayTracingMaterial defaultMaterial = RayTracingMaterial(
-	MATERIAL_DEFAULT, 		// type
-	vec3(0.0), vec3(0.0), 	// albedo
-	0.0, 0.0, 0.0, 			// specular parameters
-	vec3(0.0), 0.0, 		// emission
-	0.0, 1.0, 				// transmission/dielectric
-	0.3, 0.3, 0.3,			// PBR
-	0.0, 0.0				// Anisotropic alphas
-);
-
-/*
-	This goes in here for dependecy reasons
-*/
-struct RayHitInfo
-{
-	bool didHit;
-	float dst;
-	vec3 hitPoint;
-	vec3 normal;
-	vec3 tangent;
-	vec3 lightVector;
-	RayTracingMaterial material;
-};
-
-const RayHitInfo defaultHitInfo = RayHitInfo( false, 1e30, vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), defaultMaterial );
-
-/*
 	Bounces
 */
 
@@ -112,7 +73,7 @@ struct BRDFInfo
 };
 
 // These functions are combined for the reason that the same values need to be calculated eitherway
-vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint seed, RayHitInfo info)
+vec3 GetBRDFAndBounce(inout Ray ray, inout uint seed)
 {
 	BRDFInfo diffuse 		= BRDFInfo(0.0, vec3(0.0), vec3(0.0));
 	BRDFInfo specular 		= BRDFInfo(0.0, vec3(0.0), vec3(0.0));
@@ -120,11 +81,13 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 
 	bool glassReflect = false;
 
+	RayTracingMaterial material = ray.hit.material;
+
 	if ((material.type & MATERIAL_DIFFUSE) != 0)
 	{
 		// Direction
 		if ((material.type & MATERIAL_REFLECTION) != 0)
-			diffuse.direction = LambertianBounce(seed, info.normal);
+			diffuse.direction = LambertianBounce(seed, ray.hit.normal);
 
 		if ((material.type & MATERIAL_MICROFACET) != 0)
 		{
@@ -136,7 +99,7 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 				material.specularColor,
 				material.PBR_Metallic
 			);
-			vec3 F = FresnelSchlick(abs(-dot(info.normal, ray.dir)), F0);
+			vec3 F = FresnelSchlick(abs(-dot(ray.hit.normal, ray.dir)), F0);
 			diffuse.BRDF = (1.0 - F) * (1.0 - material.PBR_Metallic) * material.diffuseColor * INVPI;
 		}
 		else
@@ -151,20 +114,20 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 	{
 		// Direction
 		if ((material.type & MATERIAL_REFLECTION) != 0)
-			specular.direction = Reflect(-ray.dir, info.normal);
+			specular.direction = Reflect(-ray.dir, ray.hit.normal);
 
 		if ((material.type & MATERIAL_MICROFACET) != 0)
 		{
 			specular.factor = 1.0 - material.PBR_Roughness;
-			specular.BRDF = MicrofacetBRDF(material, info.normal, info.tangent, -ray.dir, info.lightVector);
+			specular.BRDF = MicrofacetBRDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
 		}
 		else
 		{
 			specular.factor = material.specularity;
 			// BRDF
 			// https://www.cs.cmu.edu/afs/cs/academic/class/15462-f09/www/lec/lec8.pdf
-			vec3 H = normalize(info.lightVector - ray.dir);
-			float overlap = max(0.001, dot(H, info.normal));
+			vec3 H = normalize(ray.hit.lightVector - ray.dir);
+			float overlap = max(0.001, dot(H, ray.hit.normal));
 			float k = (material.shininess + 2.0) * INV2PI;
 			specular.BRDF = k * material.specularColor * pow(overlap, material.shininess);
 		}
@@ -179,7 +142,7 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 			float etaI = 1.0;
 			float etaO = material.refractionCoefficient;
 			// Direction
-			vec4 res = Refract(-ray.dir, info.normal, material.refractionCoefficient, etaI, etaO);
+			vec4 res = Refract(-ray.dir, ray.hit.normal, material.refractionCoefficient, etaI, etaO);
 			float fresnel = res.w;
 			if (Xi(seed) <= mix(1.0, fresnel, transmission.factor))
 				glassReflect = true;
@@ -189,7 +152,7 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 			// BRDF
 			if ((material.type & MATERIAL_MICROFACET) != 0)
 			{
-				transmission.BRDF = MicrofacetBRDF(material, info.normal, info.tangent, -ray.dir, info.lightVector);
+				transmission.BRDF = MicrofacetBRDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
 			}
 			else
 			{
@@ -197,8 +160,8 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 				float overlap = max(0.001, -dot(res.xyz, ray.dir));
 				float changeOfRadiance = (etaO * etaO) / (etaI * etaI);
 				// Physically-plausible Phong Distributuion
-				vec3 DPPPhong = info.material.specularColor * ((material.shininess + 2.0) / TWO_PI) * pow(overlap, material.shininess);
-				transmission.BRDF = changeOfRadiance * (1.0 - fresnel) * DPPPhong / dot(info.normal, info.lightVector);
+				vec3 DPPPhong = material.specularColor * ((material.shininess + 2.0) / TWO_PI) * pow(overlap, material.shininess);
+				transmission.BRDF = changeOfRadiance * (1.0 - fresnel) * DPPPhong / dot(ray.hit.normal, ray.hit.lightVector);
 				transmission.factor *= float(!glassReflect);
 			}
 		}
@@ -206,13 +169,13 @@ vec3 GetBRDFAndBounce(RayTracingMaterial material, inout Ray ray, inout uint see
 
 	if ((material.type & MATERIAL_MICROFACET) != 0 && (material.type & MICROFACET_GGX_ANISO) != 0)
 	{
-		vec3 wh = normalize(-ray.dir + info.lightVector);
+		vec3 wh = normalize(-ray.dir + ray.hit.lightVector);
 		vec3 wh_tangent = normalize(vec3(
-			dot(wh, info.tangent) * material.alphaX,
-			dot(wh, info.normal),
-			dot(wh, cross(info.tangent, info.normal)) * material.alphaY
+			dot(wh, ray.hit.tangent) * material.alphaX,
+			dot(wh, ray.hit.normal),
+			dot(wh, cross(ray.hit.tangent, ray.hit.normal)) * material.alphaY
 		));
-		wh = wh_tangent.x * info.tangent + wh_tangent.y * info.normal + wh_tangent.z * cross(info.tangent, info.normal);
+		wh = wh_tangent.x * ray.hit.tangent + wh_tangent.y * ray.hit.normal + wh_tangent.z * cross(ray.hit.tangent, ray.hit.normal);
 		vec3 reflected = Reflect(-ray.dir, wh);
 		ray.dir = diffuse.direction * diffuse.factor + reflected * specular.factor;
 	}
@@ -229,7 +192,7 @@ struct PDFInfo
 	float PDF;
 };
 
-float GetPDF(inout RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
+float GetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
 {
 	PDFInfo diffuse = PDFInfo(
 		1.0 - material.specularity,

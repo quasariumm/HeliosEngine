@@ -18,7 +18,7 @@ struct Sphere
 uniform Sphere Spheres[SPHERES_MAX];
 uniform int NumSpheres = 0;
 
-RayHitInfo RaySphere(Ray ray, Sphere sphere)
+void RaySphere(inout Ray ray, Sphere sphere)
 {
 	// Thanks for the code, Sebastian Lague
 	RayHitInfo hitInfo = defaultHitInfo;
@@ -29,13 +29,13 @@ RayHitInfo RaySphere(Ray ray, Sphere sphere)
 	float d = b * b - (dot(oc, oc) - sphere.radius * sphere.radius);
 
 	if (d <= 0.0)
-		return hitInfo;
+		return;
 
 	float sqrt_d = sqrt(d);
 	float t1 = -b - sqrt_d;
 	float t2 = -b + sqrt_d;
 
-	if (t1 >= 0.0)
+	if (t1 >= 0.0 && t1 < ray.hit.dst)
 	{
 		hitInfo.didHit = true;
 		hitInfo.dst = t1;
@@ -48,10 +48,12 @@ RayHitInfo RaySphere(Ray ray, Sphere sphere)
 		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
 
 		hitInfo.tangent = normalize(cross(hitInfo.normal, arbitraryDirection));
-		return hitInfo;
+
+		ray.hit = hitInfo;
+		return;
 	}
 
-	if (t2 >= 0.0 && t1 <= 0)
+	if (t2 >= 0.0 && t2 < ray.hit.dst && t1 <= 0)
 	{
 		hitInfo.didHit = true;
 		hitInfo.dst = t2;
@@ -64,27 +66,19 @@ RayHitInfo RaySphere(Ray ray, Sphere sphere)
 		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
 
 		hitInfo.tangent = normalize(cross(hitInfo.normal, arbitraryDirection));
-		return hitInfo;
-	}
 
-	return hitInfo;
+		ray.hit = hitInfo;
+		return;
+	}
 }
 
-RayHitInfo RayCollision(Ray ray)
+void RayCollision(inout Ray ray)
 {
-	RayHitInfo closest = defaultHitInfo;
-	closest.didHit = false;
-	closest.dst = 1e30;
+	ray.hit = defaultHitInfo;
+	ray.hit.didHit = false;
+	ray.hit.dst = 1e30;
 	for (int i = 0; i < NumSpheres; ++i)
-	{
-		RayHitInfo sphereInfo = RaySphere(ray, Spheres[i]);
-		if (sphereInfo.didHit
-		&& (sphereInfo.dst < closest.dst))
-		{
-			closest = sphereInfo;
-		}
-	}
-	return closest;
+		RaySphere(ray, Spheres[i]);
 }
 
 #endif // INTERSECTIONS_GLSL
