@@ -53,7 +53,7 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	// Get the includes
 	std::wostringstream includedStream;
 
-	bool supportsGLSLIncludes = glfwExtensionSupported("ARB_shading_language_include") == GLFW_TRUE;
+	static bool supportsGLSLIncludes = glfwExtensionSupported("ARB_shading_language_include") == GLFW_TRUE;
 	ManageIncludes(contentStream, includedStream, supportsGLSLIncludes);
 
 	// Set contents to the current version
@@ -140,9 +140,11 @@ void GL46_ComputeShader::ManageIncludes(
 			glslPath.erase(glslPath.length() - 1);
 
 			const bool alreadyLoaded = loadedShaders.contains(glslPath);
-			if (alreadyLoaded && supportsGLSLIncludes)
+			if (alreadyLoaded)
 			{
-				outStream << line << L"\n";
+				if (supportsGLSLIncludes)
+					outStream << line << L"\n";
+				continue;
 			}
 
 			std::wifstream included;
