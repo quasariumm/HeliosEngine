@@ -3,11 +3,16 @@
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
+#define REPROJECTION
+//#define ACCUMULATION
+
 layout(rgba32f, binding = 0) uniform image2D OutTexture;
 uniform uint ScreenWidth;
 uniform uint ScreenHeight;
 
 uniform mat4 CamToWorld;
+uniform mat4 VPMat;
+uniform mat4 PrevVPMat;
 uniform vec3 ViewParams;
 
 uniform uint Frame = 0;
@@ -135,12 +140,31 @@ void main()
 
 	vec4 pixel = vec4(Trace(ray, seed), 1.0);
 	pixel = max(pixel, vec4(0.0, 0.0, 0.0, 1.0));
-	if (!ClearAccumulator)
-	{
-		vec4 accumulatorColor = imageLoad(OutTexture, texelCoord);
-		pixel = mix(accumulatorColor, pixel, 1.0 / (Frame + 1));
-		pixel.a = 1.0;
-	}
+    
+    #ifdef REPROJECTION
+		if (!ClearAccumulator && ray.hit.didHit)
+    {
+        vec4 currNDC = vec4(tc * 2.0 - 1.0, ray.hit.dst, 1.0);
+        vec4 worldPos = inverse(VPMat) * currNDC;
+        worldPos /= worldPos.w;
+
+        vec4 prevNDC = PrevVPMat * worldPos;
+        vec2 prevUV = (prevNDC.xy / prevNDC.w) * 0.5 + 0.5;
+        vec2 clampedPrevUV = clamp(prevUV, vec2(0.0), vec2(1.0 - 1.0 / vec2(ScreenWidth, ScreenHeight)));
+        ivec2 prevTexelCoord = ivec2(clampedPrevUV * vec2(ScreenWidth, ScreenHeight));
+
+        vec4 accumulatorColor = imageLoad(OutTexture, prevTexelCoord);
+        pixel = mix(accumulatorColor, pixel, 0);
+        pixel.a = 1.0;
+    }
+    #elif defined(ACCUMULATION)
+		if (!ClearAccumulator)
+    {
+        vec4 accumulatorColor = imageLoad(OutTexture, texelCoord);
+        pixel = mix(accumulatorColor, pixel, 1.0 / (Frame + 1));
+        pixel.a = 1.0;
+    }
+    #endif // ACCUMULATION
 
 	imageStore(OutTexture, texelCoord, pixel);
 }
