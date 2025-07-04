@@ -21,9 +21,6 @@ uniform int NumSpheres = 0;
 void RaySphere(inout Ray ray, Sphere sphere)
 {
 	// Thanks for the code, Sebastian Lague
-	RayHitInfo hitInfo = defaultHitInfo;
-	hitInfo.material = sphere.material;
-
 	vec3 oc = ray.origin - sphere.center;
 	float b = dot(oc, ray.dir);
 	float d = b * b - (dot(oc, oc) - sphere.radius * sphere.radius);
@@ -37,37 +34,35 @@ void RaySphere(inout Ray ray, Sphere sphere)
 
 	if (t1 >= 0.0 && t1 < ray.hit.dst)
 	{
-		hitInfo.didHit = true;
-		hitInfo.dst = t1;
-		hitInfo.hitPoint = ray.origin + ray.dir * t1;
-		hitInfo.normal = normalize(hitInfo.hitPoint - sphere.center);
+		ray.hit.didHit = true;
+		ray.hit.material = sphere.material;
+		ray.hit.dst = t1;
+		ray.hit.hitPoint = ray.origin + ray.dir * t1;
+		ray.hit.normal = normalize(hitInfo.hitPoint - sphere.center);
 
 		// Calculate tangent vector
 		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
-		if (dot(hitInfo.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
+		if (dot(ray.hit.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
 		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
 
-		hitInfo.tangent = normalize(cross(hitInfo.normal, arbitraryDirection));
-
-		ray.hit = hitInfo;
+		ray.hit.tangent = normalize(cross(ray.hit.normal, arbitraryDirection));
 		return;
 	}
 
 	if (t2 >= 0.0 && t2 < ray.hit.dst && t1 <= 0)
 	{
-		hitInfo.didHit = true;
-		hitInfo.dst = t2;
-		hitInfo.hitPoint = ray.origin + ray.dir * t2;
-		hitInfo.normal = normalize(hitInfo.hitPoint - sphere.center);
+		ray.hit.didHit = true;
+		ray.hit.material = sphere.material;
+		ray.hit.dst = t2;
+		ray.hit.hitPoint = ray.origin + ray.dir * t2;
+		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.center);
 
 		// Calculate tangent vector
 		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
-		if (dot(hitInfo.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
+		if (dot(ray.hit.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
 		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
 
-		hitInfo.tangent = normalize(cross(hitInfo.normal, arbitraryDirection));
-
-		ray.hit = hitInfo;
+		ray.hit.tangent = normalize(cross(ray.hit.normal, arbitraryDirection));
 		return;
 	}
 }
@@ -98,8 +93,9 @@ layout (std430, binding = 6) readonly buffer IndicesBuffer
 
 struct Mesh
 {
-	int TriangleCount;
+	int IndexCount;
 	int FirstIndex;
+	RayTracingMaterial material;
 };
 
 layout (std430, binding = 7) readonly buffer MeshBuffer
@@ -107,6 +103,51 @@ layout (std430, binding = 7) readonly buffer MeshBuffer
 	int NumMeshes;
 	Mesh Meshes[];
 };
+
+void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
+{
+	vec3 edge1 = v1.position - v0.position;
+	vec3 edge2 = v2.position - v0.position;
+	vec3 h = cross(ray.dir, edge2);
+	float a = dot(edge1, h);
+
+	if (abs(a) < 0.00001) return;
+
+	float f = 1.0 / a;
+	vec3 s = ray.origin - v0.position;
+	float u = f * dot(s, h);
+	if (u < 0.0 || u > 1.0) return;
+	vec3 q = cross(s, edge1);
+	float v = f * dot(ray.dir, q);
+	if (v < 0.0 || v + u > 1.0) return;
+	float t = f * dot(edge2, q);
+
+	if (t > 0.0 && t < ray.hit.dst)
+	{
+		ray.hit.didHit = true;
+		ray.hit.material = mesh.material;
+		ray.hit.dst = t;
+		ray.hit.hitPoint = ray.origin + ray.dir * t2;
+		float w = 1.0 - u - v;
+		ray.hit.normal = u * v0.normal + v * v1.normal + w * v2.normal;
+		ray.hit.tangent = u * v0.tangent + v * v1.tangent + w * v2.tangent;
+	}
+}
+
+void RayMesh(inout Ray ray, Mesh mesh)
+{
+	// Check triangles based on the indices
+	for (int i = mesh.FirstIndex; i < mesh.FirstIndex + mesh.IndexCount; i += 3)
+	{
+		RayTriangle(
+			ray,
+			mesh,
+			Vertices[Indices[i]],
+			Vertices[Indices[i + 1]],
+			Vertices[Indices[i + 2]]
+		);
+	}
+}
 
 /*
 	Scene collision
@@ -119,6 +160,9 @@ void RayCollision(Ray ray)
 	ray.hit.dst = 1e30;
 	for (int i = 0; i < NumSpheres; ++i)
 		RaySphere(ray, Spheres[i]);
+
+	for (int i = 0; i < NumMeshes; ++i)
+		RayMesh(ray, Meshes[i]);
 }
 
 #endif // INTERSECTIONS_GLSL

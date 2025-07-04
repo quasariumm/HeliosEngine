@@ -15,6 +15,7 @@ struct RayHitInfo
 	vec3 normal;
 	vec3 tangent;
 	vec3 lightVector;
+	vec2 barycentrics;
 	RayTracingMaterial material;
 };
 
