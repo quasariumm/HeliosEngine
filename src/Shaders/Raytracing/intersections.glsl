@@ -20,6 +20,8 @@ uniform int NumSpheres = 0;
 
 void RaySphere(inout Ray ray, Sphere sphere)
 {
+	sphere.radius = 1;
+	
 	// Thanks for the code, Sebastian Lague
 	RayHitInfo hitInfo = defaultHitInfo;
 	hitInfo.material = sphere.material;

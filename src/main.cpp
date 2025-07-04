@@ -143,6 +143,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	float deltaTime = 0.f;
 
 	Engine::Camera camera;
+	Engine::mat4f VPMat;
+	Engine::mat4f prevVPMat;
 
 	Engine::Viewport::AppendEditorCamera(&camera);
 
@@ -182,6 +184,11 @@ extern "C" int __declspec(dllexport) __stdcall main()
 			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);
 			rayCompute.SetMat4("CamToWorld", camToWorld);
 
+    		VPMat = camera.GetProjectionMatrix(viewportSize) * camera.GetViewMatrix();
+    		rayCompute.SetMat4("VPMat", VPMat);
+
+    		if( frame != 0 ) rayCompute.SetMat4("PrevVPMat", prevVPMat);
+
 			Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
 			rayCompute.SetVec3("ViewParams", viewportParams);
 
@@ -191,6 +198,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
     		rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
     		rayCompute.Dispatch(computeThreads);
 			// rayTexture.UpdateData();
+
+    		prevVPMat = VPMat;
 	    }
 
 	    {
