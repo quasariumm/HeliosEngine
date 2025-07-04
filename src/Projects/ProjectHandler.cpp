@@ -108,7 +108,7 @@ namespace Engine {
             ImGui::Begin("Project Selector", nullptr, ImGuiWindowFlags_NoDocking);
 
             if (ImGui::Button("Select file")) {
-                if (ShowFileSelect(path, true)) {
+                if (ShowFileSelect(path, ProjectFilters)) {
                     if (!ValidateProjectFolder(path))
                         DebugLog(LogSeverity::SEVERE, L"Project doesn't exist");
                     else {
@@ -141,25 +141,23 @@ namespace Engine {
 
     }
 
-    bool ProjectHandler::ShowFileSelect(std::filesystem::path &path, bool projectOnly) {
-        NFD_Init();
+    bool ProjectHandler::ShowFileSelect(std::filesystem::path &path, const nfdnfilteritem_t* filters) {
+        NFD::Init();
 
-        nfdu8char_t *outPath;
+        nfdnchar_t* outPath;
         nfdresult_t result;
 
-        if (projectOnly) {
-            constexpr nfdu8filteritem_t filters[1] = {"Projects", "gep"};
-            result = NFD_OpenDialog(&outPath, filters, 1, nullptr);
-        } else {
+        if (filters)
+        	result = NFD::OpenDialog(outPath, filters, 1);
+        else
             result = NFD::PickFolder(outPath);
-        }
 
         if (result != NFD_OKAY)
             return false;
 
         path = std::filesystem::path(outPath).make_preferred();
 
-        NFD_Quit();
+        NFD::Quit();
 
         return true;
     }

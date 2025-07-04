@@ -19,6 +19,9 @@ bool EditorSettings::Save()
     }
     // Save all variables in the struct
     file << "CloseOnEscape = " << std::to_wstring(m_editorSettings.m_closeOnEscape) << std::endl;
+    file << "ForceLoadProject = " << std::to_wstring(m_editorSettings.m_forceLoadProject) << std::endl;
+	file << "ForceLoadProjectPath = " << m_editorSettings.m_forceLoadProjectPath << std::endl;
+	file << "ForceLoadScenePath = " << m_editorSettings.m_forceLoadScenePath << std::endl;
     DebugLog(LogSeverity::DONE, L"Successfully saved editor settings");
     return true;
 }
@@ -37,6 +40,9 @@ bool EditorSettings::Load()
     while (std::getline(file, line))
     {
         if (IsToken(line, L"CloseOnEscape")) m_editorSettings.m_closeOnEscape = stoi(TokenValue(line));
+    	else if (IsToken(line, L"ForceLoadProject")) m_editorSettings.m_forceLoadProject = stoi(TokenValue(line));
+    	else if (IsToken(line, L"ForceLoadProjectPath")) m_editorSettings.m_forceLoadProjectPath = TokenValue(line);
+    	else if (IsToken(line, L"ForceLoadScenePath")) m_editorSettings.m_forceLoadScenePath = TokenValue(line);
     }
 
     DebugLog(LogSeverity::DONE, L"Successfully loaded editor settings");
@@ -58,6 +64,28 @@ void EditorSettings::DrawWindow()
             ImGui::Checkbox("Close editor on " ICON_KEYBOARD_ESC, &m_editorSettings.m_closeOnEscape);
             ImGui::EndTabItem();
         }
+
+    	if (ImGui::BeginTabItem("Force Loading"))
+    	{
+    		ImGui::Checkbox("Force load project and scene on startup", &m_editorSettings.m_forceLoadProject);
+
+			// Use the interface from ProjectHandler
+    		std::filesystem::path forceProject;
+    		ImGui::Text(WSTR_TO_STR(m_editorSettings.m_forceLoadProjectPath).c_str());
+    		ImGui::SameLine();
+    		if (ImGui::Button("Select Folder"))
+    			if (ProjectHandler::ShowFileSelect(forceProject))
+    				m_editorSettings.m_forceLoadProjectPath = forceProject;
+
+    		std::filesystem::path forceScene;
+    		ImGui::Text(WSTR_TO_STR(m_editorSettings.m_forceLoadScenePath).c_str());
+    		ImGui::SameLine();
+    		if (ImGui::Button("Select Scene"))
+				if (ProjectHandler::ShowFileSelect(forceScene, SceneFilters))
+					m_editorSettings.m_forceLoadScenePath = forceScene;
+
+    		ImGui::EndTabItem();
+    	}
 
         ImGui::EndTabBar();
     }

@@ -163,7 +163,18 @@ extern "C" int __declspec(dllexport) __stdcall main()
 		camera.MouseMove(diff);
 	});
 
-    while (!window->ShouldClose())
+	// Force load project if set
+	const Engine::EditorSettingsData& editorSettings = Engine::EditorSettings::Get();
+	if (editorSettings.m_forceLoadProject)
+	{
+		std::filesystem::path projectPath(editorSettings.m_forceLoadProjectPath);
+		Engine::ProjectHandler::LoadProject(projectPath);
+		std::filesystem::path sceneFile(editorSettings.m_forceLoadScenePath);
+		Engine::SceneLoader::LoadFromFile(Engine::SceneEditor::m_targetScene, sceneFile);
+		Engine::SceneEditor::m_sceneFile = sceneFile;
+	}
+
+	while (!window->ShouldClose())
     {
     	ZoneScopedNC("Frame", tracy::Color::CornflowerBlue);
 
