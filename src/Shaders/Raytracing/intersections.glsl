@@ -70,6 +70,46 @@ RayHitInfo RaySphere(Ray ray, Sphere sphere)
 	return hitInfo;
 }
 
+/*
+	Triangles
+*/
+
+struct Vertex
+{
+	vec3 position;
+	vec3 normal;
+	vec3 tangent;
+	// Bitangent is cross(normal, tangent)
+};
+
+layout (std430, binding = 5) readonly buffer VertexBuffer
+{
+	int NumVertices;
+	Vertex Vertices[];
+};
+
+layout (std430, binding = 6) readonly buffer IndicesBuffer
+{
+	int NumIndices;
+	int Indices[];
+};
+
+struct Mesh
+{
+	int TriangleCount;
+	int FirstIndex;
+};
+
+layout (std430, binding = 7) readonly buffer MeshBuffer
+{
+	int NumMeshes;
+	Mesh Meshes[];
+};
+
+/*
+	Scene collision
+*/
+
 RayHitInfo RayCollision(Ray ray)
 {
 	RayHitInfo closest = defaultHitInfo;
