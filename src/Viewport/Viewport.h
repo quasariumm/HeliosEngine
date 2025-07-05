@@ -6,9 +6,6 @@
 namespace Engine
 {
 
-struct Line3D { vec3 a, b; };
-struct Line2D { ImVec2 a, b; };
-
 class Viewport : public EditorInterface
 {
 public:
@@ -19,11 +16,10 @@ public:
     static void AppendRenderedImage(GL46_Texture2D* texture) { m_renderedImage = texture; }
     static void AppendEditorCamera(Camera* camera) { m_editorCamera = camera; }
 
-private:
-    static void DrawGizmo(const vec3& pos, float size = 30.0f);
+	static ImVec2 position;
+	static ImVec2 size;
 
-    static Line2D ProjectLine(const Line3D& line);
-    static ImVec2 ProjectPoint(const vec3& PW);
+private:
 
     static GL46_Texture2D* m_renderedImage;
     static Camera* m_editorCamera;
