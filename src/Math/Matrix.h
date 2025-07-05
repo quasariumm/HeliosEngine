@@ -730,9 +730,9 @@ FUNC1_TMPL mat4t<T> Orthographic(T left, T right, T bottom, T top, T zNear = -1,
 
 FUNC1_TMPL vec3t<T> TransformPoint(const vec3t<T>& p, const mat4t<T>& m)
 {
-	vec4t<T> v(p);
-	v.w = 1;
-	return vec3t<T>(m * v);
+	const vec4t<T> v(p.x, p.y, p.z, 1.f);
+	vec4t<T> res = operator*<T, T>(m, v);
+	return vec3t<T>(res) / res.w;
 }
 
 FUNC1_TMPL vec3t<T> TransformVector(const vec3t<T>& p, const mat4t<T>& m)
