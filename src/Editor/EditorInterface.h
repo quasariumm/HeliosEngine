@@ -27,6 +27,12 @@ public:
         m_editorInterfaces[name] = std::move(editorInterface);
     }
 
+	EditorInterface* GetInterfaceByName(const std::wstring& name)
+    {
+	    const auto it = m_editorInterfaces.find(name);
+    	return (it != m_editorInterfaces.end()) ? it->second.get() : nullptr;
+    }
+
     static void Initialize(Window* window);
 
     void DrawAllInterfaces();

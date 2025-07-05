@@ -17,6 +17,7 @@
 
 #include <tracy/Tracy.hpp>
 
+#include "Graphics/Gizmos.h"
 #include "Scene/SceneStorage.h"
 
 #ifdef _WIN32
@@ -173,6 +174,13 @@ extern "C" int __declspec(dllexport) __stdcall main()
 		Engine::SceneLoader::LoadFromFile(Engine::SceneEditor::m_targetScene, sceneFile);
 		Engine::SceneEditor::m_sceneFile = sceneFile;
 	}
+
+	Engine::Viewport* viewport = reinterpret_cast<Engine::Viewport*>(Engine::EditorInterfaceManager::Instance().GetInterfaceByName(L"Viewport"));
+	if (viewport)
+		Engine::Gizmos::Init(*viewport, camera);
+	else
+		Engine::DebugLog(Engine::LogSeverity::SEVERE, L"Viewport could not be found");
+
 
 	while (!window->ShouldClose())
     {
