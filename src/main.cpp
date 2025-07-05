@@ -192,7 +192,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 			rayCompute.SetUInt("Frame", frame);
 
 			const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
-			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);
+			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix();
 			rayCompute.SetMat4("CamToWorld", camToWorld);
 
     		VPMat = camera.GetProjectionMatrix(viewportSize) * camera.GetViewMatrix();

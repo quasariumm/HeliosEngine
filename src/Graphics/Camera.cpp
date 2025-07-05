@@ -44,7 +44,7 @@ mat4f Camera::GetProjectionMatrix(const vec2u& viewportSize) const
 }
 
 
-mat4f Camera::GetCamToWorldMatrix( const vec2u& viewportSize ) const
+mat4f Camera::GetCamToWorldMatrix() const
 {
 	return mat4f(
 		vec4f{  m_camRight.x, 	 m_camRight.y, 	 m_camRight.z, 	m_camPos.x	},
