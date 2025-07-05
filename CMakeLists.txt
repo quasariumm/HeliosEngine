@@ -123,7 +123,8 @@ else()
 
 endif()
 
-message(STATUS "CMake is including the following source files:")
+list(LENGTH SOURCE NUM_SOURCE)
+message(STATUS "CMake is including the following ${NUM_SOURCE} source files:")
 foreach(file ${SOURCE})
     message(STATUS "  ${file}")
 endforeach()
