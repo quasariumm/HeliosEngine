@@ -65,6 +65,12 @@ void temp(Engine::Window& window, Engine::Key key)
 	if (key == Engine::Key::ESCAPE && Engine::EditorSettings::Get().m_closeOnEscape)
 		window.SetShouldClose(true);
 
+	if (key == Engine::Key::B)
+	{
+		int compCount = Engine::ComponentRegister::Instance().m_registry.size();
+		Engine::DebugLog( Engine::LogSeverity::INFO,  STR_TO_WSTR(std::to_string(compCount)));
+	}
+
 	if (key == Engine::Key::T && Engine::ProjectHandler::ProjectLoaded())
 		Engine::ProjectHandler::m_project->Init();
 }

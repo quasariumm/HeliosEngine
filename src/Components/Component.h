@@ -141,11 +141,7 @@ class ComponentRegister
 public:
     static ENGINE_API ComponentRegister& Instance();
 
-    void Register(const std::wstring& typeName, const std::wstring& displayName, Creator creator)
-    {
-        m_registry[typeName] = std::move(creator);
-        m_nameRegistry[typeName] = displayName;
-    }
+    void ENGINE_API Register(const std::wstring& typeName, const std::wstring& displayName, Creator creator);
 
     const std::wstring& GetComponentName(const std::wstring& componentType) { return m_nameRegistry[componentType]; }
     const  std::unordered_map<std::wstring, std::wstring>& GetComponentNames() { return m_nameRegistry; }
@@ -162,7 +158,7 @@ public:
         return nullptr;
     }
 
-private:
+//private:
     std::unordered_map<std::wstring, Creator> m_registry;
     std::unordered_map<std::wstring, std::wstring> m_nameRegistry;
 };

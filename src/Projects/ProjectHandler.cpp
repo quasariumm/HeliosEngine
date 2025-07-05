@@ -7,6 +7,9 @@
 #include "Core/FileTools.h"
 #include <windows.h>
 
+#include "Components/Component.h"
+#include "Scene/SceneEditor.h"
+
 namespace Engine {
 
     bool ProjectHandler::m_selectorOpen = false;
@@ -30,7 +33,6 @@ namespace Engine {
                 ImGui::CloseCurrentPopup();
 
             ImGui::Separator();
-
 
             if (!completed) {
                 if (m_recompileResult.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
@@ -280,6 +282,9 @@ namespace Engine {
     }
 
     bool ProjectHandler::RecompileProject() {
+        if (m_projectLibrary != nullptr)
+            FreeLibrary(m_projectLibrary);
+
         std::wstring cmakeCommand = L"cmake -S " + ProjectFolder().wstring() + L" -B " + ProjectFolder().wstring() +
                                     L"\\cmake-build-debug" + L" -G \"Ninja\"";
         int cmakeStatus = std::system(WStringToUTF8(cmakeCommand).c_str());
@@ -299,6 +304,8 @@ namespace Engine {
     }
 
     bool ProjectHandler::ReloadLibrary() {
+
+        // Make sure the library isn't loaded right now
         FreeLibrary(m_projectLibrary);
         std::filesystem::remove(GetProjectLib());
 

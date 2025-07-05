@@ -17,7 +17,7 @@ enum class AssetType
 class AssetEditorView final : public EditorInterface
 {
 public:
-    AssetEditorView() : EditorInterface(L"Asset Manager") {}
+    AssetEditorView() : EditorInterface(L"Asset Manager", EditorInterfaceSource::EDITOR) {}
 
     void DrawInterface() override;
 

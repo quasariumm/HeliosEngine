@@ -91,6 +91,9 @@ void SceneEditor::ObjectEditor()
 	ZoneScopedNC("Object viewer", tracy::Color::MediumPurple2);
     ImGui::Begin(ICON_CUBE_SCAN" Object Viewer", nullptr, ImGuiWindowFlags_MenuBar);
 
+    if (ProjectHandler::m_lockOut)
+        m_selectedObject = 0;
+
     // Get the actual object
     SceneObject* selectedObject = nullptr;
     if (m_selectedObject != 0)

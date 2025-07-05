@@ -88,6 +88,7 @@
 // External libraries
 #define IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_USE_WCHAR32
+#define IMGUI_API ENGINE_API
 #include <imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM

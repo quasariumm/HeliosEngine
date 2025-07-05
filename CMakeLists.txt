@@ -128,3 +128,8 @@ message(STATUS "CMake is including the following ${NUM_SOURCE} source files:")
 foreach(file ${SOURCE})
     message(STATUS "  ${file}")
 endforeach()
+
+message(STATUS "CMake is including the following library files:")
+foreach(file ${LIBS})
+    message(STATUS "  ${file}")
+endforeach()

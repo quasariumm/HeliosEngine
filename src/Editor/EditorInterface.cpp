@@ -4,6 +4,7 @@
 
 #include "EditorSettings.h"
 #include "Projects/ProjectHandler.h"
+#include "Debugger/Debugger.h"
 
 namespace Engine
 {
@@ -12,6 +13,15 @@ EditorInterfaceManager& EditorInterfaceManager::Instance()
 {
 	static EditorInterfaceManager instance;
 	return instance;
+}
+
+void EditorInterfaceManager::RegisterInterface(const std::wstring& name,
+	std::unique_ptr<EditorInterface> editorInterface)
+{
+	if (m_editorInterfaces.contains(name))
+		m_editorInterfaces[name].reset();
+	m_editorInterfaces[name] = std::move(editorInterface);
+	DebugLog(LogSeverity::INFO, L"Registered editor interface: " + name);
 }
 
 void EditorInterfaceManager::Initialize(Window* window)
@@ -117,8 +127,13 @@ void EditorInterfaceManager::DrawAllInterfaces()
         ImGui::ShowMetricsWindow();
 
     for (const auto& i : m_editorInterfaces)
+    {
+    	if (ProjectHandler::m_lockOut && i.second->source == EditorInterfaceSource::PROJECT)
+    		continue;
+
         if (i.second->active)
-            i.second->DrawInterface();
+        	i.second->DrawInterface();
+    }
 }
 
 void EditorInterfaceManager::SetMouseEnabled(bool enable)

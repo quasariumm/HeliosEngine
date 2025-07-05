@@ -14,7 +14,7 @@ int main()
         std::filesystem::remove(TMPFolder + L"\\libEngine.dll");
     std::filesystem::copy(EngineLibrary, TMPFolder + L"\\libEngine.dll", std::filesystem::copy_options::overwrite_existing);
 
-    const HINSTANCE loadedLibrary = LoadLibraryW( (TMPFolder + L"\\libEngine.dll").c_str());
+    const auto loadedLibrary = LoadLibraryW( (TMPFolder + L"\\libEngine.dll").c_str());
 
     if (!loadedLibrary) {
         std::cout << "could not load the dynamic library" << std::endl;
@@ -22,7 +22,7 @@ int main()
     }
 
     // resolve function address here
-    engineFunc function = (engineFunc)GetProcAddress(loadedLibrary, "main");
+    const auto function = reinterpret_cast<engineFunc>(GetProcAddress(loadedLibrary, "main"));
     if (!function) {
         std::cout << "could not locate the function" << std::endl;
         FreeLibrary(loadedLibrary);
