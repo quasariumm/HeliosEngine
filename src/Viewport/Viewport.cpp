@@ -29,26 +29,24 @@ void Viewport::DrawInterface()
     m_editorCamera->SetAllowUseControls(ImGui::IsWindowHovered());
 
     // Thanks envoyious! https://github.com/ocornut/imgui/issues/5118
-    ImVec2 screenSize = ImGui::GetContentRegionAvail();
-    float scale = std::min(screenSize.x / static_cast<float>(m_renderedImage->GetWidth()),
+    const ImVec2 screenSize = ImGui::GetContentRegionAvail();
+    const float scale = std::min(screenSize.x / static_cast<float>(m_renderedImage->GetWidth()),
                            screenSize.y / static_cast<float>(m_renderedImage->GetHeight()));
-    ImVec2 textureSize = ImVec2(static_cast<float>(m_renderedImage->GetWidth()) * scale,
+    const ImVec2 textureSize = ImVec2(static_cast<float>(m_renderedImage->GetWidth()) * scale,
                                 static_cast<float>(m_renderedImage->GetHeight()) * scale);
 
-    ImVec2 offset = (screenSize - textureSize) * 0.5f;
-	ImVec2 imageSize = ImVec2(
-		static_cast<float>(m_renderedImage->GetWidth()) * scale,
-		static_cast<float>(m_renderedImage->GetHeight()) * scale
-	);
-    ImGui::SetCursorPos(ImGui::GetCursorStartPos() + offset);
+    const ImVec2 offset = (screenSize - textureSize) * 0.5f;
+	const ImVec2 windowPos = ImGui::GetCursorScreenPos();
+	const ImVec2 texturePosition = ImGui::GetCursorStartPos() + offset;
+    ImGui::SetCursorPos(texturePosition);
     // Draw the final rendered image
     ImGui::Image(
         (ImTextureID)(intptr_t)m_renderedImage->GetID(),
-        imageSize
+        textureSize
     );
 
-	position = ImGui::GetCursorScreenPos();
-	size = imageSize;
+	position = windowPos + texturePosition;
+	size = textureSize;
 
 	const Line3D lineTest{{0, 0, 0}, {0, 100, 0}};
 	Gizmos::DrawLine(lineTest, vec4f(0.f, 1.f, 0.f, 1.f), 3);

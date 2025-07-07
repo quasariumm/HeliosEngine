@@ -9,11 +9,9 @@ namespace Engine
 {
 
 Camera* Gizmos::m_camera = nullptr;
-Viewport* Gizmos::m_viewport = nullptr;
 
-void Gizmos::Init( Viewport& viewport, Camera& camera )
+void Gizmos::Init( Camera& camera )
 {
-	m_viewport = &viewport;
 	m_camera = &camera;
 }
 
@@ -28,19 +26,20 @@ void Gizmos::DrawLine( const Line3D& line, const Color32F color, const float thi
 {
 	const Line2D projectedLine = ProjectLine( line );
 
-	const ImVec2 viewportSize = m_viewport->size;
+	const ImVec2 viewportPosition = Viewport::position;
+	const ImVec2 viewportSize = Viewport::size;
 
 	const ImVec2 p0(
 		(projectedLine.a.x + 1.f) * 0.5f * viewportSize.x,
-		(projectedLine.a.y + 1.f) * 0.5f * viewportSize.y
+		(1.f - projectedLine.a.y) * 0.5f * viewportSize.y
 	);
 	const ImVec2 p1(
 		(projectedLine.b.x + 1.f) * 0.5f * viewportSize.x,
-		(projectedLine.b.y + 1.f) * 0.5f * viewportSize.y
+		(1.f - projectedLine.b.y) * 0.5f * viewportSize.y
 	);
 
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
-	drawList->AddLine(p0, p1, IM_COL32(color.r, color.g, color.b, color.a), thickness);
+	drawList->AddLine(viewportPosition + p0, viewportPosition + p1, IM_COL32F(color), thickness);
 }
 
 
@@ -52,7 +51,10 @@ ImVec2 Gizmos::ProjectPoint( const vec3& point )
 		return {};
 	}
 
-	const mat4f worldToCam = Invert(m_camera->GetCamToWorldMatrix());
+	const mat4f worldToCam = Invert(
+		m_camera->GetViewMatrix()
+		* m_camera->GetProjectionMatrix(vec2u{(uint32_t)std::ceil(Viewport::size.x), (uint32_t)std::ceil(Viewport::size.y)})
+	);
 
 	vec3f projected = TransformPoint(point, worldToCam);
 

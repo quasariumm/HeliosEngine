@@ -175,12 +175,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 		Engine::SceneEditor::m_sceneFile = sceneFile;
 	}
 
-	Engine::Viewport* viewport = reinterpret_cast<Engine::Viewport*>(Engine::EditorInterfaceManager::Instance().GetInterfaceByName(L"Viewport"));
-	if (viewport)
-		Engine::Gizmos::Init(*viewport, camera);
-	else
-		Engine::DebugLog(Engine::LogSeverity::SEVERE, L"Viewport could not be found");
-
+	Engine::Gizmos::Init(camera);
 
 	while (!window->ShouldClose())
     {

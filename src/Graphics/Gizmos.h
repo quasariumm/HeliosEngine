@@ -23,7 +23,7 @@ class Gizmos
 {
 public:
 
-	static void Init(Viewport& viewport, Camera& camera);
+	static void Init(Camera& camera);
 
 	//static void DrawGizmo(const vec3& pos, float size = 30.0f);
 
@@ -47,7 +47,6 @@ public:
 
 private:
 
-	static Viewport* m_viewport;
 	static Camera* m_camera;
 
 };

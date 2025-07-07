@@ -108,6 +108,12 @@ static constexpr float LARGE_FLOAT	=	1e34f;
 #define CHECK_AABB3D(cmp, min, max) ((cmp).x >= (min).x && (cmp).x <= (max).x && (cmp).y >= (min).y && (cmp).y <= (max).y && (cmp).z >= (min).z && (cmp).z <= (max).z)
 
 
+/**
+ * @brief Converts a Color32F to an unsigned int color that Dear ImGUI uses
+ * @param color The color you want to convert
+ */
+#define IM_COL32F(color) IM_COL32(255.f * (color).r, 255.f * (color).g, 255.f * (color).b, 255.f * (color).a)
+
 
 /*
  * Functions
