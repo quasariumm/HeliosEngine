@@ -7,7 +7,7 @@ typedef int (__stdcall *engineFunc)();
 int main()
 {
     const std::wstring TMPFolder = std::filesystem::current_path().append("launcher\\cmake-build-debug");
-    const std::wstring EngineLibrary = std::filesystem::current_path().append("cmake-build-debug\\libEngine.dll");
+    const std::wstring EngineLibrary = std::filesystem::current_path().append("cmake-build-debug\\libEngined.dll");
 
     // Try to load the engine library
     if (std::filesystem::exists(TMPFolder + L"\\libEngine.dll"))

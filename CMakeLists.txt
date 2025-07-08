@@ -76,6 +76,7 @@ target_include_directories(Engine PUBLIC
         extern
         extern/imgui
         extern/nativefiledialog-extended/src/include
+        extern/Assimp/include
         lib
         lib/glfw/include
         lib/glad/include
@@ -90,10 +91,12 @@ target_precompile_headers(Engine PUBLIC
 
 set(MSVC_LIBS
         glfw3.lib
+        libassimp-5d.dll
 )
 
 set(UNIX_LIBS
         glfw3
+        assimpd.dll
 )
 
 
@@ -105,11 +108,15 @@ if (MSVC)
         # 64-bit
         target_link_directories(Engine PUBLIC
                 lib/glfw/lib-vc2010-64
+                "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/bin>"
+                "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/bin>"
         )
     else()
         # 32 bit
         target_link_directories(Engine PUBLIC
                 lib/glfw/lib-vc2010-32
+                "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/bin>"
+                "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/bin>"
         )
     endif()
 
@@ -117,7 +124,11 @@ if (MSVC)
 
 else()
 
-    target_link_directories(Engine PUBLIC lib/glfw/lib-mingw)
+    target_link_directories(Engine PUBLIC
+            lib/glfw/lib-mingw
+            "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/lib>"
+            "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/lib>"
+    )
 
     target_link_libraries(Engine PUBLIC ${UNIX_LIBS})
 
