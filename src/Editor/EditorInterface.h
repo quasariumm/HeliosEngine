@@ -4,16 +4,24 @@
 namespace Engine
 {
 
+enum class EditorInterfaceSource
+{
+    EDITOR,
+    PROJECT
+};
+
 class EditorInterface
 {
 public:
-    explicit EditorInterface(std::wstring name): name(std::move(name)) {}
+    explicit EditorInterface(std::wstring name, const EditorInterfaceSource source = EditorInterfaceSource::PROJECT):
+    name(std::move(name)), source(source) {}
     virtual ~EditorInterface() = default;
 
     virtual void DrawInterface() = 0;
 
     const std::wstring name;
     bool active = true;
+    const EditorInterfaceSource source;
 };
 
 class EditorInterfaceManager
@@ -23,9 +31,7 @@ public:
 
     static ENGINE_API EditorInterfaceManager& Instance();
 
-    void RegisterInterface(const std::wstring& name, std::unique_ptr<EditorInterface> editorInterface) {
-        m_editorInterfaces[name] = std::move(editorInterface);
-    }
+    void ENGINE_API RegisterInterface(const std::wstring& name, std::unique_ptr<EditorInterface> editorInterface);
 
     static void Initialize(Window* window);
 

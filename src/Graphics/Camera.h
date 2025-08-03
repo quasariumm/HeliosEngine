@@ -66,7 +66,7 @@ public:
 	 * @return The camera to world matrix
 	 */
 	[[nodiscard]]
-	mat4f GetCamToWorldMatrix(const vec2u& viewportSize) const;
+	mat4f GetCamToWorldMatrix() const;
 
 
 	[[nodiscard]]

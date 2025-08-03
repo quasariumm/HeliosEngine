@@ -3,6 +3,8 @@
 #include <future>
 #include <Windows.h>
 
+#include <nfd.hpp>
+
 namespace Engine
 {
 /**
@@ -34,6 +36,15 @@ public:
 typedef EngineProject* (*CreateGameProjectFunc)();
 typedef void (*DestroyGameProjectFunc)(EngineProject*);
 
+
+#if WIN32
+static constexpr nfdnfilteritem_t ProjectFilters[] = {{L"Projects", L"gep"}};
+static constexpr nfdnfilteritem_t SceneFilters[] = {{L"Scenes", L"scn"}};
+#else
+const constexpr nfdnfilteritem_t ProjectFilters[] = {{"Projects", "gep"}};
+const constexpr nfdnfilteritem_t SceneFilters[] = {{"Scenes", "scn"}};
+#endif
+
 class ProjectHandler
 {
 public:
@@ -56,10 +67,10 @@ public:
      * @brief Open the default file selector window for the operating system
      * TODO: [Rework to allow specifying which file type, then move into helper class]
      * @param path The path that the user has chosen
-     * @param projectOnly (OPTIONAL) False: only allow choosing folder, True: only allow choosing .gep files
+     * @param filters (OPTIONAL) nullptr: only allow choosing folder, any: only allow choosing .gep files
      * @return True if the user has chosen a file / folder
      */
-    static bool ShowFileSelect(std::filesystem::path& path, bool projectOnly = false);
+    static bool ShowFileSelect(std::filesystem::path& path, const nfdnfilteritem_t* filters = nullptr);
 
 
 

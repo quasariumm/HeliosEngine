@@ -7,6 +7,9 @@
 #include "Core/FileTools.h"
 #include <windows.h>
 
+#include "Components/Component.h"
+#include "Scene/SceneEditor.h"
+
 namespace Engine {
 
     bool ProjectHandler::m_selectorOpen = false;
@@ -30,7 +33,6 @@ namespace Engine {
                 ImGui::CloseCurrentPopup();
 
             ImGui::Separator();
-
 
             if (!completed) {
                 if (m_recompileResult.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
@@ -108,7 +110,7 @@ namespace Engine {
             ImGui::Begin("Project Selector", nullptr, ImGuiWindowFlags_NoDocking);
 
             if (ImGui::Button("Select file")) {
-                if (ShowFileSelect(path, true)) {
+                if (ShowFileSelect(path, ProjectFilters)) {
                     if (!ValidateProjectFolder(path))
                         DebugLog(LogSeverity::SEVERE, L"Project doesn't exist");
                     else {
@@ -141,25 +143,23 @@ namespace Engine {
 
     }
 
-    bool ProjectHandler::ShowFileSelect(std::filesystem::path &path, bool projectOnly) {
-        NFD_Init();
+    bool ProjectHandler::ShowFileSelect(std::filesystem::path &path, const nfdnfilteritem_t* filters) {
+        NFD::Init();
 
-        nfdu8char_t *outPath;
+        nfdnchar_t* outPath;
         nfdresult_t result;
 
-        if (projectOnly) {
-            constexpr nfdu8filteritem_t filters[1] = {"Projects", "gep"};
-            result = NFD_OpenDialog(&outPath, filters, 1, nullptr);
-        } else {
+        if (filters)
+        	result = NFD::OpenDialog(outPath, filters, 1);
+        else
             result = NFD::PickFolder(outPath);
-        }
 
         if (result != NFD_OKAY)
             return false;
 
         path = std::filesystem::path(outPath).make_preferred();
 
-        NFD_Quit();
+        NFD::Quit();
 
         return true;
     }
@@ -282,6 +282,9 @@ namespace Engine {
     }
 
     bool ProjectHandler::RecompileProject() {
+        if (m_projectLibrary != nullptr)
+            FreeLibrary(m_projectLibrary);
+
         std::wstring cmakeCommand = L"cmake -S " + ProjectFolder().wstring() + L" -B " + ProjectFolder().wstring() +
                                     L"\\cmake-build-debug" + L" -G \"Ninja\"";
         int cmakeStatus = std::system(WStringToUTF8(cmakeCommand).c_str());
@@ -301,6 +304,8 @@ namespace Engine {
     }
 
     bool ProjectHandler::ReloadLibrary() {
+
+        // Make sure the library isn't loaded right now
         FreeLibrary(m_projectLibrary);
         std::filesystem::remove(GetProjectLib());
 

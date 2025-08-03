@@ -65,6 +65,12 @@ void temp(Engine::Window& window, Engine::Key key)
 	if (key == Engine::Key::ESCAPE && Engine::EditorSettings::Get().m_closeOnEscape)
 		window.SetShouldClose(true);
 
+	if (key == Engine::Key::B)
+	{
+		int compCount = Engine::ComponentRegister::Instance().m_registry.size();
+		Engine::DebugLog( Engine::LogSeverity::INFO,  STR_TO_WSTR(std::to_string(compCount)));
+	}
+
 	if (key == Engine::Key::T && Engine::ProjectHandler::ProjectLoaded())
 		Engine::ProjectHandler::m_project->Init();
 }
@@ -143,6 +149,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	float deltaTime = 0.f;
 
 	Engine::Camera camera;
+	Engine::mat4f VPMat;
+	Engine::mat4f prevVPMat;
 
 	Engine::Viewport::AppendEditorCamera(&camera);
 
@@ -161,7 +169,18 @@ extern "C" int __declspec(dllexport) __stdcall main()
 		camera.MouseMove(diff);
 	});
 
-    while (!window->ShouldClose())
+	// Force load project if set
+	const Engine::EditorSettingsData& editorSettings = Engine::EditorSettings::Get();
+	if (editorSettings.m_forceLoadProject)
+	{
+		std::filesystem::path projectPath(editorSettings.m_forceLoadProjectPath);
+		Engine::ProjectHandler::LoadProject(projectPath);
+		std::filesystem::path sceneFile(editorSettings.m_forceLoadScenePath);
+		Engine::SceneLoader::LoadFromFile(Engine::SceneEditor::m_targetScene, sceneFile);
+		Engine::SceneEditor::m_sceneFile = sceneFile;
+	}
+
+	while (!window->ShouldClose())
     {
     	ZoneScopedNC("Frame", tracy::Color::CornflowerBlue);
 
@@ -179,8 +198,13 @@ extern "C" int __declspec(dllexport) __stdcall main()
 			rayCompute.SetUInt("Frame", frame);
 
 			const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
-			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix(viewportSize);
+			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix();
 			rayCompute.SetMat4("CamToWorld", camToWorld);
+
+    		VPMat = camera.GetProjectionMatrix(viewportSize) * camera.GetViewMatrix();
+    		rayCompute.SetMat4("VPMat", VPMat);
+
+    		if( frame != 0 ) rayCompute.SetMat4("PrevVPMat", prevVPMat);
 
 			Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
 			rayCompute.SetVec3("ViewParams", viewportParams);
@@ -191,6 +215,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
     		rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
     		rayCompute.Dispatch(computeThreads);
 			// rayTexture.UpdateData();
+
+    		prevVPMat = VPMat;
 	    }
 
 	    {

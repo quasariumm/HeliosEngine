@@ -6,6 +6,9 @@ namespace Engine
 struct EditorSettingsData
 {
     bool m_closeOnEscape = false;
+	bool m_forceLoadProject = false;
+	std::wstring m_forceLoadProjectPath = L"";
+	std::wstring m_forceLoadScenePath = L"";
 };
 
 class EditorSettings

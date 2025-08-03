@@ -102,12 +102,8 @@ public:
 };
 
 /// Add a log to the debug viewer
-inline void DebugLog(const LogSeverity type, const std::wstring& message, const int level = 0,
-                     std::source_location location = std::source_location::current())
-{
-    Logger::Get()->g_logs.emplace_back(type, message, level, location);
-    Logger::Get()->m_totalLog += Logger::Get()->g_logs.back().FileText();
-}
+void ENGINE_API DebugLog(LogSeverity type, const std::wstring& message, int level = 0,
+                         std::source_location location = std::source_location::current());
 
 /// Add a value to the value debugger. Can be modified from the menu
 template <class T>
@@ -119,7 +115,7 @@ static void DebugWatchTemp(const std::wstring& name, T* value) { Logger::Get()->
 class Debugger final : public EditorInterface
 {
 public:
-    Debugger(): EditorInterface(L"Debugger") {}
+    Debugger(): EditorInterface(L"Debugger", EditorInterfaceSource::EDITOR) {}
 
     void DrawInterface() override;
 

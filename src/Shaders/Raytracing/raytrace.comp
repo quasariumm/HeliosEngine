@@ -3,11 +3,17 @@
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
+#define REPROJECTION
+//#define REPROJECTION_BILERP
+//#define ACCUMULATION
+
 layout(rgba32f, binding = 0) uniform image2D OutTexture;
 uniform uint ScreenWidth;
 uniform uint ScreenHeight;
 
 uniform mat4 CamToWorld;
+uniform mat4 VPMat;
+uniform mat4 PrevVPMat;
 uniform vec3 ViewParams;
 
 uniform uint Frame = 0;
@@ -109,6 +115,23 @@ uint WangHash(in uint seed)
 	return seed;
 }
 
+vec4 SamplePrevColor(vec2 PixelCoord, float depth)
+{
+	vec2 uv = PixelCoord / vec2(ScreenWidth, ScreenHeight);
+	vec4 currNDC = vec4(uv * 2.0 - 1.0, depth, 1.0);
+
+	vec4 worldPos = inverse(VPMat) * currNDC;
+	worldPos /= worldPos.w;
+
+	vec4 prevNDC = PrevVPMat * worldPos;
+	vec2 prevUV = (prevNDC.xy / prevNDC.w) * 0.5 + 0.5;
+
+	// Option A: imageLoad (nearest neighbor)
+	vec2 texelCoord = clamp(prevUV, vec2(0.0), vec2(1.0)) * vec2(ScreenWidth, ScreenHeight) - 0.5;
+	ivec2 prevTexelCoord = ivec2(texelCoord);
+	return imageLoad(OutTexture, prevTexelCoord);
+}
+
 void main()
 {
 	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
@@ -135,12 +158,58 @@ void main()
 
 	vec4 pixel = vec4(Trace(ray, seed), 1.0);
 	pixel = max(pixel, vec4(0.0, 0.0, 0.0, 1.0));
-	if (!ClearAccumulator)
-	{
-		vec4 accumulatorColor = imageLoad(OutTexture, texelCoord);
-		pixel = mix(accumulatorColor, pixel, 1.0 / (Frame + 1));
-		pixel.a = 1.0;
-	}
+    
+    #ifdef REPROJECTION
+		if (!ClearAccumulator && ray.hit.didHit)
+    {
+		vec4 accumulatorColor;
+		
+		#ifdef REPROJECTION_BILERP
+		//Bilinear interpolation
+		if (tc.x >= 0 && tc.x < ScreenWidth - 2 && tc.y >= 0 && tc.y < ScreenHeight - 2)
+		{
+			vec4 currNDC = vec4(tc * 2.0 - 1.0, ray.hit.dst, 1.0);
+			vec4 worldPos = inverse(VPMat) * currNDC;
+			worldPos /= worldPos.w;
+
+			vec4 prevNDC = PrevVPMat * worldPos;
+			vec2 prevUV = (prevNDC.xy / prevNDC.w) * 0.5 + 0.5;
+			vec2 clampedPrevUV = clamp(prevUV, vec2(0.0), vec2(1.0 - 1.0 / vec2(ScreenWidth, ScreenHeight)));
+			ivec2 prevTexelCoord = ivec2(clampedPrevUV * vec2(ScreenWidth, ScreenHeight));
+			
+			float fx = fract( prevTexelCoord.x ), fy = fract( prevTexelCoord.y );
+			float w0 = (1 - fx) * (1 - fy);
+			float w1 = fx * (1 - fy);
+			float w2 = (1 - fx) * fy;
+			float w3 = fx * fy;
+			
+			vec4 p0 = SamplePrevColor(prevTexelCoord, ray.hit.dst); // (x,y)
+			vec4 p1 = SamplePrevColor(vec2(prevTexelCoord.x + 1, prevTexelCoord.y), ray.hit.dst); // (x+1,y)
+			vec4 p2 = SamplePrevColor(vec2(prevTexelCoord.x, prevTexelCoord.y + 1), ray.hit.dst); // (x,y+1)
+			vec4 p3 = SamplePrevColor(vec2(prevTexelCoord.x + 1, prevTexelCoord.y+ 1), ray.hit.dst); // (x+1,y+1)
+			accumulatorColor = p0 * w0 + p1 * w1 + p2 * w2 + p3 * w3;
+		}
+		else
+		{
+			accumulatorColor = SamplePrevColor(tc, ray.hit.dst); // (x,y)
+		}
+		#else
+		
+		accumulatorColor = SamplePrevColor(tc, ray.hit.dst); // (x,y)
+		
+		#endif //REPROJECTION_BILERP
+		
+        pixel = mix(accumulatorColor, pixel, 0.25);
+        pixel.a = 1.0;
+    }
+    #elif defined(ACCUMULATION)
+		if (!ClearAccumulator)
+    {
+        vec4 accumulatorColor = imageLoad(OutTexture, texelCoord);
+        pixel = mix(accumulatorColor, pixel, 1.0 / (Frame + 1));
+        pixel.a = 1.0;
+    }
+    #endif // ACCUMULATION
 
 	imageStore(OutTexture, texelCoord, pixel);
 }

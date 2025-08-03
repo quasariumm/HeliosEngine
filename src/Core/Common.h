@@ -16,6 +16,9 @@ class Material;
 class Light;
 }
 
+/*
+ * Console logging tags
+ */
 
 static const std::wstring ANSI_OK = L"[\033[32m OK \033[0m] ";
 static const std::wstring ANSI_DONE = L"[\033[32mDONE\033[0m] ";
@@ -24,12 +27,26 @@ static const std::wstring ANSI_WARN = L"[\033[33mWARN\033[0m] ";
 static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
 
 /*
+ * Typedefs
+ */
+
+namespace Engine
+{
+typedef vec4t<uint8_t>	Color8;
+typedef vec4f			Color32F;
+}
+
+
+
+/*
  * Static lists
  */
 
 static std::unordered_set<std::string> loadedShaders;
 static std::vector<Engine::Material*> materials;
 static std::vector<Engine::Light*> lights;
+
+
 
 /*
  * Defines
@@ -41,6 +58,8 @@ static constexpr float INV2PI		=	1.f / (2.f * PI);
 static constexpr float TWOPI		=	2.f * PI;
 static constexpr float SQRT_PI_INV	=	std::numbers::inv_sqrtpi_v<float>;
 static constexpr float LARGE_FLOAT	=	1e34f;
+
+
 
 /*
  * Macros
@@ -71,6 +90,28 @@ static constexpr float LARGE_FLOAT	=	1e34f;
  * @param str The string literal
  */
 #define TEXT(str) L##str
+
+/**
+ * @brief Checks if a point is in a 2D bounding box
+ * @param cmp The point to compare
+ * @param min The top left corner
+ * @param max The bottom right corner
+ */
+#define CHECK_AABB2D(cmp, min, max) ((cmp).x >= (min).x && (cmp).x <= (max).x && (cmp).y >= (min).y && (cmp).y <= (max).y)
+
+/**
+ * @brief Checks if a point is in a 3D bounding box
+ * @param cmp The point to compare
+ * @param min The top left corner
+ * @param max The bottom right corner
+ */
+#define CHECK_AABB3D(cmp, min, max) ((cmp).x >= (min).x && (cmp).x <= (max).x && (cmp).y >= (min).y && (cmp).y <= (max).y && (cmp).z >= (min).z && (cmp).z <= (max).z)
+
+
+
+/*
+ * Functions
+ */
 
 /**
  * @brief Converts a wide string to a UTF-8 encoded basic string

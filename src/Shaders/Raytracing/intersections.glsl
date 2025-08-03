@@ -20,6 +20,7 @@ uniform int NumSpheres = 0;
 
 void RaySphere(inout Ray ray, Sphere sphere)
 {
+	
 	// Thanks for the code, Sebastian Lague
 	vec3 oc = ray.origin - sphere.center;
 	float b = dot(oc, ray.dir);

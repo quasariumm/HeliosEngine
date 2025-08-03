@@ -12,6 +12,13 @@ Logger* Logger::Get()
     return instance;
 }
 
+void DebugLog(const LogSeverity type, const std::wstring& message, const int level, std::source_location location)
+{
+    Logger::Get()->g_logs.emplace_back(type, message, level, location);
+    Logger::Get()->m_totalLog += Logger::Get()->g_logs.back().FileText();
+    std::cout << WStringToUTF8(message) << "\n";
+}
+
 void Debugger::DrawInterface()
 {
 	{
@@ -72,7 +79,7 @@ void Debugger::DrawLogs()
         float spacing = 30;
         ImGui::SameLine(spacing);
 
-        if (showSource)
+        if (showSource && !ProjectHandler::m_lockOut)
         {
             ImGui::Text(ICON_CODE_BLOCK_BRACES);
             std::filesystem::path file = std::filesystem::path(log.source.file_name()).make_preferred();
@@ -83,6 +90,7 @@ void Debugger::DrawLogs()
 
             ImGui::SetItemTooltip(ICON_FILE_CODE " %s\n" ICON_FORMAT_LIST_NUMBERED " %o:%o\n" ICON_CODE_BRACES " %s",
                 file.string().c_str(), log.source.line(), log.source.column(), log.source.function_name());
+
             spacing += 25;
             ImGui::SameLine(spacing);
         }
