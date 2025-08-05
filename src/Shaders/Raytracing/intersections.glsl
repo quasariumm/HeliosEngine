@@ -75,10 +75,21 @@ void RaySphere(inout Ray ray, Sphere sphere)
 struct Vertex
 {
 	vec3 position;
-	vec3 normal;
-	vec3 tangent;
+	// The normal is in the first 16 bits of an axis, tangent in the other 16 bits
+	// This needs to be a uint because of parameter reasons
+	uvec3 normalTanget;
 	// Bitangent is cross(normal, tangent)
 };
+
+void UnpackNormalTangent(in uvec3 original, inout vec3 normal, inout vec3 tangent)
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		vec2 res = unpackHalf2x16(original[i]);
+		normal[i] = res[0];
+		tangent[i] = res[1];
+	}
+}
 
 layout (std430, binding = 5) readonly buffer VertexBuffer
 {
@@ -130,8 +141,14 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 		ray.hit.dst = t;
 		ray.hit.hitPoint = ray.origin + ray.dir * t;
 		float w = 1.0 - u - v;
-		ray.hit.normal = u * v0.normal + v * v1.normal + w * v2.normal;
-		ray.hit.tangent = u * v0.tangent + v * v1.tangent + w * v2.tangent;
+
+		// Sorry for a bit of Jacco code here
+		vec3 v0n = vec3(0.0); vec3 v0t = vec3(0.0); UnpackNormalTangent(v0.normalTanget, v0n, v0t);
+		vec3 v1n = vec3(0.0); vec3 v1t = vec3(0.0); UnpackNormalTangent(v1.normalTanget, v1n, v1t);
+		vec3 v2n = vec3(0.0); vec3 v2t = vec3(0.0); UnpackNormalTangent(v2.normalTanget, v2n, v2t);
+
+		ray.hit.normal = u * v0n + v * v1n + w * v2n;
+		ray.hit.tangent = u * v0t + v * v1t + w * v2t;
 	}
 }
 
