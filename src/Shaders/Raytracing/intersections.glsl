@@ -39,7 +39,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 		ray.hit.material = sphere.material;
 		ray.hit.dst = t1;
 		ray.hit.hitPoint = ray.origin + ray.dir * t1;
-		ray.hit.normal = normalize(hitInfo.hitPoint - sphere.center);
+		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.center);
 
 		// Calculate tangent vector
 		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
@@ -128,7 +128,7 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 		ray.hit.didHit = true;
 		ray.hit.material = mesh.material;
 		ray.hit.dst = t;
-		ray.hit.hitPoint = ray.origin + ray.dir * t2;
+		ray.hit.hitPoint = ray.origin + ray.dir * t;
 		float w = 1.0 - u - v;
 		ray.hit.normal = u * v0.normal + v * v1.normal + w * v2.normal;
 		ray.hit.tangent = u * v0.tangent + v * v1.tangent + w * v2.tangent;
