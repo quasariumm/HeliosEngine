@@ -108,7 +108,11 @@ namespace Engine
 
         Component* AddComponentByName(const std::wstring& name);
 
-        void RemoveComponent() { }
+        void RemoveComponent(const uint32_t componentIdx)
+        {
+            m_components[componentIdx].reset();
+            m_components.erase(m_components.begin() + componentIdx);
+        }
 
         const std::vector<std::unique_ptr<Component>>& GetComponentList() {return m_components;}
         

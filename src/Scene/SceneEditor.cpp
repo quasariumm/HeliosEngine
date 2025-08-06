@@ -125,15 +125,24 @@ void SceneEditor::ObjectEditor()
 
     ImGui::Separator();
 
-    if (ImGui::CollapsingHeader("Transform"))
+    if (ImGui::CollapsingHeader(ICON_AXIS_ARROW" Transform"))
         selectedObject->GetTransform()->TransformControllerUI();
 
 	uint32_t idCounter = 0;
     for (const std::unique_ptr<Component>& c : selectedObject->GetComponentList())
     {
-    	ImGui::PushID((void*)(intptr_t)idCounter);
+    	ImGui::PushID(reinterpret_cast<void*>(static_cast<intptr_t>(idCounter)));
 	    if (ImGui::CollapsingHeader(WStringToUTF8(c->GetName()).c_str()))
+	    {
+	        if (ImGui::Button(ICON_DELETE" Remove"))
+	        {
+	            selectedObject->RemoveComponent(idCounter);
+	            ImGui::PopID();
+	            break;
+	        }
+	        ImGui::Separator();
 	    	c->DisplayProperties();
+	    }
     	ImGui::PopID();
     	idCounter++;
     }
