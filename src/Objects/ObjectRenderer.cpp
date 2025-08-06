@@ -115,9 +115,7 @@ void ObjectRenderer::SetMaterialData(const std::string& base, const int material
 {
     if (m_computeShader == nullptr) return;
     const std::string matBaseName = base + ".material";
-	if (materialIdx < 0 || materialIdx >= materials.size())
-		throw std::range_error("Material index out of range");
-	const Material* mat = materials[materialIdx];
+	const Material* mat = MaterialRegister::Instance().GetMaterial(materialIdx);
 
 	const int type = mat->m_properties.reflection
 		| (mat->m_properties.microfacet << 1)

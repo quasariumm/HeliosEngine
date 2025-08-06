@@ -3,6 +3,15 @@ project(Engine)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# Set the way the engine launches:
+# "Default"
+# Normal way of loading the engine
+# "Standalone"
+# Launches it as an executable which makes debugging easier, but does not allow project loading
+# Make sure to use a config that launches the executable
+
+set(ENGINE_LAUNCH_MODE "Default")
+
 add_subdirectory(launcher)
 
 file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h lib/glad/src/glad.c)
@@ -41,7 +50,14 @@ elseif(MSVC)
     add_compile_options(/arch:SSE2 /arch:AVX)
 endif()
 
-add_library(Engine SHARED ${LIBS} ${SOURCE})
+# Create library or executable based on launch option
+if(ENGINE_LAUNCH_MODE MATCHES "Standalone")
+    add_executable(Engine ${LIBS} ${SOURCE})
+    message("Launching engine in standalone mode... Creating executable")
+else ()
+    add_library(Engine SHARED ${LIBS} ${SOURCE})
+    message("Launching engine in default mode... Creating library")
+endif ()
 
 target_compile_definitions(Engine PRIVATE ENGINE_BUILD_DLL)
 

@@ -154,6 +154,15 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	Engine::Viewport::AppendEditorCamera(&camera);
 
+	// Setting default material
+	auto defaultMaterial = Engine::Material();
+	defaultMaterial.m_properties = { 1, 0, 1, 1, 1, 1 };
+	defaultMaterial.m_microfacetModel = { 1, 0, 0, 0 };
+	defaultMaterial.m_diffuseColor = Engine::vec3f(0.9f, 0.6f, 0.3f);
+	defaultMaterial.m_specularColor = Engine::vec3f(1.f, 1.f, 1.f);
+	defaultMaterial.m_refractionCoefficient = 1.f;
+	Engine::MaterialRegister::Instance().SetDefaultMaterial(&defaultMaterial);
+
 	window->SetMouseButtonDownCallback([&camera](Engine::Window&, Engine::MouseButton button)
 	{
 		camera.MouseButtonDown(button);
