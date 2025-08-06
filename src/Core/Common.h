@@ -42,11 +42,10 @@ typedef vec4f			Color32F;
  * Static lists
  */
 
+// TODO: Replace these with handlers to prevent issues with project dll loading
+
 static std::unordered_set<std::string> loadedShaders;
-static std::vector<Engine::Material*> materials;
 static std::vector<Engine::Light*> lights;
-
-
 
 /*
  * Defines

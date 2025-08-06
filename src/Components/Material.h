@@ -5,6 +5,47 @@
 namespace Engine
 {
 
+class Material;
+
+class MaterialRegister
+{
+public:
+	static ENGINE_API MaterialRegister& Instance()
+	{
+		static MaterialRegister instance;
+		return instance;
+	}
+
+	void RegisterMaterial(Material* mat) { m_materials.push_back(mat); }
+
+	[[nodiscard]]
+	Material* GetMaterial(const int idx) const
+	{
+		// If requested material is invalid, use the default
+		if (idx < 0 || idx >= m_materials.size() || m_materials[idx] == nullptr)
+		{
+			if (m_defaultMaterial == nullptr)
+				throw std::invalid_argument("Default material has not been created");
+			return m_defaultMaterial;
+		}
+
+		return m_materials[idx];
+	}
+
+	[[nodiscard]]
+	int GetNumMaterials() const { return static_cast<int>(m_materials.size()); }
+
+	[[nodiscard]]
+	std::vector<Material*>& GetMaterials() { return m_materials; }
+
+	void SetDefaultMaterial(Material* mat) { m_defaultMaterial = mat; }
+
+private:
+	std::vector<Material*> m_materials;
+
+	Material* m_defaultMaterial = nullptr;
+};
+
 static void DisplayMaterialProperties(void* data);
 static void DisplayMicrofacetModel(void* data);
 
@@ -33,9 +74,20 @@ public:
 		AssignProperty(L"PBR Reflectance", &m_PBR_Reflectance);
 	}
 
+	static ENGINE_API void SetupDefaultMaterial()
+	{
+		static Material material;
+		material.m_properties = { 1, 0, 1, 1, 1, 1 };
+		material.m_microfacetModel = { 1, 0, 0, 0 };
+		material.m_diffuseColor = vec3f(0.9f, 0.6f, 0.3f);
+		material.m_specularColor = vec3f(1.f, 1.f, 1.f);
+		material.m_refractionCoefficient = 1.f;
+		MaterialRegister::Instance().RegisterMaterial(&material);
+	}
+
 	void Init() override
 	{
-		materials.push_back(this);
+		MaterialRegister::Instance().RegisterMaterial(this);
 	}
 
 	struct MaterialProperties
@@ -85,7 +137,8 @@ static void DisplayMaterialProperties(void* data)
 	static Material offsetMaterial = {};
 	static size_t propertiesOffset = (size_t)&offsetMaterial.m_properties - (size_t)&offsetMaterial;
 
-	const int idx = std::distance(materials.begin(), std::ranges::find(materials, (Material*)((intptr_t)mat - (intptr_t)propertiesOffset)));
+	std::vector<Material*> materialList = MaterialRegister::Instance().GetMaterials();
+	const int idx = std::distance(materialList.begin(), std::ranges::find(materialList, (Material*)((intptr_t)mat - (intptr_t)propertiesOffset)));
 	ImGui::Text("Material idx: %i", idx);
 	ImGui::Separator();
 
@@ -145,18 +198,4 @@ static void DisplayMicrofacetModel(void* data)
 }
 
 REGISTER_COMPONENT(Material, STR_TO_WSTR(ICON_PALETTE_SWATCH_VARIANT) + L" Material");
-
-static Material defaultMaterial;
-
-static bool setDefaultMaterial = []()
-{
-	defaultMaterial.m_properties = { 1, 0, 1, 1, 1, 1 };
-	defaultMaterial.m_microfacetModel = { 1, 0, 0, 0 };
-	defaultMaterial.m_diffuseColor = vec3f(0.9f, 0.6f, 0.3f);
-	defaultMaterial.m_specularColor = vec3f(1.f, 1.f, 1.f);
-	defaultMaterial.m_refractionCoefficient = 1.f;
-	materials.push_back(&defaultMaterial);
-	return true;
-}();
-
 }
