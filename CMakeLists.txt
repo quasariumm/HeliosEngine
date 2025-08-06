@@ -8,8 +8,9 @@ set(CMAKE_CXX_STANDARD 20)
 # Normal way of loading the engine
 # "Standalone"
 # Launches it as an executable which makes debugging easier, but does not allow project loading
+# Make sure to use a config that launches the executable
 
-set(ENGINE_LAUNCH_MODE "Standalone")
+set(ENGINE_LAUNCH_MODE "Default")
 
 add_subdirectory(launcher)
 
