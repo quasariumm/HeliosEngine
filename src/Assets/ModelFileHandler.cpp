@@ -96,27 +96,24 @@ ModelData* ModelFileHandler::LoadModel( const std::filesystem::path& modelFile )
 	if (m_loadedModels.contains(modelFile.wstring()))
 		return &m_loadedModels[modelFile.wstring()];
 
-	// TODO: Assimp is unusable (any function call specifically kills it)
-	// Assimp::Importer importer;
+	Assimp::Importer importer;
 
-	return nullptr;
-	//
-	// const aiScene* scene = importer.ReadFile(modelFile.string().c_str(),
-	// 	aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-	//
-	// if (!scene
-	// 	|| scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE
-	// 	|| !scene->mRootNode)
-	// {
-	// 	DebugLog(LogSeverity::SEVERE, std::format(L"Assimp error {0}.", STR_TO_WSTR(importer.GetErrorString()).c_str()));
-	// 	return nullptr;
-	// }
-	//
-	// m_loadedModels[modelFile.wstring()] = {};
-	//
-	// ProcessNode(scene->mRootNode, scene, m_loadedModels[modelFile.wstring()].meshes, modelFile.parent_path());
-	//
-	// return &m_loadedModels[modelFile.wstring()];
+	const aiScene* scene = importer.ReadFile(modelFile.string().c_str(),
+		aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+
+	if (!scene
+		|| scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE
+		|| !scene->mRootNode)
+	{
+		DebugLog(LogSeverity::SEVERE, std::format(L"Assimp error {0}.", STR_TO_WSTR(importer.GetErrorString()).c_str()));
+		return nullptr;
+	}
+
+	m_loadedModels[modelFile.wstring()] = {};
+
+	ProcessNode(scene->mRootNode, scene, m_loadedModels[modelFile.wstring()].meshes, modelFile.parent_path());
+
+	return &m_loadedModels[modelFile.wstring()];
 }
 
 }

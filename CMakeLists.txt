@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Launches it as an executable which makes debugging easier, but does not allow project loading
 # Make sure to use a config that launches the executable
 
-set(ENGINE_LAUNCH_MODE "Default")
+set(ENGINE_LAUNCH_MODE "Standalone")
 
 add_subdirectory(launcher)
 
@@ -112,7 +112,8 @@ set(MSVC_LIBS
 
 set(UNIX_LIBS
         glfw3
-        assimpd.dll
+        assimpd
+        zlibstaticd
 )
 
 
@@ -143,7 +144,9 @@ else()
     target_link_directories(Engine PUBLIC
             lib/glfw/lib-mingw
             "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/lib>"
+            "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/contrib/zlib>"
             "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/lib>"
+            "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/contrib/zlib>"
     )
 
     target_link_libraries(Engine PUBLIC ${UNIX_LIBS})
