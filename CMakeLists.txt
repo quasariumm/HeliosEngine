@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Launches it as an executable which makes debugging easier, but does not allow project loading
 # Make sure to use a config that launches the executable
 
-set(ENGINE_LAUNCH_MODE "Standalone")
+set(ENGINE_LAUNCH_MODE "Default")
 
 add_subdirectory(launcher)
 
@@ -68,6 +68,12 @@ endif()
 add_subdirectory(extern/nativefiledialog-extended)
 add_subdirectory(extern/Tracy)
 
+add_subdirectory(extern/Assimp)
+set (CMAKE_CXX_STANDARD 20) # Because Assimp changes it back to C++17
+# Configure Assimp to work with our project
+set( BUILD_SHARED_LIBS      OFF )
+set( ASSIMP_INSTALL         OFF )
+
 
 target_compile_definitions(Engine PRIVATE
         "$<$<CONFIG:Debug>:DEBUG=1>"
@@ -107,17 +113,14 @@ target_precompile_headers(Engine PUBLIC
 
 set(MSVC_LIBS
         glfw3.lib
-        libassimp-5d.dll
 )
 
 set(UNIX_LIBS
         glfw3
-        assimpd
-        zlibstaticd
 )
 
 
-target_link_libraries(Engine PUBLIC nfd Tracy::TracyClient)
+target_link_libraries(Engine PUBLIC nfd Tracy::TracyClient assimp::assimp)
 
 if (MSVC)
 
@@ -125,15 +128,11 @@ if (MSVC)
         # 64-bit
         target_link_directories(Engine PUBLIC
                 lib/glfw/lib-vc2010-64
-                "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/bin>"
-                "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/bin>"
         )
     else()
         # 32 bit
         target_link_directories(Engine PUBLIC
                 lib/glfw/lib-vc2010-32
-                "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/bin>"
-                "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/bin>"
         )
     endif()
 
@@ -143,10 +142,6 @@ else()
 
     target_link_directories(Engine PUBLIC
             lib/glfw/lib-mingw
-            "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/lib>"
-            "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-debug/contrib/zlib>"
-            "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/lib>"
-            "$<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/extern/Assimp/cmake-build-release/contrib/zlib>"
     )
 
     target_link_libraries(Engine PUBLIC ${UNIX_LIBS})
