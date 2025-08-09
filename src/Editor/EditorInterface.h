@@ -37,6 +37,8 @@ public:
 
     void DrawAllInterfaces();
 
+    void SetInterfaceActive(const std::wstring& name, bool active);
+
     static void SetMouseEnabled(bool enable = true);
     static void SetKeyboardEnable(bool enable = true);
 

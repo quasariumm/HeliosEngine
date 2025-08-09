@@ -91,8 +91,7 @@ void SceneEditor::ObjectEditor()
 	ZoneScopedNC("Object viewer", tracy::Color::MediumPurple2);
     ImGui::Begin(ICON_CUBE_SCAN" Object Viewer", nullptr, ImGuiWindowFlags_MenuBar);
 
-    if (ProjectHandler::m_lockOut)
-        m_selectedObject = 0;
+    if (ProjectHandler::m_lockOut) m_selectedObject = 0;
 
     // Get the actual object
     SceneObject* selectedObject = nullptr;
@@ -102,7 +101,7 @@ void SceneEditor::ObjectEditor()
     if (ImGui::BeginMenuBar())
     {
         // Show text of no object selected
-        if (m_selectedObject == 0)
+        if (m_selectedObject == 0 || selectedObject == nullptr)
             ImGui::Text(ICON_CUBE" No object selected");
         else
             ImGui::Text(WStringToUTF8(STR_TO_WSTR(ICON_CUBE) + L" " + selectedObject->GetName()).c_str());

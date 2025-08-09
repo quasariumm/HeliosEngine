@@ -2,6 +2,7 @@
 
 #include <tracy/Tracy.hpp>
 
+#include "ActionRecorder.h"
 #include "EditorSettings.h"
 #include "Projects/ProjectHandler.h"
 #include "Debugger/Debugger.h"
@@ -63,6 +64,10 @@ void EditorInterfaceManager::DrawAllInterfaces()
 		ProjectHandler::ShowProjectSelector(true);
 	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Comma, globalShortcutFlags))
 		EditorSettings::OpenWindow();
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z, globalShortcutFlags))
+		ActionRecorder::Instance()->UndoAction();
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y, globalShortcutFlags))
+		ActionRecorder::Instance()->RedoAction();
 	// TODO(Quillan): CTRL+SHIFT+O to open the "Open recent menu"
 	{
     	ZoneScopedNC("Menu bar", tracy::Color::MediumOrchid2);
@@ -104,6 +109,16 @@ void EditorInterfaceManager::DrawAllInterfaces()
 
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu(ICON_FILE_TREE" Actions"))
+			{
+				if (ImGui::MenuItem(ICON_UNDO" Undo action", "CTRL+Z"))
+					ActionRecorder::Instance()->UndoAction();
+				if (ImGui::MenuItem(ICON_REDO" Redo action", "CTRL+Y"))
+					ActionRecorder::Instance()->RedoAction();
+				if (ImGui::MenuItem(ICON_REDO_VARIANT" Show action tree", "CTRL+SHIFT+Y"))
+					SetInterfaceActive(L"ActionsTreeViewer", true);
+				ImGui::EndMenu();
+			}
 			if (ImGui::BeginMenu(ICON_TOOLBOX" Editor"))
 			{
 				if (ImGui::MenuItem(ICON_COG" Settings", "CTRL+,"))
@@ -134,6 +149,12 @@ void EditorInterfaceManager::DrawAllInterfaces()
         if (i.second->active)
         	i.second->DrawInterface();
     }
+}
+
+void EditorInterfaceManager::SetInterfaceActive(const std::wstring& name, bool active)
+{
+	if (!m_editorInterfaces.contains(name)) return;
+	m_editorInterfaces[name]->active = active;
 }
 
 void EditorInterfaceManager::SetMouseEnabled(bool enable)
