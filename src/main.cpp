@@ -143,7 +143,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	rayCompute.SetInt("OutTexture", 0);
 	rayCompute.SetUInt("ScreenWidth", window->GetSize().x);
 	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
-
+	
     Engine::Timer frameTimer;
 	uint32_t frame = 0;
 	float deltaTime = 0.f;
@@ -202,6 +202,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	    }
 
 	    {
+    		
     		ZoneScopedNC("Compute shader dispatch", tracy::Color::LightGreen);
 			rayCompute.Use();
 			rayCompute.SetUInt("Frame", frame);
@@ -210,11 +211,13 @@ extern "C" int __declspec(dllexport) __stdcall main()
 			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix();
 			rayCompute.SetMat4("CamToWorld", camToWorld);
 
+    		prevVPMat = VPMat;
     		VPMat = camera.GetProjectionMatrix(viewportSize) * camera.GetViewMatrix();
+    		
     		rayCompute.SetMat4("VPMat", VPMat);
 
-    		if( frame != 0 ) rayCompute.SetMat4("PrevVPMat", prevVPMat);
-
+    		rayCompute.SetMat4("PrevVPMat", prevVPMat);
+    		
 			Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
 			rayCompute.SetVec3("ViewParams", viewportParams);
 
@@ -224,8 +227,6 @@ extern "C" int __declspec(dllexport) __stdcall main()
     		rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
     		rayCompute.Dispatch(computeThreads);
 			// rayTexture.UpdateData();
-
-    		prevVPMat = VPMat;
 	    }
 
 	    {

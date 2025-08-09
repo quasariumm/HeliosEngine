@@ -47,12 +47,12 @@ vec3 GetSkyboxColor(in Ray ray)
 	return mix(GroundColor, skyGradient, groundToSkyT) + sun * sunMask;
 }
 
-vec3 Trace(Ray ray, uint seed)
+vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 {
 	vec3 incommingLight = vec3(0);
 	vec3 rayColor = vec3(1);
 
-	for (int i = 0; i <= 10; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		RayCollision(ray);
 
@@ -100,6 +100,7 @@ vec3 Trace(Ray ray, uint seed)
 			incommingLight += rayColor * GetSkyboxColor(ray);
 			break;
 		}
+		if(i == 1) firstRay = ray;
 	}
 
 	return incommingLight;
@@ -117,31 +118,38 @@ uint WangHash(in uint seed)
 
 vec4 SamplePrevColor(vec2 PixelCoord, float depth)
 {
-	vec2 uv = PixelCoord / vec2(ScreenWidth, ScreenHeight);
-	vec4 currNDC = vec4(uv * 2.0 - 1.0, depth, 1.0);
+	// Convert pixel coordinate and depth to NDC
+	vec4 currNDC = vec4(PixelCoord * 2.0 - 1.0, -depth/1e30 * 2.0 - 1.0, 1.0);
 
+	// Transform to world space
 	vec4 worldPos = inverse(VPMat) * currNDC;
 	worldPos /= worldPos.w;
 
+	// Project to previous frame's screen space
 	vec4 prevNDC = PrevVPMat * worldPos;
 	vec2 prevUV = (prevNDC.xy / prevNDC.w) * 0.5 + 0.5;
 
-	// Option A: imageLoad (nearest neighbor)
-	vec2 texelCoord = clamp(prevUV, vec2(0.0), vec2(1.0)) * vec2(ScreenWidth, ScreenHeight) - 0.5;
-	ivec2 prevTexelCoord = ivec2(texelCoord);
-	return imageLoad(OutTexture, prevTexelCoord);
+	// Check bounds before sampling
+	if (any(lessThan(prevUV, vec2(0.0))) || any(greaterThan(prevUV, vec2(1.0))))
+		return vec4(0.0); // or handle out-of-bounds case
+
+	// Convert to texel coordinates
+	vec2 prevTexelCoord = prevUV * vec2(ScreenWidth, ScreenHeight);
+	ivec2 prevPixelCoord = ivec2(round(prevTexelCoord));
+
+	return imageLoad(OutTexture, prevPixelCoord);
 }
 
 void main()
 {
 	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-
+	
 	if (texelCoord.x >= ScreenWidth || texelCoord.y >= ScreenHeight)
 	{
 		return;
 	}
 
-	vec2 tc = vec2(float(texelCoord.x) / float(ScreenWidth), float(texelCoord.y) / float(ScreenHeight));
+	vec2 tc = vec2(texelCoord / vec2(ScreenWidth, ScreenHeight));
 
 	vec3 focusDirLocal = vec3((tc - 0.5) * ViewParams.xy, ViewParams.z);
 	vec3 focusDir = normalize((CamToWorld * vec4(focusDirLocal, 1.0)).xyz);
@@ -155,12 +163,14 @@ void main()
 	uint seed = uint(floor(tc.y * ScreenHeight * ScreenWidth + tc.x * ScreenWidth));
 	seed ^= WangHash(Frame);
 	seed = WangHash(seed);
-
-	vec4 pixel = vec4(Trace(ray, seed), 1.0);
+	
+	Ray firstRay; 
+	
+	vec4 pixel = vec4(Trace(ray, seed, firstRay), 1.0);
 	pixel = max(pixel, vec4(0.0, 0.0, 0.0, 1.0));
     
     #ifdef REPROJECTION
-		if (!ClearAccumulator && ray.hit.didHit)
+	if (!ClearAccumulator && firstRay.hit.didHit)
     {
 		vec4 accumulatorColor;
 		
@@ -168,7 +178,7 @@ void main()
 		//Bilinear interpolation
 		if (tc.x >= 0 && tc.x < ScreenWidth - 2 && tc.y >= 0 && tc.y < ScreenHeight - 2)
 		{
-			vec4 currNDC = vec4(tc * 2.0 - 1.0, ray.hit.dst, 1.0);
+			vec4 currNDC = vec4(tc * 2.0 - 1.0, firstRay.hit.dst, 1.0);
 			vec4 worldPos = inverse(VPMat) * currNDC;
 			worldPos /= worldPos.w;
 
@@ -183,23 +193,23 @@ void main()
 			float w2 = (1 - fx) * fy;
 			float w3 = fx * fy;
 			
-			vec4 p0 = SamplePrevColor(prevTexelCoord, ray.hit.dst); // (x,y)
-			vec4 p1 = SamplePrevColor(vec2(prevTexelCoord.x + 1, prevTexelCoord.y), ray.hit.dst); // (x+1,y)
-			vec4 p2 = SamplePrevColor(vec2(prevTexelCoord.x, prevTexelCoord.y + 1), ray.hit.dst); // (x,y+1)
-			vec4 p3 = SamplePrevColor(vec2(prevTexelCoord.x + 1, prevTexelCoord.y+ 1), ray.hit.dst); // (x+1,y+1)
+			vec4 p0 = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
+			vec4 p1 = SamplePrevColor(vec2(tc.x + 1, tc.y), firstRay.hit.dst); // (x+1,y)
+			vec4 p2 = SamplePrevColor(vec2(tc.x, tc.y + 1), firstRay.hit.dst); // (x,y+1)
+			vec4 p3 = SamplePrevColor(vec2(tc.x + 1, tc.y+ 1), firstRay.hit.dst); // (x+1,y+1)
 			accumulatorColor = p0 * w0 + p1 * w1 + p2 * w2 + p3 * w3;
 		}
 		else
 		{
-			accumulatorColor = SamplePrevColor(tc, ray.hit.dst); // (x,y)
+			accumulatorColor = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
 		}
-		#else
-		
-		accumulatorColor = SamplePrevColor(tc, ray.hit.dst); // (x,y)
+		#else //REPROJECTION_NO_BILERP
+
+		accumulatorColor = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
 		
 		#endif //REPROJECTION_BILERP
 		
-        pixel = mix(accumulatorColor, pixel, 0.25);
+        pixel = mix(accumulatorColor, pixel, 0.01);
         pixel.a = 1.0;
     }
     #elif defined(ACCUMULATION)
