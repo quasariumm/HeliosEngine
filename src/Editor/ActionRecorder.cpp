@@ -5,6 +5,8 @@ namespace Engine
 
 void ActionRecorder::RegisterAction(const EditorAction& action)
 {
+    if (m_isCallingAction)
+        return;
     DebugLog(LogSeverity::INFO, L"Registering action: " + action.name);
     m_actions.push_back(action);
     const int m_totalActions = static_cast<int>(m_actions.size());
@@ -22,11 +24,14 @@ void ActionRecorder::UndoAction()
         return;
     }
 
+    m_isCallingAction = true;
     if (!m_actions[m_currentActionIdx].undoAction())
     {
         DebugLog(LogSeverity::SEVERE, L"Something went wrong undoing the last action");
+        m_isCallingAction = false;
         return;
     }
+    m_isCallingAction = false;
     m_currentActionIdx = m_actions[m_currentActionIdx].prevActionIdx;
 }
 
@@ -44,8 +49,10 @@ void ActionRecorder::RedoAction(int path)
         path = static_cast<int>(m_actions[m_currentActionIdx].nextActionIdx.size()) - 1;
 
     m_currentActionIdx = m_actions[m_currentActionIdx].nextActionIdx[path];
+    m_isCallingAction = true;
     if (!m_actions[m_currentActionIdx].redoAction())
         DebugLog(LogSeverity::SEVERE, L"Something went wrong redoing the next action");
+    m_isCallingAction = false;
 }
 
 void ActionsTreeViewer::DrawInterface()
@@ -53,10 +60,26 @@ void ActionsTreeViewer::DrawInterface()
     ImGui::Begin(ICON_FILE_TREE" Action Tree");
     const std::vector<EditorAction> actions = ActionRecorder::Instance()->GetActionsList();
 
-    std::vector<EditorAction> nextActions = {actions[0] };
+    if (!ImGui::BeginTable("ActionTreeTable", 1000))
+    {
+        ImGui::End();
+        return;
+    }
+
+    std::map<int, int> unexplored = { };
+    int next = 0;
     while (true)
     {
-        if (nextActions.empty()) break;
+        if (next == -1)
+        {
+            if (unexplored.empty()) break;
+            next = unexplored.back();
+            unexplored.pop_back();
+            ImGui::NextColumn();
+        }
+
+
+
 
         std::vector<EditorAction> childActions = {};
 
@@ -84,6 +107,8 @@ void ActionsTreeViewer::DrawInterface()
         nextActions = childActions;
         childActions.clear();
     }
+
+    ImGui::EndTable();
     ImGui::End();
 }
 

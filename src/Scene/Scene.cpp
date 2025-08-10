@@ -31,7 +31,7 @@ bool Scene::ValidUID(const uint32_t UID) const
 	return std::ranges::all_of(m_sceneObjects, [&](const SceneObject* o){ return o->GetUID() != UID; });
 }
 
-SceneObject* Scene::NewObject(uint32_t UID, const bool fromAction)
+SceneObject* Scene::NewObject(uint32_t UID)
 {
     if (!ValidUID(UID))
         UID = NewUID();
@@ -48,32 +48,28 @@ SceneObject* Scene::NewObject(uint32_t UID, const bool fromAction)
 
     m_sceneObjects.push_back(object);
 
-    if (!fromAction)
-    {
-        const EditorAction action = {L"Add object",
-            [this, UID] { DeleteObject(GetSceneObject(UID), true); return true; },
-            [this, UID] { NewObject(UID, true); return true; }
-        };
-        RegisterAction(action);
-    }
+    const EditorAction action = {L"Add object",
+        [this, UID] { DeleteObject(GetSceneObject(UID)); return true; },
+        [this, UID] { NewObject(UID); return true; }
+    };
+    RegisterAction(action);
     return object;
 }
 
-void Scene::DeleteObject(const uint32_t UID, const bool fromAction)
+void Scene::DeleteObject(const uint32_t UID)
 {
     for (int i = 0; i < (int)m_sceneObjects.size(); i++)
         if (m_sceneObjects[i]->GetUID() == UID)
         {
             delete m_sceneObjects[i];
             m_sceneObjects.erase(m_sceneObjects.begin() + i);
-            if (!fromAction)
-            {
-                const EditorAction action = {L"Remove object",
-    [this, UID] { NewObject(UID, true); return true; },
-    [this, UID] { DeleteObject(GetSceneObject(UID), true); return true; }
-                };
-                RegisterAction(action);
-            }
+
+            const EditorAction action = {L"Remove object",
+    [this, UID] { NewObject(UID); return true; },
+    [this, UID] { DeleteObject(GetSceneObject(UID)); return true; }
+            };
+            RegisterAction(action);
+
             return;
         }
 }

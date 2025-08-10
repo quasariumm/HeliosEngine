@@ -58,6 +58,7 @@ class ActionRecorder {
 private:
     std::vector<EditorAction> m_actions;
     int m_currentActionIdx = -1;
+    bool m_isCallingAction = false;
 };
 
 class ActionsTreeViewer final : public EditorInterface

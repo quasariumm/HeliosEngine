@@ -19,30 +19,27 @@ namespace Engine
          * @return True if the UId is not 0 and doesn't exist yet
          */
         [[nodiscard]]
-        bool ValidUID(const uint32_t UID) const;
+        bool ValidUID(uint32_t UID) const;
 
         /**
          * @brief Creates a new object in the scene
          * @param UID (OPTIONAL) A specific UID. Used for loading in objects from disk. By default, creates a new UID
-         * @param fromAction Mark as true if being called from action system to prevent double action calls
          * @return A pointer to the scene object
          */
-        SceneObject* NewObject(uint32_t UID = 0, bool fromAction = false);
+        SceneObject* NewObject(uint32_t UID = 0);
 
         /**
          * @brief Creates a new object in the scene. Also deletes any child objects
          * @param UID The UID of the object you want to delete
-         * @param fromAction Mark as true if being called from action system to prevent double action calls
          */
-        void DeleteObject(const uint32_t UID, const bool fromAction = false);
+        void DeleteObject(uint32_t UID);
 
         /**
          * @brief Creates a new object in the scene. Also deletes any child objects
          * @param object A pointer to the object you want to delete
-         * @param fromAction Mark as true if being called from action system to prevent double action calls
          *
          */
-        void DeleteObject(const SceneObject* object, const bool fromAction = false) { DeleteObject(object->GetUID(), fromAction); }
+        void DeleteObject(const SceneObject* object) { DeleteObject(object->GetUID()); }
 
         /**
          * @brief Delete all the objects in the scene
