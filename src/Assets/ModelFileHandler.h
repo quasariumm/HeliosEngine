@@ -6,8 +6,9 @@ namespace Engine
 struct alignas(16) VertexData
 {
 	vec3f position;
+	float texCoordX;
 	vec3u normalTangent;
-	vec2f texCoords;
+	float texCoordY;
 };
 
 /** This struct is for internal use ONLY. Do NOT use it yourself */

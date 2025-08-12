@@ -76,9 +76,10 @@ struct Vertex
 	vec3 position;
 	// The normal is in the first 16 bits of an axis, tangent in the other 16 bits
 	// This needs to be a uint because of parameter reasons
+	float texCoordX;
 	uvec3 normalTanget;
 	// Bitangent is cross(normal, tangent)
-	vec2 texCoords;
+	float texCoordY;
 };
 
 void UnpackNormalTangent(in uvec3 original, inout vec3 normal, inout vec3 tangent)
@@ -119,37 +120,22 @@ layout (std430, binding = 7) readonly buffer MeshBuffer
 
 void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 {
+	// https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm#C++_implementation
 	vec3 edge1 = v1.position - v0.position;
 	vec3 edge2 = v2.position - v0.position;
-	vec3 h = cross(ray.dir, edge2);
-	float a = dot(edge1, h);
+	vec3 ray_cross_e2 = cross(ray.dir, edge2);
+	float det = dot(edge1, ray_cross_e2);
 
-	if (abs(a) < 0.00001) return;
+	if (abs(det) < 0.00001) return;
 
-	float f = 1.0 / a;
-	vec3 s = ray.origin - (v0.position + mesh.position);
-	float u = f * dot(s, h);
+	float inv_det = 1.0 / det;
+	vec3 s = ray.origin - (v0.position /* + mesh.position */);
+	float u = inv_det * dot(s, ray_cross_e2);
 	if (u < 0.0 || u > 1.0) return;
-	vec3 q = cross(s, edge1);
-	float v = f * dot(ray.dir, q);
+	vec3 s_cross_e1 = cross(s, edge1);
+	float v = inv_det * dot(ray.dir, s_cross_e1);
 	if (v < 0.0 || v + u > 1.0) return;
-	float t = f * dot(edge2, q);
-//
-//	vec3 edgeAB = v1.position - v0.position;
-//	vec3 edgeAC = v2.position - v0.position;
-//	vec3 normalVector = cross(edgeAB, edgeAC);
-//	vec3 ao = ray.origin - (v0.position + mesh.position);
-//	vec3 dao = cross(ao, ray.dir);
-//
-//	float determinant = -dot(ray.dir, normalVector);
-//	float invDet = 1 / determinant;
-//
-//	// Calculate dst to triangle & barycentric coordinates of intersection point
-//	float t = dot(ao, normalVector) * invDet;
-//	float u = dot(edgeAC, dao) * invDet;
-//	if (u < 0.0 || u > 1.0) return;
-//	float v = -dot(edgeAB, dao) * invDet;
-//	if (v < 0.0 || v + u > 1.0) return;
+	float t = inv_det * dot(edge2, s_cross_e1);
 
 	if (t > 0.0 && t < ray.hit.dst)
 	{
@@ -173,8 +159,8 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 		vec3 v1n = vec3(0.0); vec3 v1t = vec3(0.0); UnpackNormalTangent(v1.normalTanget, v1n, v1t);
 		vec3 v2n = vec3(0.0); vec3 v2t = vec3(0.0); UnpackNormalTangent(v2.normalTanget, v2n, v2t);
 
-		ray.hit.normal = u * v0n + v * v1n + w * v2n;
-		ray.hit.tangent = u * v0t + v * v1t + w * v2t;
+		ray.hit.normal = u * v1n + v * v2n + w * v0n;
+		ray.hit.tangent = u * v1t + v * v2t + w * v0t;
 	}
 }
 

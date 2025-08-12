@@ -224,7 +224,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
     			frame = 0;
     		rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
     		rayCompute.Dispatch(computeThreads);
-			rayTexture.UpdateData();
+			// rayTexture.UpdateData();
 
     		prevVPMat = VPMat;
 	    }

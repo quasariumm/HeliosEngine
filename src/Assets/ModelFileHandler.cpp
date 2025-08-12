@@ -30,8 +30,8 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 
 		if (aiMesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
 		{
-			vertex.texCoords.x = aiMesh->mTextureCoords[0][i].x;
-			vertex.texCoords.y = aiMesh->mTextureCoords[0][i].y;
+			vertex.texCoordX = aiMesh->mTextureCoords[0][i].x;
+			vertex.texCoordY = aiMesh->mTextureCoords[0][i].y;
 		}
 	}
 
