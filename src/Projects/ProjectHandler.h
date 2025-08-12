@@ -40,11 +40,11 @@ typedef void (*DestroyGameProjectFunc)(EngineProject*);
 #if WIN32
 static constexpr nfdnfilteritem_t ProjectFilters[] = {{L"Projects", L"gep"}};
 static constexpr nfdnfilteritem_t SceneFilters[] = {{L"Scenes", L"scn"}};
-static constexpr nfdnfilteritem_t ModelFilters[] = {{L"Models", L"obj,fbx,glTF"}};
+static constexpr nfdnfilteritem_t ModelFilters[] = {{L"Models", L"3ds,ase,glTF,fbx,raw,obj,ply"}};
 #else
 const constexpr nfdnfilteritem_t ProjectFilters[] = {{"Projects", "gep"}};
 const constexpr nfdnfilteritem_t SceneFilters[] = {{"Scenes", "scn"}};
-const constexpr nfdnfilteritem_t ModelFilters[] = {{"Models", "obj,fbx,glTF"}};
+const constexpr nfdnfilteritem_t ModelFilters[] = {{"Models", "3ds,ase,glTF,fbx,raw,obj,ply"}};
 #endif
 
 class ProjectHandler
