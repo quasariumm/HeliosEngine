@@ -15,10 +15,11 @@ struct RayHitInfo
 	vec3 normal;
 	vec3 tangent;
 	vec3 lightVector;
+	vec2 barycentrics;
 	RayTracingMaterial material;
 };
 
-const RayHitInfo defaultHitInfo = RayHitInfo( false, 1e30, vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), defaultMaterial );
+const RayHitInfo defaultHitInfo = RayHitInfo( false, 1e30, vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec2(0.0), defaultMaterial );
 
 struct Ray
 {

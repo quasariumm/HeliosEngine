@@ -3,9 +3,9 @@
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
-#define REPROJECTION
+//#define REPROJECTION
 //#define REPROJECTION_BILERP
-//#define ACCUMULATION
+#define ACCUMULATION
 
 layout(rgba32f, binding = 0) uniform image2D OutTexture;
 uniform uint ScreenWidth;

@@ -18,8 +18,8 @@ public:
 
     void Init() override
     {
-        ObjectRenderer::RegisterSphere(m_attachedObject->GetTransform(), &m_radius, &m_materialIdx);
-        ObjectRenderer::SendObjectData();
+        ObjectRenderer::Instance().RegisterSphere(m_attachedObject->GetTransform(), &m_radius, &m_materialIdx);
+        ObjectRenderer::Instance().SendObjectData();
     }
 
     int m_materialIdx = 0;
