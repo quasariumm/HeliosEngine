@@ -20,7 +20,6 @@ uniform int NumSpheres = 0;
 
 void RaySphere(inout Ray ray, Sphere sphere)
 {
-	
 	// Thanks for the code, Sebastian Lague
 	vec3 oc = ray.origin - sphere.center;
 	float b = dot(oc, ray.dir);
@@ -79,6 +78,7 @@ struct Vertex
 	// This needs to be a uint because of parameter reasons
 	uvec3 normalTanget;
 	// Bitangent is cross(normal, tangent)
+	vec2 texCoords;
 };
 
 void UnpackNormalTangent(in uvec3 original, inout vec3 normal, inout vec3 tangent)
@@ -91,28 +91,29 @@ void UnpackNormalTangent(in uvec3 original, inout vec3 normal, inout vec3 tangen
 	}
 }
 
+uniform uint NumVertices = 0;
 layout (std430, binding = 5) readonly buffer VertexBuffer
 {
-	int NumVertices;
 	Vertex Vertices[];
 };
 
+uniform uint NumIndices = 0;
 layout (std430, binding = 6) readonly buffer IndicesBuffer
 {
-	int NumIndices;
-	int Indices[];
+	uint Indices[];
 };
 
 struct Mesh
 {
-	int IndexCount;
-	int FirstIndex;
-	RayTracingMaterial material;
+	uint indexCount;
+	uint firstIndex;
+	vec3 position;
+	float _padding;
 };
 
+uniform uint NumMeshes = 0;
 layout (std430, binding = 7) readonly buffer MeshBuffer
 {
-	int NumMeshes;
 	Mesh Meshes[];
 };
 
@@ -126,20 +127,45 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 	if (abs(a) < 0.00001) return;
 
 	float f = 1.0 / a;
-	vec3 s = ray.origin - v0.position;
+	vec3 s = ray.origin - (v0.position + mesh.position);
 	float u = f * dot(s, h);
 	if (u < 0.0 || u > 1.0) return;
 	vec3 q = cross(s, edge1);
 	float v = f * dot(ray.dir, q);
 	if (v < 0.0 || v + u > 1.0) return;
 	float t = f * dot(edge2, q);
+//
+//	vec3 edgeAB = v1.position - v0.position;
+//	vec3 edgeAC = v2.position - v0.position;
+//	vec3 normalVector = cross(edgeAB, edgeAC);
+//	vec3 ao = ray.origin - (v0.position + mesh.position);
+//	vec3 dao = cross(ao, ray.dir);
+//
+//	float determinant = -dot(ray.dir, normalVector);
+//	float invDet = 1 / determinant;
+//
+//	// Calculate dst to triangle & barycentric coordinates of intersection point
+//	float t = dot(ao, normalVector) * invDet;
+//	float u = dot(edgeAC, dao) * invDet;
+//	if (u < 0.0 || u > 1.0) return;
+//	float v = -dot(edgeAB, dao) * invDet;
+//	if (v < 0.0 || v + u > 1.0) return;
 
 	if (t > 0.0 && t < ray.hit.dst)
 	{
 		ray.hit.didHit = true;
-		ray.hit.material = mesh.material;
+		ray.hit.material = RayTracingMaterial(
+			MATERIAL_DEFAULT, 		// type
+			vec3(1.0), vec3(1.0), 	// albedo
+			0.0, 0.0, 0.0, 			// specular parameters
+			vec3(0.0), 0.0, 		// emission
+			0.0, 1.0, 				// transmission/dielectric
+			0.3, 0.3, 0.3,			// PBR
+			0.0, 0.0				// Anisotropic alphas
+		);
 		ray.hit.dst = t;
 		ray.hit.hitPoint = ray.origin + ray.dir * t;
+		ray.hit.barycentrics = vec2(u, v);
 		float w = 1.0 - u - v;
 
 		// Sorry for a bit of Jacco code here
@@ -155,7 +181,7 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 void RayMesh(inout Ray ray, Mesh mesh)
 {
 	// Check triangles based on the indices
-	for (int i = mesh.FirstIndex; i < mesh.FirstIndex + mesh.IndexCount; i += 3)
+	for (uint i = mesh.firstIndex; i < mesh.firstIndex + mesh.indexCount; i += 3)
 	{
 		RayTriangle(
 			ray,
@@ -171,7 +197,7 @@ void RayMesh(inout Ray ray, Mesh mesh)
 	Scene collision
 */
 
-void RayCollision(Ray ray)
+void RayCollision(inout Ray ray)
 {
 	ray.hit = defaultHitInfo;
 	ray.hit.didHit = false;
@@ -179,7 +205,7 @@ void RayCollision(Ray ray)
 	for (int i = 0; i < NumSpheres; ++i)
 		RaySphere(ray, Spheres[i]);
 
-	for (int i = 0; i < NumMeshes; ++i)
+	for (uint i = 0; i < NumMeshes; ++i)
 		RayMesh(ray, Meshes[i]);
 }
 

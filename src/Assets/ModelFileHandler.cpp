@@ -24,13 +24,9 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 		vertex.position.y = aiMesh->mVertices[i].y;
 		vertex.position.z = aiMesh->mVertices[i].z;
 
-		vertex.normal.x = aiMesh->mNormals[i].x;
-		vertex.normal.y = aiMesh->mNormals[i].y;
-		vertex.normal.z = aiMesh->mNormals[i].z;
-
-		vertex.tangent.x = aiMesh->mTangents[i].x;
-		vertex.tangent.y = aiMesh->mTangents[i].y;
-		vertex.tangent.z = aiMesh->mTangents[i].z;
+		vertex.normalTangent.x = PackHalf2x16(aiMesh->mNormals[i].x, aiMesh->mTangents[i].x);
+		vertex.normalTangent.y = PackHalf2x16(aiMesh->mNormals[i].y, aiMesh->mTangents[i].y);
+		vertex.normalTangent.z = PackHalf2x16(aiMesh->mNormals[i].z, aiMesh->mTangents[i].z);
 
 		if (aiMesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
 		{
@@ -43,7 +39,6 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 	 * Indices
 	 */
 
-	unsigned counter = 0;
 	for (unsigned i = 0; i < aiMesh->mNumFaces; i++)
 	{
 		const aiFace face = aiMesh->mFaces[i];

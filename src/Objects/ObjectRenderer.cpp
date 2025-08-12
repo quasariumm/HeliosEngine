@@ -1,5 +1,6 @@
 #include "ObjectRenderer.h"
 
+#include "Assets/ModelFileHandler.h"
 #include "Components/Light.h"
 #include "Components/Material.h"
 
@@ -7,8 +8,20 @@
 namespace Engine
 {
 
-std::vector<RenderObject> ObjectRenderer::m_renderObjects = {};
-GL46_ComputeShader* ObjectRenderer::m_computeShader = {};
+
+ObjectRenderer::~ObjectRenderer()
+{
+	glDeleteBuffers(1, &m_meshSSBO);
+	glDeleteBuffers(1, &m_vertexSSBO);
+	glDeleteBuffers(1, &m_indexSSBO);
+}
+
+
+void ObjectRenderer::SetShader(GL46_ComputeShader* shader)
+{
+	m_computeShader = shader;
+}
+
 
 void ObjectRenderer::SendObjectData()
 {
@@ -17,7 +30,6 @@ void ObjectRenderer::SendObjectData()
 
     int sphereIdx = 0;
     int cubeIdx = 0;
-    int modelIdx = 0;
 
     for (const RenderObject& object : m_renderObjects)
     {
@@ -35,7 +47,6 @@ void ObjectRenderer::SendObjectData()
             cubeIdx++;
             break;
         case PrimitiveType::MODEL:
-            modelIdx++;
             break;
         }
 
@@ -92,17 +103,111 @@ void ObjectRenderer::SendObjectData()
 	m_computeShader->SetUInt("NumSimpleSpotLights", simpleSpotIdx);
 }
 
-void ObjectRenderer::RegisterModelInstance(Transform* transform, uint32_t modelUID)
+void ObjectRenderer::RegisterModelInstance(Transform* transform, ModelData** modelDataLoc)
 {
-    m_renderObjects.emplace_back(PrimitiveType::MODEL, transform, modelUID);
+    m_renderObjects.emplace_back(PrimitiveType::MODEL, transform, modelDataLoc);
+	UpdateModelSSBOs();
 }
 
 void ObjectRenderer::RegisterSphere(Transform* transform, float* radius, int* materialIdx)
 {
-    m_renderObjects.emplace_back(PrimitiveType::SPHERE, transform, -1, radius, materialIdx);
+    m_renderObjects.emplace_back(PrimitiveType::SPHERE, transform, nullptr, radius, materialIdx);
 }
 
-void ObjectRenderer::SetSphereData(const int idx, const vec3 position, const float radius)
+
+void ObjectRenderer::UpdateModelSSBOs()
+{
+	// Delete old buffers
+	glDeleteBuffers(1, &m_meshSSBO);
+	glDeleteBuffers(1, &m_vertexSSBO);
+	glDeleteBuffers(1, &m_indexSSBO);
+
+	// Generate new ones that we're going to use
+	glGenBuffers(1, &m_meshSSBO);
+	glGenBuffers(1, &m_vertexSSBO);
+	glGenBuffers(1, &m_indexSSBO);
+
+	// Associate the buffers with the GL_SHADER_STORAGE_BUFFER name
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_meshSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_vertexSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_indexSSBO);
+
+	// Determine the amount of vertices, indices and meshes
+	uint32_t meshAmount = 0;
+	uint32_t vertexAmount = 0;
+	uint32_t indexAmount = 0;
+	for (const RenderObject& renderObject : m_renderObjects)
+	{
+		if (renderObject.primitiveType != PrimitiveType::MODEL) continue;
+		ModelData* modelData = *renderObject.modelDataLoc;
+		if (modelData == nullptr) continue;
+		meshAmount += modelData->meshes.size();
+		for (MeshData& mesh : modelData->meshes)
+		{
+			vertexAmount += mesh.vertices.size();
+			indexAmount += mesh.indices.size();
+		}
+	}
+
+	// Set the Num**** variables in the first part of the data
+	m_computeShader->Use();
+	m_computeShader->SetUInt("NumMeshes", meshAmount);
+	m_computeShader->SetUInt("NumVertices", vertexAmount);
+	m_computeShader->SetUInt("NumIndices", indexAmount);
+
+	if (meshAmount == 0) return;
+
+	// Allocate enough space for the buffers
+	glNamedBufferStorage(
+		m_meshSSBO,
+		sizeofll(GPUMesh) * meshAmount,
+		nullptr,
+		GL_DYNAMIC_STORAGE_BIT
+	);
+	glNamedBufferStorage(
+		m_vertexSSBO,
+		sizeofll(VertexData) * vertexAmount,
+		nullptr,
+		GL_DYNAMIC_STORAGE_BIT
+	);
+	glNamedBufferStorage(
+		m_indexSSBO,
+		sizeofll(uint32_t) * indexAmount,
+		nullptr,
+		GL_DYNAMIC_STORAGE_BIT
+	);
+
+	// Send data per mesh
+	uint32_t meshIndex = 0;
+	uint32_t vertexIndex = 0;
+	uint32_t indexIndex = 0;
+	for (const RenderObject& renderObject : m_renderObjects)
+	{
+		if (renderObject.primitiveType != PrimitiveType::MODEL) continue;
+		ModelData* modelData = *renderObject.modelDataLoc;
+		if (modelData == nullptr) continue;
+		for (MeshData& mesh : modelData->meshes)
+		{
+			mesh.gpuMesh = { (uint32_t)mesh.indices.size(), indexIndex, vec3f(0.f), 1.f };
+			glNamedBufferSubData(m_meshSSBO, meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &mesh.gpuMesh);
+			const auto vertices = (int64_t)mesh.vertices.size();
+			const auto indices = (int64_t)mesh.indices.size();
+			glNamedBufferSubData(m_vertexSSBO, vertexIndex * sizeofll(VertexData), vertices * sizeofll(VertexData), mesh.vertices.data());
+			glNamedBufferSubData(m_indexSSBO, indexIndex * sizeofll(uint32_t), indices * sizeofll(uint32_t), mesh.indices.data());
+			meshIndex++;
+			vertexIndex += vertices;
+			indexIndex += indices;
+		}
+	}
+
+	// Bind newly made buffers to the shader
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, m_meshSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, m_indexSSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_vertexSSBO);
+}
+
+
+void ObjectRenderer::SetSphereData(const int idx, const vec3f position, const float radius) const
 {
     if (m_computeShader == nullptr) return;
     const std::string baseName = "Spheres[" + std::to_string(idx) + "]";
@@ -111,7 +216,8 @@ void ObjectRenderer::SetSphereData(const int idx, const vec3 position, const flo
 
 }
 
-void ObjectRenderer::SetMaterialData(const std::string& base, const int materialIdx)
+
+void ObjectRenderer::SetMaterialData(const std::string& base, const int materialIdx) const
 {
     if (m_computeShader == nullptr) return;
     const std::string matBaseName = base + ".material";

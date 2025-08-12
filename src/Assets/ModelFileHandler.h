@@ -6,15 +6,25 @@ namespace Engine
 struct alignas(16) VertexData
 {
 	vec3f position;
-	vec3f normal;
-	vec3f tangent;
+	vec3u normalTangent;
 	vec2f texCoords;
+};
+
+/** This struct is for internal use ONLY. Do NOT use it yourself */
+struct GPUMesh
+{
+	uint32_t indexCount = 0;
+	uint32_t firstIndex = 0;
+	vec3f position;
+	float _padding = 0.f;
 };
 
 struct MeshData
 {
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
+
+	GPUMesh gpuMesh;
 
 	int materialIndex;
 };

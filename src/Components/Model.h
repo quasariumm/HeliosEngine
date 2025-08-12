@@ -23,7 +23,7 @@ public:
 
 	void Init() override
 	{
-
+		ObjectRenderer::Instance().RegisterModelInstance(m_attachedObject->GetTransform(), &modelData);
 	}
 
 	void DisplayProperties() override
@@ -35,8 +35,10 @@ public:
 		{
 			m_cachedModelPath = modelPath;
 			modelData = ModelFileHandler::LoadModel(modelPath);
+			ObjectRenderer::Instance().UpdateModelSSBOs();
 		}
 
+		if (modelData == nullptr) return;
 		// Display the meshes and their properties
 		for (MeshData& mesh : modelData->meshes)
 		{
@@ -67,7 +69,7 @@ inline void DisplayModelPath(void* data)
 	ImGui::Text(path.string().c_str());
 	ImGui::SameLine();
 	if (ImGui::Button("Browse"))
-		if (ProjectHandler::ShowFileSelect(path))
+		if (ProjectHandler::ShowFileSelect(path, ModelFilters))
 			*wstring = path.wstring();
 }
 

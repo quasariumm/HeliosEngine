@@ -68,11 +68,11 @@ endif()
 add_subdirectory(extern/nativefiledialog-extended)
 add_subdirectory(extern/Tracy)
 
-add_subdirectory(extern/Assimp)
-set (CMAKE_CXX_STANDARD 20) # Because Assimp changes it back to C++17
 # Configure Assimp to work with our project
 set( BUILD_SHARED_LIBS      OFF )
 set( ASSIMP_INSTALL         OFF )
+add_subdirectory(extern/Assimp)
+set (CMAKE_CXX_STANDARD 20) # Because Assimp changes it back to C++17
 
 
 target_compile_definitions(Engine PRIVATE

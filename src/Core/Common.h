@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include "IconDefines.h"
+#include "float16_t.hpp"
 
 #ifdef ENGINE_BUILD_DLL
   #define ENGINE_API __declspec(dllexport)
@@ -68,6 +69,9 @@ static constexpr float LARGE_FLOAT	=	1e34f;
 #define RAD(x) { (x) * 0.0174532925f }
 
 #define CALL(func, ...) if (func) (func).operator()(__VA_ARGS__)
+
+// Because OpenGL likes their size types as signed
+#define sizeofll(obj) (int64_t)sizeof(obj)
 
 /**
  * @brief Converts a string to a wide string
@@ -211,4 +215,14 @@ inline std::wstring EnginePath(bool stringSafe = false)
     if (!stringSafe) return enginePath;
     std::ranges::replace(enginePath, '\\', '/');
     return enginePath;
+}
+
+/**
+ * @brief Packs two floats into one 32-bit int containing the two floats as half floats complying with IEEE 754
+ * @note Complies with OpenGL standards: \n
+ *			The first vector component specifies the 16 least-significant bits of the result; the second component specifies the 16 most-significant bits.
+ */
+inline std::uint32_t PackHalf2x16(const float a, const float b)
+{
+	return (uint32_t)( (uint16_t)numeric::float16_t(b) << 16 | (uint16_t)numeric::float16_t(a) );
 }

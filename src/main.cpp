@@ -6,6 +6,7 @@
 #include "Components/Sphere.h"
 #include "Components/Material.h"
 #include "Components/Light.h"
+#include "Components/Model.h"
 #include "Core/Window.h"
 #include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"
@@ -137,7 +138,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 		1u
 	};
 
-	Engine::ObjectRenderer::SetShader(&rayCompute);
+	Engine::ObjectRenderer::Instance().SetShader(&rayCompute);
 
 	rayCompute.Use();
 	rayCompute.SetInt("OutTexture", 0);
@@ -193,7 +194,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
     {
     	ZoneScopedNC("Frame", tracy::Color::CornflowerBlue);
 
-    	Engine::ObjectRenderer::SendObjectData();
+    	Engine::ObjectRenderer::Instance().SendObjectData();
 
 	    {
     		ZoneScopedNC("Input", tracy::Color::LightCoral);
@@ -223,7 +224,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
     			frame = 0;
     		rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
     		rayCompute.Dispatch(computeThreads);
-			// rayTexture.UpdateData();
+			rayTexture.UpdateData();
 
     		prevVPMat = VPMat;
 	    }
