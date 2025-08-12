@@ -188,7 +188,7 @@ void ObjectRenderer::UpdateModelSSBOs()
 		if (modelData == nullptr) continue;
 		for (MeshData& mesh : modelData->meshes)
 		{
-			mesh.gpuMesh = { (uint32_t)mesh.indices.size(), indexIndex, vec3f(0.f), 1.f };
+			mesh.gpuMesh = { (uint32_t)mesh.indices.size(), indexIndex, renderObject.transform->position(), 1.f };
 			glNamedBufferSubData(m_meshSSBO, meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &mesh.gpuMesh);
 			const auto vertices = (int64_t)mesh.vertices.size();
 			const auto indices = (int64_t)mesh.indices.size();
