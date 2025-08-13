@@ -11,15 +11,6 @@ struct alignas(16) VertexData
 	float texCoordY;
 };
 
-/** This struct is for internal use ONLY. Do NOT use it yourself */
-struct GPUMesh
-{
-	uint32_t indexCount = 0;
-	uint32_t firstIndex = 0;
-	vec3f position = vec3f(0.f);
-	int materialIndex = -1;
-};
-
 struct MeshData
 {
 	std::vector<VertexData> vertices;

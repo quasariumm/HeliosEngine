@@ -106,10 +106,11 @@ layout (std430, binding = 6) readonly buffer IndicesBuffer
 
 struct Mesh
 {
-	uint indexCount;
-	uint firstIndex;
 	vec3 position;
 	int materialIndex;
+	uint indexCount;
+	uint firstIndex;
+	vec2 _padding;
 };
 
 uniform uint NumMeshes = 0;
@@ -129,7 +130,7 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 	if (abs(det) < 0.00001) return;
 
 	float inv_det = 1.0 / det;
-	vec3 s = ray.origin - (v0.position /* + mesh.position */);
+	vec3 s = ray.origin - (v0.position + mesh.position);
 	float u = inv_det * dot(s, ray_cross_e2);
 	if (u < 0.0 || u > 1.0) return;
 	vec3 s_cross_e1 = cross(s, edge1);

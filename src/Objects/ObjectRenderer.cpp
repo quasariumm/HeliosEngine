@@ -115,6 +115,15 @@ void ObjectRenderer::RegisterSphere(Transform* transform, float* radius, int* ma
 }
 
 
+struct GPUMesh
+{
+	vec3f position = vec3f(0.f);
+	int materialIndex = -1;
+	uint32_t indexCount = 0;
+	uint32_t firstIndex = 0;
+	vec2f _padding;
+};
+
 void ObjectRenderer::UpdateModelSSBOs()
 {
 	if (m_computeShader == nullptr) return;
@@ -193,7 +202,7 @@ void ObjectRenderer::UpdateModelSSBOs()
 		for (const MeshData& mesh : modelData->meshes)
 		{
 			const int materialIndex = (mesh.materialIndex >= 0 && mesh.materialIndex < numMaterials) ? mesh.materialIndex + 1 : 0;
-			GPUMesh gpuMesh = { (uint32_t)mesh.indices.size(), indexIndex, renderObject.transform->position(), materialIndex };
+			GPUMesh gpuMesh = { renderObject.transform->position(), materialIndex, (uint32_t)mesh.indices.size(), indexIndex, vec2f(0.f) };
 			glNamedBufferSubData(m_meshSSBO, meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &gpuMesh);
 			const auto vertices = (int64_t)mesh.vertices.size();
 			const auto indices = (int64_t)mesh.indices.size();
