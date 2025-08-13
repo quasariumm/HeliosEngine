@@ -16,8 +16,8 @@ struct GPUMesh
 {
 	uint32_t indexCount = 0;
 	uint32_t firstIndex = 0;
-	vec3f position;
-	float _padding = 0.f;
+	vec3f position = vec3f(0.f);
+	int materialIndex = -1;
 };
 
 struct MeshData
@@ -25,9 +25,7 @@ struct MeshData
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
 
-	GPUMesh gpuMesh;
-
-	int materialIndex;
+	int materialIndex = -1;
 };
 
 struct ModelData

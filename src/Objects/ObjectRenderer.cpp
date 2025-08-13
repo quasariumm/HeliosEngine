@@ -14,6 +14,7 @@ ObjectRenderer::~ObjectRenderer()
 	glDeleteBuffers(1, &m_meshSSBO);
 	glDeleteBuffers(1, &m_vertexSSBO);
 	glDeleteBuffers(1, &m_indexSSBO);
+	glDeleteBuffers(1, &m_materialSSBO);
 }
 
 
@@ -38,9 +39,8 @@ void ObjectRenderer::SendObjectData()
         switch (object.primitiveType)
         {
         case PrimitiveType::SPHERE:
-            SetSphereData(sphereIdx, object.transform->position(), *object.radius );
+            SetSphereData(sphereIdx, object.transform->position(), *object.radius, *object.materialIdx );
             baseName = "Spheres[" + std::to_string(sphereIdx) + "]";
-            SetMaterialData(baseName, *object.materialIdx);
             sphereIdx++;
             break;
         case PrimitiveType::CUBE:
@@ -117,6 +117,7 @@ void ObjectRenderer::RegisterSphere(Transform* transform, float* radius, int* ma
 
 void ObjectRenderer::UpdateModelSSBOs()
 {
+	if (m_computeShader == nullptr) return;
 	// Delete old buffers
 	glDeleteBuffers(1, &m_meshSSBO);
 	glDeleteBuffers(1, &m_vertexSSBO);
@@ -181,15 +182,19 @@ void ObjectRenderer::UpdateModelSSBOs()
 	uint32_t meshIndex = 0;
 	uint32_t vertexIndex = 0;
 	uint32_t indexIndex = 0;
+
+	const int numMaterials = MaterialRegister::Instance().GetNumMaterials();
+
 	for (const RenderObject& renderObject : m_renderObjects)
 	{
 		if (renderObject.primitiveType != PrimitiveType::MODEL) continue;
-		ModelData* modelData = *renderObject.modelDataLoc;
+		const ModelData* modelData = *renderObject.modelDataLoc;
 		if (modelData == nullptr) continue;
-		for (MeshData& mesh : modelData->meshes)
+		for (const MeshData& mesh : modelData->meshes)
 		{
-			mesh.gpuMesh = { (uint32_t)mesh.indices.size(), indexIndex, renderObject.transform->position(), 1.f };
-			glNamedBufferSubData(m_meshSSBO, meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &mesh.gpuMesh);
+			const int materialIndex = (mesh.materialIndex >= 0 && mesh.materialIndex < numMaterials) ? mesh.materialIndex + 1 : 0;
+			GPUMesh gpuMesh = { (uint32_t)mesh.indices.size(), indexIndex, renderObject.transform->position(), materialIndex };
+			glNamedBufferSubData(m_meshSSBO, meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &gpuMesh);
 			const auto vertices = (int64_t)mesh.vertices.size();
 			const auto indices = (int64_t)mesh.indices.size();
 			glNamedBufferSubData(m_vertexSSBO, vertexIndex * sizeofll(VertexData), vertices * sizeofll(VertexData), mesh.vertices.data());
@@ -207,52 +212,105 @@ void ObjectRenderer::UpdateModelSSBOs()
 }
 
 
-void ObjectRenderer::SetSphereData(const int idx, const vec3f position, const float radius) const
+void ObjectRenderer::SetSphereData(const int idx, const vec3f position, const float radius, int materialIndex) const
 {
     if (m_computeShader == nullptr) return;
     const std::string baseName = "Spheres[" + std::to_string(idx) + "]";
     m_computeShader->SetVec3(baseName + ".center", position);
     m_computeShader->SetFloat(baseName + ".radius", radius);
 
+	const int numMaterials = MaterialRegister::Instance().GetNumMaterials();
+	materialIndex = (materialIndex >= 0 && materialIndex < numMaterials) ? materialIndex + 1 : 0;
+
+	m_computeShader->SetInt(baseName + ".materialIndex", materialIndex);
 }
 
 
-void ObjectRenderer::SetMaterialData(const std::string& base, const int materialIdx) const
+struct GPUMaterial
+{
+	vec3f diffuseColor;
+	float specularity;
+	vec3f specularColor;
+	float shininess;
+	vec3f emissionColor;
+	float emissionStrength;
+	int type;
+	float glossiness;
+	float refractivity;
+	float refractionCoefficient;
+	float PBR_Roughness;
+	float PBR_Metallic;
+	float PBR_Reflectance;
+	float alphaX;
+	float alphaY;
+	float _padding[3];
+};
+
+void ObjectRenderer::UpdateMaterialSSBO()
 {
     if (m_computeShader == nullptr) return;
-    const std::string matBaseName = base + ".material";
-	const Material* mat = MaterialRegister::Instance().GetMaterial(materialIdx);
+	// Delete old buffer
+	glDeleteBuffers(1, &m_materialSSBO);
+	// Create a new one
+	glGenBuffers(1, &m_materialSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_materialSSBO);
 
-	const int type = mat->m_properties.reflection
-		| (mat->m_properties.microfacet << 1)
-		| (mat->m_properties.transmission << 2)
-		| (mat->m_properties.diffuse << 3)
-		| (mat->m_properties.glossy << 4)
-		| (mat->m_properties.specular << 5)
-		| (mat->m_microfacetModel.beckmann << 6)
-		| (mat->m_microfacetModel.ggx_iso << 7)
-		| (mat->m_microfacetModel.ggx_aniso << 8)
-		| (mat->m_microfacetModel.blinnphong << 9);
-	m_computeShader->SetInt(matBaseName + ".type", type);
+	// Determine the size
+	glNamedBufferStorage(
+		m_materialSSBO,
+		(MaterialRegister::Instance().GetNumMaterials() + 1) * sizeofll(GPUMaterial),
+		nullptr,
+		GL_DYNAMIC_STORAGE_BIT
+	);
 
-    m_computeShader->SetVec3(matBaseName + ".diffuseColor", mat->m_diffuseColor);
-    m_computeShader->SetVec3(matBaseName + ".specularColor", mat->m_specularColor);
-    m_computeShader->SetFloat(matBaseName + ".specularity", mat->m_specularity);
-    m_computeShader->SetFloat(matBaseName + ".shininess", mat->m_shininess);
-    m_computeShader->SetFloat(matBaseName + ".specularProbability", mat->m_glossiness);
+	auto FillMaterial = [this](const Material* mat, const int idx) -> void
+	{
+		const int type = mat->m_properties.reflection
+			| (mat->m_properties.microfacet << 1)
+			| (mat->m_properties.transmission << 2)
+			| (mat->m_properties.diffuse << 3)
+			| (mat->m_properties.glossy << 4)
+			| (mat->m_properties.specular << 5)
+			| (mat->m_microfacetModel.beckmann << 6)
+			| (mat->m_microfacetModel.ggx_iso << 7)
+			| (mat->m_microfacetModel.ggx_aniso << 8)
+			| (mat->m_microfacetModel.blinnphong << 9);
+		const GPUMaterial gpuMaterial = {
+			.diffuseColor = mat->m_diffuseColor,
+			.specularity = mat->m_specularity,
+			.specularColor = mat->m_specularColor,
+			.shininess = mat->m_shininess,
+			.emissionColor = mat->m_emissionColor,
+			.emissionStrength = mat->m_emissionStrength,
+			.type= type,
+			.glossiness = mat->m_glossiness,
+			.refractivity = mat->m_refractivity,
+			.refractionCoefficient = mat->m_refractionCoefficient,
+			.PBR_Roughness = mat->m_PBR_Roughness,
+			.PBR_Metallic = mat->m_PBR_Metallic,
+			.PBR_Reflectance = mat->m_PBR_Reflectance,
+			.alphaX = mat->m_microfacetModel.alphaX,
+			.alphaY = mat->m_microfacetModel.alphaY,
+			._padding= {0.f}
+		};
+		glNamedBufferSubData(m_materialSSBO, idx * sizeofll(GPUMaterial), sizeofll(GPUMaterial), &gpuMaterial);
+	};
 
-    m_computeShader->SetVec3(matBaseName + ".emissionColor", mat->m_emissionColor);
-    m_computeShader->SetFloat(matBaseName + ".emissionStrength", mat->m_emissionStrength);
+	// Add the default material to the buffer
+	const Material* defaultMaterial = MaterialRegister::Instance().GetMaterial(-1);
+	FillMaterial(defaultMaterial, 0);
 
-    m_computeShader->SetFloat(matBaseName + ".refractivity", mat->m_refractivity);
-    m_computeShader->SetFloat(matBaseName + ".refractionCoefficient", mat->m_refractionCoefficient);
+	// Add the materials to the new buffer
+	const auto& materials = MaterialRegister::Instance().GetMaterials();
+    for (int i = 0; i < materials.size(); ++i)
+    {
+    	const Material* mat = materials[i];
+    	FillMaterial(mat, i + 1);
+    }
 
-	m_computeShader->SetFloat(matBaseName + ".PBR_Roughness", mat->m_PBR_Roughness);
-	m_computeShader->SetFloat(matBaseName + ".PBR_Metallic", mat->m_PBR_Metallic);
-	m_computeShader->SetFloat(matBaseName + ".PBR_Reflectance", mat->m_PBR_Reflectance);
-
-	m_computeShader->SetFloat(matBaseName + ".alphaX", mat->m_microfacetModel.alphaX);
-	m_computeShader->SetFloat(matBaseName + ".alphaY", mat->m_microfacetModel.alphaY);
+	// Bind the buffer
+	m_computeShader->Use();
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, m_materialSSBO);
 }
 
 }

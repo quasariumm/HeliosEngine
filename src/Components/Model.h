@@ -45,7 +45,8 @@ public:
 			ImGui::PushID(&mesh);
 			if (ImGui::TreeNode("Mesh"))
 			{
-				ImGui::InputInt("Material Index", &mesh.materialIndex);
+				if (ImGui::InputInt("Material Index", &mesh.materialIndex))
+					ObjectRenderer::Instance().UpdateModelSSBOs();
 				ImGui::TreePop();
 			}
 			ImGui::PopID();

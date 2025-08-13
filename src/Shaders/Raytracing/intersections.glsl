@@ -12,7 +12,7 @@ struct Sphere
 {
 	vec3 center;
 	float radius;
-	RayTracingMaterial material;
+	int materialIndex;
 };
 #define SPHERES_MAX 16
 uniform Sphere Spheres[SPHERES_MAX];
@@ -35,7 +35,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 	if (t1 >= 0.0 && t1 < ray.hit.dst)
 	{
 		ray.hit.didHit = true;
-		ray.hit.material = sphere.material;
+		ray.hit.materialIndex = sphere.materialIndex;
 		ray.hit.dst = t1;
 		ray.hit.hitPoint = ray.origin + ray.dir * t1;
 		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.center);
@@ -52,7 +52,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 	if (t2 >= 0.0 && t2 < ray.hit.dst && t1 <= 0)
 	{
 		ray.hit.didHit = true;
-		ray.hit.material = sphere.material;
+		ray.hit.materialIndex = sphere.materialIndex;
 		ray.hit.dst = t2;
 		ray.hit.hitPoint = ray.origin + ray.dir * t2;
 		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.center);
@@ -109,7 +109,7 @@ struct Mesh
 	uint indexCount;
 	uint firstIndex;
 	vec3 position;
-	float _padding;
+	int materialIndex;
 };
 
 uniform uint NumMeshes = 0;
@@ -140,15 +140,7 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 	if (t > 0.0 && t < ray.hit.dst)
 	{
 		ray.hit.didHit = true;
-		ray.hit.material = RayTracingMaterial(
-			MATERIAL_DEFAULT, 		// type
-			vec3(1.0), vec3(1.0), 	// albedo
-			0.0, 0.0, 0.0, 			// specular parameters
-			vec3(0.0), 0.0, 		// emission
-			0.0, 1.0, 				// transmission/dielectric
-			0.3, 0.3, 0.3,			// PBR
-			0.0, 0.0				// Anisotropic alphas
-		);
+		ray.hit.materialIndex = mesh.materialIndex;
 		ray.hit.dst = t;
 		ray.hit.hitPoint = ray.origin + ray.dir * t;
 		ray.hit.barycentrics = vec2(u, v);

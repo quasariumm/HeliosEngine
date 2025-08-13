@@ -58,7 +58,7 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 
 		if (ray.hit.didHit)
 		{
-			RayTracingMaterial material = ray.hit.material;
+			RayTracingMaterial material = Materials[ray.hit.materialIndex];
 
 			vec3 emittance = material.emissionColor * material.emissionStrength;
 

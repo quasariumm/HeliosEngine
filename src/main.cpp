@@ -163,6 +163,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	defaultMaterial.m_specularColor = Engine::vec3f(1.f, 1.f, 1.f);
 	defaultMaterial.m_refractionCoefficient = 1.f;
 	Engine::MaterialRegister::Instance().SetDefaultMaterial(&defaultMaterial);
+	Engine::ObjectRenderer::Instance().UpdateMaterialSSBO();
 
 	window->SetMouseButtonDownCallback([&camera](Engine::Window&, Engine::MouseButton button)
 	{

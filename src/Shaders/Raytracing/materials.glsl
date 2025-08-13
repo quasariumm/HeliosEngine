@@ -81,7 +81,7 @@ vec3 GetBRDFAndBounce(inout Ray ray, inout uint seed)
 
 	bool glassReflect = false;
 
-	RayTracingMaterial material = ray.hit.material;
+	RayTracingMaterial material = Materials[ray.hit.materialIndex];
 
 	if ((material.type & MATERIAL_DIFFUSE) != 0)
 	{

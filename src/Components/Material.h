@@ -140,6 +140,10 @@ static void DisplayMaterialProperties(void* data)
 	std::vector<Material*> materialList = MaterialRegister::Instance().GetMaterials();
 	const int idx = std::distance(materialList.begin(), std::ranges::find(materialList, (Material*)((intptr_t)mat - (intptr_t)propertiesOffset)));
 	ImGui::Text("Material idx: %i", idx);
+	if (ImGui::Button("Apply changes"))
+	{
+		ObjectRenderer::Instance().UpdateMaterialSSBO();
+	}
 	ImGui::Separator();
 
 	bool reflection = mat->reflection;

@@ -70,17 +70,14 @@ public:
 	 */
 	void UpdateModelSSBOs();
 
+	/**
+	 * @brief Can be called to manually update the SSBO
+	 */
+	void UpdateMaterialSSBO();
+
 private:
 
-    void SetSphereData(int idx, vec3f position, float radius) const;
-
-    /**
-     * Sets the uniform for an object's material data
-     * @param base The base name for uniform setting
-     * @param materialIdx The index of the material in the global material list
-     * @throws std::range_error When the material index is less than zero or more than the array is long
-     */
-    void SetMaterialData( const std::string& base, int materialIdx ) const;
+    void SetSphereData(int idx, vec3f position, float radius, int materialIndex) const;
 
     std::vector<RenderObject> m_renderObjects;
     GL46_ComputeShader* m_computeShader;
@@ -88,5 +85,6 @@ private:
 	uint32_t m_meshSSBO;
 	uint32_t m_vertexSSBO;
 	uint32_t m_indexSSBO;
+	uint32_t m_materialSSBO;
 };
 }
