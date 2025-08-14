@@ -1,4 +1,5 @@
 #pragma once
+#include "Backends/OpenGL46_GLFW/GL46_Buffer.h"
 #include "Backends/OpenGL46_GLFW/Graphics/GL46_ComputeShader.h"
 #include "Scene/SceneObjects.h"
 
@@ -30,7 +31,7 @@ class ObjectRenderer
 public:
 
 	ObjectRenderer()
-		: m_computeShader(nullptr), m_meshSSBO(0), m_vertexSSBO(0), m_indexSSBO(0), m_materialSSBO(0) {};
+		: m_computeShader(nullptr), m_meshSSBO(), m_vertexSSBO(), m_indexSSBO(), m_materialSSBO() {};
 
 	virtual ~ObjectRenderer();
 
@@ -95,9 +96,9 @@ private:
     std::vector<RenderObject> m_renderObjects;
     GL46_ComputeShader* m_computeShader;
 
-	uint32_t m_meshSSBO;
-	uint32_t m_vertexSSBO;
-	uint32_t m_indexSSBO;
-	uint32_t m_materialSSBO;
+	GL46_Buffer m_meshSSBO;
+	GL46_Buffer m_vertexSSBO;
+	GL46_Buffer m_indexSSBO;
+	GL46_Buffer m_materialSSBO;
 };
 }

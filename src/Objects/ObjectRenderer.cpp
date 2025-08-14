@@ -11,10 +11,10 @@ namespace Engine
 
 ObjectRenderer::~ObjectRenderer()
 {
-	glDeleteBuffers(1, &m_meshSSBO);
-	glDeleteBuffers(1, &m_vertexSSBO);
-	glDeleteBuffers(1, &m_indexSSBO);
-	glDeleteBuffers(1, &m_materialSSBO);
+	m_meshSSBO.Clear();
+	m_vertexSSBO.Clear();
+	m_indexSSBO.Clear();
+	m_materialSSBO.Clear();
 }
 
 
@@ -152,19 +152,14 @@ void ObjectRenderer::UpdateModelSSBOs()
 {
 	if (m_computeShader == nullptr) return;
 	// Delete old buffers
-	glDeleteBuffers(1, &m_meshSSBO);
-	glDeleteBuffers(1, &m_vertexSSBO);
-	glDeleteBuffers(1, &m_indexSSBO);
+	m_meshSSBO.Clear();
+	m_vertexSSBO.Clear();
+	m_indexSSBO.Clear();
 
-	// Generate new ones that we're going to use
-	glGenBuffers(1, &m_meshSSBO);
-	glGenBuffers(1, &m_vertexSSBO);
-	glGenBuffers(1, &m_indexSSBO);
-
-	// Associate the buffers with the GL_SHADER_STORAGE_BUFFER name
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_meshSSBO);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_vertexSSBO);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_indexSSBO);
+	// Initialise the buffers again to the ShaderStorage type
+	m_meshSSBO.Init(BufferType::ShaderStorage);
+	m_vertexSSBO.Init(BufferType::ShaderStorage);
+	m_indexSSBO.Init(BufferType::ShaderStorage);
 
 	// Determine the amount of vertices, indices and meshes
 	uint32_t meshAmount = 0;
@@ -192,24 +187,9 @@ void ObjectRenderer::UpdateModelSSBOs()
 	if (meshAmount == 0) return;
 
 	// Allocate enough space for the buffers
-	glNamedBufferStorage(
-		m_meshSSBO,
-		sizeofll(GPUMesh) * meshAmount,
-		nullptr,
-		GL_DYNAMIC_STORAGE_BIT
-	);
-	glNamedBufferStorage(
-		m_vertexSSBO,
-		sizeofll(VertexData) * vertexAmount,
-		nullptr,
-		GL_DYNAMIC_STORAGE_BIT
-	);
-	glNamedBufferStorage(
-		m_indexSSBO,
-		sizeofll(uint32_t) * indexAmount,
-		nullptr,
-		GL_DYNAMIC_STORAGE_BIT
-	);
+	m_meshSSBO.Fill(sizeofll(GPUMesh) * meshAmount);
+	m_vertexSSBO.Fill(sizeofll(VertexData) * vertexAmount);
+	m_indexSSBO.Fill(sizeofll(uint32_t) * indexAmount);
 
 	// Send data per mesh
 	uint32_t meshIndex = 0;
@@ -227,11 +207,11 @@ void ObjectRenderer::UpdateModelSSBOs()
 		{
 			const int materialIndex = (mesh.materialIndex >= 0 && mesh.materialIndex < numMaterials) ? mesh.materialIndex + 1 : 0;
 			GPUMesh gpuMesh = { renderObject.transform->position(), materialIndex, (uint32_t)mesh.indices.size(), indexIndex, vec2f(0.f) };
-			glNamedBufferSubData(m_meshSSBO, meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &gpuMesh);
+			m_meshSSBO.SubData(meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &gpuMesh);
 			const auto vertices = (int64_t)mesh.vertices.size();
 			const auto indices = (int64_t)mesh.indices.size();
-			glNamedBufferSubData(m_vertexSSBO, vertexIndex * sizeofll(VertexData), vertices * sizeofll(VertexData), mesh.vertices.data());
-			glNamedBufferSubData(m_indexSSBO, indexIndex * sizeofll(uint32_t), indices * sizeofll(uint32_t), mesh.indices.data());
+			m_vertexSSBO.SubData(vertexIndex * sizeofll(VertexData), vertices * sizeofll(VertexData), mesh.vertices.data());
+			m_indexSSBO.SubData(indexIndex * sizeofll(uint32_t), indices * sizeofll(uint32_t), mesh.indices.data());
 			meshIndex++;
 			vertexIndex += vertices;
 			indexIndex += indices;
@@ -239,9 +219,9 @@ void ObjectRenderer::UpdateModelSSBOs()
 	}
 
 	// Bind newly made buffers to the shader
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, m_meshSSBO);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, m_indexSSBO);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_vertexSSBO);
+	m_meshSSBO.BindBase(7);
+	m_indexSSBO.BindBase(6);
+	m_vertexSSBO.BindBase(5);
 }
 
 
@@ -283,18 +263,12 @@ void ObjectRenderer::UpdateMaterialSSBO()
 {
     if (m_computeShader == nullptr) return;
 	// Delete old buffer
-	glDeleteBuffers(1, &m_materialSSBO);
+	m_materialSSBO.Clear();
 	// Create a new one
-	glGenBuffers(1, &m_materialSSBO);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_materialSSBO);
+	m_materialSSBO.Init(BufferType::ShaderStorage);
 
 	// Determine the size
-	glNamedBufferStorage(
-		m_materialSSBO,
-		(MaterialRegister::Instance().GetNumMaterials() + 1) * sizeofll(GPUMaterial),
-		nullptr,
-		GL_DYNAMIC_STORAGE_BIT
-	);
+	m_materialSSBO.Fill((MaterialRegister::Instance().GetNumMaterials() + 1) * sizeofll(GPUMaterial));
 
 	auto FillMaterial = [this](const Material* mat, const int idx) -> void
 	{
@@ -326,7 +300,7 @@ void ObjectRenderer::UpdateMaterialSSBO()
 			.alphaY = mat->m_microfacetModel.alphaY,
 			._padding= {0.f}
 		};
-		glNamedBufferSubData(m_materialSSBO, idx * sizeofll(GPUMaterial), sizeofll(GPUMaterial), &gpuMaterial);
+		m_materialSSBO.SubData(idx * sizeofll(GPUMaterial), sizeofll(GPUMaterial), &gpuMaterial);
 	};
 
 	// Add the default material to the buffer
@@ -343,7 +317,7 @@ void ObjectRenderer::UpdateMaterialSSBO()
 
 	// Bind the buffer
 	m_computeShader->Use();
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, m_materialSSBO);
+	m_materialSSBO.BindBase(8);
 }
 
 }
