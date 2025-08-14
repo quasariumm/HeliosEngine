@@ -16,7 +16,9 @@ public:
 		return instance;
 	}
 
-	void RegisterMaterial(Material* mat) { m_materials.push_back(mat); }
+	void RegisterMaterial(Material* mat) { if (mat != nullptr) m_materials.push_back(mat); }
+
+	void DeregisterMaterial(Material* mat) { m_materials.erase(std::ranges::find(m_materials, mat)); }
 
 	[[nodiscard]]
 	Material* GetMaterial(const int idx) const
@@ -72,6 +74,11 @@ public:
 		AssignProperty(L"PBR Roughness", &m_PBR_Roughness);
 		AssignProperty(L"PBR Metallic", &m_PBR_Metallic);
 		AssignProperty(L"PBR Reflectance", &m_PBR_Reflectance);
+	}
+
+	~Material() override
+	{
+		MaterialRegister::Instance().DeregisterMaterial(this);
 	}
 
 	static ENGINE_API void SetupDefaultMaterial()

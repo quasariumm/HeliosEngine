@@ -30,7 +30,7 @@ class ObjectRenderer
 public:
 
 	ObjectRenderer()
-		: m_computeShader(nullptr), m_meshSSBO(0), m_vertexSSBO(0), m_indexSSBO(0) {};
+		: m_computeShader(nullptr), m_meshSSBO(0), m_vertexSSBO(0), m_indexSSBO(0), m_materialSSBO(0) {};
 
 	virtual ~ObjectRenderer();
 
@@ -53,9 +53,15 @@ public:
     /**
      * @brief Register an object to the renderer
      * @param transform A pointer to the transform of the object
-     * @param modelDataLoc The adress of the mode data for an instance of the Model component
+     * @param modelDataLoc The adress of the model data for an instance of the Model component
      */
     void RegisterModelInstance(Transform* transform, ModelData** modelDataLoc);
+
+	/**
+	 * @brief Deregister an object to the renderer
+	 * @param modelDataLoc The adress of the model data for the instance of a Model component
+	 */
+	void DeregisterModelInstance(ModelData** modelDataLoc);
 
     /**
      * @brief Register an object to the renderer
@@ -64,6 +70,13 @@ public:
      * @param materialIdx The index in the material list
      */
     void RegisterSphere(Transform* transform, float* radius, int* materialIdx);
+
+	/**
+     * @brief Register an object to the renderer
+     * @param radius A pointer to the radius of the sphere
+     * @param materialIdx The index in the material list
+     */
+    void DeregisterSphere(float* radius, int* materialIdx);
 
 	/**
 	 * @brief Can be called to manually update the SSBOs

@@ -21,6 +21,11 @@ public:
 		AssignProperty(L"Model Path", &modelPath, DisplayModelPath);
 	}
 
+	~Model() override
+	{
+		ObjectRenderer::Instance().DeregisterModelInstance(&modelData);
+	}
+
 	void Init() override
 	{
 		ObjectRenderer::Instance().RegisterModelInstance(m_attachedObject->GetTransform(), &modelData);

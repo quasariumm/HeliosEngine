@@ -16,6 +16,11 @@ public:
         AssignProperty(L"Material Index", &m_materialIdx);
     }
 
+	~Sphere() override
+    {
+    	ObjectRenderer::Instance().DeregisterSphere(&m_radius, &m_materialIdx);
+    }
+
     void Init() override
     {
         ObjectRenderer::Instance().RegisterSphere(m_attachedObject->GetTransform(), &m_radius, &m_materialIdx);

@@ -109,9 +109,33 @@ void ObjectRenderer::RegisterModelInstance(Transform* transform, ModelData** mod
 	UpdateModelSSBOs();
 }
 
+
+void ObjectRenderer::DeregisterModelInstance(ModelData** modelDataLoc)
+{
+	m_renderObjects.erase(std::ranges::find_if(m_renderObjects,
+		[modelDataLoc](const RenderObject& ro) -> bool
+		{
+			return ro.modelDataLoc == modelDataLoc;
+		}
+	));
+	UpdateModelSSBOs();
+}
+
+
 void ObjectRenderer::RegisterSphere(Transform* transform, float* radius, int* materialIdx)
 {
     m_renderObjects.emplace_back(PrimitiveType::SPHERE, transform, nullptr, radius, materialIdx);
+}
+
+
+void ObjectRenderer::DeregisterSphere(float* radius, int* materialIdx)
+{
+	m_renderObjects.erase(std::ranges::find_if(m_renderObjects,
+		[radius, materialIdx](const RenderObject& ro) -> bool
+		{
+			return ro.radius == radius && ro.materialIdx == materialIdx;
+		}
+	));
 }
 
 
