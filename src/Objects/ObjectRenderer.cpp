@@ -225,6 +225,28 @@ void ObjectRenderer::UpdateModelSSBOs()
 }
 
 
+void ObjectRenderer::UpdateModelTransforms() const
+{
+	// I assume that the buffer is the correct size to make this optimal.
+	if (m_computeShader == nullptr) return;
+
+	uint32_t meshIndex = 0;
+	for (const RenderObject& renderObject : m_renderObjects)
+	{
+		if (renderObject.primitiveType != PrimitiveType::MODEL) continue;
+		const ModelData* modelData = *renderObject.modelDataLoc;
+		if (modelData == nullptr) continue;
+		const size_t meshAmount = modelData->meshes.size();
+		for (int i = 0; i < meshAmount; i++)
+		{
+			vec3f position = renderObject.transform->position();
+			m_meshSSBO.SubData(meshIndex * sizeofll(GPUMesh), sizeofll(vec3), &position);
+			meshIndex++;
+		}
+	}
+}
+
+
 void ObjectRenderer::SetSphereData(const int idx, const vec3f position, const float radius, int materialIndex) const
 {
     if (m_computeShader == nullptr) return;

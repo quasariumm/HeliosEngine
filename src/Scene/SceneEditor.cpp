@@ -126,7 +126,7 @@ void SceneEditor::ObjectEditor()
     ImGui::Separator();
 
     if (ImGui::CollapsingHeader(ICON_AXIS_ARROW" Transform"))
-        selectedObject->GetTransform()->TransformControllerUI();
+        selectedObject->SetTransformChanged(selectedObject->GetTransform()->TransformControllerUI());
 
 	uint32_t idCounter = 0;
     for (const std::unique_ptr<Component>& c : selectedObject->GetComponentList())

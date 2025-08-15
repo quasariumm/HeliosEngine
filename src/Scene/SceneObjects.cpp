@@ -4,12 +4,20 @@
 
 namespace Engine
 {
-void Transform::TransformControllerUI()
+bool Transform::TransformControllerUI()
 {
+	bool changed = false;
     ImGui::DragFloat3("Position", p.cell, 0.1f);
+	if (ImGui::IsItemDeactivatedAfterEdit())
+		changed = true;
     ImGui::DragFloat3("Rotation", r.cell, 1.0f);
+	if (ImGui::IsItemDeactivatedAfterEdit())
+		changed = true;
     ImGui::DragFloat3("Scale", s.cell, 0.1f);
+	if (ImGui::IsItemDeactivatedAfterEdit())
+		changed = true;
     UpdateTransform();
+	return changed;
 }
 
 SceneObject::~SceneObject()

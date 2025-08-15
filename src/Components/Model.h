@@ -35,6 +35,9 @@ public:
 	{
 		Component::DisplayProperties();
 
+		if (m_attachedObject->GetTransformChanged())
+			ObjectRenderer::Instance().UpdateModelTransforms();
+
 		// Check if the model path has changed. If so, load the model
 		if (modelPath != m_cachedModelPath)
 		{

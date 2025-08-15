@@ -85,6 +85,11 @@ public:
 	void UpdateModelSSBOs();
 
 	/**
+	 * @brief A more simple version of UpdateModelSSBOs where only the transforms are updated
+	 */
+	void UpdateModelTransforms() const;
+
+	/**
 	 * @brief Can be called to manually update the SSBO
 	 */
 	void UpdateMaterialSSBO();

@@ -39,8 +39,11 @@ namespace Engine
             // it = t.Inverted();
         }
 
-        /// Display options to change this transform
-        void TransformControllerUI();
+        /**
+         * @brief Display options to change this transform
+         * @returns Whether the transform has been changed (only when mouse has been released)
+         */
+        bool TransformControllerUI();
 
     private:
         vec3 p = {0,0,0};
@@ -65,6 +68,9 @@ namespace Engine
         [[nodiscard]]
         uint32_t GetUID() const { return m_UID; }
         Transform* GetTransform() { return &m_transform; }
+    	[[nodiscard]]
+    	bool GetTransformChanged() const { return m_transformChanged; }
+    	void SetTransformChanged(const bool transformChanged) { m_transformChanged = transformChanged; }
         /// Completely overwrite the transform
         void SetTransform(const Transform& transform) { m_transform = transform; }
 
@@ -125,6 +131,7 @@ namespace Engine
         const uint32_t m_UID = 0;
         std::wstring m_displayName = L"Object";
         Transform m_transform = Transform();
+    	bool m_transformChanged = false;
         SceneObject* m_parentObject = nullptr;
         std::vector<SceneObject*> m_childObjects = {};
         std::vector<std::unique_ptr<Component>> m_components = {};
