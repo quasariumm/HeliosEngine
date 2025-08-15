@@ -86,10 +86,16 @@ static void ProcessNode(const aiNode* node, const aiScene* scene, std::vector<Me
 
 std::unordered_map<std::wstring, ModelData> ModelFileHandler::m_loadedModels = {};
 
-ModelData* ModelFileHandler::LoadModel( const std::filesystem::path& modelFile )
+ModelInstance ModelFileHandler::LoadModel( const std::filesystem::path& modelFile )
 {
 	if (m_loadedModels.contains(modelFile.wstring()))
-		return &m_loadedModels[modelFile.wstring()];
+	{
+		ModelData* modelData = &m_loadedModels[modelFile.wstring()];
+		return {
+			.modelData=			modelData,
+			.materialIndices=	std::vector<int>(modelData->meshes.size(), -1)
+		};
+	}
 
 	Assimp::Importer importer;
 
@@ -101,14 +107,18 @@ ModelData* ModelFileHandler::LoadModel( const std::filesystem::path& modelFile )
 		|| !scene->mRootNode)
 	{
 		DebugLog(LogSeverity::SEVERE, std::format(L"Assimp error {0}.", STR_TO_WSTR(importer.GetErrorString()).c_str()));
-		return nullptr;
+		return {nullptr, std::vector<int>() };
 	}
 
 	m_loadedModels[modelFile.wstring()] = {};
 
 	ProcessNode(scene->mRootNode, scene, m_loadedModels[modelFile.wstring()].meshes, modelFile.parent_path());
 
-	return &m_loadedModels[modelFile.wstring()];
+	ModelData* modelData = &m_loadedModels[modelFile.wstring()];
+	return {
+		.modelData=			modelData,
+		.materialIndices=	std::vector<int>(modelData->meshes.size(), -1)
+	};
 }
 
 }

@@ -103,19 +103,19 @@ void ObjectRenderer::SendObjectData()
 	m_computeShader->SetUInt("NumSimpleSpotLights", simpleSpotIdx);
 }
 
-void ObjectRenderer::RegisterModelInstance(Transform* transform, ModelData** modelDataLoc)
+void ObjectRenderer::RegisterModelInstance(Transform* transform, ModelInstance* modelInstanceLoc)
 {
-    m_renderObjects.emplace_back(PrimitiveType::MODEL, transform, modelDataLoc);
+    m_renderObjects.emplace_back(PrimitiveType::MODEL, transform, modelInstanceLoc);
 	UpdateModelSSBOs();
 }
 
 
-void ObjectRenderer::DeregisterModelInstance(ModelData** modelDataLoc)
+void ObjectRenderer::DeregisterModelInstance(ModelInstance* modelInstanceLoc)
 {
 	m_renderObjects.erase(std::ranges::find_if(m_renderObjects,
-		[modelDataLoc](const RenderObject& ro) -> bool
+		[modelInstanceLoc](const RenderObject& ro) -> bool
 		{
-			return ro.modelDataLoc == modelDataLoc;
+			return ro.modelInstanceLoc == modelInstanceLoc;
 		}
 	));
 	UpdateModelSSBOs();
@@ -168,7 +168,7 @@ void ObjectRenderer::UpdateModelSSBOs()
 	for (const RenderObject& renderObject : m_renderObjects)
 	{
 		if (renderObject.primitiveType != PrimitiveType::MODEL) continue;
-		ModelData* modelData = *renderObject.modelDataLoc;
+		ModelData* modelData = renderObject.modelInstanceLoc->modelData;
 		if (modelData == nullptr) continue;
 		meshAmount += modelData->meshes.size();
 		for (MeshData& mesh : modelData->meshes)
@@ -201,11 +201,13 @@ void ObjectRenderer::UpdateModelSSBOs()
 	for (const RenderObject& renderObject : m_renderObjects)
 	{
 		if (renderObject.primitiveType != PrimitiveType::MODEL) continue;
-		const ModelData* modelData = *renderObject.modelDataLoc;
+		const ModelData* modelData = renderObject.modelInstanceLoc->modelData;
 		if (modelData == nullptr) continue;
-		for (const MeshData& mesh : modelData->meshes)
+		for (int i = 0; i < modelData->meshes.size(); i++)
 		{
-			const int materialIndex = (mesh.materialIndex >= 0 && mesh.materialIndex < numMaterials) ? mesh.materialIndex + 1 : 0;
+			const MeshData& mesh = modelData->meshes[i];
+			int materialIndex = renderObject.modelInstanceLoc->materialIndices[i];
+			materialIndex = (materialIndex >= 0 && materialIndex < numMaterials) ? materialIndex + 1 : 0;
 			GPUMesh gpuMesh = { renderObject.transform->position(), materialIndex, (uint32_t)mesh.indices.size(), indexIndex, vec2f(0.f) };
 			m_meshSSBO.SubData(meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &gpuMesh);
 			const auto vertices = (int64_t)mesh.vertices.size();
@@ -234,7 +236,7 @@ void ObjectRenderer::UpdateModelTransforms() const
 	for (const RenderObject& renderObject : m_renderObjects)
 	{
 		if (renderObject.primitiveType != PrimitiveType::MODEL) continue;
-		const ModelData* modelData = *renderObject.modelDataLoc;
+		const ModelData* modelData = renderObject.modelInstanceLoc->modelData;
 		if (modelData == nullptr) continue;
 		const size_t meshAmount = modelData->meshes.size();
 		for (int i = 0; i < meshAmount; i++)

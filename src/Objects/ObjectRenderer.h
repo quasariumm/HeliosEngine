@@ -5,7 +5,7 @@
 
 namespace Engine
 {
-struct ModelData;
+struct ModelInstance;
 
 
 enum class PrimitiveType
@@ -20,7 +20,7 @@ struct RenderObject
     PrimitiveType primitiveType;
     Transform* transform;
     // Model specific
-	ModelData** modelDataLoc = nullptr;
+	ModelInstance* modelInstanceLoc = nullptr;
     // Sphere specific
     float* radius;
 	int* materialIdx;
@@ -54,15 +54,15 @@ public:
     /**
      * @brief Register an object to the renderer
      * @param transform A pointer to the transform of the object
-     * @param modelDataLoc The adress of the model data for an instance of the Model component
+     * @param modelInstanceLoc The adress of the model data for an instance of the Model component
      */
-    void RegisterModelInstance(Transform* transform, ModelData** modelDataLoc);
+    void RegisterModelInstance(Transform* transform, ModelInstance* modelInstanceLoc);
 
 	/**
 	 * @brief Deregister an object to the renderer
-	 * @param modelDataLoc The adress of the model data for the instance of a Model component
+	 * @param modelInstanceLoc The adress of the model data for the instance of a Model component
 	 */
-	void DeregisterModelInstance(ModelData** modelDataLoc);
+	void DeregisterModelInstance(ModelInstance* modelInstanceLoc);
 
     /**
      * @brief Register an object to the renderer

@@ -19,16 +19,17 @@ public:
 	Model() : Component(this)
 	{
 		AssignProperty(L"Model Path", &modelPath, DisplayModelPath);
+		modelInstance = { nullptr, {} };
 	}
 
 	~Model() override
 	{
-		ObjectRenderer::Instance().DeregisterModelInstance(&modelData);
+		ObjectRenderer::Instance().DeregisterModelInstance(&modelInstance);
 	}
 
 	void Init() override
 	{
-		ObjectRenderer::Instance().RegisterModelInstance(m_attachedObject->GetTransform(), &modelData);
+		ObjectRenderer::Instance().RegisterModelInstance(m_attachedObject->GetTransform(), &modelInstance);
 	}
 
 	void DisplayProperties() override
@@ -42,18 +43,18 @@ public:
 		if (modelPath != m_cachedModelPath)
 		{
 			m_cachedModelPath = modelPath;
-			modelData = ModelFileHandler::LoadModel(modelPath);
+			modelInstance = ModelFileHandler::LoadModel(modelPath);
 			ObjectRenderer::Instance().UpdateModelSSBOs();
 		}
 
-		if (modelData == nullptr) return;
+		if (modelInstance.modelData == nullptr) return;
 		// Display the meshes and their properties
-		for (MeshData& mesh : modelData->meshes)
+		for (int& index : modelInstance.materialIndices)
 		{
-			ImGui::PushID(&mesh);
+			ImGui::PushID(&index);
 			if (ImGui::TreeNode("Mesh"))
 			{
-				if (ImGui::InputInt("Material Index", &mesh.materialIndex))
+				if (ImGui::InputInt("Material Index", &index))
 					ObjectRenderer::Instance().UpdateModelSSBOs();
 				ImGui::TreePop();
 			}
@@ -63,7 +64,7 @@ public:
 
 	std::wstring modelPath;
 
-	ModelData* modelData = nullptr;
+	ModelInstance modelInstance;
 
 private:
 

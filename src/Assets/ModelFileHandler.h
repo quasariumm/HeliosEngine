@@ -15,13 +15,17 @@ struct MeshData
 {
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
-
-	int materialIndex = -1;
 };
 
 struct ModelData
 {
 	std::vector<MeshData> meshes;
+};
+
+struct ModelInstance
+{
+	ModelData* modelData;
+	std::vector<int> materialIndices;
 };
 
 /**
@@ -33,7 +37,7 @@ class ModelFileHandler
 
 public:
 
-	static ModelData* LoadModel(const std::filesystem::path& modelFile);
+	static ModelInstance LoadModel(const std::filesystem::path& modelFile);
 
 private:
 
