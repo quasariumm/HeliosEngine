@@ -57,19 +57,19 @@ public:
 	Material() : Component(this)
 	{
 		AssignProperty(L"Properties", &m_properties, &DisplayMaterialProperties);
-		AssignProperty(L"MicrofacetModel", &m_microfacetModel, &DisplayMicrofacetModel);
+		AssignProperty(L"Microfacet model", &m_microfacetModel, &DisplayMicrofacetModel);
 
-		AssignProperty(L"Diffuse Color", &m_diffuseColor, &DisplayColorRGB);
-		AssignProperty(L"SpecularColor", &m_specularColor, &DisplayColorRGB);
+		AssignProperty(L"Diffuse color", &m_diffuseColor, &DisplayColorRGB);
+		AssignProperty(L"Specular color", &m_specularColor, &DisplayColorRGB);
 		AssignProperty(L"Specularity", &m_specularity);
 		AssignProperty(L"Shininess", &m_shininess);
 		AssignProperty(L"Glossiness", &m_glossiness);
 
-		AssignProperty(L"Emission Color", &m_emissionColor, &DisplayColorRGB);
-		AssignProperty(L"EmissionStrength", &m_emissionStrength);
+		AssignProperty(L"Emission color", &m_emissionColor, &DisplayColorRGB);
+		AssignProperty(L"Emission ctrength", &m_emissionStrength);
 
 		AssignProperty(L"Refractivity", &m_refractivity);
-		AssignProperty(L"RefractionCoefficient", &m_refractionCoefficient);
+		AssignProperty(L"Refraction coefficient", &m_refractionCoefficient);
 
 		AssignProperty(L"PBR Roughness", &m_PBR_Roughness);
 		AssignProperty(L"PBR Metallic", &m_PBR_Metallic);
