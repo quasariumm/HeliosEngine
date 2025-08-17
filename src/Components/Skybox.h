@@ -16,12 +16,15 @@ public:
 	Skybox() : Component(this)
 		, m_texturePath(L"")
 	{
-		AssignProperty(L"Ground color", &GroundColor);
-		AssignProperty(L"Horizon color", &HorizonColor);
-		AssignProperty(L"Zenith color", &ZenithColor);
+		AssignProperty(L"Ground color", &GroundColor, &DisplayColorRGB);
+		AssignProperty(L"Horizon color", &HorizonColor, &DisplayColorRGB);
+		AssignProperty(L"Zenith color", &ZenithColor, &DisplayColorRGB);
 		AssignProperty(L"Sun direction", &SunDirection);
-		AssignProperty(L"Sun focus", &SunDirection);
+		AssignProperty(L"Sun focus", &SunFocus);
 		AssignProperty(L"Sun intensity", &SunIntensity);
+
+		AssignProperty(L"Use texture", &m_useTexture, &DisplayNone);
+		AssignProperty(L"HDR Texture Path", &m_texturePath, &DisplayNone);
 	}
 
 	void DisplayProperties() override

@@ -2,6 +2,7 @@
 
 #include <typeinfo>
 #include "Core/FileTools.h"
+#include "DisplayFunctions.h"
 
 namespace Engine
 {
@@ -14,7 +15,7 @@ struct alignas(32) ComponentProperty
     const std::type_info& rawType;
     void* value;
 	size_t typeSize;
-    void (*displayFunc)(void*) = nullptr;
+    void (*displayFunc)(const ComponentProperty*) = nullptr;
 };
 
 class Component
@@ -55,7 +56,7 @@ public:
      * @attention For non-defaulted types, you MUST supply a custom display function
      */
     template <typename T>
-    void AssignProperty(const std::wstring& name, T* value, void (*displayFunc)(void*) = nullptr)
+    void AssignProperty(const std::wstring& name, T* value, void (*displayFunc)(const ComponentProperty*) = nullptr)
     {
         const std::string demangled = Demangle(typeid(T).name());
         m_properties.emplace_back(name, std::wstring(demangled.begin(), demangled.end()), typeid(T), value, sizeof(*value),
@@ -100,7 +101,7 @@ public:
     {
         for (const ComponentProperty& p : m_properties)
         {
-            if (p.displayFunc) p.displayFunc(p.value);
+            if (p.displayFunc) p.displayFunc(&p);
             else if (p.rawType == typeid(bool))
                 ImGui::Checkbox(WStringToUTF8(p.name).c_str(), static_cast<bool*>(p.value));
             else if (p.rawType == typeid(int))

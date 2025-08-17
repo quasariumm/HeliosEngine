@@ -48,8 +48,8 @@ private:
 	Material* m_defaultMaterial = nullptr;
 };
 
-static void DisplayMaterialProperties(void* data);
-static void DisplayMicrofacetModel(void* data);
+static void DisplayMaterialProperties( const ComponentProperty* property);
+static void DisplayMicrofacetModel( const ComponentProperty* property);
 
 class Material final : public Component
 {
@@ -59,13 +59,13 @@ public:
 		AssignProperty(L"Properties", &m_properties, &DisplayMaterialProperties);
 		AssignProperty(L"MicrofacetModel", &m_microfacetModel, &DisplayMicrofacetModel);
 
-		AssignProperty(L"Diffuse Color", &m_diffuseColor);
-		AssignProperty(L"SpecularColor", &m_specularColor);
+		AssignProperty(L"Diffuse Color", &m_diffuseColor, &DisplayColorRGB);
+		AssignProperty(L"SpecularColor", &m_specularColor, &DisplayColorRGB);
 		AssignProperty(L"Specularity", &m_specularity);
 		AssignProperty(L"Shininess", &m_shininess);
 		AssignProperty(L"Glossiness", &m_glossiness);
 
-		AssignProperty(L"Emission Color", &m_emissionColor);
+		AssignProperty(L"Emission Color", &m_emissionColor, &DisplayColorRGB);
 		AssignProperty(L"EmissionStrength", &m_emissionStrength);
 
 		AssignProperty(L"Refractivity", &m_refractivity);
@@ -137,9 +137,9 @@ public:
 
 };
 
-static void DisplayMaterialProperties(void* data)
+static void DisplayMaterialProperties(const ComponentProperty* property)
 {
-	auto* mat = (Material::MaterialProperties*)data;
+	auto* mat = static_cast<Material::MaterialProperties*>(property->value);
 
 	static Material offsetMaterial = {};
 	static size_t propertiesOffset = (size_t)&offsetMaterial.m_properties - (size_t)&offsetMaterial;
@@ -178,9 +178,9 @@ static void DisplayMaterialProperties(void* data)
 		mat->specular = specular ? 1 : 0;
 }
 
-static void DisplayMicrofacetModel(void* data)
+static void DisplayMicrofacetModel(const ComponentProperty* property)
 {
-	auto* model = (Material::MicrofacetModel*)data;
+	auto* model = static_cast<Material::MicrofacetModel*>(property->value);
 	ImGui::Text("Microfacet model:");
 	if (ImGui::Selectable("Beckmann", model->selector == 0))
 		model->selector = 0;

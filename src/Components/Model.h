@@ -9,7 +9,7 @@ namespace Engine
 {
 struct ModelData;
 
-static void DisplayModelPath(void* data);
+static void DisplayModelPath(const ComponentProperty* property);
 
 class Model final : public Component
 {
@@ -18,7 +18,7 @@ public:
 
 	Model() : Component(this)
 	{
-		AssignProperty(L"Model Path", &modelPath, DisplayModelPath);
+		AssignProperty(L"Model Path", &modelPath, &DisplayModelPath);
 		modelInstance = { nullptr, {} };
 	}
 
@@ -72,9 +72,9 @@ private:
 
 };
 
-inline void DisplayModelPath(void* data)
+inline void DisplayModelPath(const ComponentProperty* property)
 {
-	auto* wstring = (std::wstring*)data;
+	auto* wstring = static_cast<std::wstring*>(property->value);
 	std::filesystem::path path{*wstring};
 	if (ImGui::Button("Browse"))
 		if (ProjectHandler::ShowFileSelect(path, ModelFilters))
