@@ -80,9 +80,9 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 			float PDF = GetPDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
 
 			if (PDF == 0.0)
-				incommingLight += emittance;
+				incommingLight += emittance * rayColor;
 			else
-				incommingLight += emittance + BRDF / PDF * light * rayColor * max(0.001, -dot(ray.hit.normal, ray.dir));
+				incommingLight += rayColor * (emittance + BRDF / PDF * light * max(0.001, -dot(ray.hit.normal, ray.dir)));
 
 			float specularity = material.specularity;
 			if ((material.type & MATERIAL_MICROFACET) != 0)

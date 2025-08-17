@@ -26,7 +26,9 @@ struct RayTracingMaterial
 
 	float alphaX;
 	float alphaY;
-	float _padding[3];
+	float _padding1;
+	float _padding2;
+	float _padding3;
 };
 
 /*
