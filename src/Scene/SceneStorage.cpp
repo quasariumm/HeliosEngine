@@ -1,6 +1,8 @@
 #include "SceneStorage.h"
 
 #include "Core/FileTools.h"
+#include "Objects/ObjectRenderer.h"
+
 
 namespace Engine
 {
@@ -101,6 +103,9 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
     // Set object parents
     for (const std::pair<SceneObject*, uint32_t> pair : sceneObjectParents)
         pair.first->SetParent(scene->GetSceneObject(pair.second));
+
+	// Update material SSBO
+	ObjectRenderer::Instance().UpdateMaterialSSBO();
 
     DebugLog(LogSeverity::DONE, L"Scene was successfully loaded");
 }
