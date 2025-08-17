@@ -97,6 +97,20 @@ public:
 		MaterialRegister::Instance().RegisterMaterial(this);
 	}
 
+	void DisplayProperties() override
+	{
+		std::vector<Material*> materialList = MaterialRegister::Instance().GetMaterials();
+		const int idx = std::distance(materialList.begin(), std::ranges::find(materialList, this));
+		ImGui::Text("Material idx: %i", idx);
+		if (ImGui::Button("Apply changes"))
+		{
+			ObjectRenderer::Instance().UpdateMaterialSSBO();
+		}
+		ImGui::Separator();
+
+		Component::DisplayProperties();
+	}
+
 	struct MaterialProperties
 	{
 		uint8_t reflection : 1 = 1u;
@@ -140,18 +154,6 @@ public:
 static void DisplayMaterialProperties(const ComponentProperty* property)
 {
 	auto* mat = static_cast<Material::MaterialProperties*>(property->value);
-
-	static Material offsetMaterial = {};
-	static size_t propertiesOffset = (size_t)&offsetMaterial.m_properties - (size_t)&offsetMaterial;
-
-	std::vector<Material*> materialList = MaterialRegister::Instance().GetMaterials();
-	const int idx = std::distance(materialList.begin(), std::ranges::find(materialList, (Material*)((intptr_t)mat - (intptr_t)propertiesOffset)));
-	ImGui::Text("Material idx: %i", idx);
-	if (ImGui::Button("Apply changes"))
-	{
-		ObjectRenderer::Instance().UpdateMaterialSSBO();
-	}
-	ImGui::Separator();
 
 	bool reflection = mat->reflection;
 	if (ImGui::Checkbox("Rays reflect", &reflection))
