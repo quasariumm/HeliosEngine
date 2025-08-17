@@ -76,11 +76,11 @@ inline void DisplayModelPath(void* data)
 {
 	auto* wstring = (std::wstring*)data;
 	std::filesystem::path path{*wstring};
-	ImGui::Text(path.string().c_str());
-	ImGui::SameLine();
 	if (ImGui::Button("Browse"))
 		if (ProjectHandler::ShowFileSelect(path, ModelFilters))
 			*wstring = path.wstring();
+	ImGui::SameLine();
+	ImGui::Text(path.string().c_str());
 }
 
 

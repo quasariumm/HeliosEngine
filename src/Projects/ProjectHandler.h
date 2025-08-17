@@ -41,10 +41,14 @@ typedef void (*DestroyGameProjectFunc)(EngineProject*);
 static constexpr nfdnfilteritem_t ProjectFilters[] = {{L"Projects", L"gep"}};
 static constexpr nfdnfilteritem_t SceneFilters[] = {{L"Scenes", L"scn"}};
 static constexpr nfdnfilteritem_t ModelFilters[] = {{L"Models", L"3ds,ase,glTF,fbx,raw,obj,ply"}};
+static constexpr nfdnfilteritem_t TextureFilters[] = {{L"Image Files", L"jpg,jpeg,png,bmp,psd"}};
+static constexpr nfdnfilteritem_t HDRTextureFilters[] = {{L"HDR Images", L"hdr"}};
 #else
 const constexpr nfdnfilteritem_t ProjectFilters[] = {{"Projects", "gep"}};
 const constexpr nfdnfilteritem_t SceneFilters[] = {{"Scenes", "scn"}};
 const constexpr nfdnfilteritem_t ModelFilters[] = {{"Models", "3ds,ase,glTF,fbx,raw,obj,ply"}};
+const constexpr nfdnfilteritem_t TextureFilters[] = {{"Image Files", "jpg,jpeg,png,bmp,psd"}};
+const constexpr nfdnfilteritem_t HDRTextureFilters[] = {{"HDR Images", "hdr"}};
 #endif
 
 class ProjectHandler

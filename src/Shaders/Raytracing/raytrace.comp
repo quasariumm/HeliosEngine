@@ -27,30 +27,49 @@ uniform bool ClearAccumulator = false;
 #include "/Engine/Raytracing/intersections.glsl"
 #include "/Engine/Raytracing/lighting.glsl"
 
-const vec3 GroundColor  = vec3(0.5, 0.5, 0.5);
-const vec3 HorizonColor = vec3(0.78, 0.87, 1.0);
-const vec3 ZenithColor  = vec3(0.68, 0.84, 1.0);
+uniform vec3 GroundColor  = vec3(0.5, 0.5, 0.5);
+uniform vec3 HorizonColor = vec3(0.78, 0.87, 1.0);
+uniform vec3 ZenithColor  = vec3(0.68, 0.84, 1.0);
 
-const vec3 SunDirection		= normalize(vec3(1.0, -1.0, 0.0));
-const float SunFocus    	= 150.0;
-const float SunIntensity	= 3.0;
+uniform vec3 SunDirection	= normalize(vec3(1.0, -1.0, 0.0));
+uniform float SunFocus    	= 150.0;
+uniform float SunIntensity	= 3.0;
+
+uniform bool UseSkyboxTexture = false;
+layout(binding = 31) uniform sampler2D SkyboxTexture;
 vec3 GetSkyboxColor(in Ray ray)
 {
-	float skyGradientT = pow(smoothstep(0.0, 0.4, ray.dir.y), 0.35);
-	vec3 skyGradient = mix(HorizonColor, ZenithColor, skyGradientT);
-	float sun = pow(max(0.0, dot(ray.dir, -SunDirection)), SunFocus) * SunIntensity;
+	if (UseSkyboxTexture)
+	{
+		const float u = INV2PI * atan2(ray.dir.z, ray.dir.x);
+		const float v = INVPI * acos(ray.dir.y);
 
-	float groundToSkyT = smoothstep(-0.01, 0.0, ray.dir.y);
-	float sunMask = 0.0;
-	if (groundToSkyT >= 1.0)
-		sunMask = 1.0;
-	return mix(GroundColor, skyGradient, groundToSkyT) + sun * sunMask;
+		if (u > 1.0 || u < 0.0 || v > 1.0 || v < 0.0)
+			return vec3(0.0);
+
+		const vec3 pixel = sqrt(texture(SkyboxTexture, vec2(u, v)).xyz);
+
+		return 0.55 * pixel;
+	}
+	else
+	{
+		float skyGradientT = pow(smoothstep(0.0, 0.4, ray.dir.y), 0.35);
+		vec3 skyGradient = mix(HorizonColor, ZenithColor, skyGradientT);
+		float sun = pow(max(0.0, dot(ray.dir, -SunDirection)), SunFocus) * SunIntensity;
+
+		float groundToSkyT = smoothstep(-0.01, 0.0, ray.dir.y);
+		float sunMask = 0.0;
+		if (groundToSkyT >= 1.0)
+			sunMask = 1.0;
+		return mix(GroundColor, skyGradient, groundToSkyT) + sun * sunMask;
+	}
 }
 
 vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 {
 	vec3 incommingLight = vec3(0);
 	vec3 rayColor = vec3(1);
+	vec3 mixedColor = vec3(1); /* For determining the light */
 
 	for (int i = 0; i < 10; ++i)
 	{
@@ -80,9 +99,9 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 			float PDF = GetPDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
 
 			if (PDF == 0.0)
-				incommingLight += emittance * rayColor;
+				incommingLight += emittance * mixedColor;
 			else
-				incommingLight += rayColor * (emittance + BRDF / PDF * light * max(0.001, -dot(ray.hit.normal, ray.dir)));
+				incommingLight += emittance * mixedColor + BRDF / PDF * light * rayColor * max(0.001, -dot(ray.hit.normal, ray.dir));
 
 			float specularity = material.specularity;
 			if ((material.type & MATERIAL_MICROFACET) != 0)
@@ -90,14 +109,15 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 				specularity = 1.0 - material.PBR_Roughness;
 			}
 
+			mixedColor *= mix(material.diffuseColor, material.specularColor, specularity);
 			rayColor *= mix(material.diffuseColor, material.specularColor, specularity)
-				* mix(light, vec3(1.0), specularity);
+				 * mix(light, vec3(1.0), specularity);
 
 			ray.origin = ray.hit.hitPoint + 0.001 * ray.dir;
 		}
 		else
 		{
-			incommingLight += rayColor * GetSkyboxColor(ray);
+			incommingLight += mixedColor * GetSkyboxColor(ray);
 			break;
 		}
 		if(i == 1) firstRay = ray;

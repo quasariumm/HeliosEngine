@@ -50,15 +50,14 @@ public:
 	/**
 	 * @brief Loads a texture from disk
 	 * @param filename The relative path to the texture file from the working directory of the executable
-	 * @param fileFormat The format of the image in the file
-	 * @param internalFormat The format you want to save the texture as
+	 * @param format The format of the image in the file
 	 * @param isHDR Whether the image should be treated as an HDR texture
 	 * @warning Will delete old data if the image was initialised before
 	 * @throws runtime_error The texture cannot be opened
 	 */
 	void LoadFromFile(
 		const std::wstring& filename,
-		TextureFormat fileFormat = TextureFormat::RGBA8, TextureFormat internalFormat = TextureFormat::RGBA8,
+		TextureFormat format = TextureFormat::RGBA8,
 		bool isHDR = false
 	);
 

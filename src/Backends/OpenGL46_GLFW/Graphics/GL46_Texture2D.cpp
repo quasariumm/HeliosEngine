@@ -52,6 +52,34 @@ static GLuint ConvertFormat(const TextureFormat format)
 	}
 }
 
+static GLuint ConvertBufferFormat(const TextureFormat format)
+{
+	switch (format)
+	{
+	case TextureFormat::RED8:
+	case TextureFormat::RED16:
+	case TextureFormat::RED16F:
+	case TextureFormat::RED32F:
+		return GL_RED;
+	case TextureFormat::RG8:
+	case TextureFormat::RG16:
+	case TextureFormat::RG16F:
+	case TextureFormat::RG32F:
+		return GL_RG;
+	case TextureFormat::RGB8:
+	case TextureFormat::RGB16F:
+	case TextureFormat::RGB32F:
+		return GL_RGB;
+	case TextureFormat::RGBA8:
+	case TextureFormat::RGBA16:
+	case TextureFormat::RGBA16F:
+	case TextureFormat::RGBA32F:
+		return GL_RGBA;
+	default:
+		return GL_RGB;
+	}
+}
+
 /*
  * Class: GL64_Texture2D
  * Interface of Texture2D for OpenGL 4.6
@@ -143,12 +171,13 @@ void GL46_Texture2D::FillBlank(
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 	m_isSTBBuffer = false;
+	m_initialized = true;
 }
 
 
 void GL46_Texture2D::LoadFromFile(
 	const std::wstring& filename,
-	const TextureFormat fileFormat, const TextureFormat internalFormat,
+	const TextureFormat format,
 	const bool isHDR
 	)
 {
@@ -177,10 +206,10 @@ void GL46_Texture2D::LoadFromFile(
 
 	fclose(file);
 
-	m_internalFormat = internalFormat;
-	m_glInternalFormat = ConvertFormat(internalFormat);
-	m_bufferFormat = fileFormat;
-	m_glBufferFormat = ConvertFormat(fileFormat);
+	m_internalFormat = format;
+	m_glInternalFormat = ConvertFormat(format);
+	m_bufferFormat = format;
+	m_glBufferFormat = ConvertBufferFormat(format);
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
@@ -218,6 +247,7 @@ void GL46_Texture2D::LoadFromFile(
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 	m_isSTBBuffer = true;
+	m_initialized = true;
 }
 
 

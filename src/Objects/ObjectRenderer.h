@@ -46,6 +46,8 @@ public:
      */
     void SetShader(GL46_ComputeShader* shader);
 
+	GL46_ComputeShader* GetShader() const { return m_computeShader; }
+
     /**
      * @brief Takes all the given objects and sends them to the GPU for rendering. Only run this when updating many objects!
      */

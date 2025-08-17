@@ -7,6 +7,7 @@
 #include "Components/Material.h"
 #include "Components/Light.h"
 #include "Components/Model.h"
+#include "Components/Skybox.h"
 #include "Core/Window.h"
 #include "Debugger/Debugger.h"
 #include "Editor/EditorInterface.h"
