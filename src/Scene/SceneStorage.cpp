@@ -76,6 +76,8 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
                     newComponent->SetPropertyValue(name, ParseVec3(value));
                 else if (type == STR_TO_WSTR(Demangle(typeid(std::string).name())))
                     newComponent->SetPropertyValue(name, value);
+                else if (type == STR_TO_WSTR(Demangle(typeid(std::wstring).name())))
+                    newComponent->SetPropertyValue(name, value);
             	else
             	{
             		// Trim the value of any whitespace
@@ -160,6 +162,7 @@ void SceneLoader::SaveToFile(Scene* scene, const std::filesystem::path& fileName
                 else if (p.rawType == typeid(vec2)) file << *(vec2*)p.value;
                 else if (p.rawType == typeid(vec3)) file << *(vec3*)p.value;
                 else if (p.rawType == typeid(std::string)) file << *(std::wstring*)p.value;
+                else if (p.rawType == typeid(std::wstring)) file << *(std::wstring*)p.value;
             	else
             	{
             		// Copy raw data
