@@ -66,7 +66,7 @@ public:
 		AssignProperty(L"Glossiness", &m_glossiness);
 
 		AssignProperty(L"Emission color", &m_emissionColor, &DisplayColorRGB);
-		AssignProperty(L"Emission ctrength", &m_emissionStrength);
+		AssignProperty(L"Emission strength", &m_emissionStrength);
 
 		AssignProperty(L"Refractivity", &m_refractivity);
 		AssignProperty(L"Refraction coefficient", &m_refractionCoefficient);
