@@ -111,12 +111,20 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 
 			vec3 color = mix(material.diffuseColor, material.specularColor, specularity);
 
-			if (ray.hit.inside && material.refractivity > 0.0)
+			if (material.refractivity > 0.0)
 			{
-				// https://www.flipcode.com/archives/Raytracing_Topics_Techniques-Part_3_Refractions_and_Beers_Law.shtml (Author: Jacco Bikker)
-				vec3 absorbance = material.specularColor * material.absorption * -ray.hit.dst;
-				vec3 transmittance = exp(absorbance);
-				color = transmittance;
+				if (ray.hit.inside)
+				{
+					// https://www.flipcode.com/archives/Raytracing_Topics_Techniques-Part_3_Refractions_and_Beers_Law.shtml (Author: Jacco Bikker)
+					vec3 absorbance = material.specularColor * material.absorption * -ray.hit.dst;
+					vec3 transmittance = exp(absorbance);
+					color = transmittance;
+				}
+				else
+				{
+					// TODO: Change this to the correct calculation
+					color = vec3(1.0);
+				}
 			}
 
 			mixedColor *= color;

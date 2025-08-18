@@ -143,7 +143,7 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 	if (t > 0.0 && t < ray.hit.dst)
 	{
 		ray.hit.didHit = true;
-		ray.hit.inside = det < -0.0;
+		ray.hit.inside = det < 0.0;
 		ray.hit.materialIndex = mesh.materialIndex;
 		ray.hit.dst = t;
 		ray.hit.hitPoint = ray.origin + ray.dir * t;
@@ -155,8 +155,8 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 		vec3 v1n = vec3(0.0); vec3 v1t = vec3(0.0); UnpackNormalTangent(v1.normalTanget, v1n, v1t);
 		vec3 v2n = vec3(0.0); vec3 v2t = vec3(0.0); UnpackNormalTangent(v2.normalTanget, v2n, v2t);
 
-		ray.hit.normal = (u * v1n + v * v2n + w * v0n) * -sign(det);
-		ray.hit.tangent = u * v1t + v * v2t + w * v0t;
+		ray.hit.normal = normalize(u * v1n + v * v2n + w * v0n) * sign(det);
+		ray.hit.tangent = normalize(u * v1t + v * v2t + w * v0t);
 	}
 }
 
