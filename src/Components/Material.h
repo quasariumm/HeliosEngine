@@ -71,6 +71,8 @@ public:
 		AssignProperty(L"Refractivity", &m_refractivity);
 		AssignProperty(L"Refraction coefficient", &m_refractionCoefficient);
 
+		AssignProperty(L"Absorption", &m_absorption);
+
 		AssignProperty(L"PBR Roughness", &m_PBR_Roughness);
 		AssignProperty(L"PBR Metallic", &m_PBR_Metallic);
 		AssignProperty(L"PBR Reflectance", &m_PBR_Reflectance);
@@ -144,6 +146,7 @@ public:
 
 	float m_refractivity = 0.f;
 	float m_refractionCoefficient = 1.f;
+	float m_absorption = 0.1f;
 
 	float m_PBR_Roughness = 0.f;
 	float m_PBR_Metallic = 0.f;

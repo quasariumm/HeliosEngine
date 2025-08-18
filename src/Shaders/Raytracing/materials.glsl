@@ -22,20 +22,13 @@ vec3 Reflect(vec3 wo, vec3 normal)
 
 // Returns direction in xyz, Fresnel term in w
 // TODO: Support for refraction from non-air to non-air
-vec4 Refract(vec3 wo, vec3 normal, float etaT, out float etaO, out float etaI)
+vec4 Refract(vec3 wo, vec3 normal, float etaI, float etaO)
 {
-	float eta = etaT;
+	float eta = etaI / etaO;
 	vec3 N = normal;
 	float cosThetaI = dot(N, wo);
 
-	if (cosThetaI < 0.0)
-	{
-		eta = 1.0 / eta;
-		cosThetaI = -cosThetaI;
-		N = -N;
-	}
-
-	float sin2ThetaI = max(0.0, 1.0 - (cosThetaI * cosThetaI));
+	float sin2ThetaI = max(0.0001, 1.0 - (cosThetaI * cosThetaI));
 
 	float sin2ThetaT = sin2ThetaI / (eta * eta);
 	if (sin2ThetaT >= 1.0)
@@ -43,21 +36,11 @@ vec4 Refract(vec3 wo, vec3 normal, float etaT, out float etaO, out float etaI)
 
 	float cosThetaT = sqrt(1.0 - sin2ThetaT);
 
-	float R0 = (1.0 - etaT) / (1.0 + etaT);
+	float R0 = (etaI - etaO) / (etaI + etaO);
 	R0 *= R0;
 	float x = (1.0 - cosThetaI);
 	float fresnel = R0 + (1.0 - R0) * x * x * x * x * x;
 
-	if (eta == etaT)
-	{
-		etaI = 1.0;
-		etaO = etaT;
-	}
-	else
-	{
-		etaI = etaT;
-		etaO = 1.0;
-	}
 	return vec4(normalize(-wo / eta + (cosThetaI / eta - cosThetaT) * N), fresnel);
 }
 
@@ -139,10 +122,10 @@ vec3 GetBRDFAndBounce(inout Ray ray, inout uint seed)
 
 		if ((material.type & MATERIAL_REFLECTION) != 0)
 		{
-			float etaI = 1.0;
-			float etaO = material.refractionCoefficient;
+			float etaI = ray.hit.inside ? material.refractionCoefficient : 1.0;
+			float etaO = ray.hit.inside ? 1.0 : material.refractionCoefficient;
 			// Direction
-			vec4 res = Refract(-ray.dir, ray.hit.normal, material.refractionCoefficient, etaI, etaO);
+			vec4 res = Refract(-ray.dir, ray.hit.normal, etaI, etaO);
 			float fresnel = res.w;
 			if (Xi(seed) <= mix(1.0, fresnel, transmission.factor))
 				glassReflect = true;

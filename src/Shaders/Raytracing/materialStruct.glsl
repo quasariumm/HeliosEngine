@@ -19,6 +19,7 @@ struct RayTracingMaterial
 
 	float refractivity;
 	float refractionCoefficient;
+	float absorption;
 
 	float PBR_Roughness;
 	float PBR_Metallic;
@@ -28,7 +29,6 @@ struct RayTracingMaterial
 	float alphaY;
 	float _padding1;
 	float _padding2;
-	float _padding3;
 };
 
 /*

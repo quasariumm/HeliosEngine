@@ -35,6 +35,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 	if (t1 >= 0.0 && t1 < ray.hit.dst)
 	{
 		ray.hit.didHit = true;
+		ray.hit.inside = b < 0.0;
 		ray.hit.materialIndex = sphere.materialIndex;
 		ray.hit.dst = t1;
 		ray.hit.hitPoint = ray.origin + ray.dir * t1;
@@ -52,10 +53,11 @@ void RaySphere(inout Ray ray, Sphere sphere)
 	if (t2 >= 0.0 && t2 < ray.hit.dst && t1 <= 0)
 	{
 		ray.hit.didHit = true;
+		ray.hit.inside = b < 0.0;
 		ray.hit.materialIndex = sphere.materialIndex;
 		ray.hit.dst = t2;
 		ray.hit.hitPoint = ray.origin + ray.dir * t2;
-		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.center);
+		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.center) * sign(b);
 
 		// Calculate tangent vector
 		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
@@ -141,6 +143,7 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 	if (t > 0.0 && t < ray.hit.dst)
 	{
 		ray.hit.didHit = true;
+		ray.hit.inside = det < -0.0;
 		ray.hit.materialIndex = mesh.materialIndex;
 		ray.hit.dst = t;
 		ray.hit.hitPoint = ray.origin + ray.dir * t;
@@ -152,7 +155,7 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 		vec3 v1n = vec3(0.0); vec3 v1t = vec3(0.0); UnpackNormalTangent(v1.normalTanget, v1n, v1t);
 		vec3 v2n = vec3(0.0); vec3 v2t = vec3(0.0); UnpackNormalTangent(v2.normalTanget, v2n, v2t);
 
-		ray.hit.normal = u * v1n + v * v2n + w * v0n;
+		ray.hit.normal = (u * v1n + v * v2n + w * v0n) * -sign(det);
 		ray.hit.tangent = u * v1t + v * v2t + w * v0t;
 	}
 }
