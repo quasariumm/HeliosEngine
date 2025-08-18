@@ -60,52 +60,34 @@ void ActionsTreeViewer::DrawInterface()
     ImGui::Begin(ICON_FILE_TREE" Action Tree");
     const std::vector<EditorAction> actions = ActionRecorder::Instance()->GetActionsList();
 
-    if (!ImGui::BeginTable("ActionTreeTable", 1000))
+    if (!ImGui::BeginTable("ActionTreeTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
     {
         ImGui::End();
         return;
     }
 
-    std::map<int, int> unexplored = { };
+    ImGui::TableSetupColumn("ID");
+    ImGui::TableSetupColumn("Action");
+    ImGui::TableSetupColumn("Branches");
+
     int next = 0;
+
     while (true)
     {
-        if (next == -1)
+        ImGui::Text("%d", next);
+        ImGui::NextColumn();
+        ImGui::Text(WStringToUTF8(actions[next].name).c_str());
+
+        const int branches = static_cast<int>(actions[next].nextActionIdx.size()) - 1;
+        if (branches > 0)
         {
-            if (unexplored.empty()) break;
-            next = unexplored.back();
-            unexplored.pop_back();
             ImGui::NextColumn();
+            ImGui::Text("%d", branches);
         }
 
-
-
-
-        std::vector<EditorAction> childActions = {};
-
-        ImGui::BeginGroup();
-        for (int i = 0; i < nextActions.size(); i++)
-        {
-            if (nextActions.size() > 1)
-            {
-                // Show path index
-                ImGui::Text(std::to_string(i).c_str());
-                ImGui::SameLine();
-            }
-            ImGui::Text(WStringToUTF8(nextActions[i].name).c_str());
-            ImGui::SameLine();
-
-            for (const int idx : nextActions[i].nextActionIdx)
-                childActions.push_back(actions[idx]);
-        }
-        ImGui::EndGroup();
-        ImGui::Separator();
-
-        if (childActions.empty()) break;
-
-        nextActions.clear();
-        nextActions = childActions;
-        childActions.clear();
+        if (branches == -1) break;
+        next = actions[next].nextActionIdx.back();
+        ImGui::TableNextRow();
     }
 
     ImGui::EndTable();
