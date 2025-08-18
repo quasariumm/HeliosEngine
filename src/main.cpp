@@ -123,7 +123,9 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	Engine::SceneEditor::SetEditingScene(&g_scene);
 
 	Engine::GL46_Texture2D rayTexture;
-	rayTexture.FillBlank(window->GetSize().x, window->GetSize().y, 4, Engine::TextureFormat::RGBA32F, true);
+	// Get the viewport render size from the Editor Settings
+	Engine::vec2u viewportSize = Engine::EditorSettings::Get().m_viewportRenderSize;
+	rayTexture.FillBlank(viewportSize.x, viewportSize.y, 4, Engine::TextureFormat::RGBA32F, true);
 
 	Engine::Viewport::AppendRenderedImage(&rayTexture);
 
@@ -134,8 +136,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	Engine::GL46_ComputeShader rayCompute;
 	rayCompute.LoadFromFile(L"src/Shaders/Raytracing/raytrace.comp");
 	const Engine::vec3u computeThreads{
-		static_cast<unsigned>(std::ceil(window->GetSize().x / 8.f)),
-		static_cast<unsigned>(std::ceil(window->GetSize().y / 8.f)),
+		static_cast<unsigned>(std::ceil(rayTexture.GetWidth() / 8.f)),
+		static_cast<unsigned>(std::ceil(rayTexture.GetHeight() / 8.f)),
 		1u
 	};
 
@@ -143,8 +145,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	rayCompute.Use();
 	rayCompute.SetInt("OutTexture", 0);
-	rayCompute.SetUInt("ScreenWidth", window->GetSize().x);
-	rayCompute.SetUInt("ScreenHeight", window->GetSize().y);
+	rayCompute.SetUInt("ScreenWidth", rayTexture.GetWidth());
+	rayCompute.SetUInt("ScreenHeight", rayTexture.GetHeight());
 	
     Engine::Timer frameTimer;
 	uint32_t frame = 0;

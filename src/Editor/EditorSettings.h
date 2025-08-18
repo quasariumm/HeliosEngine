@@ -9,6 +9,7 @@ struct EditorSettingsData
 	bool m_forceLoadProject = false;
 	std::wstring m_forceLoadProjectPath = L"";
 	std::wstring m_forceLoadScenePath = L"";
+	vec2u m_viewportRenderSize = vec2u(1920, 1080);
 };
 
 class EditorSettings

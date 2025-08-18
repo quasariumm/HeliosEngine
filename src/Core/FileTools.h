@@ -31,6 +31,17 @@ static vec2f ParseVec2(std::wstring text)
     return result;
 }
 
+static vec2u ParseVec2u(std::wstring text)
+{
+	vec2u result;
+	text.erase(text.begin(), text.begin() + 1); // Remove first bracket
+	text.erase(text.end() - 1, text.end()); // Remove last bracket
+	result.x = std::stoi(text.substr(0, text.find(sep))); // Get the first value
+	text.erase(text.begin(), text.begin() + text.find(sep) + 2ull); // Remove the first value
+	result.y = std::stoi(text.substr(0, text.find(sep))); // Get the second value
+	return result;
+}
+
 static vec3 ParseVec3(std::wstring text)
 {
     vec3 result;

@@ -22,6 +22,7 @@ bool EditorSettings::Save()
     file << "ForceLoadProject = " << std::to_wstring(m_editorSettings.m_forceLoadProject) << std::endl;
 	file << "ForceLoadProjectPath = " << m_editorSettings.m_forceLoadProjectPath << std::endl;
 	file << "ForceLoadScenePath = " << m_editorSettings.m_forceLoadScenePath << std::endl;
+	file << "ViewportRenderSize = " << m_editorSettings.m_viewportRenderSize << std::endl;
     DebugLog(LogSeverity::DONE, L"Successfully saved editor settings");
     return true;
 }
@@ -43,6 +44,7 @@ bool EditorSettings::Load()
     	else if (IsToken(line, L"ForceLoadProject")) m_editorSettings.m_forceLoadProject = stoi(TokenValue(line));
     	else if (IsToken(line, L"ForceLoadProjectPath")) m_editorSettings.m_forceLoadProjectPath = TokenValue(line);
     	else if (IsToken(line, L"ForceLoadScenePath")) m_editorSettings.m_forceLoadScenePath = TokenValue(line);
+    	else if (IsToken(line, L"ViewportRenderSize")) m_editorSettings.m_viewportRenderSize = ParseVec2u(TokenValue(line));
     }
 
     DebugLog(LogSeverity::DONE, L"Successfully loaded editor settings");
@@ -84,6 +86,14 @@ void EditorSettings::DrawWindow()
 				if (ProjectHandler::ShowFileSelect(forceScene, SceneFilters))
 					m_editorSettings.m_forceLoadScenePath = forceScene;
 
+    		ImGui::EndTabItem();
+    	}
+
+    	if (ImGui::BeginTabItem("View Settings"))
+    	{
+    		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), "Requires restart");
+    		if (ImGui::InputInt2("Viewport texture size", (int*)m_editorSettings.m_viewportRenderSize.cell))
+    			Min(m_editorSettings.m_viewportRenderSize, vec2u(1, 1));
     		ImGui::EndTabItem();
     	}
 
