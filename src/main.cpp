@@ -20,6 +20,9 @@
 #include <tracy/Tracy.hpp>
 
 #include "Scene/SceneStorage.h"
+#include "VideoRenderer/VideoRenderer.h"
+
+using VR = Engine::VideoRenderer;
 
 #ifdef _WIN32
 extern "C" {
@@ -226,11 +229,34 @@ extern "C" int __declspec(dllexport) __stdcall main()
 			Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
 			rayCompute.SetVec3("ViewParams", viewportParams);
 
-		    rayTexture.UseCompute(0);
-    		if (window->GetKey(Engine::Key::Q))
-    			frame = 0;
-    		rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
-    		rayCompute.Dispatch(computeThreads);
+    		if (!Engine::gVideoRenderingEnabled)
+    		{
+				rayTexture.UseCompute(0);
+				if (window->GetKey(Engine::Key::Q))
+					frame = 0;
+				rayCompute.SetBool("ClearAccumulator", window->GetKey(Engine::Key::Q) == 1);
+				rayCompute.Dispatch(computeThreads);
+    		}
+    		else
+    		{
+    			// Rendering to a video
+    			uint16_t samples = VR::samplesPerFrame;
+			    rayCompute.SetBool("ClearAccumulator", true);
+			    for (uint16_t i = 0; i < samples; ++i)
+			    {
+					rayCompute.SetUInt("Frame", i);
+			    	if (i == 1)
+						rayCompute.SetBool("ClearAccumulator", false);
+					rayTexture.UseCompute(0);
+			    	rayCompute.Dispatch(computeThreads);
+			    }
+    			VR::SaveFrame();
+    			Engine::gVideoFrame++;
+    			if (Engine::gVideoFrame == VR::framesToRender)
+    			{
+    				Engine::VideoRenderer::StopRecording();
+    			}
+    		}
 			// rayTexture.UpdateData();
 	    }
 

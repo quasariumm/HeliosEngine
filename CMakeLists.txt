@@ -18,6 +18,7 @@ file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h lib/glad/src/glad.c
 file(GLOB LIBS CONFIGURE_DEPENDS
 		extern/imgui/*.cpp
 		extern/imgui/*.h
+		extern/imgui/misc/cpp/imgui_stdlib.cpp
 		extern/imgui/backends/imgui_impl_opengl3.h
 		extern/imgui/backends/imgui_impl_opengl3.cpp
 		extern/imgui/backends/imgui_impl_opengl3_loader.h

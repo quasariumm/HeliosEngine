@@ -82,6 +82,7 @@
 #include "Math/Vector.h"
 #include "Math/Matrix.h"
 #include "Math/Random.h"
+#include "Core/Globals.h"
 #include "Core/Common.h"
 #include "Core/Timer.h"
 
