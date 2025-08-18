@@ -57,6 +57,15 @@ void VideoRenderer::DrawInterface()
 	if (ImGui::Button("Render"))
 		BeginRecording();
 
+	if (gVideoRenderingEnabled)
+	{
+		ImGui::Text("Render progress:");
+		const float progress = std::clamp((float)gVideoFrame / (float)framesToRender, 0.f, 1.f);
+		char buffer[32];
+		sprintf_s(buffer, "%d/%d (%.1f%%)", gVideoFrame, framesToRender, 100.f * progress);
+		ImGui::ProgressBar(progress, ImVec2(0.f, 0.f), buffer);
+	}
+
 	ImGui::End();
 }
 
@@ -66,13 +75,13 @@ void VideoRenderer::SaveFrame()
 	const EditorSettingsData& editorSettings = EditorSettings::Get();
 	const vec2u viewportSize = editorSettings.m_viewportRenderSize;
 	// Save using OpenCV or something
-	DebugLog(LogSeverity::INFO, L"SaveFrame() called");
 }
 
 
 void VideoRenderer::StopRecording()
 {
 	gVideoRenderingEnabled = false;
+	DebugLog(LogSeverity::DONE, L"Video rendering successfully saved to " + m_videoDirectory.wstring() + L"\\" + STR_TO_WSTR(m_videoName) + L".mp4");
 }
 
 
