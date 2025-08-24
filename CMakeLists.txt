@@ -159,6 +159,20 @@ target_include_directories(Engine PUBLIC
 		${TRACY_PUBLIC_DIR}
 )
 
+# FFmpeg
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+find_package(FFmpeg REQUIRED)
+
+if (FFMPEG_FOUND)
+	message(STATUS "FFmpeg found")
+else()
+	message(FATAL_ERROR "FFmpeg not found. See README.md for installation instructions. Report if installation instructions are incomplete/not working.")
+endif()
+
+target_compile_definitions(Engine PUBLIC ${FFMPEG_DEFINITIONS})
+target_include_directories(Engine PUBLIC ${FFMPEG_INCLUDE_DIRS})
+target_link_libraries(Engine PUBLIC ${FFMPEG_LIBRARIES})
+
 target_precompile_headers(Engine PUBLIC
 		"$<$<COMPILE_LANGUAGE:CXX>:PrecompCXX.h>"
 		"$<$<COMPILE_LANGUAGE:C>:PrecompC.h>"
