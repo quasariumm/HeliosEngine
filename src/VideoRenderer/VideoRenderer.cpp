@@ -21,22 +21,22 @@ extern "C" {
 
 namespace Engine {
 // TODO: Remove before commiting
-// #define VR_TEST_VALUES
-// #ifdef VR_TEST_VALUES
-// uint16_t VideoRenderer::framesToRender = 60;
-// uint16_t VideoRenderer::fps = 30;
-// uint16_t VideoRenderer::samplesPerFrame = 500;
-//
-// std::filesystem::path VideoRenderer::m_videoDirectory = L"C:\\Users\\patri\\Videos";
-// std::string VideoRenderer::m_videoName = "Test";
-// #else
+#define VR_TEST_VALUES
+#ifdef VR_TEST_VALUES
+uint16_t VideoRenderer::framesToRender = 60;
+uint16_t VideoRenderer::fps = 30;
+uint16_t VideoRenderer::samplesPerFrame = 500;
+
+std::filesystem::path VideoRenderer::m_videoDirectory = L"C:\\Users\\patri\\Videos";
+std::string VideoRenderer::m_videoName = "Test";
+#else
 uint16_t VideoRenderer::framesToRender = 0;
 uint16_t VideoRenderer::fps = 0;
 uint16_t VideoRenderer::samplesPerFrame = 0;
 
 std::filesystem::path VideoRenderer::m_videoDirectory;
 std::string VideoRenderer::m_videoName;
-// #endif
+#endif
 
 AVContext VideoRenderer::m_ctx = {};
 
@@ -183,16 +183,14 @@ void VideoRenderer::BeginRecording()
 	m_ctx.frame = av_frame_alloc();
 	if (!m_ctx.frame)
 	{
-		m_ctx.disabled = true;
-		DebugLog(LogSeverity::SEVERE, L"Could not allocate video frame. Video rendering feature disabled.");
+		DebugLog(LogSeverity::SEVERE, L"Could not allocate video frame.");
 		return;
 	}
 
 	m_ctx.codecCtx = avcodec_alloc_context3(m_ctx.codec);
 	if (!m_ctx.codecCtx)
 	{
-		m_ctx.disabled = true;
-		DebugLog(LogSeverity::SEVERE, L"Could not allocate video codec context. Video rendering feature disabled.");
+		DebugLog(LogSeverity::SEVERE, L"Could not allocate video codec context.");
 		return;
 	}
 
@@ -216,8 +214,7 @@ void VideoRenderer::BeginRecording()
 	int ret = avcodec_open2(m_ctx.codecCtx, m_ctx.codec, NULL);
 	if (ret < 0)
 	{
-		m_ctx.disabled = true;
-		DebugLog(LogSeverity::SEVERE, L"Could not open video codec. Video rendering feature disabled.");
+		DebugLog(LogSeverity::SEVERE, L"Could not open video codec.");
 		return;
 	}
 
@@ -227,8 +224,7 @@ void VideoRenderer::BeginRecording()
 	ret = av_frame_get_buffer(m_ctx.frame, 0);
 	if (ret < 0)
 	{
-		m_ctx.disabled = true;
-		DebugLog(LogSeverity::SEVERE, L"Could not allocate video frame data. Video rendering feature disabled.");
+		DebugLog(LogSeverity::SEVERE, L"Could not allocate video frame data.");
 		return;
 	}
 
@@ -242,8 +238,7 @@ void VideoRenderer::BeginRecording()
 	m_ctx.packet = av_packet_alloc();
 	if (!m_ctx.packet)
 	{
-		m_ctx.disabled = true;
-		DebugLog(LogSeverity::SEVERE, L"Could not allocate video packet. Video rendering feature disabled.");
+		DebugLog(LogSeverity::SEVERE, L"Could not allocate video packet.");
 		return;
 	}
 
