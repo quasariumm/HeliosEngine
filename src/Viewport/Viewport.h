@@ -19,13 +19,14 @@ public:
     static void AppendRenderedImage(GL46_Texture2D* texture) { m_renderedImage = texture; }
     static void AppendEditorCamera(Camera* camera) { m_editorCamera = camera; }
 
+    static GL46_Texture2D* m_renderedImage;
+
 private:
     static void DrawGizmo(const vec3& pos, float size = 30.0f);
 
     static Line2D ProjectLine(const Line3D& line);
     static ImVec2 ProjectPoint(const vec3& PW);
 
-    static GL46_Texture2D* m_renderedImage;
     static Camera* m_editorCamera;
 };
 

@@ -1,8 +1,27 @@
 ﻿#pragma once
+
 #include "Editor/EditorInterface.h"
 
+struct AVFrame;
+struct AVPacket;
+struct AVCodec;
+struct AVCodecContext;
+struct SwsContext;
 
 namespace Engine {
+
+struct AVContext
+{
+	bool disabled = false;
+	std::ofstream file;
+	AVFrame* frame = nullptr;
+	AVPacket* packet = nullptr;
+
+	const AVCodec* codec = nullptr;
+	AVCodecContext* codecCtx = nullptr;
+
+	SwsContext* swsCtx = nullptr;
+};
 
 class VideoRenderer final : public EditorInterface
 {
@@ -10,6 +29,8 @@ class VideoRenderer final : public EditorInterface
 public:
 
 	VideoRenderer();
+
+	~VideoRenderer() override;
 
 	void DrawInterface() override;
 
@@ -21,12 +42,14 @@ public:
 
 	static void StopRecording();
 
-private:
-
 	static void BeginRecording();
+
+private:
 
 	static std::filesystem::path m_videoDirectory;
 	static std::string m_videoName;
+
+	static AVContext m_ctx;
 
 };
 
