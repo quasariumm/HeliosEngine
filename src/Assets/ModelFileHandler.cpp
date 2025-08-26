@@ -5,6 +5,8 @@
 
 #include "Debugger/Debugger.h"
 
+#define TINYBVH_IMPLEMENTATION
+#include "tiny_bvh.h"
 
 namespace Engine
 {
@@ -17,12 +19,16 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 	 * Vertices
 	 */
 
+	tinybvh::bvhvec4* bvhvertices = (tinybvh::bvhvec4*)tinybvh::malloc64(aiMesh->mNumVertices * sizeof(tinybvh::bvhvec4));
+
 	for (unsigned i = 0; i < aiMesh->mNumVertices; i++)
 	{
 		VertexData& vertex = mesh.vertices.emplace_back();
 		vertex.position.x = aiMesh->mVertices[i].x;
 		vertex.position.y = aiMesh->mVertices[i].y;
 		vertex.position.z = aiMesh->mVertices[i].z;
+
+		bvhvertices[i] = tinybvh::bvhvec4(vertex.position.x, vertex.position.y, vertex.position.z, 1);
 
 		vertex.normalTangent.x = PackHalf2x16(aiMesh->mNormals[i].x, aiMesh->mTangents[i].x);
 		vertex.normalTangent.y = PackHalf2x16(aiMesh->mNormals[i].y, aiMesh->mTangents[i].y);
@@ -49,6 +55,16 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 			mesh.indices.emplace_back(face.mIndices[idx + 2]);
 		}
 	}
+
+	tinybvh::BVH_GPU bvh;
+	bvh.BuildHQ(
+		tinybvh::bvhvec4slice{ bvhvertices, aiMesh->mNumVertices, sizeof( tinybvh::bvhvec4 ) },
+		mesh.indices.data(),
+		aiMesh->mNumVertices / 3
+	);
+	mesh.bvhNodes = { bvh.bvhNode, bvh.bvhNode + bvh.bvh.NodeCount() };
+
+	tinybvh::free64(bvhvertices);
 
 	/*
 	 * Textures TODO

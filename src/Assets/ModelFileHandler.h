@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tiny_bvh.h"
+
 namespace Engine
 {
 
@@ -15,6 +17,7 @@ struct MeshData
 {
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
+	std::vector<tinybvh::BVH_GPU::BVHNode> bvhNodes;
 };
 
 struct ModelData
