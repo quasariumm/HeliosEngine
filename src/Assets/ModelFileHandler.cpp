@@ -19,11 +19,13 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 	 * Vertices
 	 */
 
-	tinybvh::bvhvec4* bvhvertices = (tinybvh::bvhvec4*)tinybvh::malloc64(aiMesh->mNumVertices * sizeof(tinybvh::bvhvec4));
+	mesh.vertices = ALIGNED_NEW(64) VertexData[aiMesh->mNumVertices];
+	mesh.numVertices = aiMesh->mNumVertices;
+	auto* bvhvertices = (tinybvh::bvhvec4*)tinybvh::malloc64(aiMesh->mNumVertices * sizeof(tinybvh::bvhvec4));
 
 	for (unsigned i = 0; i < aiMesh->mNumVertices; i++)
 	{
-		VertexData& vertex = mesh.vertices.emplace_back();
+		VertexData& vertex = mesh.vertices[i];
 		vertex.position.x = aiMesh->mVertices[i].x;
 		vertex.position.y = aiMesh->mVertices[i].y;
 		vertex.position.z = aiMesh->mVertices[i].z;
@@ -45,24 +47,34 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 	 * Indices
 	 */
 
+	size_t numIndices = 0;
+	for (unsigned i = 0; i < aiMesh->mNumFaces; i++)
+		numIndices += aiMesh->mFaces[i].mNumIndices;
+
+	mesh.indices = ALIGNED_NEW(64) uint32_t[numIndices];
+	mesh.numIndices = numIndices;
+
+	uint32_t indexIndex = 0;
 	for (unsigned i = 0; i < aiMesh->mNumFaces; i++)
 	{
 		const aiFace face = aiMesh->mFaces[i];
-		for (unsigned idx = 0; idx < face.mNumIndices; idx += 3)
+		for (unsigned idx = 0; idx < face.mNumIndices; idx += 3, indexIndex += 3)
 		{
-			mesh.indices.emplace_back(face.mIndices[idx + 0]);
-			mesh.indices.emplace_back(face.mIndices[idx + 1]);
-			mesh.indices.emplace_back(face.mIndices[idx + 2]);
+			mesh.indices[indexIndex + 0] = face.mIndices[idx + 0];
+			mesh.indices[indexIndex + 1] = face.mIndices[idx + 1];
+			mesh.indices[indexIndex + 2] = face.mIndices[idx + 2];
 		}
 	}
 
 	tinybvh::BVH_GPU bvh;
 	bvh.BuildHQ(
 		tinybvh::bvhvec4slice{ bvhvertices, aiMesh->mNumVertices, sizeof( tinybvh::bvhvec4 ) },
-		mesh.indices.data(),
+		mesh.indices,
 		aiMesh->mNumVertices / 3
 	);
-	mesh.bvhNodes = { bvh.bvhNode, bvh.bvhNode + bvh.bvh.NodeCount() };
+	mesh.bvhNodes = ALIGNED_NEW(64) tinybvh::BVH_GPU::BVHNode[bvh.bvh.NodeCount()];
+	mesh.numBVHNodes = bvh.bvh.NodeCount();
+	mempcpy(mesh.bvhNodes, bvh.bvhNode, bvh.bvh.NodeCount() * sizeof(tinybvh::BVH_GPU::BVHNode));
 
 	tinybvh::free64(bvhvertices);
 
@@ -101,6 +113,15 @@ static void ProcessNode(const aiNode* node, const aiScene* scene, std::vector<Me
 }
 
 std::unordered_map<std::wstring, ModelData> ModelFileHandler::m_loadedModels = {};
+
+
+MeshData::~MeshData()
+{
+	ALIGNED_LIST_DELETE(vertices, 64);
+	ALIGNED_LIST_DELETE(indices, 64);
+	ALIGNED_LIST_DELETE(bvhNodes, 64);
+}
+
 
 ModelInstance ModelFileHandler::LoadModel( const std::filesystem::path& modelFile )
 {

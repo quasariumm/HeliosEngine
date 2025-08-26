@@ -70,6 +70,13 @@ static constexpr float LARGE_FLOAT	=	1e34f;
 
 #define CALL(func, ...) if (func) (func).operator()(__VA_ARGS__)
 
+/**
+ * Aligned new operator	\n
+ * Usage example: ALIGNED_NEW(64) uint32_t[100];
+ */
+#define ALIGNED_NEW(alignment) new (std::align_val_t(alignment))
+#define ALIGNED_LIST_DELETE(ptr, alignment) ::operator delete[](ptr, std::align_val_t(alignment))
+
 // Because OpenGL likes their size types as signed
 #define sizeofll(obj) (int64_t)sizeof(obj)
 

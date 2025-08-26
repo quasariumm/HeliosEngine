@@ -15,9 +15,13 @@ struct alignas(16) VertexData
 
 struct MeshData
 {
-	std::vector<VertexData> vertices;
-	std::vector<uint32_t> indices;
-	std::vector<tinybvh::BVH_GPU::BVHNode> bvhNodes;
+	~MeshData();
+	VertexData* vertices;
+	size_t numVertices;
+	uint32_t* indices;
+	size_t numIndices;
+	tinybvh::BVH_GPU::BVHNode* bvhNodes;
+	size_t numBVHNodes;
 };
 
 struct ModelData
