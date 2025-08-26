@@ -197,42 +197,19 @@ __FILE__ "(" EMIT_COMPILER_WARNING_STRINGIFY1(__LINE__) "): " type ": "
 // SSE4.2 availability: Since Nehalem (2008)
 // AVX1 availability: Since Sandy Bridge (2011)
 // AVX2 availability: Since Haswell (2013)
-#ifndef TINYBVH_NO_SIMD
-#if defined __x86_64__ || defined _M_X64 || defined __wasm_simd128__ || defined __wasm_relaxed_simd__
-#if !defined __SSE4_2__  && !defined _MSC_VER
-WARNING( "SSE4.2 not enabled in compilation." )
-#else
-#define BVH_USESSE
-#ifndef __SSE4_2__
-#define __SSE4_2__		// msvc doesn't set the SSE flag
-#endif
-#endif
-#if !defined __AVX__
-WARNING( "AVX not enabled in compilation." )
-#define TINYBVH_NO_SIMD
-#else
-#define BVH_USEAVX		// required for BuildAVX, BVH_SoA and others
+// Replaced to use Helios definnes: Patrick Vreeburg (2025)
+#ifdef ENGINE_USE_SSE
 #define BVH_USESSE
 #endif
-#if !defined __AVX2__ || (!defined __FMA__ && !defined _MSC_VER)
-WARNING( "AVX2 and FMA not enabled in compilation." )
-#define TINYBVH_NO_SIMD
-#else
-#define BVH_USEAVX2		// required for BVH8_CPU
+#ifdef ENGINE_USE_AVX
 #define BVH_USEAVX
-#define BVH_USESSE
 #endif
-#include "immintrin.h"	// for __m128 and __m256
-#elif defined __aarch64__ || defined _M_ARM64
-#if !defined __NEON__
-WARNING( "NEON not enabled in compilation." )
-#define TINYBVH_NO_SIMD
-#else
+#ifdef ENGINE_USE_AVX2
+#define BVH_USEAVX2
+#endif
+#ifdef ENGINE_USE_NEON
 #define BVH_USENEON
-#include "arm_neon.h"
 #endif
-#endif
-#endif // TINYBVH_NO_SIMD
 
 // aligned memory allocation
 // note: formally, size needs to be a multiple of 'alignment', see:

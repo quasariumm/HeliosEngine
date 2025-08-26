@@ -44,6 +44,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
 	if (COMPILER_SUPPORTS_AVX2)
 		add_compile_options(-mavx2)
+		add_compile_options(-mfma)
 	endif ()
 elseif (MSVC)
 	# For MSVC
