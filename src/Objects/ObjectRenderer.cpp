@@ -14,6 +14,7 @@ ObjectRenderer::~ObjectRenderer()
 	m_meshSSBO.Clear();
 	m_vertexSSBO.Clear();
 	m_indexSSBO.Clear();
+	m_BVHNodeSSBO.Clear();
 	m_materialSSBO.Clear();
 }
 
@@ -145,7 +146,8 @@ struct GPUMesh
 	int materialIndex = -1;
 	uint32_t indexCount = 0;
 	uint32_t firstIndex = 0;
-	vec2f _padding;
+	uint32_t bvhNodeCount = 0;
+	uint32_t firstBvhNode = 0;
 };
 
 void ObjectRenderer::UpdateModelSSBOs()
@@ -160,21 +162,24 @@ void ObjectRenderer::UpdateModelSSBOs()
 	m_meshSSBO.Init(BufferType::ShaderStorage);
 	m_vertexSSBO.Init(BufferType::ShaderStorage);
 	m_indexSSBO.Init(BufferType::ShaderStorage);
+	m_BVHNodeSSBO.Init(BufferType::ShaderStorage);
 
 	// Determine the amount of vertices, indices and meshes
 	uint32_t meshAmount = 0;
 	uint32_t vertexAmount = 0;
 	uint32_t indexAmount = 0;
+	uint32_t BVHNodeAmount = 0;
 	for (const RenderObject& renderObject : m_renderObjects)
 	{
 		if (renderObject.primitiveType != PrimitiveType::MODEL) continue;
-		ModelData* modelData = renderObject.modelInstanceLoc->modelData;
+		const ModelData* modelData = renderObject.modelInstanceLoc->modelData;
 		if (modelData == nullptr) continue;
 		meshAmount += modelData->meshes.size();
-		for (MeshData& mesh : modelData->meshes)
+		for (const MeshData& mesh : modelData->meshes)
 		{
-			vertexAmount += mesh.vertices.size();
-			indexAmount += mesh.indices.size();
+			vertexAmount += mesh.numVertices;
+			indexAmount += mesh.numIndices;
+			BVHNodeAmount += mesh.numBVHNodes;
 		}
 	}
 
@@ -183,6 +188,7 @@ void ObjectRenderer::UpdateModelSSBOs()
 	m_computeShader->SetUInt("NumMeshes", meshAmount);
 	m_computeShader->SetUInt("NumVertices", vertexAmount);
 	m_computeShader->SetUInt("NumIndices", indexAmount);
+	m_computeShader->SetUInt("NumBVHNodes", indexAmount);
 
 	if (meshAmount == 0) return;
 
@@ -190,11 +196,13 @@ void ObjectRenderer::UpdateModelSSBOs()
 	m_meshSSBO.Fill(sizeofll(GPUMesh) * meshAmount);
 	m_vertexSSBO.Fill(sizeofll(VertexData) * vertexAmount);
 	m_indexSSBO.Fill(sizeofll(uint32_t) * indexAmount);
+	m_BVHNodeSSBO.Fill(sizeofll(tinybvh::BVH_GPU::BVHNode) * BVHNodeAmount);
 
 	// Send data per mesh
 	uint32_t meshIndex = 0;
 	uint32_t vertexIndex = 0;
 	uint32_t indexIndex = 0;
+	uint32_t BVHNodeIndex = 0;
 
 	const int numMaterials = MaterialRegister::Instance().GetNumMaterials();
 
@@ -208,15 +216,18 @@ void ObjectRenderer::UpdateModelSSBOs()
 			const MeshData& mesh = modelData->meshes[i];
 			int materialIndex = renderObject.modelInstanceLoc->materialIndices[i];
 			materialIndex = (materialIndex >= 0 && materialIndex < numMaterials) ? materialIndex + 1 : 0;
-			GPUMesh gpuMesh = { renderObject.transform->position(), materialIndex, (uint32_t)mesh.indices.size(), indexIndex, vec2f(0.f) };
-			m_meshSSBO.SubData(meshIndex * sizeofll(GPUMesh), sizeofll(GPUMesh), &gpuMesh);
-			const auto vertices = (int64_t)mesh.vertices.size();
-			const auto indices = (int64_t)mesh.indices.size();
-			m_vertexSSBO.SubData(vertexIndex * sizeofll(VertexData), vertices * sizeofll(VertexData), mesh.vertices.data());
-			m_indexSSBO.SubData(indexIndex * sizeofll(uint32_t), indices * sizeofll(uint32_t), mesh.indices.data());
+			const uint32_t BVHNodes = mesh.numBVHNodes;
+			GPUMesh gpuMesh = { renderObject.transform->position(), materialIndex, (uint32_t)mesh.numIndices, indexIndex, BVHNodes, BVHNodeIndex };
+			m_meshSSBO.SubData(meshIndex * sizeof(GPUMesh), sizeof(GPUMesh), &gpuMesh);
+			const auto vertices = (int64_t)mesh.numVertices;
+			const auto indices = (int64_t)mesh.numIndices;
+			m_vertexSSBO.SubData(vertexIndex * sizeof(VertexData), vertices * sizeof(VertexData), mesh.vertices);
+			m_indexSSBO.SubData(indexIndex * sizeof(uint32_t), indices * sizeof(uint32_t), mesh.indices);
+			m_BVHNodeSSBO.SubData(BVHNodeIndex * sizeof(tinybvh::BVH_GPU::BVHNode), BVHNodes * sizeof(tinybvh::BVH_GPU::BVHNode), mesh.bvhNodes);
 			meshIndex++;
 			vertexIndex += vertices;
 			indexIndex += indices;
+			BVHNodeIndex += BVHNodes;
 		}
 	}
 
@@ -224,6 +235,7 @@ void ObjectRenderer::UpdateModelSSBOs()
 	m_meshSSBO.BindBase(7);
 	m_indexSSBO.BindBase(6);
 	m_vertexSSBO.BindBase(5);
+	m_BVHNodeSSBO.BindBase(4);
 }
 
 

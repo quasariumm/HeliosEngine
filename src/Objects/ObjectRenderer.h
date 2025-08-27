@@ -106,6 +106,7 @@ private:
 	GL46_Buffer m_meshSSBO;
 	GL46_Buffer m_vertexSSBO;
 	GL46_Buffer m_indexSSBO;
+	GL46_Buffer m_BVHNodeSSBO;
 	GL46_Buffer m_materialSSBO;
 };
 }

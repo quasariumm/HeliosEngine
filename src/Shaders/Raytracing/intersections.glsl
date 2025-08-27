@@ -112,13 +112,29 @@ struct Mesh
 	int materialIndex;
 	uint indexCount;
 	uint firstIndex;
-	vec2 _padding;
+	uint bvhNodeCount;
+	uint firstBvhNode;
 };
 
 uniform uint NumMeshes = 0;
 layout (std430, binding = 7) readonly buffer MeshBuffer
 {
 	Mesh Meshes[];
+};
+
+struct BVHNode
+{
+	vec3 lmin; uint left;
+	vec3 lmax; uint right;
+	vec3 rmin; uint triCount;
+	vec3 rmax; uint firstTri;
+};
+
+uniform uint NumBVHNodes = 0;
+// Binding 8 is occupied by the materials. I'm just too lazy to refactor that...
+layout (std430, binding = 4) readonly buffer BVHNodeBuffer
+{
+	BVHNode BVHNodes[];
 };
 
 void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
@@ -162,16 +178,58 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 
 void RayMesh(inout Ray ray, Mesh mesh)
 {
-	// Check triangles based on the indices
-	for (uint i = mesh.firstIndex; i < mesh.firstIndex + mesh.indexCount; i += 3)
+	// Traverse the BVH of the mesh
+	uint nodeOffset = mesh.firstBvhNode;
+	uint triOffset = mesh.firstIndex;
+
+	uint stack[128];
+	int stackIndex = 0;
+	stack[stackIndex++] = nodeOffset;
+
+	while (stackIndex > 0)
 	{
-		RayTriangle(
-			ray,
-			mesh,
-			Vertices[Indices[i]],
-			Vertices[Indices[i + 1]],
-			Vertices[Indices[i + 2]]
-		);
+		BVHNode node = BVHNodes[stack[--stackIndex]];
+
+		if (node.triCount > 0 /* Leaf node */)
+		{
+			for (int i = 0; i < node.triCount; i++)
+			{
+				uint indexBase = triOffset + 3 * (node.firstTri + i);
+				RayTriangle(
+					ray, mesh,
+					Vertices[Indices[indexBase + 0]],
+					Vertices[Indices[indexBase + 1]],
+					Vertices[Indices[indexBase + 2]]
+				);
+			}
+		}
+		else
+		{
+			// Altered version of traverse_ailalaine (as found in https://github.com/jbikker/tinybvh/blob/main/traverse_bvh2.cl)
+			const vec3 rD = ray.invDir;
+			const vec3 rO = ray.origin * -rD;
+			const vec3 t1a = fma( node.lmin + mesh.position, rD, rO ), t2a = fma( node.lmax + mesh.position, rD, rO );
+			const vec3 t1b = fma( node.rmin + mesh.position, rD, rO ), t2b = fma( node.rmax + mesh.position, rD, rO );
+			const vec3 minta = min( t1a, t2a ), maxta = max( t1a, t2a );
+			const vec3 mintb = min( t1b, t2b ), maxtb = max( t1b, t2b );
+			const float tmina = max( max( max( minta.x, minta.y ), minta.z ), 0 );
+			const float tminb = max( max( max( mintb.x, mintb.y ), mintb.z ), 0 );
+			const float tmaxa = min( min( min( maxta.x, maxta.y ), maxta.z ), ray.hit.dst );
+			const float tmaxb = min( min( min( maxtb.x, maxtb.y ), maxtb.z ), ray.hit.dst );
+
+			float dist1 = tmina > tmaxa ? 1e30 : tmina;
+			float dist2 = tminb > tmaxb ? 1e30 : tminb;
+			uint left = nodeOffset + node.left, right = nodeOffset + node.right;
+			if (dist1 > dist2)
+			{
+				float h = dist1; dist1 = dist2; dist2 = h;
+				uint t = left; left = right; right = t;
+			}
+			if (dist1 < 1e29)
+				stack[stackIndex++] = left;
+			if (dist2 < 1e29)
+				stack[stackIndex++] = right;
+		}
 	}
 }
 

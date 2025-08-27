@@ -58,23 +58,31 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 	for (unsigned i = 0; i < aiMesh->mNumFaces; i++)
 	{
 		const aiFace face = aiMesh->mFaces[i];
-		for (unsigned idx = 0; idx < face.mNumIndices; idx += 3, indexIndex += 3)
-		{
-			mesh.indices[indexIndex + 0] = face.mIndices[idx + 0];
-			mesh.indices[indexIndex + 1] = face.mIndices[idx + 1];
-			mesh.indices[indexIndex + 2] = face.mIndices[idx + 2];
-		}
+		memcpy(mesh.indices + indexIndex, face.mIndices, face.mNumIndices * sizeof(uint32_t));
+		indexIndex += face.mNumIndices;
 	}
 
 	tinybvh::BVH_GPU bvh;
-	bvh.BuildHQ(
+	bvh.Build(
 		tinybvh::bvhvec4slice{ bvhvertices, aiMesh->mNumVertices, sizeof( tinybvh::bvhvec4 ) },
 		mesh.indices,
-		aiMesh->mNumVertices / 3
+		mesh.numIndices / 3
 	);
-	mesh.bvhNodes = ALIGNED_NEW(64) tinybvh::BVH_GPU::BVHNode[bvh.bvh.NodeCount()];
-	mesh.numBVHNodes = bvh.bvh.NodeCount();
-	mempcpy(mesh.bvhNodes, bvh.bvhNode, bvh.bvh.NodeCount() * sizeof(tinybvh::BVH_GPU::BVHNode));
+	mesh.bvhNodes = ALIGNED_NEW(64) tinybvh::BVH_GPU::BVHNode[bvh.usedNodes];
+	mesh.numBVHNodes = bvh.usedNodes;
+	mempcpy(mesh.bvhNodes, bvh.bvhNode, bvh.usedNodes * sizeof(tinybvh::BVH_GPU::BVHNode));
+	// Use the indices that the bvh gave
+	auto* newIndices = ALIGNED_NEW(64) uint32_t[3 * bvh.triCount];
+	for (int i = 0; i < bvh.triCount; ++i)
+	{
+		uint32_t primIdx = 3 * bvh.bvh.primIdx[i];
+		newIndices[3 * i + 0] = mesh.indices[primIdx + 0];
+		newIndices[3 * i + 1] = mesh.indices[primIdx + 1];
+		newIndices[3 * i + 2] = mesh.indices[primIdx + 2];
+	}
+	ALIGNED_LIST_DELETE(mesh.indices, 64);
+	mesh.indices = newIndices;
+	mesh.numIndices = 3 * bvh.triCount;
 
 	tinybvh::free64(bvhvertices);
 
