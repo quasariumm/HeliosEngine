@@ -73,7 +73,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
                 else if (type == STR_TO_WSTR(Demangle(typeid(float).name())))
                     newComponent->SetPropertyValue(name, std::stof(value));
                 else if (type == STR_TO_WSTR(Demangle(typeid(vec2).name())))
-                    newComponent->SetPropertyValue(name, ParseVec2(value));
+                    newComponent->SetPropertyValue(name, ParseVec2<float>(value));
                 else if (type == STR_TO_WSTR(Demangle(typeid(vec3).name())))
                     newComponent->SetPropertyValue(name, ParseVec3(value));
                 else if (type == STR_TO_WSTR(Demangle(typeid(std::string).name())))

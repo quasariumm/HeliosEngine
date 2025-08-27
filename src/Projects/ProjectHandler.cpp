@@ -285,6 +285,9 @@ namespace Engine {
         if (m_projectLibrary != nullptr)
             FreeLibrary(m_projectLibrary);
 
+        // Removing editor interfaces from the library that are from the project
+        EditorInterfaceManager::Instance().UnregisterProjectInterfaces();
+
         std::wstring cmakeCommand = L"cmake -S " + ProjectFolder().wstring() + L" -B " + ProjectFolder().wstring() +
                                     L"\\cmake-build-debug" + L" -G \"Ninja\"";
         int cmakeStatus = std::system(WStringToUTF8(cmakeCommand).c_str());

@@ -87,10 +87,12 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	std::cout << "Running engine library as include" << std::endl;
 #endif
 
+	Engine::EditorSettings::Load();
+
     std::unique_ptr<Engine::Window> window;
     Engine::CreateWin(
     	window,
-    	Engine::vec2u(1280, 720),
+    	Engine::vec2u(Engine::EditorSettings::Get().m_windowSize.x, Engine::EditorSettings::Get().m_windowSize.y),
     	L"Helios Engine",
     	EngineWindowFlags_NoVsync
     );
@@ -114,9 +116,6 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	// 	} catch (...) {break;}
 	// 	++i;
 	// }
-
-
-	Engine::EditorSettings::Load();
 
 	Engine::EditorInterfaceManager::Initialize(window.get());
 

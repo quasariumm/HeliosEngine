@@ -19,6 +19,8 @@ bool EditorSettings::Save()
     }
     // Save all variables in the struct
     file << "CloseOnEscape = " << std::to_wstring(m_editorSettings.m_closeOnEscape) << std::endl;
+    file << "WindowSize = " << m_editorSettings.m_windowSize << std::endl;
+    file << "InterfaceScale = " << std::to_wstring(m_editorSettings.m_interfaceScaling) << std::endl;
     file << "ForceLoadProject = " << std::to_wstring(m_editorSettings.m_forceLoadProject) << std::endl;
 	file << "ForceLoadProjectPath = " << m_editorSettings.m_forceLoadProjectPath << std::endl;
 	file << "ForceLoadScenePath = " << m_editorSettings.m_forceLoadScenePath << std::endl;
@@ -41,6 +43,8 @@ bool EditorSettings::Load()
     while (std::getline(file, line))
     {
         if (IsToken(line, L"CloseOnEscape")) m_editorSettings.m_closeOnEscape = stoi(TokenValue(line));
+    	else if (IsToken(line, L"WindowSize")) m_editorSettings.m_windowSize = ParseVec2<int>(TokenValue(line));
+    	else if (IsToken(line, L"InterfaceScale")) m_editorSettings.m_interfaceScaling = std::stof(TokenValue(line));
     	else if (IsToken(line, L"ForceLoadProject")) m_editorSettings.m_forceLoadProject = stoi(TokenValue(line));
     	else if (IsToken(line, L"ForceLoadProjectPath")) m_editorSettings.m_forceLoadProjectPath = TokenValue(line);
     	else if (IsToken(line, L"ForceLoadScenePath")) m_editorSettings.m_forceLoadScenePath = TokenValue(line);
@@ -53,14 +57,25 @@ bool EditorSettings::Load()
 
 void EditorSettings::DrawWindow()
 {
-    // ReSharper disable once CppDFAConstantConditions
     if (!m_editorSettingsOpen) return;
 
-    // ReSharper disable once CppDFAUnreachableCode
     ImGui::Begin("Editor Settings");
 
     if (ImGui::BeginTabBar("Editor Settings"))
     {
+    	if (ImGui::BeginTabItem("Interface"))
+    	{
+    		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), ICON_REFRESH);
+    		ImGui::SameLine();
+    		ImGui::InputInt2(ICON_RESIZE" Window Size", m_editorSettings.m_windowSize.cell);
+
+    		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), ICON_REFRESH);
+    		ImGui::SameLine();
+    		ImGui::InputFloat(ICON_FORMAT_SIZE" Scaling", &m_editorSettings.m_interfaceScaling);
+
+    		ImGui::EndTabItem();
+    	}
+
         if (ImGui::BeginTabItem("Shortcuts"))
         {
             ImGui::Checkbox("Close editor on " ICON_KEYBOARD_ESC, &m_editorSettings.m_closeOnEscape);
@@ -91,7 +106,8 @@ void EditorSettings::DrawWindow()
 
     	if (ImGui::BeginTabItem("View Settings"))
     	{
-    		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), "Requires restart");
+    		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), ICON_REFRESH);
+    		ImGui::SameLine();
     		if (ImGui::InputInt2("Viewport texture size", (int*)m_editorSettings.m_viewportRenderSize.cell))
     			Min(m_editorSettings.m_viewportRenderSize, vec2u(1, 1));
     		ImGui::EndTabItem();

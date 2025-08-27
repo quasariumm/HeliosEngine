@@ -2,6 +2,8 @@
 
 #include <tracy/Tracy.hpp>
 
+#include "Editor/EditorSettings.h"
+
 
 namespace Engine
 {
@@ -76,7 +78,7 @@ void Debugger::DrawLogs()
 
 
         ImGui::TextColored({1,1,1,0.5f}, ICON_CHEVRON_RIGHT);
-        float spacing = 30;
+        float spacing = 30 * EditorSettings::Get().m_interfaceScaling;
         ImGui::SameLine(spacing);
 
         if (showSource && !ProjectHandler::m_lockOut)
@@ -91,7 +93,7 @@ void Debugger::DrawLogs()
             ImGui::SetItemTooltip(ICON_FILE_CODE " %s\n" ICON_FORMAT_LIST_NUMBERED " %o:%o\n" ICON_CODE_BRACES " %s",
                 file.string().c_str(), log.source.line(), log.source.column(), log.source.function_name());
 
-            spacing += 25;
+            spacing += 25 * EditorSettings::Get().m_interfaceScaling;
             ImGui::SameLine(spacing);
         }
 
@@ -100,7 +102,7 @@ void Debugger::DrawLogs()
             char timestamp[48];
             strftime(timestamp, 48, "%H:%M:%S", localtime(&log.timestamp));
             ImGui::Text(timestamp);
-            spacing += 65;
+            spacing += 65 * EditorSettings::Get().m_interfaceScaling;
             ImGui::SameLine(spacing);
         }
 
@@ -117,7 +119,7 @@ void Debugger::DrawLogs()
             break;
         }
 
-        spacing += 30;
+        spacing += 30 * EditorSettings::Get().m_interfaceScaling;
         ImGui::SameLine(spacing);
         ImGui::Text(WStringToUTF8(log.message).c_str());
     }

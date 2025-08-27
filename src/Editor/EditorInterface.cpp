@@ -16,13 +16,31 @@ EditorInterfaceManager& EditorInterfaceManager::Instance()
 }
 
 void EditorInterfaceManager::RegisterInterface(const std::wstring& name,
-	std::unique_ptr<EditorInterface> editorInterface)
+	EditorInterface* editorInterface)
 {
 	if (m_editorInterfaces.contains(name))
-		m_editorInterfaces[name].reset();
-	m_editorInterfaces[name] = std::move(editorInterface);
+		return;
+	m_editorInterfaces[name] = editorInterface;
 	DebugLog(LogSeverity::INFO, L"Registered editor interface: " + name);
 }
+
+void EditorInterfaceManager::UnregisterProjectInterfaces()
+{
+	std::vector<std::wstring> keys = {};
+	for (auto& i : m_editorInterfaces)
+	{
+		if (i.second->source == EditorInterfaceSource::PROJECT)
+		{
+			delete i.second;
+			keys.push_back(i.first);
+			m_editorInterfaces.erase(i.first);
+		}
+	}
+
+	for (std::wstring& key : keys)
+		m_editorInterfaces.erase(key);
+}
+
 
 void EditorInterfaceManager::Initialize(Window* window)
 {
@@ -30,14 +48,14 @@ void EditorInterfaceManager::Initialize(Window* window)
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags = ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard;
 
-    io.Fonts->AddFontFromFileTTF("extern/imgui/misc/fonts/Roboto-Medium.ttf", 16.0f);
+    io.Fonts->AddFontFromFileTTF("extern/imgui/misc/fonts/Roboto-Medium.ttf", 16.0f * EditorSettings::Get().m_interfaceScaling);
 
     ImFontConfig config;
     config.MergeMode = true;
-    config.GlyphMinAdvanceX = 18.0f;
+    config.GlyphMinAdvanceX = 18.0f * EditorSettings::Get().m_interfaceScaling;
     config.GlyphOffset = {0, 2.0f};
     static constexpr ImWchar32 icon_ranges[] = {ICON_MIN_MDI, ICON_MAX_MDI, 0};
-    io.Fonts->AddFontFromFileTTF("extern/fonts/materialdesignicons-webfont.ttf", 18.0f, &config, icon_ranges);
+    io.Fonts->AddFontFromFileTTF("extern/fonts/materialdesignicons-webfont.ttf", 18.0f * EditorSettings::Get().m_interfaceScaling, &config, icon_ranges);
 
 	io.Fonts->Build();
 }

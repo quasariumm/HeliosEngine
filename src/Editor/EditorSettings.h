@@ -6,6 +6,8 @@ namespace Engine
 struct EditorSettingsData
 {
     bool m_closeOnEscape = false;
+    vec2i m_windowSize = {1920, 1080};
+    float m_interfaceScaling = 1.0f;
 	bool m_forceLoadProject = false;
 	std::wstring m_forceLoadProjectPath = L"";
 	std::wstring m_forceLoadScenePath = L"";

@@ -31,7 +31,9 @@ public:
 
     static ENGINE_API EditorInterfaceManager& Instance();
 
-    void ENGINE_API RegisterInterface(const std::wstring& name, std::unique_ptr<EditorInterface> editorInterface);
+    void ENGINE_API RegisterInterface(const std::wstring& name, EditorInterface* editorInterface);
+
+    void ENGINE_API UnregisterProjectInterfaces();
 
     static void Initialize(Window* window);
 
@@ -41,7 +43,7 @@ public:
     static void SetKeyboardEnable(bool enable = true);
 
 private:
-    std::unordered_map<std::wstring, std::unique_ptr<EditorInterface>> m_editorInterfaces = {};
+    std::unordered_map<std::wstring, EditorInterface*> m_editorInterfaces = {};
     Window* m_window = nullptr;
     std::unordered_map<std::wstring, std::filesystem::path> m_recentProjects = {};
 };
@@ -49,7 +51,7 @@ private:
 #define REGISTER_EDITOR_INTERFACE(TYPE) \
 static bool TYPE##_registered = []() { \
 std::string type = #TYPE; \
-Engine::EditorInterfaceManager::Instance().RegisterInterface(std::wstring(type.begin(), type.end()), std::make_unique<TYPE>()); \
+Engine::EditorInterfaceManager::Instance().RegisterInterface(std::wstring(type.begin(), type.end()), new TYPE()); \
 return true; \
 }()
 

@@ -20,9 +20,10 @@ static std::wstring TokenValue(const std::wstring& line)
 }
 
 static constexpr const wchar_t* sep = L", ";
-static vec2f ParseVec2(std::wstring text)
+template <typename T>
+static vec2t<T> ParseVec2(std::wstring text)
 {
-    vec2f result;
+    vec2t<T> result;
     text.erase(text.begin(), text.begin() + 1); // Remove first bracket
     text.erase(text.end() - 1, text.end()); // Remove last bracket
     result.x = std::stof(text.substr(0, text.find(sep))); // Get the first value
