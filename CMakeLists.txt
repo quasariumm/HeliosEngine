@@ -123,6 +123,7 @@ set(ASSIMP_BUILD_X_IMPORTER					OFF	)
 set(ASSIMP_BUILD_X3D_IMPORTER				OFF	)
 set(ASSIMP_BUILD_3MF_IMPORTER				OFF	)
 set(ASSIMP_BUILD_MDD_IMPORTER				OFF	)
+set(ASSIMP_BUILD_TESTS 						OFF )
 
 add_subdirectory(extern/Assimp)
 set(CMAKE_CXX_STANDARD 20) # Because Assimp changes it back to C++17
