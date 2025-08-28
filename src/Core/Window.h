@@ -68,6 +68,8 @@ public:
 
 	virtual void SetShouldClose(bool shouldClose) = 0;
 
+	virtual void SetMaximized(bool maximized) = 0;
+
     /*
      * Window callbacks
      */
