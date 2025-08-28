@@ -7,9 +7,6 @@
 #include "Core/FileTools.h"
 #include <windows.h>
 
-#include "Components/Component.h"
-#include "Scene/SceneEditor.h"
-
 namespace Engine {
 
     bool ProjectHandler::m_selectorOpen = false;
@@ -51,7 +48,7 @@ namespace Engine {
                 }
 
                 if (result == 1)
-                    ImGui::Text("Recompiled successfully!");
+                    m_lockOut = false;
                 else if (result == 0) {
                     ImGui::Text("Recompile failed!");
                     ImGui::Text("Please check the console output in your IDE for issues");
