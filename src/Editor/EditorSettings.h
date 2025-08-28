@@ -7,6 +7,7 @@ struct EditorSettingsData
 {
     bool m_closeOnEscape = false;
     vec2i m_windowSize = {1920, 1080};
+    bool m_autoMaximize = true;
     float m_interfaceScaling = 1.0f;
 	bool m_forceLoadProject = false;
 	std::wstring m_forceLoadProjectPath = L"";

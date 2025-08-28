@@ -20,6 +20,7 @@ bool EditorSettings::Save()
     // Save all variables in the struct
     file << "CloseOnEscape = " << std::to_wstring(m_editorSettings.m_closeOnEscape) << std::endl;
     file << "WindowSize = " << m_editorSettings.m_windowSize << std::endl;
+    file << "AutoMaximize = " << std::to_wstring(m_editorSettings.m_autoMaximize) << std::endl;
     file << "InterfaceScale = " << std::to_wstring(m_editorSettings.m_interfaceScaling) << std::endl;
     file << "ForceLoadProject = " << std::to_wstring(m_editorSettings.m_forceLoadProject) << std::endl;
 	file << "ForceLoadProjectPath = " << m_editorSettings.m_forceLoadProjectPath << std::endl;
@@ -44,6 +45,7 @@ bool EditorSettings::Load()
     {
         if (IsToken(line, L"CloseOnEscape")) m_editorSettings.m_closeOnEscape = stoi(TokenValue(line));
     	else if (IsToken(line, L"WindowSize")) m_editorSettings.m_windowSize = ParseVec2<int>(TokenValue(line));
+    	else if (IsToken(line, L"AutoMaximize")) m_editorSettings.m_autoMaximize = stoi(TokenValue(line));
     	else if (IsToken(line, L"InterfaceScale")) m_editorSettings.m_interfaceScaling = std::stof(TokenValue(line));
     	else if (IsToken(line, L"ForceLoadProject")) m_editorSettings.m_forceLoadProject = stoi(TokenValue(line));
     	else if (IsToken(line, L"ForceLoadProjectPath")) m_editorSettings.m_forceLoadProjectPath = TokenValue(line);
@@ -68,6 +70,8 @@ void EditorSettings::DrawWindow()
     		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), ICON_REFRESH);
     		ImGui::SameLine();
     		ImGui::InputInt2(ICON_RESIZE" Window Size", m_editorSettings.m_windowSize.cell);
+
+    		ImGui::Checkbox(ICON_WINDOW_MAXIMIZE" Maximize on start", &m_editorSettings.m_autoMaximize);
 
     		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), ICON_REFRESH);
     		ImGui::SameLine();

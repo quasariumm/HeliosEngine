@@ -97,6 +97,9 @@ extern "C" int __declspec(dllexport) __stdcall main()
     	EngineWindowFlags_NoVsync
     );
 
+	if (Engine::EditorSettings::Get().m_autoMaximize)
+		window->SetMaximized(true);
+
 	window->SetKeyDownCallback(temp);
 
 	glEnable( GL_DEBUG_OUTPUT );

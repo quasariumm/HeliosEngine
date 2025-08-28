@@ -228,6 +228,14 @@ bool GL46_Window::ShouldClose()
     return glfwWindowShouldClose(m_window);
 }
 
+void GL46_Window::SetMaximized(const bool maximized)
+{
+	if (maximized)
+		glfwMaximizeWindow(m_window);
+	else
+		glfwRestoreWindow(m_window);
+}
+
 
 void GL46_Window::Terminate()
 {

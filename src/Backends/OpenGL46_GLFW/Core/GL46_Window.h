@@ -35,17 +35,17 @@ public:
 
 	void SetCursorMode(CursorMode mode) override;
 
-
     /**
      * @brief Gets the vendor from OpenGL
      * @note This in mostly used for internal purposes
      */
     const std::string& GetVendor() const;
 
-
 	void SetShouldClose(bool shouldClose) override;
 
     bool ShouldClose() override;
+
+	void SetMaximized(bool maximized) override;
 
     void Terminate();
 
