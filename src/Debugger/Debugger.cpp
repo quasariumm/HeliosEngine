@@ -66,11 +66,21 @@ void Debugger::DrawLogs()
         }
         if (ImGui::MenuItem(ICON_CLOSE_BOX" Clear"))
             Logger::Get()->g_logs.clear();
+        if (ImGui::MenuItem(ICON_OPEN_IN_NEW" Full Log"))
+        {
+            Logger::ExportLog();
+            std::filesystem::path folder = ProjectHandler::ProjectFolder();
+            std::string logPath = folder.append("Latest-Log.md").generic_string();
+            ShellExecuteA(nullptr, "open", logPath.c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
+        }
         ImGui::EndMenuBar();
     }
 
-    for (const Logger::Log& log : Logger::Get()->g_logs)
+    // Currently limiting the amount of logs shown to 30
+    for (int logIndex = std::max(0, (int)Logger::Get()->g_logs.size() - 30); logIndex < Logger::Get()->g_logs.size(); logIndex++)
     {
+        Logger::Log log = Logger::Get()->g_logs[logIndex];
+
         if (log.type == LogSeverity::INFO && !showInfo) continue;
         if (log.type == LogSeverity::WARNING && !showWarn) continue;
         if (log.type == LogSeverity::SEVERE && !showError) continue;
