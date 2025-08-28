@@ -3,19 +3,27 @@ project(Engine)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# Set the way the engine launches:
-# "Default"
-# Normal way of loading the engine
-# "Standalone"
-# Launches it as an executable which makes debugging easier, but does not allow project loading
-# Make sure to use a config that launches the executable
+# Determines whether the engine loads in standalone:
+# - OFF (Default):
+# 		Normal way of loading the engine. Launches using a dynamic library and separate launcher executable
+# - ON (Standalone):
+# 		Launches it as an executable, which makes debugging easier, but does not allow project loading
+# 		NOTE: Make sure to use a config that launches the executable Engine.exe
+option( ENGINE_STANDALONE
+		"Use standalone mode"
+		OFF)
 
-set(ENGINE_LAUNCH_MODE "Default")
-
+# Adds the launcher to the project
+# Used in Default launch option
 add_subdirectory(launcher)
 
-file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h lib/glad/src/glad.c)
+
+##############################################
+##  	  Determine files to build  		##
+##############################################
+file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h)
 file(GLOB LIBS CONFIGURE_DEPENDS
+		lib/glad/src/glad.c
 		extern/imgui/*.cpp
 		extern/imgui/*.h
 		extern/imgui/backends/imgui_impl_opengl3.h
@@ -26,6 +34,9 @@ file(GLOB LIBS CONFIGURE_DEPENDS
 )
 
 
+##############################################
+##				SSE/AVX flags				##
+##############################################
 include(CheckCXXCompilerFlag)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -44,15 +55,22 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
 	if (COMPILER_SUPPORTS_AVX2)
 		add_compile_options(-mavx2)
+		# Add FMA instructions. These are supported by all chips that have AVX2,
+		# but require explicit options to enable them.
 		add_compile_options(-mfma)
 	endif ()
+
+	# AVX512 flags will be added when we feel we can benefit from it
+
 elseif (MSVC)
 	# For MSVC
-	add_compile_options(/arch:SSE2 /arch:AVX)
+	add_compile_options(/arch:SSE2 /arch:AVX /arch:AVX2)
 endif ()
 
-# Create library or executable based on launch option
-if (ENGINE_LAUNCH_MODE MATCHES "Standalone")
+##############################################
+##  Create lib/exe based on launch option	##
+##############################################
+if (ENGINE_STANDALONE)
 	add_executable(Engine ${LIBS} ${SOURCE})
 	message("Launching engine in standalone mode... Creating executable")
 else ()
@@ -66,10 +84,16 @@ if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	set(TRACY_ENABLE ON)
 endif ()
 
+
+##############################################
+##  	Add external libraries's cmake		##
+##############################################
 add_subdirectory(extern/nativefiledialog-extended)
 add_subdirectory(extern/Tracy)
 
-# Configure Assimp to work with our project
+##############################################
+##  		  Configure Assimp  			##
+##############################################
 set(BUILD_SHARED_LIBS 	OFF	)
 set(ASSIMP_INSTALL 		OFF	)
 # Optimise build times by turning off certain importers
@@ -129,6 +153,11 @@ add_subdirectory(extern/Assimp)
 set(CMAKE_CXX_STANDARD 20) # Because Assimp changes it back to C++17
 
 
+##############################################
+##  	  Compile defs and options  		##
+##############################################
+
+# Tracy defs
 target_compile_definitions(Engine PRIVATE
 		"$<$<CONFIG:Debug>:DEBUG=1>"
 		"$<$<CONFIG:Release>:NDEBUG=1>"
@@ -136,7 +165,7 @@ target_compile_definitions(Engine PRIVATE
 		"$<$<CONFIG:Debug>:TRACY_CALLSTACK=10>"
 )
 
-
+# UTF8 compile flags
 target_compile_options(Engine PRIVATE
 		"$<$<C_COMPILER_ID:MSVC>:/utf-8>"
 		"$<$<NOT:$<C_COMPILER_ID:MSVC>>:-finput-charset=UTF-8;-fexec-charset=UTF-8>"
@@ -146,6 +175,10 @@ target_compile_options(Engine PRIVATE
 		"$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-finput-charset=UTF-8;-fexec-charset=UTF-8>"
 )
 
+
+##############################################
+## Include directories + precompiled header ##
+##############################################
 target_include_directories(Engine PUBLIC
 		pch
 		src
@@ -165,6 +198,10 @@ target_precompile_headers(Engine PUBLIC
 		"$<$<COMPILE_LANGUAGE:C>:PrecompC.h>"
 )
 
+
+##############################################
+##  		  Linking libraries  			##
+##############################################
 set(MSVC_LIBS
 		glfw3.lib
 )
@@ -202,6 +239,10 @@ else ()
 
 endif ()
 
+
+###############################################
+## Logging Engine and software library files ##
+###############################################
 list(LENGTH SOURCE NUM_SOURCE)
 message(STATUS "CMake is including the following ${NUM_SOURCE} source files:")
 foreach (file ${SOURCE})
