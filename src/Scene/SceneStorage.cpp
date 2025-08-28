@@ -35,12 +35,13 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
 
     while (std::getline(file, line))
     {
-        if (line.empty()) loadType = NONE, newObject = nullptr, newComponent = nullptr;
+        if (line.empty()) loadType = NONE, newObject->MarkLoaded(), newObject = nullptr, newComponent = nullptr;
 
         switch (loadType)
         {
         case NONE:
             if (line == L"[Object]") loadType = OBJECT;
+            if (line == L"[Component]") loadType = COMPONENT;
             break;
         case OBJECT:
             if (IsToken(line, L"UID"))
@@ -58,9 +59,19 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
             break;
         case COMPONENT:
             if (IsToken(line, L"Type"))
+            {
                 newComponent = newObject->AddComponentByName(TokenValue(line));
+                if (newComponent == nullptr)
+                {
+                    DebugLog(LogSeverity::SEVERE, L"Requested component type 'TokenValue(line)' does not exist");
+                    loadType = NONE;
+                }
+                break;
+            }
             if (IsToken(line, L"Property"))
             {
+                if (newComponent == nullptr) break;
+
                 std::wstring data = TokenValue(line);
                 std::wstring name = data.substr(0, data.find(L" : "));
                 std::wstring type = data.substr(data.find(L" : ") + 3, data.find(L" => ") - (data.find(L" : ") + 3));
@@ -107,6 +118,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
 	// Update material SSBO
 	ObjectRenderer::Instance().UpdateMaterialSSBO();
 
+    scene->OnLoad();
     DebugLog(LogSeverity::DONE, L"Scene was successfully loaded");
 }
 

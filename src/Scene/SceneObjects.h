@@ -78,6 +78,8 @@ namespace Engine
         std::wstring GetName() const { return m_displayName; }
         void SetName(const std::wstring& name) { m_displayName = name; }
 
+        void MarkLoaded() { m_loaded = true; }
+
         [[nodiscard]]
         mat4 GlobalMatrix() const;
 
@@ -92,6 +94,28 @@ namespace Engine
 
         /// Remove an object as a child. Also removes parent from the child
         void RemoveChild(const SceneObject* object);
+
+        /// Called when the object has been fully loaded into the scene also calls init on each component
+        virtual void Init()
+        {
+        }
+
+        /// Ticks the object, calling update on the object itself, then each component
+        void ENGINE_API Tick()
+        {
+            if (!m_loaded) return;
+            if (!m_initialized)
+            {
+                Init();
+                for (const auto & m_component : m_components)
+                    m_component->Init();
+                m_initialized = true;
+            }
+            // Only call during runtime
+            // Update();
+            for (const auto & m_component : m_components)
+                m_component->Tick();
+        }
 
         template <typename T>
         T* FindComponent()
@@ -127,6 +151,10 @@ namespace Engine
         [[nodiscard]]
         SceneObject* GetParent() const { return m_parentObject; }
 
+    protected:
+        /// Called once per frame
+        virtual void Update() {}
+
     private:
         const uint32_t m_UID = 0;
         std::wstring m_displayName = L"Object";
@@ -135,5 +163,8 @@ namespace Engine
         SceneObject* m_parentObject = nullptr;
         std::vector<SceneObject*> m_childObjects = {};
         std::vector<std::unique_ptr<Component>> m_components = {};
+
+        bool m_loaded = false;
+        bool m_initialized = false;
     };
 }

@@ -33,7 +33,7 @@ public:
     void AttachToObject(SceneObject* object)
     {
         m_attachedObject = object;
-        Init();
+        OnAttach();
     }
 
     /**
@@ -120,11 +120,37 @@ public:
     [[nodiscard]]
     const std::vector<ComponentProperty>& GetProperties() const { return m_properties; }
 
-protected:
     /**
      * @brief Called when component is added to an object or when the attached component is loaded into the scene
      */
-    virtual void Init()
+    virtual ENGINE_API void OnAttach()
+    {
+    }
+
+    /**
+     * @brief Called when component and it's values are loaded into the scene
+     */
+    virtual ENGINE_API void Init()
+    {
+    }
+
+    /**
+    * @brief Called once every tick after update has been called on the attached object
+    * Called both in editor and runtime
+    */
+    virtual ENGINE_API void Tick()
+    {
+        // Only call during runtime
+        // Update();
+    }
+
+protected:
+
+    /**
+    * @brief Called once every tick after update has been called on the attached object
+    * Only called in runtime
+    */
+    virtual ENGINE_API void Update()
     {
     }
 

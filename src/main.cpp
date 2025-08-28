@@ -208,6 +208,12 @@ extern "C" int __declspec(dllexport) __stdcall main()
 			camera.HandleInput(*window, deltaTime);
 	    }
 
+    	{
+    		ZoneScopedNC("Updating scene", tracy::Color::DarkBlue);
+    		if (Engine::SceneEditor::m_targetScene != nullptr && !Engine::ProjectHandler::m_lockOut)
+    			Engine::SceneEditor::m_targetScene->TickObjects();
+    	}
+
 	    {
     		
     		ZoneScopedNC("Compute shader dispatch", tracy::Color::LightGreen);

@@ -29,12 +29,13 @@ public:
 
 	void Init() override
 	{
+		DebugLog(LogSeverity::INFO, L"Init::Model");
 		ObjectRenderer::Instance().RegisterModelInstance(m_attachedObject->GetTransform(), &modelInstance);
 	}
 
-	void DisplayProperties() override
+	void Tick() override
 	{
-		Component::DisplayProperties();
+		Component::Tick();
 
 		if (m_attachedObject->GetTransformChanged())
 			ObjectRenderer::Instance().UpdateModelTransforms();
@@ -46,6 +47,11 @@ public:
 			modelInstance = ModelFileHandler::LoadModel(modelPath);
 			ObjectRenderer::Instance().UpdateModelSSBOs();
 		}
+	}
+
+	void DisplayProperties() override
+	{
+		Component::DisplayProperties();
 
 		if (modelInstance.modelData == nullptr) return;
 		// Display the meshes and their properties

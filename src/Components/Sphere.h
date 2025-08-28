@@ -23,6 +23,7 @@ public:
 
     void Init() override
     {
+        DebugLog(LogSeverity::INFO, L"Init::Sphere");
         ObjectRenderer::Instance().RegisterSphere(m_attachedObject->GetTransform(), &m_radius, &m_materialIdx);
         ObjectRenderer::Instance().SendObjectData();
     }

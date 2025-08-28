@@ -19,7 +19,7 @@ namespace Engine
          * @return True if the UId is not 0 and doesn't exist yet
          */
         [[nodiscard]]
-        bool ValidUID(const uint32_t UID) const;
+        bool ValidUID(uint32_t UID) const;
 
         /**
          * @brief Creates a new object in the scene
@@ -72,6 +72,24 @@ namespace Engine
          * @return A reference to the list of all objects in the scene
          */
         std::vector<SceneObject*>& GetSceneObjectList() { return m_sceneObjects; }
+
+        /**
+         * @brief Called when the scene is loaded from the scene loader. Then also initializes all objects and their components
+         */
+        void OnLoad()
+        {
+            for (auto & m_sceneObject : m_sceneObjects)
+                m_sceneObject->Init();
+        }
+
+        /**
+         * @brief Loops through the objects and calls tick on each one which updates them and their components
+         */
+        void TickObjects() const
+        {
+            for (auto & m_sceneObject : m_sceneObjects)
+                m_sceneObject->Tick();
+        }
 
     private:
         std::vector<SceneObject*> m_sceneObjects = {};
