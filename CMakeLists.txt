@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 project(Engine)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -171,6 +171,22 @@ endif()
 
 target_compile_definitions(Engine PUBLIC ${FFMPEG_DEFINITIONS})
 target_include_directories(Engine PUBLIC ${FFMPEG_INCLUDE_DIRS})
+# Just as a precaution, I copy all of the ffmpeg dlls to the build dir
+list(GET FFMPEG_LIBRARIES 0 FFMPEG_SAMPLE_LIB)
+cmake_path(GET FFMPEG_SAMPLE_LIB PARENT_PATH FFMPEG_LIBRARY_DIR)
+if (WIN32)
+	file(GLOB FFMPEG_DYN_LIBS CONFIGURE_DEPENDS ${FFMPEG_LIBRARY_DIR}/*.dll)
+else()
+	file(GLOB FFMPEG_DYN_LIBS CONFIGURE_DEPENDS ${FFMPEG_LIBRARY_DIR}/*.so ${FFMPEG_LIBRARY_DIR}/*.so.* ${FFMPEG_LIBRARY_DIR}/*.so.*.*)
+endif()
+
+if (ENGINE_STANDALONE)
+	file(COPY ${FFMPEG_DYN_LIBS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+else()
+	file(COPY ${FFMPEG_DYN_LIBS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/launcher)
+endif()
+
+
 target_link_libraries(Engine PUBLIC ${FFMPEG_LIBRARIES})
 
 target_precompile_headers(Engine PUBLIC
