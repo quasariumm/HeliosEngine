@@ -21,11 +21,17 @@ class Light;
  * Console logging tags
  */
 
-static const std::wstring ANSI_OK = L"[\033[32m OK \033[0m] ";
-static const std::wstring ANSI_DONE = L"[\033[32mDONE\033[0m] ";
-static const std::wstring ANSI_ERR = L"[\033[31mERRO\033[0m] ";
-static const std::wstring ANSI_WARN = L"[\033[33mWARN\033[0m] ";
-static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
+static constexpr std::wstring_view ANSI_OK = L"[\033[32m OK \033[0m] ";
+static constexpr std::wstring_view ANSI_DONE = L"[\033[32mDONE\033[0m] ";
+static constexpr std::wstring_view ANSI_ERR = L"[\033[31mERRO\033[0m] ";
+static constexpr std::wstring_view ANSI_WARN = L"[\033[33mWARN\033[0m] ";
+static constexpr std::wstring_view ANSI_INFO = L"[\033[36mINFO\033[0m] ";
+
+static constexpr std::string_view _STRING_ANSI_OK = "[\033[32m OK \033[0m] ";
+static constexpr std::string_view _STRING_ANSI_DONE = "[\033[32mDONE\033[0m] ";
+static constexpr std::string_view _STRING_ANSI_ERR = "[\033[31mERRO\033[0m] ";
+static constexpr std::string_view _STRING_ANSI_WARN = "[\033[33mWARN\033[0m] ";
+static constexpr std::string_view _STRING_ANSI_INFO = "[\033[36mINFO\033[0m] ";
 
 /*
  * Typedefs

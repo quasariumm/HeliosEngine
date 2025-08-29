@@ -12,11 +12,18 @@ Logger* Logger::Get()
     return instance;
 }
 
+static constexpr std::string_view logSeverityToCoutTag[] = {
+	_STRING_ANSI_INFO,
+	_STRING_ANSI_WARN,
+	_STRING_ANSI_ERR,
+	_STRING_ANSI_DONE
+};
+
 void DebugLog(const LogSeverity type, const std::wstring& message, const int level, std::source_location location)
 {
     Logger::Get()->g_logs.emplace_back(type, message, level, location);
     Logger::Get()->m_totalLog += Logger::Get()->g_logs.back().FileText();
-    std::cout << WStringToUTF8(message) << "\n";
+    std::cout << logSeverityToCoutTag[(int)type] << WStringToUTF8(message) << std::endl;
 }
 
 void Debugger::DrawInterface()
