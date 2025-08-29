@@ -35,7 +35,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
 
     while (std::getline(file, line))
     {
-        if (line.empty()) loadType = NONE, newObject->MarkLoaded(), newObject = nullptr, newComponent = nullptr;
+        if (line.empty()) loadType = NONE, newObject = nullptr, newComponent = nullptr;
 
         switch (loadType)
         {
@@ -45,7 +45,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
             break;
         case OBJECT:
             if (IsToken(line, L"UID"))
-                newObject = scene->NewObject(stoul(TokenValue(line)));
+                newObject = scene->NewObject(stoul(TokenValue(line)), false);
             if (newObject == nullptr) continue;
 
             if (line == L"[Component]")
@@ -60,7 +60,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
         case COMPONENT:
             if (IsToken(line, L"Type"))
             {
-                newComponent = newObject->AddComponentByName(TokenValue(line));
+                newComponent = newObject->AddComponentByName(TokenValue(line), false);
                 if (newComponent == nullptr)
                 {
                     DebugLog(LogSeverity::SEVERE, L"Requested component type 'TokenValue(line)' does not exist");
@@ -118,7 +118,7 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
 	// Update material SSBO
 	ObjectRenderer::Instance().UpdateMaterialSSBO();
 
-    scene->OnLoad();
+    scene->MarkLoaded();
     DebugLog(LogSeverity::DONE, L"Scene was successfully loaded");
 }
 

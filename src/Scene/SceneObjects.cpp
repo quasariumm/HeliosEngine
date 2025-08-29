@@ -54,12 +54,7 @@ void SceneObject::RemoveChild(const SceneObject* object)
             m_childObjects.erase(m_childObjects.begin() + i);
 }
 
-/**
- * @brief Adds a component based on type name
- * @param name Type name of the component (NOT DISPLAY NAME!)
- * @return Pointer to the added component
- */
-Component* SceneObject::AddComponentByName(const std::wstring& name)
+Component* SceneObject::AddComponentByName(const std::wstring& name, const bool loaded)
 {
     std::unique_ptr<Component> comp = ComponentRegister::Instance().Create(name);
     if (comp)
@@ -67,6 +62,7 @@ Component* SceneObject::AddComponentByName(const std::wstring& name)
         Component* ptr = comp.get();
         comp->AttachToObject(this);
         m_components.push_back(std::move(comp));
+        if (loaded) ptr->MarkLoaded();
         return ptr;
     }
 

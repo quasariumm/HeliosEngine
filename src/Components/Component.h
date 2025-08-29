@@ -42,6 +42,9 @@ public:
      */
     void SetDisplayName(const std::wstring& name) { m_displayName = name; }
 
+    void MarkLoaded() { m_loaded = true; OnLoad(); }
+    void UnInitialize() { m_initialized = false; }
+
     [[nodiscard]] const std::type_info& GetType() const { return m_componentType; }
     [[nodiscard]] std::wstring GetName() const { return m_displayName; }
     [[nodiscard]] SceneObject* GetAttachedObject() const { return m_attachedObject; }
@@ -122,9 +125,35 @@ public:
 
     /**
      * @brief Called when component is added to an object or when the attached component is loaded into the scene
+     * @note If overridden, make sure to call Component::OnLoad();
+     */
+    virtual ENGINE_API void OnLoad()
+    {
+    }
+
+    /**
+     * @brief Called when component is added to an object or when the attached object is loaded into the scene but before any variables are set
      */
     virtual ENGINE_API void OnAttach()
     {
+    }
+
+
+    /**
+    * @brief Called once every tick after update has been called on the attached object
+    * Called both in editor and runtime
+    * @note If overridden, make sure to call Component::Tick();
+    */
+    virtual ENGINE_API void Tick()
+    {
+        if (!m_loaded) return;
+        // Only call during runtime
+        // Update();
+        // if (!m_initialized)
+        // {
+        //     Init();
+        //     m_initialized = true;
+        // }
     }
 
     /**
@@ -133,18 +162,6 @@ public:
     virtual ENGINE_API void Init()
     {
     }
-
-    /**
-    * @brief Called once every tick after update has been called on the attached object
-    * Called both in editor and runtime
-    */
-    virtual ENGINE_API void Tick()
-    {
-        // Only call during runtime
-        // Update();
-    }
-
-protected:
 
     /**
     * @brief Called once every tick after update has been called on the attached object
@@ -159,6 +176,10 @@ protected:
     std::wstring m_displayName;
 
     std::vector<ComponentProperty> m_properties = {};
+
+private:
+    bool m_loaded = false;
+    bool m_initialized = false;
 };
 
 class ComponentRegister

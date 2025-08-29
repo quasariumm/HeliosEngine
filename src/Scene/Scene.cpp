@@ -29,7 +29,7 @@ bool Scene::ValidUID(const uint32_t UID) const
 	return std::ranges::all_of(m_sceneObjects, [&](const SceneObject* o){ return o->GetUID() != UID; });
 }
 
-SceneObject* Scene::NewObject(uint32_t UID)
+SceneObject* Scene::NewObject(uint32_t UID, const bool loaded)
 {
     if (!ValidUID(UID))
         UID = NewUID();

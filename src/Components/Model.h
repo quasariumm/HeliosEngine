@@ -27,10 +27,12 @@ public:
 		ObjectRenderer::Instance().DeregisterModelInstance(&modelInstance);
 	}
 
-	void Init() override
+	void OnLoad() override
 	{
 		DebugLog(LogSeverity::INFO, L"Init::Model");
 		ObjectRenderer::Instance().RegisterModelInstance(m_attachedObject->GetTransform(), &modelInstance);
+
+		Component::OnLoad();
 	}
 
 	void Tick() override

@@ -21,11 +21,13 @@ public:
     	ObjectRenderer::Instance().DeregisterSphere(&m_radius, &m_materialIdx);
     }
 
-    void Init() override
+    void OnLoad() override
     {
         DebugLog(LogSeverity::INFO, L"Init::Sphere");
         ObjectRenderer::Instance().RegisterSphere(m_attachedObject->GetTransform(), &m_radius, &m_materialIdx);
         ObjectRenderer::Instance().SendObjectData();
+
+        Component::OnLoad();
     }
 
     int m_materialIdx = 0;

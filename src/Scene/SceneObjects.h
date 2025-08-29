@@ -78,7 +78,8 @@ namespace Engine
         std::wstring GetName() const { return m_displayName; }
         void SetName(const std::wstring& name) { m_displayName = name; }
 
-        void MarkLoaded() { m_loaded = true; }
+        void MarkLoaded() { m_loaded = true; OnLoad(); }
+        void Uninitialize() { m_initialized = false; }
 
         [[nodiscard]]
         mat4 GlobalMatrix() const;
@@ -95,26 +96,41 @@ namespace Engine
         /// Remove an object as a child. Also removes parent from the child
         void RemoveChild(const SceneObject* object);
 
-        /// Called when the object has been fully loaded into the scene also calls init on each component
+        /**
+         * @brief Called whenever the object is loaded into the scene, in both editor and runtime
+         * @note If overridden, make sure to call SceneObject::OnLoad();
+         */
+        virtual void OnLoad()
+        {
+            for (const auto & m_component : m_components)
+                m_component->OnLoad();
+        }
+
+        /**
+         * @brief Called when the object has been fully loaded into the scene also calls init on each component
+         */
         virtual void Init()
         {
         }
 
-        /// Ticks the object, calling update on the object itself, then each component
-        void ENGINE_API Tick()
+        /**
+         * @brief Ticks the object, calling update on the object itself, then each component
+         * @note If overridden, make sure to call SceneObject::Tick();
+         */
+        virtual void ENGINE_API Tick()
         {
             if (!m_loaded) return;
-            if (!m_initialized)
-            {
-                Init();
-                for (const auto & m_component : m_components)
-                    m_component->Init();
-                m_initialized = true;
-            }
-            // Only call during runtime
-            // Update();
+
             for (const auto & m_component : m_components)
                 m_component->Tick();
+
+            // Only call during runtime
+            // Update();
+            // if (!m_initialized)
+            // {
+            //     Init();
+            //     m_initialized = true;
+            // }
         }
 
         template <typename T>
@@ -128,15 +144,22 @@ namespace Engine
         }
 
         template <typename T>
-        T* AddComponent()
+        T* AddComponent(bool loaded = true)
         {
-            auto component = std::make_unique<T>();
+            const std::unique_ptr<Component> component = std::make_unique<T>();
             T* ptr = component.get(); // raw pointer for access
-            m_components.push_back(std::move(component));
+            m_components.push_back(component);
+            if (loaded) component->MarkLoaded();
             return ptr;
         }
 
-        Component* AddComponentByName(const std::wstring& name);
+        /**
+         * @brief Adds a component based on type name
+         * @param name Type name of the component (NOT DISPLAY NAME!)
+         * @param loaded Whether the new component should be marked as loaded
+         * @return Pointer to the added component
+         */
+        Component* AddComponentByName(const std::wstring& name, bool loaded = true);
 
         void RemoveComponent(const uint32_t componentIdx)
         {

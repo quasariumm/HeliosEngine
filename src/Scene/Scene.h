@@ -24,9 +24,10 @@ namespace Engine
         /**
          * @brief Creates a new object in the scene
          * @param UID (OPTIONAL) A specific UID. Used for loading in objects from disk. By default, creates a new UID
+         * @param loaded (OPTIONAL) Whether the object should be marked as loaded
          * @return A pointer to the scene object
          */
-        SceneObject* NewObject(uint32_t UID = 0);
+        SceneObject* NewObject(uint32_t UID = 0, bool loaded = true);
 
         /**
          * @brief Creates a new object in the scene. Also deletes any child objects
@@ -74,12 +75,16 @@ namespace Engine
         std::vector<SceneObject*>& GetSceneObjectList() { return m_sceneObjects; }
 
         /**
-         * @brief Called when the scene is loaded from the scene loader. Then also initializes all objects and their components
+         * @brief Called when the scene is loaded from the scene loader
          */
         void OnLoad()
         {
-            for (auto & m_sceneObject : m_sceneObjects)
-                m_sceneObject->Init();
+            for (const auto & m_sceneObject : m_sceneObjects)
+            {
+                m_sceneObject->MarkLoaded();
+                for (const auto & component : m_sceneObject->GetComponentList())
+                    component->MarkLoaded();
+            }
         }
 
         /**
@@ -87,11 +92,18 @@ namespace Engine
          */
         void TickObjects() const
         {
+            if (!m_isLoaded) return;
+
             for (auto & m_sceneObject : m_sceneObjects)
                 m_sceneObject->Tick();
         }
 
+        void MarkLoaded() { m_isLoaded = true; OnLoad(); }
+
+        [[nodiscard]] bool IsLoaded() const { return m_isLoaded; }
+
     private:
         std::vector<SceneObject*> m_sceneObjects = {};
+        bool m_isLoaded = false;
     };
 }
