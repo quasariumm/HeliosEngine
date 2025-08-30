@@ -297,6 +297,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
     		// Count fps
     		const float frameTime = deltaTime = frameTimer.Elapsed<float>();
     		frameTimer.Reset();
+    		if (Engine::gVideoRenderingEnabled)
+    			deltaTime = 1.f / (float)Engine::VideoRenderer::fps;
 
     		static float avg = 10, alpha = 1;
     		avg = (1 - alpha) * avg + alpha * frameTime * 1000;

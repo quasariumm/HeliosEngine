@@ -20,7 +20,8 @@ extern "C" {
 }
 
 namespace Engine {
-// TODO: Remove before commiting
+// TODO: Remove before commitin
+// TODO:
 #define VR_TEST_VALUES
 #ifdef VR_TEST_VALUES
 uint16_t VideoRenderer::framesToRender = 60;
@@ -43,28 +44,12 @@ AVContext VideoRenderer::m_ctx = {};
 VideoRenderer::VideoRenderer()
 	: EditorInterface(L"Video Renderer", EditorInterfaceSource::EDITOR)
 {
-	avformat_network_init();
-
-	m_ctx.codec = avcodec_find_encoder(AV_CODEC_ID_H264);
-	if (!m_ctx.codec)
-	{
-		DebugLog(LogSeverity::INFO, L"Could not find H.264 video codec. Falling back to MPEG-4.");
-		m_ctx.codec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);
-		if (!m_ctx.codec)
-		{
-			m_ctx.disabled = true;
-			DebugLog(LogSeverity::SEVERE, L"Could not find MPEG-4 codec. Video rendering feature disabled.");
-			return;
-		}
-	}
 }
 
 
 VideoRenderer::~VideoRenderer()
 {
 	sws_freeContext(m_ctx.swsCtx);
-
-	avformat_network_deinit();
 }
 
 
@@ -114,9 +99,29 @@ void VideoRenderer::DrawInterface()
 }
 
 
+/**
+ * @returns Whether the code should return (in the case of an unprocedable error)
+ */
+static bool LogFFmpegError(const int errCode, const std::wstring& msg, const std::source_location location = std::source_location::current())
+{
+	if (errCode == 0)
+		return false;
+	// Get simple error description
+	char errbuffer[AV_ERROR_MAX_STRING_SIZE];
+	av_strerror(errCode, errbuffer, AV_ERROR_MAX_STRING_SIZE);
+	// Flush outputs to see the FFmpeg logs
+	std::cerr << std::flush;
+	std::cout << std::flush;
+	// Log to the engine
+	std::wstring message = msg + L" Video rendering initialisation failed. FFmpeg message: " + STR_TO_WSTR(std::string(errbuffer)) + L". See terminal output for full logs";
+	DebugLog(LogSeverity::SEVERE, message, 0, location);
+	return true;
+}
+
+
 // https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/encode_video.c
 static void encode(AVCodecContext* enc_ctx, AVFrame* frame, AVPacket* pkt,
-				   std::ofstream& outfile)
+				   AVFormatContext* formatCtx)
 {
 	int ret = avcodec_send_frame(enc_ctx, frame);
 	if (ret < 0)
@@ -132,7 +137,7 @@ static void encode(AVCodecContext* enc_ctx, AVFrame* frame, AVPacket* pkt,
 		if (ret < 0)
 			DebugLog(LogSeverity::SEVERE, L"Error during encoding");
 
-		outfile.write(reinterpret_cast<const char*>(pkt->data), pkt->size);
+		av_interleaved_write_frame(formatCtx, pkt);
 		av_packet_unref(pkt);
 	}
 }
@@ -140,8 +145,6 @@ static void encode(AVCodecContext* enc_ctx, AVFrame* frame, AVPacket* pkt,
 
 void VideoRenderer::SaveFrame()
 {
-	if (m_ctx.disabled)
-		return;
 	// Save using FFmpeg
 	int ret = av_frame_make_writable(m_ctx.frame);
 	if (ret < 0)
@@ -153,7 +156,7 @@ void VideoRenderer::SaveFrame()
 
 	texture->UpdateData();
 
-	// The texture is HDR RGB32F, so we need to use sws to convert to the YUV420P format
+	// The texture is HDR RGB32F, so we need to use sws to convert to the YUV444P format
 	const float* data = texture->GetDataHDR();
 	auto* rgbData = new uint8_t[3 * texture->GetWidth() * texture->GetHeight()];
 
@@ -165,69 +168,108 @@ void VideoRenderer::SaveFrame()
 	const uint8_t* srcSlice[1] = { reinterpret_cast<const uint8_t*>(rgbData) };
 	const int lineStride[1] = { 3 * texture->GetWidth() };
 
-	// Covert to YUV420P
+	// Covert to YUV444P
 	sws_scale(m_ctx.swsCtx, srcSlice, lineStride, 0, texture->GetHeight(), m_ctx.frame->data, m_ctx.frame->linesize);
 
 	// Delete allocated buffer
 	delete[] rgbData;
 
-	encode(m_ctx.codecCtx, m_ctx.frame, m_ctx.packet, m_ctx.file);
+	encode(m_ctx.codecCtx, m_ctx.frame, m_ctx.packet, m_ctx.formatCtx);
 }
 
 
 void VideoRenderer::BeginRecording()
 {
-	if (m_ctx.disabled)
-		return;
-
-	m_ctx.frame = av_frame_alloc();
-	if (!m_ctx.frame)
-	{
-		DebugLog(LogSeverity::SEVERE, L"Could not allocate video frame.");
-		return;
-	}
-
-	m_ctx.codecCtx = avcodec_alloc_context3(m_ctx.codec);
-	if (!m_ctx.codecCtx)
-	{
-		DebugLog(LogSeverity::SEVERE, L"Could not allocate video codec context.");
-		return;
-	}
-
-	gVideoRenderingEnabled = true;
-	gVideoFrame = 0;
+	const std::string outPath = (m_videoDirectory / (m_videoName + ".mp4")).string();
 
 	const EditorSettingsData& editorSettings = EditorSettings::Get();
 	const vec2u viewportSize = editorSettings.m_viewportRenderSize;
 
-	m_ctx.codecCtx->bit_rate = 400000;
-	m_ctx.codecCtx->pix_fmt = AV_PIX_FMT_YUV444P;
+	// Guess the format
+	m_ctx.outputFormat = av_guess_format(nullptr, outPath.c_str(), nullptr);
+	if (!m_ctx.outputFormat)
+	{
+		DebugLog(LogSeverity::SEVERE, L"Could not find output format.");
+		return;
+	}
+
+	m_ctx.codec = avcodec_find_encoder(m_ctx.outputFormat->video_codec);
+	if (!m_ctx.codec)
+	{
+		DebugLog(LogSeverity::INFO, L"Could not find guessed video codec. Falling back to MPEG-4.");
+		m_ctx.codec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);
+		if (!m_ctx.codec)
+		{
+			DebugLog(LogSeverity::SEVERE, L"Could not find MPEG-4 codec.");
+			return;
+		}
+	}
+
+	// Make format context
+	int ret = avformat_alloc_output_context2(&m_ctx.formatCtx, m_ctx.outputFormat, nullptr, outPath.c_str());
+	if (LogFFmpegError(ret, L"Could not allocate output context."))
+		return;
+
+	m_ctx.formatCtx->video_codec = m_ctx.codec;
+	m_ctx.formatCtx->video_codec_id = m_ctx.codec->id;
+
+	// Make stream
+	m_ctx.stream = avformat_new_stream(m_ctx.formatCtx, m_ctx.codec);
+	if (!m_ctx.stream)
+	{
+		DebugLog(LogSeverity::SEVERE, L"Could not allocate output stream.");
+		avformat_free_context(m_ctx.formatCtx);
+		return;
+	}
+	av_opt_set(&m_ctx.stream->metadata, "copyright", "Helios Engine (2025)", 0);
+
+	// Allocate a frame
+	m_ctx.frame = av_frame_alloc();
+	if (!m_ctx.frame)
+	{
+		DebugLog(LogSeverity::SEVERE, L"Could not allocate video frame.");
+		avformat_free_context(m_ctx.formatCtx);
+		return;
+	}
+
+	// Allocate the codec context
+	m_ctx.codecCtx = avcodec_alloc_context3(m_ctx.codec);
+	if (!m_ctx.codecCtx)
+	{
+		DebugLog(LogSeverity::SEVERE, L"Could not allocate video codec context.");
+		avformat_free_context(m_ctx.formatCtx);
+		av_frame_free(&m_ctx.frame);
+		return;
+	}
+
+	// Set up stream and codec parameters
+	m_ctx.stream->codecpar->color_range = AVCOL_RANGE_JPEG;
+	m_ctx.stream->codecpar->bit_rate = 400000;
+	m_ctx.stream->codecpar->sample_rate = 44100;
+	m_ctx.stream->codecpar->width = (int)viewportSize.x;
+	m_ctx.stream->codecpar->height = (int)viewportSize.y;
+	m_ctx.stream->codecpar->framerate = (AVRational){ fps, 1 };
+	m_ctx.stream->time_base = (AVRational){ 1, fps };
+
 	// m_ctx.codecCtx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-	m_ctx.frame->format = m_ctx.codecCtx->pix_fmt;
-	m_ctx.frame->width = (int)viewportSize.x;
-	m_ctx.frame->height = (int)viewportSize.y;
+	m_ctx.codecCtx->pix_fmt = (m_ctx.codec->id == AV_CODEC_ID_H264) ? AV_PIX_FMT_YUV444P : AV_PIX_FMT_YUV420P;
+	m_ctx.codecCtx->color_range = AVCOL_RANGE_JPEG;
+	m_ctx.codecCtx->gop_size = 12;
+	m_ctx.codecCtx->bit_rate = 1000000;
+	m_ctx.codecCtx->sample_rate = 44100;
+	m_ctx.codecCtx->coded_width = (int)viewportSize.x;
+	m_ctx.codecCtx->coded_height = (int)viewportSize.y;
 	m_ctx.codecCtx->width = (int)viewportSize.x;
 	m_ctx.codecCtx->height = (int)viewportSize.y;
 	m_ctx.codecCtx->time_base = (AVRational){ 1, fps };
 	m_ctx.codecCtx->framerate = (AVRational){ fps, 1 };
-
-	int ret = avcodec_open2(m_ctx.codecCtx, m_ctx.codec, NULL);
-	if (ret < 0)
-	{
-		DebugLog(LogSeverity::SEVERE, L"Could not open video codec.");
-		return;
-	}
-
 	if (m_ctx.codec->id == AV_CODEC_ID_H264)
 		av_opt_set(m_ctx.codecCtx->priv_data, "preset", "slow", 0);
+	m_ctx.frame->format = m_ctx.codecCtx->pix_fmt;
+	m_ctx.frame->width = (int)viewportSize.x;
+	m_ctx.frame->height = (int)viewportSize.y;
 
-	ret = av_frame_get_buffer(m_ctx.frame, 0);
-	if (ret < 0)
-	{
-		DebugLog(LogSeverity::SEVERE, L"Could not allocate video frame data.");
-		return;
-	}
-
+	// Get the SWS context (used to convert RGB24 to YUV444P)
 	m_ctx.swsCtx = sws_getCachedContext(
 		m_ctx.swsCtx,
 		(int)viewportSize.x, (int)viewportSize.y, AV_PIX_FMT_RGB24,
@@ -235,32 +277,84 @@ void VideoRenderer::BeginRecording()
 		0, nullptr, nullptr, nullptr
 	);
 
+	// Open the codec
+	ret = avcodec_open2(m_ctx.codecCtx, m_ctx.codec, NULL);
+	if (LogFFmpegError(ret, L"Could not open video codec."))
+	{
+		avformat_free_context(m_ctx.formatCtx);
+		av_frame_free(&m_ctx.frame);
+		avcodec_free_context(&m_ctx.codecCtx);
+		return;
+	}
+
+	// Init the frame's buffer
+	ret = av_frame_get_buffer(m_ctx.frame, 0);
+	if (LogFFmpegError(ret, L"Could not allocate video frame data."))
+	{
+		avformat_free_context(m_ctx.formatCtx);
+		av_frame_free(&m_ctx.frame);
+		avcodec_free_context(&m_ctx.codecCtx);
+		return;
+	}
+
+	// Allocate a packet
 	m_ctx.packet = av_packet_alloc();
 	if (!m_ctx.packet)
 	{
 		DebugLog(LogSeverity::SEVERE, L"Could not allocate video packet.");
+		avformat_free_context(m_ctx.formatCtx);
+		av_frame_free(&m_ctx.frame);
+		avcodec_free_context(&m_ctx.codecCtx);
 		return;
 	}
 
-	m_ctx.file.open(m_videoDirectory / (m_videoName + ".mp4"));
+	// Write MP4 headers
+	ret = avformat_write_header(m_ctx.formatCtx, nullptr);
+	if (LogFFmpegError(ret, L"Could not write video header."))
+	{
+		avformat_free_context(m_ctx.formatCtx);
+		av_frame_free(&m_ctx.frame);
+		avcodec_free_context(&m_ctx.codecCtx);
+		av_packet_free(&m_ctx.packet);
+		return;
+	}
+
+	// Open the video file
+	ret = avio_open(&m_ctx.formatCtx->pb, outPath.c_str(), AVIO_FLAG_WRITE);
+	if (LogFFmpegError(ret, L"Could not open output file."))
+	{
+		avformat_free_context(m_ctx.formatCtx);
+		av_frame_free(&m_ctx.frame);
+		avcodec_free_context(&m_ctx.codecCtx);
+		av_packet_free(&m_ctx.packet);
+		return;
+	}
+
+	gVideoRenderingEnabled = true;
+	gVideoFrame = 0;
 }
 
 
 void VideoRenderer::StopRecording()
 {
-	if (m_ctx.disabled)
-		return;
 	gVideoRenderingEnabled = false;
 	DebugLog(LogSeverity::DONE, L"Video rendering successfully saved to " + m_videoDirectory.wstring() + L"\\" + STR_TO_WSTR(m_videoName) + L".mp4");
 
 	// Flush the encoder
-	encode(m_ctx.codecCtx, nullptr, m_ctx.packet, m_ctx.file);
+	encode(m_ctx.codecCtx, nullptr, m_ctx.packet, m_ctx.formatCtx);
 
-	m_ctx.file.close();
+	// Write trailer (idk what it does. so, magic?)
+	av_write_trailer(m_ctx.formatCtx);
 
+	// Close the file
+	if (avio_close(m_ctx.formatCtx->pb) < 0)
+		DebugLog(LogSeverity::SEVERE, L"Could not close output file.");
+
+	// Free allocated data
 	av_frame_free(&m_ctx.frame);
 	av_packet_free(&m_ctx.packet);
 	avcodec_free_context(&m_ctx.codecCtx);
+	avformat_free_context(m_ctx.formatCtx);
 }
 
 } // Engine

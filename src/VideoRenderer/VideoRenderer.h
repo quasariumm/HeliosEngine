@@ -7,13 +7,14 @@ struct AVPacket;
 struct AVCodec;
 struct AVCodecContext;
 struct SwsContext;
+struct AVFormatContext;
+struct AVOutputFormat;
+struct AVStream;
 
 namespace Engine {
 
 struct AVContext
 {
-	bool disabled = false;
-	std::ofstream file;
 	AVFrame* frame = nullptr;
 	AVPacket* packet = nullptr;
 
@@ -21,6 +22,10 @@ struct AVContext
 	AVCodecContext* codecCtx = nullptr;
 
 	SwsContext* swsCtx = nullptr;
+
+	AVFormatContext* formatCtx = nullptr;
+	const AVOutputFormat* outputFormat = nullptr;
+	AVStream* stream = nullptr;
 };
 
 class VideoRenderer final : public EditorInterface
