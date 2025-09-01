@@ -22,7 +22,7 @@ extern "C" {
 namespace Engine {
 // TODO: Remove before commitin
 // TODO:
-#define VR_TEST_VALUES
+// #define VR_TEST_VALUES
 #ifdef VR_TEST_VALUES
 uint16_t VideoRenderer::framesToRender = 60;
 uint16_t VideoRenderer::fps = 30;
@@ -218,8 +218,7 @@ void VideoRenderer::BeginRecording()
 	if (!m_ctx.stream)
 	{
 		DebugLog(LogSeverity::SEVERE, L"Could not allocate output stream.");
-		avformat_free_context(m_ctx.formatCtx);
-		return;
+		goto error_free;
 	}
 	av_opt_set(&m_ctx.stream->metadata, "copyright", "Helios Engine (2025)", 0);
 
@@ -228,8 +227,7 @@ void VideoRenderer::BeginRecording()
 	if (!m_ctx.frame)
 	{
 		DebugLog(LogSeverity::SEVERE, L"Could not allocate video frame.");
-		avformat_free_context(m_ctx.formatCtx);
-		return;
+		goto error_free;
 	}
 
 	// Allocate the codec context
@@ -237,9 +235,7 @@ void VideoRenderer::BeginRecording()
 	if (!m_ctx.codecCtx)
 	{
 		DebugLog(LogSeverity::SEVERE, L"Could not allocate video codec context.");
-		avformat_free_context(m_ctx.formatCtx);
-		av_frame_free(&m_ctx.frame);
-		return;
+		goto error_free;
 	}
 
 	// Set up stream and codec parameters
@@ -280,58 +276,40 @@ void VideoRenderer::BeginRecording()
 	// Open the codec
 	ret = avcodec_open2(m_ctx.codecCtx, m_ctx.codec, NULL);
 	if (LogFFmpegError(ret, L"Could not open video codec."))
-	{
-		avformat_free_context(m_ctx.formatCtx);
-		av_frame_free(&m_ctx.frame);
-		avcodec_free_context(&m_ctx.codecCtx);
-		return;
-	}
+		goto error_free;
 
 	// Init the frame's buffer
 	ret = av_frame_get_buffer(m_ctx.frame, 0);
 	if (LogFFmpegError(ret, L"Could not allocate video frame data."))
-	{
-		avformat_free_context(m_ctx.formatCtx);
-		av_frame_free(&m_ctx.frame);
-		avcodec_free_context(&m_ctx.codecCtx);
-		return;
-	}
+		goto error_free;
 
 	// Allocate a packet
 	m_ctx.packet = av_packet_alloc();
 	if (!m_ctx.packet)
 	{
 		DebugLog(LogSeverity::SEVERE, L"Could not allocate video packet.");
-		avformat_free_context(m_ctx.formatCtx);
-		av_frame_free(&m_ctx.frame);
-		avcodec_free_context(&m_ctx.codecCtx);
-		return;
+		goto error_free;
 	}
 
 	// Write MP4 headers
 	ret = avformat_write_header(m_ctx.formatCtx, nullptr);
 	if (LogFFmpegError(ret, L"Could not write video header."))
-	{
-		avformat_free_context(m_ctx.formatCtx);
-		av_frame_free(&m_ctx.frame);
-		avcodec_free_context(&m_ctx.codecCtx);
-		av_packet_free(&m_ctx.packet);
-		return;
-	}
+		goto error_free;
 
 	// Open the video file
 	ret = avio_open(&m_ctx.formatCtx->pb, outPath.c_str(), AVIO_FLAG_WRITE);
 	if (LogFFmpegError(ret, L"Could not open output file."))
-	{
-		avformat_free_context(m_ctx.formatCtx);
-		av_frame_free(&m_ctx.frame);
-		avcodec_free_context(&m_ctx.codecCtx);
-		av_packet_free(&m_ctx.packet);
-		return;
-	}
+		goto error_free;
 
 	gVideoRenderingEnabled = true;
 	gVideoFrame = 0;
+	return;
+
+error_free:
+	avformat_free_context(m_ctx.formatCtx);
+	av_frame_free(&m_ctx.frame);
+	avcodec_free_context(&m_ctx.codecCtx);
+	av_packet_free(&m_ctx.packet);
 }
 
 
