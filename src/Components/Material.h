@@ -94,9 +94,10 @@ public:
 		MaterialRegister::Instance().RegisterMaterial(&material);
 	}
 
-	void Init() override
+	void OnLoad() override
 	{
 		MaterialRegister::Instance().RegisterMaterial(this);
+		ObjectRenderer::Instance().UpdateMaterialSSBO();
 	}
 
 	void DisplayProperties() override
