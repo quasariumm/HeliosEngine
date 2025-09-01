@@ -18,10 +18,21 @@ or via your system's package manager:
 winget install Gyan.FFmpeg.Shared
 ```
 Additional note for people using Bundled MinGW on any JetBrains IDE:  
-After installing the FFmpeg package, you might have to copy the `.lib/.dll/.dll.a` library and the include directory files from  
-`%AppData%\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Shared_...\ffmpeg-<version>-full_build-shared\[lib|include]`  
+After installing the FFmpeg package, you might have to:
+- Copy the `.lib/.dll.a` library and the include directory files from  
+`%AppData%\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Shared_...\ffmpeg-<version>-full_build-shared\lib`  
 to  
-`%AppData%\Local\Programs\CLion\bin\mingw\[lib|include]`
+`%AppData%\Local\Programs\CLion\bin\mingw\lib`
+
+- Copy the include folders from  
+`%AppData%\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Shared_...\ffmpeg-<version>-full_build-shared\include`  
+  to  
+  `%AppData%\Local\Programs\CLion\bin\mingw\include`
+
+- Copy the `.dll` files from  
+  `%AppData%\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Shared_...\ffmpeg-<version>-full_build-shared\bin`  
+  to  
+  `%AppData%\Local\Programs\CLion\bin\mingw\lib`
 
 #### Linux / WSL / MySYS / MinGW
 Depending on the distro, use your package manager to install the package (use sudo if necessary).  
