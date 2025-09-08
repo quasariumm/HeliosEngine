@@ -65,8 +65,8 @@ static constexpr float LARGE_FLOAT	=	1e34f;
  * Macros
  */
 
-#define DEG(x) { (x) * 57.2957795131f }
-#define RAD(x) { (x) * 0.0174532925f }
+#define DEG(x) ( (x) * 57.2957795131f )
+#define RAD(x) ( (x) * 0.0174532925f )
 
 #define CALL(func, ...) if (func) (func).operator()(__VA_ARGS__)
 
