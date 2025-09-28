@@ -41,7 +41,7 @@ public:
      */
     const std::string& GetVendor() const;
 
-	void SetShouldClose(bool shouldClose) override;
+	void RequestClose() override;
 
     bool ShouldClose() override;
 

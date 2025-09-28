@@ -1,0 +1,1 @@
+﻿target_compile_definitions(Engine PRIVATE "HELIOS_API_VK=1")

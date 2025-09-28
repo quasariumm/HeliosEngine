@@ -1,6 +1,4 @@
 #include "GL46_Window.h"
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include "Core/Keys.h"
 
 #include "stb_image.h"
@@ -114,8 +112,6 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint3
     glViewport(0, 0, size.x, size.y);
 
 	m_vendor.assign(reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
-
-    m_currentAPI = GraphicsAPI::OPENGL;
     return true;
 }
 
@@ -217,9 +213,9 @@ const std::string& GL46_Window::GetVendor() const
 }
 
 
-void GL46_Window::SetShouldClose( const bool shouldClose )
+void GL46_Window::RequestClose()
 {
-	glfwSetWindowShouldClose(m_window, shouldClose);
+	glfwSetWindowShouldClose(m_window, true);
 }
 
 

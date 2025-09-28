@@ -44,6 +44,36 @@
 #endif
 #endif // ENGINE_NO_SIMD
 
+// API includes
+#if defined HELIOS_API_DX12
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <shellapi.h>
+
+#if defined(CreateWindow)
+#undef CreateWindow
+#endif
+
+#include <wrl.h>
+using namespace Microsoft::WRL;
+
+// DirectX 12 specific headers.
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <d3dcompiler.h>
+#include <DirectXMath.h>
+
+// D3D12 extension library.
+#include <d3dx12.h>
+
+#elif defined HELIOS_API_GL46
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#elif defined HELIOS_API_VK
+// TODO(tygo)
+#endif
+
 // Include common STL libraries
 #include <array>
 #include <cfloat>

@@ -1,9 +1,5 @@
 #include "GL46_ComputeShader.h"
-
-#include <glad/glad.h>
-
 #include "Backends/OpenGL46_GLFW/Core/GL46_Window.h"
-#include "GLFW/glfw3.h"
 
 
 namespace Engine

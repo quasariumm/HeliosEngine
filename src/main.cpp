@@ -65,7 +65,7 @@ void GLAPIENTRY MessageCallback(
 void temp(Engine::Window& window, Engine::Key key)
 {
 	if (key == Engine::Key::ESCAPE && Engine::EditorSettings::Get().m_closeOnEscape)
-		window.SetShouldClose(true);
+		window.RequestClose();
 
 	if (key == Engine::Key::B)
 	{

@@ -5,6 +5,18 @@
 namespace Engine
 {
 
+const std::wstring& Window::GetTitle() const
+{
+	return m_title;
+}
+
+
+void Window::RequestClose()
+{
+	m_shouldClose = true;
+}
+
+
 void Window::SetResizeCallback(const resizeCallback_t& callback)
 {
 	onResize = callback;
@@ -53,29 +65,17 @@ void Window::SetKeyUpCallback(const keyCallback_t& callback)
 }
 
 
-void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, const uint32_t flags, const GraphicsAPI api)
+void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, const uint32_t flags)
 {
-	switch (api)
-	{
-	case GraphicsAPI::VULKAN:
-		break;
-	case GraphicsAPI::DIRECTX12:
-		break;
-	case GraphicsAPI::OPENGL:
-	{
-		std::unique_ptr<Engine::GL46_Window> GLwindow = std::make_unique<Engine::GL46_Window>();
-		if( GLwindow->Init( size, title, flags ) )
-			window = std::move(GLwindow);
-		break;
-	}
-	case GraphicsAPI::NONE:
-	default:
-	{
-		std::unique_ptr<Engine::GL46_Window> GLwindow = std::make_unique<Engine::GL46_Window>();
-		if( GLwindow->Init( size, title, flags ) )
-			window = std::move(GLwindow);
-	}
-	}
+#if defined HELIOS_API_VK
+#elif defined HELIOS_API_DX12
+#elif defined HELIOS_API_GL46
+	std::unique_ptr<Engine::GL46_Window> GLwindow = std::make_unique<Engine::GL46_Window>();
+	if( GLwindow->Init( size, title, flags ) )
+		window = std::move(GLwindow);
+#else
+	throw std::runtime_error("Please select something. This is not yet supported")
+#endif
 }
 
 } // Engine

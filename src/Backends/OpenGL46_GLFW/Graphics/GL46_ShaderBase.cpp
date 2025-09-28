@@ -1,8 +1,5 @@
 #include "GL46_ShaderBase.h"
 
-#include <glad/glad.h>
-
-
 namespace Engine
 {
 

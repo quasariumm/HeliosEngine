@@ -13,6 +13,13 @@ option( ENGINE_STANDALONE
 		"Use standalone mode"
 		OFF)
 
+# Determines which graphics API the engine uses. The following are supported
+# Name				Alias
+# OpenGL 4.6		GL46
+# DirectX 12		DX12
+# Vulkan			VK
+set(HELIOS_GRAPHICS_API "GL46")
+
 # Adds the launcher to the project
 # Used in Default launch option
 add_subdirectory(launcher)
@@ -22,15 +29,14 @@ add_subdirectory(launcher)
 ##  	  Determine files to build  		##
 ##############################################
 file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h)
+
+file(GLOB_RECURSE GL46_BACKEND CONFIGURE_DEPENDS src/Backends/OpenGL46_GLFW/*.cpp src/Backends/OpenGL46_GLFW/*.h)
+file(GLOB_RECURSE DX12_BACKEND CONFIGURE_DEPENDS src/Backends/DirectX12/*.cpp src/Backends/DirectX12/*.h)
+file(GLOB_RECURSE VK_BACKEND CONFIGURE_DEPENDS src/Backends/Vulkan/*.cpp src/Backends/Vulkan/*.h)
+
 file(GLOB LIBS CONFIGURE_DEPENDS
-		lib/glad/src/glad.c
 		extern/imgui/*.cpp
 		extern/imgui/*.h
-		extern/imgui/backends/imgui_impl_opengl3.h
-		extern/imgui/backends/imgui_impl_opengl3.cpp
-		extern/imgui/backends/imgui_impl_opengl3_loader.h
-		extern/imgui/backends/imgui_impl_glfw.h
-		extern/imgui/backends/imgui_impl_glfw.cpp
 )
 
 
@@ -68,6 +74,34 @@ elseif (MSVC)
 endif ()
 
 ##############################################
+##  Leave only selected API's backend code	##
+##############################################
+
+if (HELIOS_GRAPHICS_API MATCHES "OpenGL 4.6|GL46")
+	include(cmake/GL46_includes.cmake)
+elseif(HELIOS_GRAPHICS_API MATCHES "DirectX 12|DX12")
+	include(cmake/DX12_includes.cmake)
+elseif(HELIOS_GRAPHICS_API MATCHES "Vulkan|VK")
+	include(cmake/VK_includes.cmake)
+endif()
+
+###############################################
+## Logging Engine and software library files ##
+###############################################
+list(LENGTH SOURCE NUM_SOURCE)
+message(STATUS "CMake is including the following ${NUM_SOURCE} source files:")
+foreach (file ${SOURCE})
+	file(RELATIVE_PATH REL_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${file})
+	message(STATUS "  ${REL_PATH}")
+endforeach ()
+
+message(STATUS "CMake is including the following library files:")
+foreach (file ${LIBS})
+	file(RELATIVE_PATH REL_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${file})
+	message(STATUS "  ${REL_PATH}")
+endforeach ()
+
+##############################################
 ##  Create lib/exe based on launch option	##
 ##############################################
 if (ENGINE_STANDALONE)
@@ -83,6 +117,18 @@ target_compile_definitions(Engine PRIVATE ENGINE_BUILD_DLL)
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	set(TRACY_ENABLE ON)
 endif ()
+
+##############################################
+##  	  API-specific configuration	  	##
+##############################################
+
+if (HELIOS_GRAPHICS_API MATCHES "OpenGL 4.6|GL46")
+	include(cmake/GL46_config.cmake)
+elseif(HELIOS_GRAPHICS_API MATCHES "DirectX 12|DX12")
+	include(cmake/DX12_config.cmake)
+elseif(HELIOS_GRAPHICS_API MATCHES "Vulkan|VK")
+	include(cmake/VK_config.cmake)
+endif()
 
 
 ##############################################
@@ -202,56 +248,4 @@ target_precompile_headers(Engine PUBLIC
 ##############################################
 ##  		  Linking libraries  			##
 ##############################################
-set(MSVC_LIBS
-		glfw3.lib
-)
-
-set(UNIX_LIBS
-		glfw3
-)
-
-
 target_link_libraries(Engine PUBLIC nfd Tracy::TracyClient assimp::assimp)
-
-if (MSVC)
-
-	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-		# 64-bit
-		target_link_directories(Engine PUBLIC
-				lib/glfw/lib-vc2010-64
-		)
-	else ()
-		# 32 bit
-		target_link_directories(Engine PUBLIC
-				lib/glfw/lib-vc2010-32
-		)
-	endif ()
-
-	target_link_libraries(Engine PUBLIC ${MSVC_LIBS})
-
-else ()
-
-	target_link_directories(Engine PUBLIC
-			lib/glfw/lib-mingw
-	)
-
-	target_link_libraries(Engine PUBLIC ${UNIX_LIBS})
-
-endif ()
-
-
-###############################################
-## Logging Engine and software library files ##
-###############################################
-list(LENGTH SOURCE NUM_SOURCE)
-message(STATUS "CMake is including the following ${NUM_SOURCE} source files:")
-foreach (file ${SOURCE})
-	file(RELATIVE_PATH REL_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${file})
-	message(STATUS "  ${REL_PATH}")
-endforeach ()
-
-message(STATUS "CMake is including the following library files:")
-foreach (file ${LIBS})
-	file(RELATIVE_PATH REL_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${file})
-	message(STATUS "  ${REL_PATH}")
-endforeach ()

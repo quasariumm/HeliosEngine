@@ -3,24 +3,21 @@
 #include "Keys.h"
 
 
-#define EngineWindowFlags_None					0x00000000u
-#define EngineWindowFlags_NoVsync 				0x00000001u
-#define EngineWindowFlags_NoResize 				0x00000002u
-#define EngineWindowFlags_NoDecoration 			0x00000004u
-#define EngineWindowFlags_Fullscreen			0x00000008u
-#define EngineWindowFlags_WindowedBorderless	0x00000010u
+static constexpr uint32_t EngineWindowFlags_None				= 0x00000000u;
+static constexpr uint32_t EngineWindowFlags_NoVsync 			= 0x00000001u;
+static constexpr uint32_t EngineWindowFlags_NoResize 			= 0x00000002u;
+static constexpr uint32_t EngineWindowFlags_NoDecoration 		= 0x00000004u;
+static constexpr uint32_t EngineWindowFlags_Fullscreen			= 0x00000008u;
+static constexpr uint32_t EngineWindowFlags_WindowedBorderless	= 0x00000010u;
 
 
 namespace Engine
 {
 
-enum class GraphicsAPI
-{
-    NONE,
-    VULKAN,
-    DIRECTX12,
-    OPENGL
-};
+// Predefine the windows for all the platforms
+class GL46_Window;
+class DX12_Window;
+class VK_Window;
 
 enum class CursorMode
 {
@@ -34,18 +31,33 @@ class Window
 
 public:
 
-    typedef std::function<void(Window&, const vec2u&)>  resizeCallback_t;
-    typedef std::function<void(Window&, bool)>          focusCallback_t;
-    typedef std::function<void(Window&, vec2f)>  		mouseMoveCallback_t;
-    typedef std::function<void(Window&, MouseButton)>   mouseButtonCallback_t;
-    typedef std::function<void(Window&, float, float)>  mouseScrollCallback_t;
-    typedef std::function<void(Window&, Key)>           keyCallback_t;
+    using resizeCallback_t		= std::function<void(Window&, const vec2u&)>;
+    using focusCallback_t		= std::function<void(Window&, bool)>;
+    using mouseMoveCallback_t	= std::function<void(Window&, vec2f)>;
+    using mouseButtonCallback_t = std::function<void(Window&, MouseButton)>;
+    using mouseScrollCallback_t = std::function<void(Window&, float, float)>;
+    using keyCallback_t			= std::function<void(Window&, Key)>;
 
     Window() = default;
+	virtual ~Window() = default;
+
+	auto* GetPlatformPtr()
+	{
+#if defined HELIOS_API_GL46
+		return reinterpret_cast<GL46_Window*>(this);
+#elif defined HELIOS_API_DX12
+		return reinterpret_cast<DX12_Window*>(this);
+#elif defined HELIOS_API_VK
+		return reinterpret_cast<VK_Window*>(this);
+#else
+		return nullptr;
+#endif
+	}
 
     virtual bool Init(const vec2u& size, const std::wstring& title, uint32_t flags) = 0;
 
     virtual void PollEvents() = 0;
+	virtual void BeginFrame() {} /* OpenGL does not need this function, but modern APIs do */
 	virtual void SwapBuffers() = 0;
 	virtual void ClearViewport() = 0;
     virtual bool ShouldClose() = 0;
@@ -57,7 +69,7 @@ public:
 	virtual vec2u GetSize() const = 0;
 
 	[[nodiscard]]
-	virtual const std::wstring& GetTitle() const = 0;
+	virtual const std::wstring& GetTitle() const;
 
 	virtual void SetTitle(const std::wstring& title) = 0;
 
@@ -66,7 +78,7 @@ public:
 
 	virtual void SetCursorMode(CursorMode mode) = 0;
 
-	virtual void SetShouldClose(bool shouldClose) = 0;
+	virtual void RequestClose();
 
 	virtual void SetMaximized(bool maximized) = 0;
 
@@ -87,7 +99,7 @@ public:
     void SetKeyUpCallback(const keyCallback_t& callback);
 
 protected:
-    GraphicsAPI m_currentAPI = GraphicsAPI::NONE;
+	bool m_shouldClose = false;
 	std::wstring m_title;
 
     resizeCallback_t onResize;
@@ -105,8 +117,7 @@ protected:
 void CreateWin(
 	std::unique_ptr<Window>& window,
 	const vec2u& size, const std::wstring& title,
-	uint32_t flags = EngineWindowFlags_None,
-	GraphicsAPI api = GraphicsAPI::OPENGL
+	uint32_t flags = EngineWindowFlags_None
 );
 
 } // Engine
