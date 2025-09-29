@@ -27,6 +27,7 @@ extern "C" {
 }
 #endif
 
+using namespace Engine;
 
 static bool hasWarnedOfBrokenShader = false;
 void GLAPIENTRY MessageCallback(

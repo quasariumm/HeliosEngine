@@ -15,7 +15,6 @@ namespace Engine
 {
 class Material;
 class Light;
-}
 
 /*
  * Console logging tags
@@ -31,12 +30,8 @@ static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
  * Typedefs
  */
 
-namespace Engine
-{
 typedef vec4t<uint8_t>	Color8;
 typedef vec4f			Color32F;
-}
-
 
 
 /*
@@ -58,7 +53,6 @@ static constexpr float INV2PI		=	1.f / (2.f * PI);
 static constexpr float TWOPI		=	2.f * PI;
 static constexpr float SQRT_PI_INV	=	std::numbers::inv_sqrtpi_v<float>;
 static constexpr float LARGE_FLOAT	=	1e34f;
-
 
 
 /*
@@ -161,7 +155,7 @@ inline std::wstring GLErrorToString( const uint32_t error )
 {
 	switch (error)
 	{
-	// Errors
+		// Errors
 	case 0:
 		return L"GL_NO_ERROR";
 	case 0x0500:
@@ -180,7 +174,7 @@ inline std::wstring GLErrorToString( const uint32_t error )
 		return L"GL_INVALID_FRAMEBUFFER_OPERATION";
 	case 0x0507:
 		return L"GL_CONTEXT_LOST";
-	// Framebuffer status
+		// Framebuffer status
 	case 0x8cd5:
 		return L"GL_FRAMEBUFFER_COMPLETE";
 	case 0x8219:
@@ -218,10 +212,10 @@ inline std::wstring GLSeverityToString( const GLenum sev )
 
 inline std::wstring EnginePath(bool stringSafe = false)
 {
-    std::wstring enginePath = std::filesystem::current_path().wstring();
-    if (!stringSafe) return enginePath;
-    std::ranges::replace(enginePath, '\\', '/');
-    return enginePath;
+	std::wstring enginePath = std::filesystem::current_path().wstring();
+	if (!stringSafe) return enginePath;
+	std::ranges::replace(enginePath, '\\', '/');
+	return enginePath;
 }
 
 /**
@@ -232,4 +226,5 @@ inline std::wstring EnginePath(bool stringSafe = false)
 inline std::uint32_t PackHalf2x16(const float a, const float b)
 {
 	return (uint32_t)( (uint16_t)numeric::float16_t(b) << 16 | (uint16_t)numeric::float16_t(a) );
+}
 }

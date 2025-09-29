@@ -99,7 +99,10 @@ public:
     void SetKeyUpCallback(const keyCallback_t& callback);
 
 protected:
+	bool m_initialized = false;
 	bool m_shouldClose = false;
+	bool m_vsync = false;
+	bool m_fullscreen = false;
 	std::wstring m_title;
 
     resizeCallback_t onResize;

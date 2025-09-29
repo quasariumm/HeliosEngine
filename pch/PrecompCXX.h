@@ -59,6 +59,7 @@
 using namespace Microsoft::WRL;
 
 // DirectX 12 specific headers.
+#define _MSC_VER 1020
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
@@ -66,6 +67,13 @@ using namespace Microsoft::WRL;
 
 // D3D12 extension library.
 #include <d3dx12.h>
+
+// DirectX 12 common file
+#include "Backends/DirectX12/Core/DX12_Common.h"
+
+#undef _MSC_VER
+
+#include <dxguids.h>
 
 #elif defined HELIOS_API_GL46
 #include <glad/glad.h>

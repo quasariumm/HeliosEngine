@@ -18,7 +18,7 @@ option( ENGINE_STANDALONE
 # OpenGL 4.6		GL46
 # DirectX 12		DX12
 # Vulkan			VK
-set(HELIOS_GRAPHICS_API "GL46")
+set(HELIOS_GRAPHICS_API "DX12")
 
 # Adds the launcher to the project
 # Used in Default launch option
@@ -206,6 +206,7 @@ set(CMAKE_CXX_STANDARD 20) # Because Assimp changes it back to C++17
 # Tracy defs
 target_compile_definitions(Engine PRIVATE
 		"$<$<CONFIG:Debug>:DEBUG=1>"
+		"$<$<CONFIG:Debug>:_DEBUG=1>"
 		"$<$<CONFIG:Release>:NDEBUG=1>"
 		"$<$<CONFIG:Debug>:TRACY_ENABLE=1>"
 		"$<$<CONFIG:Debug>:TRACY_CALLSTACK=10>"
