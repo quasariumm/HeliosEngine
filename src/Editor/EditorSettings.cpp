@@ -19,13 +19,13 @@ bool EditorSettings::Save()
     }
     // Save all variables in the struct
     file << "CloseOnEscape = " << std::to_wstring(m_editorSettings.m_closeOnEscape) << std::endl;
-    file << "WindowSize = " << m_editorSettings.m_windowSize << std::endl;
+    file << "WindowSize = [" << m_editorSettings.m_windowSize.x << ", " << m_editorSettings.m_windowSize.y << ']' << std::endl;
     file << "AutoMaximize = " << std::to_wstring(m_editorSettings.m_autoMaximize) << std::endl;
     file << "InterfaceScale = " << std::to_wstring(m_editorSettings.m_interfaceScaling) << std::endl;
     file << "ForceLoadProject = " << std::to_wstring(m_editorSettings.m_forceLoadProject) << std::endl;
 	file << "ForceLoadProjectPath = " << m_editorSettings.m_forceLoadProjectPath << std::endl;
 	file << "ForceLoadScenePath = " << m_editorSettings.m_forceLoadScenePath << std::endl;
-	file << "ViewportRenderSize = " << m_editorSettings.m_viewportRenderSize << std::endl;
+	file << "ViewportRenderSize = [" << m_editorSettings.m_viewportRenderSize.x << ", " << m_editorSettings.m_viewportRenderSize.y << ']' << std::endl;
     DebugLog(LogSeverity::DONE, L"Successfully saved editor settings");
     return true;
 }
@@ -69,7 +69,7 @@ void EditorSettings::DrawWindow()
     	{
     		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), ICON_REFRESH);
     		ImGui::SameLine();
-    		ImGui::InputInt2(ICON_RESIZE" Window Size", m_editorSettings.m_windowSize.cell);
+    		ImGui::InputInt2(ICON_RESIZE" Window Size", glm::value_ptr(m_editorSettings.m_windowSize));
 
     		ImGui::Checkbox(ICON_WINDOW_MAXIMIZE" Maximize on start", &m_editorSettings.m_autoMaximize);
 
@@ -112,8 +112,8 @@ void EditorSettings::DrawWindow()
     	{
     		ImGui::TextColored(ImVec4(1.f, 0.9f, 0.3f, 1.f), ICON_REFRESH);
     		ImGui::SameLine();
-    		if (ImGui::InputInt2("Viewport texture size", (int*)m_editorSettings.m_viewportRenderSize.cell))
-    			Min(m_editorSettings.m_viewportRenderSize, vec2u(1, 1));
+    		if (ImGui::InputInt2("Viewport texture size", (int*)glm::value_ptr(m_editorSettings.m_viewportRenderSize)))
+    			m_editorSettings.m_viewportRenderSize = glm::min(m_editorSettings.m_viewportRenderSize, glm::uvec2(1, 1));
     		ImGui::EndTabItem();
     	}
 

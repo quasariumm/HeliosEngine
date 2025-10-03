@@ -12,25 +12,25 @@ namespace Engine
     {
         // Getter functions
         [[nodiscard]]
-        mat4 matrix(bool inverse = false) const { return inverse ? it : t; }
+        glm::mat4 matrix(bool inverse = false) const { return inverse ? it : t; }
         [[nodiscard]]
-        vec3 position() const { return p; }
+        glm::vec3 position() const { return p; }
         [[nodiscard]]
-        vec3* positionRef() { return &p; }
+        glm::vec3* positionRef() { return &p; }
         [[nodiscard]]
-        vec3 rotation() const { return r; }
+        glm::vec3 rotation() const { return r; }
         [[nodiscard]]
-        vec3* rotationRef() { return &r; }
+        glm::vec3* rotationRef() { return &r; }
         [[nodiscard]]
-        vec3 scale() const { return s; }
+        glm::vec3 scale() const { return s; }
         [[nodiscard]]
-        vec3* scaleRef() { return &s; }
+        glm::vec3* scaleRef() { return &s; }
 
         // Setter functions
-        void matrix(const mat4& matrix) { t = matrix, UpdateTransform(); }
-        void position(const vec3& position) { p = position, UpdateTransform(); }
-        void rotation(const vec3& rotation) { r = rotation, UpdateTransform(); }
-        void scale(const vec3& scale) { s = scale, UpdateTransform(); }
+        void matrix(const glm::mat4& matrix) { t = matrix, UpdateTransform(); }
+        void position(const glm::vec3& position) { p = position, UpdateTransform(); }
+        void rotation(const glm::vec3& rotation) { r = rotation, UpdateTransform(); }
+        void scale(const glm::vec3& scale) { s = scale, UpdateTransform(); }
 
         void UpdateTransform()
         {
@@ -46,12 +46,12 @@ namespace Engine
         bool TransformControllerUI();
 
     private:
-        vec3 p = {0,0,0};
-        vec3 r = {0,0,0};
-        vec3 s = {1,1,1};
+        glm::vec3 p{0,0,0};
+        glm::vec3 r{0,0,0};
+        glm::vec3 s{1,1,1};
 
-        mat4 t = mat4();
-        mat4 it = Invert(mat4());
+        glm::mat4 t = glm::mat4{1.f};
+        glm::mat4 it = glm::mat4{1.f};
     };
 
     static std::map<std::string, Model*> gLoadedModels = {};
@@ -82,7 +82,7 @@ namespace Engine
         void Uninitialize() { m_initialized = false; }
 
         [[nodiscard]]
-        mat4 GlobalMatrix() const;
+        glm::mat4 GlobalMatrix() const;
 
         /// Set the parent of the object. Also assigns it as a child of the parent
         void SetParent(SceneObject* object);

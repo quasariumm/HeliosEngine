@@ -10,6 +10,7 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/extern/Assimp" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/extern/Tracy" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extern/glm" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/extern/imgui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/extern/nativefiledialog-extended" vcs="Git" />
   </component>

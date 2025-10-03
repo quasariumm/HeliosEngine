@@ -63,51 +63,51 @@ void GL46_ShaderBase::SetFloat(const int index, const float value) const
 }
 
 
-void GL46_ShaderBase::SetVec2(const std::string& name, const vec2f& value) const
+void GL46_ShaderBase::SetVec2(const std::string& name, const glm::vec2& value) const
 {
-	glUniform2fv(glGetUniformLocation(programID, name.c_str()), 1, value.cell);
+	glUniform2fv(glGetUniformLocation(programID, name.c_str()), 1, glm::value_ptr(value));
 }
 
 
-void GL46_ShaderBase::SetVec2(int index, const vec2f& value) const
+void GL46_ShaderBase::SetVec2(int index, const glm::vec2& value) const
 {
-	glUniform2fv(index, 1, value.cell);
+	glUniform2fv(index, 1, glm::value_ptr(value));
 }
 
 
-void GL46_ShaderBase::SetVec3(const std::string& name, const vec3f& value) const
+void GL46_ShaderBase::SetVec3(const std::string& name, const glm::vec3& value) const
 {
-	glUniform3fv(glGetUniformLocation(programID, name.c_str()), 1, value.cell);
+	glUniform3fv(glGetUniformLocation(programID, name.c_str()), 1, glm::value_ptr(value));
 }
 
 
-void GL46_ShaderBase::SetVec3(const int index, const vec3f& value) const
+void GL46_ShaderBase::SetVec3(const int index, const glm::vec3& value) const
 {
-	glUniform3fv(index, 1, value.cell);
+	glUniform3fv(index, 1, glm::value_ptr(value));
 }
 
 
-void GL46_ShaderBase::SetVec4(const std::string& name, const vec4f& value) const
+void GL46_ShaderBase::SetVec4(const std::string& name, const glm::vec4& value) const
 {
-	glUniform4fv(glGetUniformLocation(programID, name.c_str()), 1, value.cell);
+	glUniform4fv(glGetUniformLocation(programID, name.c_str()), 1, glm::value_ptr(value));
 }
 
 
-void GL46_ShaderBase::SetVec4(const int index, const vec4f& value) const
+void GL46_ShaderBase::SetVec4(const int index, const glm::vec4& value) const
 {
-	glUniform4fv(index, 1, value.cell);
+	glUniform4fv(index, 1, glm::value_ptr(value));
 }
 
 
-void GL46_ShaderBase::SetMat4(const std::string& name, const mat4f& value) const
+void GL46_ShaderBase::SetMat4(const std::string& name, const glm::mat4& value) const
 {
-	glUniformMatrix4fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, value.cell);
+	glUniformMatrix4fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 
-void GL46_ShaderBase::SetMat4(const int index, const mat4f& value) const
+void GL46_ShaderBase::SetMat4(const int index, const glm::mat4& value) const
 {
-	glUniformMatrix4fv(index, 1, GL_FALSE, value.cell);
+	glUniformMatrix4fv(index, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 } // Engine

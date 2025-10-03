@@ -111,10 +111,10 @@ public:
                 ImGui::InputInt(WStringToUTF8(p.name).c_str(), static_cast<int*>(p.value));
             else if (p.rawType == typeid(float))
                 ImGui::InputFloat(WStringToUTF8(p.name).c_str(), static_cast<float*>(p.value));
-            else if (p.rawType == typeid(vec2))
-                ImGui::InputFloat2(WStringToUTF8(p.name).c_str(), static_cast<vec2*>(p.value)->cell);
-            else if (p.rawType == typeid(vec3))
-                ImGui::InputFloat3(WStringToUTF8(p.name).c_str(), static_cast<vec3*>(p.value)->cell);
+            else if (p.rawType == typeid(glm::vec2))
+                ImGui::InputFloat2(WStringToUTF8(p.name).c_str(), glm::value_ptr(*static_cast<glm::vec2*>(p.value)));
+            else if (p.rawType == typeid(glm::vec3))
+                ImGui::InputFloat3(WStringToUTF8(p.name).c_str(), glm::value_ptr(*static_cast<glm::vec3*>(p.value)));
             else throw std::runtime_error(
                 "The property has a non-defaulted type but does not have a custom display function");
         }

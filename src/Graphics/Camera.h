@@ -23,7 +23,7 @@ public:
 	 * @brief Handles the mouse movement for the camera
 	 * @param delta The distance the cursor has traveled
 	 */
-	void MouseMove(const vec2f& delta);
+	void MouseMove(const glm::vec2& delta);
 
 	/**
 	 * @brief Handles button presses for the camera
@@ -43,14 +43,14 @@ public:
 	 * @return The viewport width and height in coordinate units and the focal plane distance
 	 */
 	[[nodiscard]]
-	vec3f GetViewportParameters( const vec2u& viewportSize );
+	glm::vec3 GetViewportParameters( const glm::uvec2& viewportSize );
 
 	/**
 	 * @brief Gives a matrix that converts world space to view space
 	 * @return The view matrix
 	 */
 	[[nodiscard]]
-	mat4f GetViewMatrix() const;
+	glm::mat4 GetViewMatrix() const;
 
 	/**
 	 * @brief Gives a matrix that converts view space to screen space coordinates
@@ -58,7 +58,7 @@ public:
 	 * @return The projection matrix
 	 */
 	[[nodiscard]]
-	mat4f GetProjectionMatrix(const vec2u& viewportSize) const;
+	glm::mat4 GetProjectionMatrix(const glm::uvec2& viewportSize) const;
 
 	/**
 	 * @brief Gives a matrix that converts
@@ -66,7 +66,7 @@ public:
 	 * @return The camera to world matrix
 	 */
 	[[nodiscard]]
-	mat4f GetCamToWorldMatrix() const;
+	glm::mat4 GetCamToWorldMatrix() const;
 
 
 	[[nodiscard]]
@@ -75,21 +75,21 @@ public:
 	void SetAllowUseControls(bool allow) { m_allowUsingCamera = allow; }
 
 	[[nodiscard]]
-	vec3f GetCameraPosition() const { return m_camPos; }
+	glm::vec3 GetCameraPosition() const { return m_camPos; }
 	[[nodiscard]]
-	vec3f GetCameraRightVec() const { return m_camRight; }
+	glm::vec3 GetCameraRightVec() const { return m_camRight; }
 	[[nodiscard]]
-	vec3f GetCameraFrontVec() const { return m_camFront; }
+	glm::vec3 GetCameraFrontVec() const { return m_camFront; }
 	[[nodiscard]]
-	vec3f GetCameraUpVec() const { return m_camUp; }
+	glm::vec3 GetCameraUpVec() const { return m_camUp; }
 
 private:
 
-	const vec3f m_worldUp = vec3f( 0, 1, 0 );
-	vec3f m_camPos;
+	const glm::vec3 m_worldUp = glm::vec3( 0, 1, 0 );
+	glm::vec3 m_camPos;
 	float m_yaw = -90.f;
 	float m_pitch = 0.f;
-	vec3f m_camFront, m_camUp, m_camRight;
+	glm::vec3 m_camFront, m_camUp, m_camRight;
 	float m_fov = 70.0f;
 	// Used for Ray tracing
 	float m_focusPlaneDistance = 1.f;

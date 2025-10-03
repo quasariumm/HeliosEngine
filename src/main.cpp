@@ -92,7 +92,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
     std::unique_ptr<Engine::Window> window;
     Engine::CreateWin(
     	window,
-    	Engine::vec2u(Engine::EditorSettings::Get().m_windowSize.x, Engine::EditorSettings::Get().m_windowSize.y),
+    	glm::uvec2(Engine::EditorSettings::Get().m_windowSize.x, Engine::EditorSettings::Get().m_windowSize.y),
     	L"Helios Engine",
     	EngineWindowFlags_NoVsync
     );
@@ -126,7 +126,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	Engine::GL46_Texture2D rayTexture;
 	// Get the viewport render size from the Editor Settings
-	Engine::vec2u viewportSize = Engine::EditorSettings::Get().m_viewportRenderSize;
+	glm::uvec2 viewportSize = Engine::EditorSettings::Get().m_viewportRenderSize;
 	rayTexture.FillBlank(viewportSize.x, viewportSize.y, 4, Engine::TextureFormat::RGBA32F, true);
 
 	Engine::Viewport::AppendRenderedImage(&rayTexture);
@@ -137,7 +137,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	Engine::GL46_ComputeShader rayCompute;
 	rayCompute.LoadFromFile(L"src/Shaders/Raytracing/raytrace.comp");
-	const Engine::vec3u computeThreads{
+	const glm::uvec3 computeThreads{
 		static_cast<unsigned>(std::ceil(rayTexture.GetWidth() / 8.f)),
 		static_cast<unsigned>(std::ceil(rayTexture.GetHeight() / 8.f)),
 		1u
@@ -155,8 +155,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	float deltaTime = 0.f;
 
 	Engine::Camera camera;
-	Engine::mat4f VPMat;
-	Engine::mat4f prevVPMat;
+	glm::mat4 VPMat;
+	glm::mat4 prevVPMat;
 
 	Engine::Viewport::AppendEditorCamera(&camera);
 
@@ -164,8 +164,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	auto defaultMaterial = Engine::Material();
 	defaultMaterial.m_properties = { 1, 0, 1, 1, 1, 1 };
 	defaultMaterial.m_microfacetModel = { 1, 0, 0, 0 };
-	defaultMaterial.m_diffuseColor = Engine::vec3f(0.9f, 0.6f, 0.3f);
-	defaultMaterial.m_specularColor = Engine::vec3f(1.f, 1.f, 1.f);
+	defaultMaterial.m_diffuseColor = glm::vec3(0.9f, 0.6f, 0.3f);
+	defaultMaterial.m_specularColor = glm::vec3(1.f, 1.f, 1.f);
 	defaultMaterial.m_refractionCoefficient = 1.f;
 	Engine::MaterialRegister::Instance().SetDefaultMaterial(&defaultMaterial);
 	Engine::ObjectRenderer::Instance().UpdateMaterialSSBO();
@@ -180,7 +180,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 		camera.MouseButtonUp(button);
 	});
 
-	window->SetMouseMoveCallback([&camera](Engine::Window&, Engine::vec2f diff)
+	window->SetMouseMoveCallback([&camera](Engine::Window&, glm::vec2 diff)
 	{
 		camera.MouseMove(diff);
 	});
@@ -220,8 +220,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
 			rayCompute.Use();
 			rayCompute.SetUInt("Frame", frame);
 
-			const Engine::vec2u viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
-			Engine::mat4f camToWorld = camera.GetCamToWorldMatrix();
+			const glm::uvec2 viewportSize(rayTexture.GetWidth(), rayTexture.GetHeight());
+			glm::mat4 camToWorld = camera.GetCamToWorldMatrix();
 			rayCompute.SetMat4("CamToWorld", camToWorld);
 
     		prevVPMat = VPMat;
@@ -231,7 +231,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
     		rayCompute.SetMat4("PrevVPMat", prevVPMat);
     		
-			Engine::vec3f viewportParams = camera.GetViewportParameters(viewportSize);
+			glm::vec3 viewportParams = camera.GetViewportParameters(viewportSize);
 			rayCompute.SetVec3("ViewParams", viewportParams);
 
 		    rayTexture.UseCompute(0);

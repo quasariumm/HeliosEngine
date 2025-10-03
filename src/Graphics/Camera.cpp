@@ -13,17 +13,17 @@ namespace Engine
 Camera::Camera()
 {
 	// Set up a basic view frustum
-	m_camPos = vec3f( 0, 0, -2 );
+	m_camPos = glm::vec3( 0, 0, -2 );
 
-	m_camFront = vec3f( 0, 0, 1 );
-	m_camRight = Normalise( Cross( m_worldUp, m_camFront ) );
-	m_camUp = Normalise( Cross( m_camFront, m_camRight ) );
+	m_camFront = glm::vec3( 0, 0, 1 );
+	m_camRight = glm::normalize( glm::cross( m_worldUp, m_camFront ) );
+	m_camUp = glm::normalize( glm::cross( m_camFront, m_camRight ) );
 
 	UpdateCameraVectors();
 }
 
 
-vec3f Camera::GetViewportParameters( const vec2u& viewportSize )
+glm::vec3 Camera::GetViewportParameters( const glm::uvec2& viewportSize )
 {
 	// Viewport size
 	const float viewportHeight = 2.f * std::tan(RAD(0.25f * m_fov)) * m_focusPlaneDistance;
@@ -32,25 +32,25 @@ vec3f Camera::GetViewportParameters( const vec2u& viewportSize )
 }
 
 
-mat4f Camera::GetViewMatrix() const
+glm::mat4 Camera::GetViewMatrix() const
 {
-	return LookAt(m_camPos, m_camFront, m_camUp);
+	return glm::lookAt(m_camPos, m_camFront, m_camUp);
 }
 
 
-mat4f Camera::GetProjectionMatrix(const vec2u& viewportSize) const
+glm::mat4 Camera::GetProjectionMatrix(const glm::uvec2& viewportSize) const
 {
-	return Perspective(m_fov, static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y), 0.1f, 100.0f);
+	return glm::perspective(m_fov, static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y), 0.1f, 100.0f);
 }
 
 
-mat4f Camera::GetCamToWorldMatrix() const
+glm::mat4 Camera::GetCamToWorldMatrix() const
 {
-	return mat4f(
-		vec4f{  m_camRight.x, 	 m_camRight.y, 	 m_camRight.z, 	m_camPos.x	},
-		vec4f{ -m_camUp.x, 		-m_camUp.y, 	-m_camUp.z, 	m_camPos.y	},
-		vec4f{  m_camFront.x, 	 m_camFront.y, 	 m_camFront.z, 	m_camPos.z	},
-		vec4f{		0, 				0, 			0, 		0		}
+	return glm::mat4(
+		glm::vec4{  m_camRight.x, 	 m_camRight.y, 	 m_camRight.z, 	m_camPos.x	},
+		glm::vec4{ -m_camUp.x, 		-m_camUp.y, 	-m_camUp.z, 	m_camPos.y	},
+		glm::vec4{  m_camFront.x, 	 m_camFront.y, 	 m_camFront.z, 	m_camPos.z	},
+		glm::vec4{		0, 				0, 			0, 		0		}
 	);
 }
 
@@ -83,7 +83,7 @@ void Camera::HandleInput( Window& window, const float deltaTime )
 }
 
 
-void Camera::MouseMove( const vec2f& delta )
+void Camera::MouseMove( const glm::vec2& delta )
 {
 	if (!m_usingCamera)
 		return;
@@ -114,14 +114,14 @@ void Camera::MouseButtonUp(const MouseButton& button)
 void Camera::UpdateCameraVectors()
 {
 	// calculate the new Front vector
-	vec3f front;
+	glm::vec3 front;
 	front.x = std::cos(RAD(m_yaw)) * std::cos(RAD(m_pitch));
 	front.y = std::sin(RAD(m_pitch));
 	front.z = std::sin(RAD(m_yaw)) * std::cos(RAD(m_pitch));
-	m_camFront = Normalise(front);
+	m_camFront = glm::normalize(front);
 	// also re-calculate the Right and Up vector
-	m_camRight = Normalise(Cross(m_camFront, m_worldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-	m_camUp    = Normalise(Cross(m_camRight, m_camFront));
+	m_camRight = glm::normalize(glm::cross(m_camFront, m_worldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	m_camUp    = glm::normalize(glm::cross(m_camRight, m_camFront));
 }
 
 } // Engine

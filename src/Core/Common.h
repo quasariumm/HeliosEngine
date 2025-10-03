@@ -33,8 +33,8 @@ static const std::wstring ANSI_INFO = L"[\033[36mINFO\033[0m] ";
 
 namespace Engine
 {
-typedef vec4t<uint8_t>	Color8;
-typedef vec4f			Color32F;
+typedef glm::u8vec4		Color8;
+typedef glm::vec4		Color32F;
 }
 
 

@@ -37,7 +37,7 @@ public:
 	 * @param threads The number of threads per dimension (X, Y, Z)
 	 * @throws runtime_error When no shader is initialised
 	 */
-	void Dispatch(const vec3u& threads) const;
+	void Dispatch(const glm::uvec3& threads) const;
 
 private:
 

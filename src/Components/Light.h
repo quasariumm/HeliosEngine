@@ -42,9 +42,9 @@ public:
 		if (ImGui::Combo("Light type", &_lightType, "Point\0Directional\0Simple Spot\0IES Spot\0\0"))
 			lightType = (LightType)_lightType;
 
-		ImGui::ColorEdit3("Color", color.cell);
+		ImGui::ColorEdit3("Color", glm::value_ptr(color));
 		if (lightType != LightType::DIRECTIONAL)
-			ImGui::DragFloat3("Position", position.cell);
+			ImGui::DragFloat3("Position", glm::value_ptr(position));
 		ImGui::DragFloat("Intensity", &intensity, 0.001f, 0.f);
 
 		switch (lightType)
@@ -55,8 +55,8 @@ public:
 			[[fallthrough]];
 		case LightType::DIRECTIONAL:
 		case LightType::IES_SPOT:
-			if (ImGui::DragFloat3("Direction", direction.cell, 0.01f))
-				direction = Normalise(direction);
+			if (ImGui::DragFloat3("Direction", glm::value_ptr(direction), 0.01f))
+				direction = glm::normalize(direction);
 			break;
 		default:
 			break;
@@ -65,18 +65,18 @@ public:
 
 	LightType lightType = LightType::POINT;
 
-	vec3f color = vec3f(0.f);
-	vec3f position = vec3f(0.f);
+	glm::vec3 color = glm::vec3(0.f);
+	glm::vec3 position = glm::vec3(0.f);
 	float intensity = 0.f;
 
-	vec3f direction = vec3f(0.f);
+	glm::vec3 direction = glm::vec3(0.f);
 
 	float innerCutOff = 0.f;
 	float outerCutOff = 0.f;
 
 	// IES
 	// Non-user-editable. Made with the LoadIES function
-	vec3f iesDimensions = vec3f(0.f);
+	glm::vec3 iesDimensions = glm::vec3(0.f);
 	float iesMaxCD = 0.f;
 	float iesRowStepSize = 0.f;
 	float iesColStepSize = 0.f;

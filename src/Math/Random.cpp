@@ -32,13 +32,13 @@ float RandomFloat(uint32_t& seed, const float min, const float max)
 }
 
 
-vec3f RandomDirection(uint32_t& seed)
+glm::vec3 RandomDirection(uint32_t& seed)
 {
-	return Normalise( vec3f(RandomFloat(seed, -1.f, 1.f), RandomFloat(seed, -1.f, 1.f), RandomFloat(seed, -1.f, 1.f)) );
+	return glm::normalize( glm::vec3(RandomFloat(seed, -1.f, 1.f), RandomFloat(seed, -1.f, 1.f), RandomFloat(seed, -1.f, 1.f)) );
 }
 
 
-vec2f RandomPointInUnitCircle(uint32_t& seed)
+glm::vec2 RandomPointInUnitCircle(uint32_t& seed)
 {
 	float x, y;
 	do

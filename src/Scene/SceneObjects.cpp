@@ -7,13 +7,13 @@ namespace Engine
 bool Transform::TransformControllerUI()
 {
 	bool changed = false;
-    ImGui::DragFloat3("Position", p.cell, 0.1f);
+    ImGui::DragFloat3("Position", glm::value_ptr(p), 0.1f);
 	if (ImGui::IsItemDeactivatedAfterEdit())
 		changed = true;
-    ImGui::DragFloat3("Rotation", r.cell, 1.0f);
+    ImGui::DragFloat3("Rotation", glm::value_ptr(r), 1.0f);
 	if (ImGui::IsItemDeactivatedAfterEdit())
 		changed = true;
-    ImGui::DragFloat3("Scale", s.cell, 0.1f);
+    ImGui::DragFloat3("Scale", glm::value_ptr(s), 0.1f);
 	if (ImGui::IsItemDeactivatedAfterEdit())
 		changed = true;
     UpdateTransform();
@@ -31,7 +31,7 @@ SceneObject::~SceneObject()
     SetParent(nullptr);
 }
 
-mat4 SceneObject::GlobalMatrix() const
+glm::mat4 SceneObject::GlobalMatrix() const
 {
     if (m_parentObject != nullptr)
         return m_parentObject->GlobalMatrix() * m_transform.matrix();

@@ -6,13 +6,13 @@ namespace Engine
 struct EditorSettingsData
 {
     bool m_closeOnEscape = false;
-    vec2i m_windowSize = {1920, 1080};
+    glm::ivec2 m_windowSize = {1920, 1080};
     bool m_autoMaximize = true;
     float m_interfaceScaling = 1.0f;
 	bool m_forceLoadProject = false;
 	std::wstring m_forceLoadProjectPath = L"";
 	std::wstring m_forceLoadScenePath = L"";
-	vec2u m_viewportRenderSize = vec2u(1920, 1080);
+	glm::uvec2 m_viewportRenderSize = glm::uvec2(1920, 1080);
 };
 
 class EditorSettings

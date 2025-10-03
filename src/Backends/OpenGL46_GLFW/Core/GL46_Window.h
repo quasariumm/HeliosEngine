@@ -14,7 +14,7 @@ public:
 
     GL46_Window() = default;
 
-    bool Init(const vec2u& size, const std::wstring& title, uint32_t flags) override;
+    bool Init(const glm::uvec2& size, const std::wstring& title, uint32_t flags) override;
 
     void PollEvents() override;
 	void SwapBuffers() override;
@@ -23,7 +23,7 @@ public:
     int GetKey(Key key) override;
 
 	[[nodiscard]]
-	vec2u GetSize() const override;
+	glm::uvec2 GetSize() const override;
 
 	[[nodiscard]]
 	const std::wstring& GetTitle() const override;
@@ -53,8 +53,8 @@ private:
 
     GLFWwindow* m_window;
 
-	vec2u m_screenSize;
-	vec2f m_mousePos;
+	glm::uvec2 m_screenSize;
+	glm::vec2 m_mousePos;
 
 	std::string m_vendor;
 

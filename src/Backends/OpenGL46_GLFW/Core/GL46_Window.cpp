@@ -7,7 +7,7 @@
 namespace Engine
 {
 
-bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint32_t flags)
+bool GL46_Window::Init(const glm::uvec2& size, const std::wstring& title, const uint32_t flags)
 {
 	m_screenSize = size;
 	m_title = title;
@@ -85,7 +85,7 @@ bool GL46_Window::Init(const vec2u& size, const std::wstring& title, const uint3
 
 	double x, y;
 	glfwGetCursorPos( m_window, &x, &y );
-	m_mousePos = vec2f(static_cast<float>(x), static_cast<float>(y));
+	m_mousePos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 
 	if (flags & EngineWindowFlags_NoVsync)
 		glfwSwapInterval(0);
@@ -150,7 +150,7 @@ int GL46_Window::GetKey(Key key)
 }
 
 
-vec2u GL46_Window::GetSize() const
+glm::uvec2 GL46_Window::GetSize() const
 {
 	return m_screenSize;
 }
@@ -263,8 +263,8 @@ void GL46_Window::ButtonCallbackGLFW(GLFWwindow* w, int button, int action, int 
 void GL46_Window::ResizeCallbackGLFW(GLFWwindow* w, int width, int height)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
-	win->m_screenSize = vec2u(width, height);
-    CALL(win->onResize, *win,vec2u(width,height));
+	win->m_screenSize = glm::uvec2(width, height);
+    CALL(win->onResize, *win,glm::uvec2(width,height));
 }
 
 void GL46_Window::FocusCallbackGLFW(GLFWwindow* w, int f)
@@ -276,13 +276,13 @@ void GL46_Window::FocusCallbackGLFW(GLFWwindow* w, int f)
 void GL46_Window::MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y)
 {
     GL46_Window* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
-	const vec2f diff{
+	const glm::vec2 diff{
 		static_cast<float>(x) - win->m_mousePos.x,
 		static_cast<float>(y) - win->m_mousePos.y
 	};
     CALL(win->onMouseMove, *win, diff);
 
-	win->m_mousePos = vec2f(static_cast<float>(x), static_cast<float>(y));
+	win->m_mousePos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
 
 void GL46_Window::MouseScrollCallbackGLFW(GLFWwindow* w, double x, double y)

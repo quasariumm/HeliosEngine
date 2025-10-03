@@ -15,49 +15,49 @@ void DisplayNone(const ComponentProperty* property)
 
 void DisplayColorRGB(const ComponentProperty* property)
 {
-	ImGui::ColorEdit3(WStringToUTF8(property->name).c_str(), static_cast<vec3*>(property->value)->cell);
+	ImGui::ColorEdit3(WStringToUTF8(property->name).c_str(), glm::value_ptr(*static_cast<glm::vec3*>(property->value)));
 }
 
 
 void DisplayColorRGB_HDR( const ComponentProperty* property )
 {
-	ImGui::ColorEdit3(WStringToUTF8(property->name).c_str(), static_cast<vec3*>(property->value)->cell, ImGuiColorEditFlags_HDR);
+	ImGui::ColorEdit3(WStringToUTF8(property->name).c_str(), glm::value_ptr(*static_cast<glm::vec3*>(property->value)), ImGuiColorEditFlags_HDR);
 }
 
 
 void DisplayColorHSV( const ComponentProperty* property )
 {
-	ImGui::ColorEdit3(WStringToUTF8(property->name).c_str(), static_cast<vec3*>(property->value)->cell, ImGuiColorEditFlags_DisplayHSV);
+	ImGui::ColorEdit3(WStringToUTF8(property->name).c_str(), glm::value_ptr(*static_cast<glm::vec3*>(property->value)), ImGuiColorEditFlags_DisplayHSV);
 }
 
 
 void DisplayColorHSV_HDR( const ComponentProperty* property )
 {
-	ImGui::ColorEdit3(WStringToUTF8(property->name).c_str(), static_cast<vec3*>(property->value)->cell, ImGuiColorEditFlags_DisplayHSV | ImGuiColorEditFlags_HDR);
+	ImGui::ColorEdit3(WStringToUTF8(property->name).c_str(), glm::value_ptr(*static_cast<glm::vec3*>(property->value)), ImGuiColorEditFlags_DisplayHSV | ImGuiColorEditFlags_HDR);
 }
 
 
 void DisplayColorRGBA(const ComponentProperty* property)
 {
-	ImGui::ColorEdit4(WStringToUTF8(property->name).c_str(), static_cast<vec4*>(property->value)->cell);
+	ImGui::ColorEdit4(WStringToUTF8(property->name).c_str(), glm::value_ptr(*static_cast<glm::vec4*>(property->value)));
 }
 
 
 void DisplayColorRGBA_HDR( const ComponentProperty* property )
 {
-	ImGui::ColorEdit4(WStringToUTF8(property->name).c_str(), static_cast<vec4*>(property->value)->cell, ImGuiColorEditFlags_HDR);
+	ImGui::ColorEdit4(WStringToUTF8(property->name).c_str(), glm::value_ptr(*static_cast<glm::vec4*>(property->value)), ImGuiColorEditFlags_HDR);
 }
 
 
 void DisplayColorHSVA( const ComponentProperty* property )
 {
-	ImGui::ColorEdit4(WStringToUTF8(property->name).c_str(), static_cast<vec4*>(property->value)->cell, ImGuiColorEditFlags_DisplayHSV);
+	ImGui::ColorEdit4(WStringToUTF8(property->name).c_str(), glm::value_ptr(*static_cast<glm::vec4*>(property->value)), ImGuiColorEditFlags_DisplayHSV);
 }
 
 
 void DisplayColorHSVA_HDR( const ComponentProperty* property )
 {
-	ImGui::ColorEdit4(WStringToUTF8(property->name).c_str(), static_cast<vec4*>(property->value)->cell, ImGuiColorEditFlags_DisplayHSV | ImGuiColorEditFlags_HDR);
+	ImGui::ColorEdit4(WStringToUTF8(property->name).c_str(), glm::value_ptr(*static_cast<glm::vec4*>(property->value)), ImGuiColorEditFlags_DisplayHSV | ImGuiColorEditFlags_HDR);
 }
 
 }

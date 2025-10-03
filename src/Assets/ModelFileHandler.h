@@ -7,9 +7,9 @@ namespace Engine
 
 struct alignas(16) VertexData
 {
-	vec3f position;
+	glm::vec3 position;
 	float texCoordX;
-	vec3u normalTangent;
+	glm::uvec3 normalTangent;
 	float texCoordY;
 };
 

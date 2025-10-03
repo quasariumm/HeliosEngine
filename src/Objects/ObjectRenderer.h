@@ -98,7 +98,7 @@ public:
 
 private:
 
-    void SetSphereData(int idx, vec3f position, float radius, int materialIndex) const;
+    void SetSphereData(int idx, glm::vec3 position, float radius, int materialIndex) const;
 
     std::vector<RenderObject> m_renderObjects;
     GL46_ComputeShader* m_computeShader;

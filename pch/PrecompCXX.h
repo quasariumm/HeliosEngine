@@ -108,9 +108,11 @@ using namespace Microsoft::WRL;
 #include <numbers>
 #include <type_traits>
 
+// GLM
+#include <glm/glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 // Engine libraries
-#include "Math/Vector.h"
-#include "Math/Matrix.h"
 #include "Math/Random.h"
 #include "Core/Common.h"
 #include "Core/Timer.h"

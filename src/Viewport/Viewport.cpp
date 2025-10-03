@@ -56,13 +56,13 @@ void Viewport::DrawInterface()
     ImGui::End();
 }
 
-void Viewport::DrawGizmo(const vec3& pos, float size)
+void Viewport::DrawGizmo(const glm::vec3& pos, float size)
 {
     if (m_editorCamera == nullptr) return; // Just doing this to suppress the warnings... They're annoying
 
-    Line2D front = ProjectLine(Line3D(pos, pos + vec3{0, 0, 1}));
-    Line2D right = ProjectLine(Line3D(pos, pos + vec3{1, 0, 0}));
-    Line2D up = ProjectLine(Line3D(pos, vec3{0, 1, 0}));
+    Line2D front = ProjectLine(Line3D(pos, pos + glm::vec3{0, 0, 1}));
+    Line2D right = ProjectLine(Line3D(pos, pos + glm::vec3{1, 0, 0}));
+    Line2D up = ProjectLine(Line3D(pos, glm::vec3{0, 1, 0}));
 
     ImDrawList* drawList = ImGui::GetForegroundDrawList();
 
@@ -76,7 +76,7 @@ Line2D Viewport::ProjectLine(const Line3D& line)
     return {ProjectPoint(line.a), ProjectPoint(line.b)};
 }
 
-ImVec2 Viewport::ProjectPoint(const vec3& PW)
+ImVec2 Viewport::ProjectPoint(const glm::vec3& PW)
 {
     if (m_editorCamera == nullptr) return {};
     return {};

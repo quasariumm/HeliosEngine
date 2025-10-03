@@ -85,7 +85,7 @@ public:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	void SetVec2(const std::string& name, const vec2f& value) const;
+	void SetVec2(const std::string& name, const glm::vec2& value) const;
 
 	/**
 	 * @brief Sets a floating point 2D vector value in the active shader by index
@@ -93,7 +93,7 @@ public:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	void SetVec2(int index, const vec2f& value) const;
+	void SetVec2(int index, const glm::vec2& value) const;
 
 	/**
 	 * @brief Sets a floating point 3D vector value in the active shader
@@ -101,7 +101,7 @@ public:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	void SetVec3(const std::string& name, const vec3f& value) const;
+	void SetVec3(const std::string& name, const glm::vec3& value) const;
 
 	/**
 	 * @brief Sets a floating point 3D vector value in the active shader by index
@@ -109,7 +109,7 @@ public:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	void SetVec3(int index, const vec3f& value) const;
+	void SetVec3(int index, const glm::vec3& value) const;
 
 	/**
 	 * @brief Sets a floating point 4D vector value in the active shader
@@ -117,7 +117,7 @@ public:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	void SetVec4(const std::string& name, const vec4f& value) const;
+	void SetVec4(const std::string& name, const glm::vec4& value) const;
 
 	/**
 	 * @brief Sets a floating point 4D vector value in the active shader by index
@@ -125,7 +125,7 @@ public:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	void SetVec4(int index, const vec4f& value) const;
+	void SetVec4(int index, const glm::vec4& value) const;
 
 	/**
 	 * @brief Sets a 4x4 floating point matrix value in the active shader
@@ -133,7 +133,7 @@ public:
 	 * @param name The name of the uniform
 	 * @param value The value you want to set
 	 */
-	void SetMat4(const std::string& name, const mat4f& value) const;
+	void SetMat4(const std::string& name, const glm::mat4& value) const;
 
 	/**
 	 * @brief Sets a 4x4 floating point matrix value in the active shader by index
@@ -141,7 +141,7 @@ public:
 	 * @param index The location index of the uniform
 	 * @param value The value you want to set
 	 */
-	void SetMat4(int index, const mat4f& value) const;
+	void SetMat4(int index, const glm::mat4& value) const;
 
 protected:
 

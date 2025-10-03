@@ -232,6 +232,7 @@ target_include_directories(Engine PUBLIC
 		extern/imgui
 		extern/nativefiledialog-extended/src/include
 		extern/Assimp/include
+		extern/glm
 		lib
 		lib/glfw/include
 		lib/glad/include

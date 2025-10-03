@@ -31,9 +31,9 @@ class Window
 
 public:
 
-    using resizeCallback_t		= std::function<void(Window&, const vec2u&)>;
+    using resizeCallback_t		= std::function<void(Window&, const glm::uvec2&)>;
     using focusCallback_t		= std::function<void(Window&, bool)>;
-    using mouseMoveCallback_t	= std::function<void(Window&, vec2f)>;
+    using mouseMoveCallback_t	= std::function<void(Window&, glm::vec2)>;
     using mouseButtonCallback_t = std::function<void(Window&, MouseButton)>;
     using mouseScrollCallback_t = std::function<void(Window&, float, float)>;
     using keyCallback_t			= std::function<void(Window&, Key)>;
@@ -54,7 +54,7 @@ public:
 #endif
 	}
 
-    virtual bool Init(const vec2u& size, const std::wstring& title, uint32_t flags) = 0;
+    virtual bool Init(const glm::uvec2& size, const std::wstring& title, uint32_t flags) = 0;
 
     virtual void PollEvents() = 0;
 	virtual void BeginFrame() {} /* OpenGL does not need this function, but modern APIs do */
@@ -66,7 +66,7 @@ public:
     virtual int GetKey(Key key) = 0;
 
 	[[nodiscard]]
-	virtual vec2u GetSize() const = 0;
+	virtual glm::uvec2 GetSize() const = 0;
 
 	[[nodiscard]]
 	virtual const std::wstring& GetTitle() const;
@@ -116,7 +116,7 @@ protected:
 
 void CreateWin(
 	std::unique_ptr<Window>& window,
-	const vec2u& size, const std::wstring& title,
+	const glm::uvec2& size, const std::wstring& title,
 	uint32_t flags = EngineWindowFlags_None
 );
 

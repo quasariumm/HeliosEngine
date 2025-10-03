@@ -83,9 +83,9 @@ void SceneLoader::LoadFromFile(Scene* scene, const std::filesystem::path& fileNa
                     newComponent->SetPropertyValue(name, std::stoi(value));
                 else if (type == STR_TO_WSTR(Demangle(typeid(float).name())))
                     newComponent->SetPropertyValue(name, std::stof(value));
-                else if (type == STR_TO_WSTR(Demangle(typeid(vec2).name())))
+                else if (type == std::wstring(L"glm::vec2"))
                     newComponent->SetPropertyValue(name, ParseVec2<float>(value));
-                else if (type == STR_TO_WSTR(Demangle(typeid(vec3).name())))
+                else if (type == std::wstring(L"glm::vec3"))
                     newComponent->SetPropertyValue(name, ParseVec3(value));
                 else if (type == STR_TO_WSTR(Demangle(typeid(std::string).name())))
                     newComponent->SetPropertyValue(name, value);
@@ -172,12 +172,19 @@ void SceneLoader::SaveToFile(Scene* scene, const std::filesystem::path& fileName
             file << "Type = " << STR_TO_WSTR(Demangle(c->GetType().name())) << std::endl;
             for (const ComponentProperty& p : c->GetProperties())
             {
-                file << "Property = " << p.name << " : " << p.type << " => ";
+            	file << "Property = " << p.name << " : ";
+            	if (p.rawType == typeid(glm::vec2))
+            		file << "glm::vec2";
+            	else if (p.rawType == typeid(glm::vec3))
+            		file << "glm::vec3";
+            	else
+            		file << p.type;
+            	file << " => ";
                 if (p.rawType == typeid(bool)) file << *(bool*)p.value;
                 else if (p.rawType == typeid(int)) file << std::to_wstring(*(int*)p.value);
                 else if (p.rawType == typeid(float)) file << std::to_wstring(*(float*)p.value);
-                else if (p.rawType == typeid(vec2)) file << *(vec2*)p.value;
-                else if (p.rawType == typeid(vec3)) file << *(vec3*)p.value;
+                else if (p.rawType == typeid(glm::vec2)) file << '[' << ((glm::vec2*)p.value)->x << ", " << ((glm::vec2*)p.value)->y << ']';
+                else if (p.rawType == typeid(glm::vec3)) file << '[' << ((glm::vec3*)p.value)->x << ", " << ((glm::vec3*)p.value)->y << ", " << ((glm::vec3*)p.value)->z << ']';
                 else if (p.rawType == typeid(std::string)) file << *(std::wstring*)p.value;
                 else if (p.rawType == typeid(std::wstring)) file << *(std::wstring*)p.value;
             	else
@@ -211,9 +218,9 @@ std::string SceneLoader::SaveTransform(SceneObject* object)
 {
     std::stringstream ss;
     Transform t = *object->GetTransform();
-    ss << "P:" << t.position();
-    ss << "R:" << t.rotation();
-    ss << "S:" << t.scale();
+    ss << std::format("P:[{:.5f}, {:.5f}, {:.5f}]", t.position().x, t.position().y, t.position().z);
+    ss << std::format("R:[{:.5f}, {:.5f}, {:.5f}]", t.rotation().x, t.rotation().y, t.rotation().z);
+    ss << std::format("S:[{:.5f}, {:.5f}, {:.5f}]", t.scale().x, t.scale().y, t.scale().z);
     return ss.str();
 }
 

@@ -88,8 +88,8 @@ public:
 		static Material material;
 		material.m_properties = { 1, 0, 1, 1, 1, 1 };
 		material.m_microfacetModel = { 1, 0, 0, 0 };
-		material.m_diffuseColor = vec3f(0.9f, 0.6f, 0.3f);
-		material.m_specularColor = vec3f(1.f, 1.f, 1.f);
+		material.m_diffuseColor = glm::vec3(0.9f, 0.6f, 0.3f);
+		material.m_specularColor = glm::vec3(1.f, 1.f, 1.f);
 		material.m_refractionCoefficient = 1.f;
 		MaterialRegister::Instance().RegisterMaterial(&material);
 	}
@@ -136,13 +136,13 @@ public:
 		float alphaY = 0.f; /* For use with anisotropic GGX */
 	} m_microfacetModel;
 
-	vec3f m_diffuseColor = {};
-	vec3f m_specularColor = {};
+	glm::vec3 m_diffuseColor = {};
+	glm::vec3 m_specularColor = {};
 	float m_specularity = 0.f;
 	float m_shininess = 0.f;
 	float m_glossiness = 0.f;
 
-	vec3f m_emissionColor = {};
+	glm::vec3 m_emissionColor = {};
 	float m_emissionStrength = 0.f;
 
 	float m_refractivity = 0.f;

@@ -65,7 +65,7 @@ void Window::SetKeyUpCallback(const keyCallback_t& callback)
 }
 
 
-void CreateWin(std::unique_ptr<Window>& window, const vec2u& size, const std::wstring& title, const uint32_t flags)
+void CreateWin(std::unique_ptr<Window>& window, const glm::uvec2& size, const std::wstring& title, const uint32_t flags)
 {
 #if defined HELIOS_API_VK
 #elif defined HELIOS_API_DX12

@@ -142,7 +142,7 @@ void ObjectRenderer::DeregisterSphere(float* radius, int* materialIdx)
 
 struct GPUMesh
 {
-	vec3f position = vec3f(0.f);
+	glm::vec3 position = glm::vec3(0.f);
 	int materialIndex = -1;
 	uint32_t indexCount = 0;
 	uint32_t firstIndex = 0;
@@ -253,15 +253,15 @@ void ObjectRenderer::UpdateModelTransforms() const
 		const size_t meshAmount = modelData->meshes.size();
 		for (int i = 0; i < meshAmount; i++)
 		{
-			vec3f position = renderObject.transform->position();
-			m_meshSSBO.SubData(meshIndex * sizeofll(GPUMesh), sizeofll(vec3), &position);
+			glm::vec3 position = renderObject.transform->position();
+			m_meshSSBO.SubData(meshIndex * sizeofll(GPUMesh), sizeofll(glm::vec3), &position);
 			meshIndex++;
 		}
 	}
 }
 
 
-void ObjectRenderer::SetSphereData(const int idx, const vec3f position, const float radius, int materialIndex) const
+void ObjectRenderer::SetSphereData(const int idx, const glm::vec3 position, const float radius, int materialIndex) const
 {
     if (m_computeShader == nullptr) return;
     const std::string baseName = "Spheres[" + std::to_string(idx) + "]";
@@ -277,11 +277,11 @@ void ObjectRenderer::SetSphereData(const int idx, const vec3f position, const fl
 
 struct GPUMaterial
 {
-	vec3f diffuseColor;
+	glm::vec3 diffuseColor;
 	float specularity;
-	vec3f specularColor;
+	glm::vec3 specularColor;
 	float shininess;
-	vec3f emissionColor;
+	glm::vec3 emissionColor;
 	float emissionStrength;
 	int type;
 	float glossiness;

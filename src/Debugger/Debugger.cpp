@@ -152,10 +152,10 @@ void Debugger::DrawWatchList()
             ImGui::InputInt(WStringToUTF8(watch.name).c_str(), (int*)watch.var);
         else if (watch.type == typeid(float))
             ImGui::InputFloat(WStringToUTF8(watch.name).c_str(), (float*)watch.var);
-        else if (watch.type == typeid(vec2))
-            ImGui::InputFloat2(WStringToUTF8(watch.name).c_str(), ((vec2*)watch.var)->cell);
-        else if (watch.type == typeid(vec3))
-            ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), ((vec3*)watch.var)->cell);
+        else if (watch.type == typeid(glm::vec2))
+        	ImGui::InputFloat2(WStringToUTF8(watch.name).c_str(), glm::value_ptr(*static_cast<glm::vec2*>(watch.var)));
+        else if (watch.type == typeid(glm::vec3))
+        	ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), glm::value_ptr(*static_cast<glm::vec3*>(watch.var)));
         else
             ImGui::Text("Watch '%s' does not have a supported type", watch.name.c_str());
     }
@@ -169,10 +169,10 @@ void Debugger::DrawWatchList()
             ImGui::InputInt(WStringToUTF8(watch.name).c_str(), (int*)watch.var);
         else if (watch.type == typeid(float))
             ImGui::InputFloat(WStringToUTF8(watch.name).c_str(), (float*)watch.var);
-        else if (watch.type == typeid(vec2))
-            ImGui::InputFloat2(WStringToUTF8(watch.name).c_str(), ((vec2*)watch.var)->cell);
-        else if (watch.type == typeid(vec3))
-            ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), ((vec3*)watch.var)->cell);
+        else if (watch.type == typeid(glm::vec2))
+        	ImGui::InputFloat2(WStringToUTF8(watch.name).c_str(), glm::value_ptr(*static_cast<glm::vec2*>(watch.var)));
+        else if (watch.type == typeid(glm::vec3))
+        	ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), glm::value_ptr(*static_cast<glm::vec3*>(watch.var)));
         else
             ImGui::Text("Watch '%s' does not have a supported type", watch.name.c_str());
     }

@@ -107,7 +107,7 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 }
 
 
-void GL46_ComputeShader::Dispatch(const vec3u& threads) const
+void GL46_ComputeShader::Dispatch(const glm::uvec3& threads) const
 {
 	if (!m_initialised)
 		throw std::runtime_error("Compute shader cannot be dispatched when no shader is loaded!");

@@ -57,7 +57,7 @@ public:
 		else
 		{
 			Component::DisplayProperties();
-			SunDirection = Normalise(SunDirection);
+			SunDirection = glm::normalize(SunDirection);
 			// Set shader values
 			shader->SetVec3("GroundColor", GroundColor);
 			shader->SetVec3("HorizonColor", HorizonColor);
@@ -68,11 +68,11 @@ public:
 		}
 	}
 
-	vec3f GroundColor  = vec3f(0.5f,  0.5f,  0.5f);
-	vec3f HorizonColor = vec3f(0.78f, 0.87f, 1.0f);
-	vec3f ZenithColor  = vec3f(0.68f, 0.84f, 1.0f);
+	glm::vec3 GroundColor  = glm::vec3(0.5f,  0.5f,  0.5f);
+	glm::vec3 HorizonColor = glm::vec3(0.78f, 0.87f, 1.0f);
+	glm::vec3 ZenithColor  = glm::vec3(0.68f, 0.84f, 1.0f);
 
-	vec3f SunDirection	= Normalise(vec3f(1.f, -1.f, 0.f));
+	glm::vec3 SunDirection	= glm::normalize(glm::vec3(1.f, -1.f, 0.f));
 	float SunFocus    	= 150.f;
 	float SunIntensity	= 3.f;
 

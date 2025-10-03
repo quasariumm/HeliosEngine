@@ -21,9 +21,9 @@ static std::wstring TokenValue(const std::wstring& line)
 
 static constexpr const wchar_t* sep = L", ";
 template <typename T>
-static vec2t<T> ParseVec2(std::wstring text)
+static glm::vec<2, T> ParseVec2(std::wstring text)
 {
-    vec2t<T> result;
+    glm::vec<2, T> result;
     text.erase(text.begin(), text.begin() + 1); // Remove first bracket
     text.erase(text.end() - 1, text.end()); // Remove last bracket
     result.x = std::stof(text.substr(0, text.find(sep))); // Get the first value
@@ -32,9 +32,9 @@ static vec2t<T> ParseVec2(std::wstring text)
     return result;
 }
 
-static vec2u ParseVec2u(std::wstring text)
+static glm::uvec2 ParseVec2u(std::wstring text)
 {
-	vec2u result;
+	glm::uvec2 result;
 	text.erase(text.begin(), text.begin() + 1); // Remove first bracket
 	text.erase(text.end() - 1, text.end()); // Remove last bracket
 	result.x = std::stoi(text.substr(0, text.find(sep))); // Get the first value
@@ -43,9 +43,9 @@ static vec2u ParseVec2u(std::wstring text)
 	return result;
 }
 
-static vec3 ParseVec3(std::wstring text)
+static glm::vec3 ParseVec3(std::wstring text)
 {
-    vec3 result;
+    glm::vec3 result;
     text.erase(text.begin(), text.begin() + 1); // Remove first bracket
     text.erase(text.end() - 1, text.end()); // Remove last bracket
     result.x = std::stof(text.substr(0, text.find(sep))); // Get the first value
