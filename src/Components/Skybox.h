@@ -27,6 +27,19 @@ public:
 		AssignProperty(L"HDR Texture Path", &m_texturePath, &DisplayNone);
 	}
 
+	void OnLoad() override
+	{
+		if (!m_useTexture)
+			return;
+		m_texture.LoadFromFile(m_texturePath, TextureFormat::RGB32F, true);
+		GL46_ComputeShader* shader = ObjectRenderer::Instance().GetShader();
+		shader->Use();
+		// Set shader values
+		m_texture.Use(31);
+		shader->SetBool("UseSkyboxTexture", m_useTexture);
+		shader->SetInt("SkyboxTexture", 31);
+	}
+
 	void DisplayProperties() override
 	{
 		ImGui::Checkbox("Use HDR texture", &m_useTexture);
