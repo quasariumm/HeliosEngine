@@ -5,6 +5,8 @@
 	Houses the material struct and material-related functions
 */
 
+// TODO: Fix this by copying from the BUas project
+
 #include "/Engine/Raytracing/materialStruct.glsl"
 
 // EXTENDS UPON MATERIAL_XXXX. THIS IS INCLUDED IN THE MATERIAL TYPE
@@ -101,7 +103,8 @@ float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
-	return F0 + (1.0 - F0) * cosTheta * cosTheta * cosTheta * cosTheta * cosTheta;
+	float x = 1.0 - cosTheta;
+	return F0 + (1.0 - F0) * x * x * x * x * x;
 }
 
 /****************************************************************************
