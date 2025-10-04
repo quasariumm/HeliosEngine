@@ -62,7 +62,7 @@ public:
 				}
 			}
 			ImGui::SameLine();
-			ImGui::Text(path.string().c_str());
+			ImGui::Text("%s", path.string().c_str());
 			// Set shader values
 			m_texture.Use(31);
 			shader->SetInt("SkyboxTexture", 31);

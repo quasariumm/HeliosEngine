@@ -19,6 +19,7 @@
 
 #include <tracy/Tracy.hpp>
 
+#include "Audio/AudioPlayer.h"
 #include "Scene/SceneStorage.h"
 
 #ifdef _WIN32
@@ -105,21 +106,6 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( MessageCallback, nullptr );
 
-	// DEbug to get the version and supported extensions
-	// const GLubyte* version = glGetString(GL_VERSION);
-	// std::string extensions;
-	// GLubyte* extension = nullptr;
-	// uint32_t i = 0;
-	// while (true)
-	// {
-	// 	extension = const_cast<GLubyte*>(glGetStringi(GL_EXTENSIONS, i));
-	// 	try
-	// 	{
-	// 		extensions += std::string((char*)extension) + "\n";
-	// 	} catch (...) {break;}
-	// 	++i;
-	// }
-
 	Engine::EditorInterfaceManager::Initialize(window.get());
 
 	Engine::SceneEditor::SetEditingScene(&g_scene);
@@ -160,6 +146,13 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	Engine::Viewport::AppendEditorCamera(&camera);
 
+#if !(defined __MINGW64__ || defined __MINGW32__)
+	// Audio test
+	Engine::Audio::AudioPlayer audioPlayer{&camera};
+	audioPlayer.LoadSound(R"(C:\Users\patri\Downloads\Testbericht.mp3)", false);
+	audioPlayer.PlaySound(R"(C:\Users\patri\Downloads\Testbericht.mp3)");
+#endif
+
 	// Setting default material
 	auto defaultMaterial = Engine::Material();
 	defaultMaterial.m_properties = { 1, 0, 1, 1, 1, 1 };
@@ -198,6 +191,9 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	while (!window->ShouldClose())
     {
+#if !(defined __MINGW64__ || defined __MINGW32__)
+		audioPlayer.Update();
+#endif
     	ZoneScopedNC("Frame", tracy::Color::CornflowerBlue);
 
     	Engine::ObjectRenderer::Instance().SendObjectData();

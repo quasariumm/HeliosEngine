@@ -110,8 +110,10 @@ void Debugger::DrawLogs()
         if (showTimestamp)
         {
             char timestamp[48];
-            strftime(timestamp, 48, "%H:%M:%S", localtime(&log.timestamp));
-            ImGui::Text(timestamp);
+        	tm t{};
+        	localtime_s(&t, &log.timestamp);
+            strftime(timestamp, 48, "%H:%M:%S", &t);
+            ImGui::Text("%s", timestamp);
             spacing += 65 * EditorSettings::Get().m_interfaceScaling;
             ImGui::SameLine(spacing);
         }
@@ -131,7 +133,7 @@ void Debugger::DrawLogs()
 
         spacing += 30 * EditorSettings::Get().m_interfaceScaling;
         ImGui::SameLine(spacing);
-        ImGui::Text(WStringToUTF8(log.message).c_str());
+        ImGui::Text("%s", WStringToUTF8(log.message).c_str());
     }
 
     static int oldSize = 0;
@@ -157,7 +159,7 @@ void Debugger::DrawWatchList()
         else if (watch.type == typeid(glm::vec3))
         	ImGui::InputFloat3(WStringToUTF8(watch.name).c_str(), glm::value_ptr(*static_cast<glm::vec3*>(watch.var)));
         else
-            ImGui::Text("Watch '%s' does not have a supported type", watch.name.c_str());
+            ImGui::Text("Watch '%s' does not have a supported type", WStringToUTF8(watch.name).c_str());
     }
 
     ImGui::BeginDisabled();

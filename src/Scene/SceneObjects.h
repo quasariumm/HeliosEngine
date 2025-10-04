@@ -146,9 +146,9 @@ namespace Engine
         template <typename T>
         T* AddComponent(bool loaded = true)
         {
-            const std::unique_ptr<Component> component = std::make_unique<T>();
+            m_components.push_back(std::make_unique<T>());
+        	const auto& component = m_components.back();
             T* ptr = component.get(); // raw pointer for access
-            m_components.push_back(component);
             if (loaded) component->MarkLoaded();
             return ptr;
         }
@@ -163,7 +163,7 @@ namespace Engine
 
         void RemoveComponent(const uint32_t componentIdx)
         {
-            m_components[componentIdx].reset();
+            m_components.at(componentIdx).reset();
             m_components.erase(m_components.begin() + componentIdx);
         }
 

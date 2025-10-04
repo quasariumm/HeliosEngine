@@ -189,7 +189,8 @@ void GL46_Texture2D::LoadFromFile(
 
 	// Load the image
 	m_isHDR = isHDR;
-	FILE* file = _wfopen(filename.c_str(), L"rb");
+	FILE* file;
+	_wfopen_s(&file, filename.c_str(), L"rb");
 
 	if (!file)
 	{

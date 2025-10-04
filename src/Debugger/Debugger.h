@@ -28,7 +28,9 @@ inline std::wstring LogSeverityString(LogSeverity severity)
 inline std::wstring TimeStamp(time_t time)
 {
     char timestamp[32];
-    strftime(timestamp, 32, "%H:%M:%S", localtime(&time));
+	tm t;
+	localtime_s(&t, &time);
+    strftime(timestamp, 32, "%H:%M:%S", &t);
     return STR_TO_WSTR(timestamp);
 }
 

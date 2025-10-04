@@ -43,17 +43,18 @@ void GL46_ComputeShader::LoadFromFile(const std::wstring& filename, const bool s
 	}
 
 	// Load contents
-	std::wstringstream contentStream;
+	std::wstringstream contentStream{};
 	contentStream << filestream.rdbuf();
 
 	// Get the includes
-	std::wostringstream includedStream;
+	std::wostringstream includedStream{};
 
 	static bool supportsGLSLIncludes = glfwExtensionSupported("ARB_shading_language_include") == GLFW_TRUE;
 	ManageIncludes(contentStream, includedStream, supportsGLSLIncludes);
 
 	// Set contents to the current version
-	std::string contentString = WSTR_TO_STR(includedStream.str());
+	std::wstring contentWString = includedStream.str();
+	std::string contentString = WStringToUTF8(contentWString);
 	const char* content = contentString.c_str();
 
 	// Create and compile shader

@@ -88,7 +88,7 @@ inline void DisplayModelPath(const ComponentProperty* property)
 		if (ProjectHandler::ShowFileSelect(path, ModelFilters))
 			*wstring = path.wstring();
 	ImGui::SameLine();
-	ImGui::Text(path.string().c_str());
+	ImGui::Text("%s", path.string().c_str());
 }
 
 

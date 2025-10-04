@@ -92,14 +92,14 @@ void EditorSettings::DrawWindow()
 
 			// Use the interface from ProjectHandler
     		std::filesystem::path forceProject;
-    		ImGui::Text(WSTR_TO_STR(m_editorSettings.m_forceLoadProjectPath).c_str());
+    		ImGui::Text("%s", WSTR_TO_STR(m_editorSettings.m_forceLoadProjectPath).c_str());
     		ImGui::SameLine();
     		if (ImGui::Button("Select Folder"))
     			if (ProjectHandler::ShowFileSelect(forceProject))
     				m_editorSettings.m_forceLoadProjectPath = forceProject;
 
     		std::filesystem::path forceScene;
-    		ImGui::Text(WSTR_TO_STR(m_editorSettings.m_forceLoadScenePath).c_str());
+    		ImGui::Text("%s", WSTR_TO_STR(m_editorSettings.m_forceLoadScenePath).c_str());
     		ImGui::SameLine();
     		if (ImGui::Button("Select Scene"))
 				if (ProjectHandler::ShowFileSelect(forceScene, SceneFilters))

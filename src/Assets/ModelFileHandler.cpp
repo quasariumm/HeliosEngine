@@ -70,7 +70,7 @@ static void InitMesh(MeshData& mesh, const std::wstring& directory, const aiMesh
 	);
 	mesh.bvhNodes = ALIGNED_NEW(64) tinybvh::BVH_GPU::BVHNode[bvh.usedNodes];
 	mesh.numBVHNodes = bvh.usedNodes;
-	mempcpy(mesh.bvhNodes, bvh.bvhNode, bvh.usedNodes * sizeof(tinybvh::BVH_GPU::BVHNode));
+	memcpy(mesh.bvhNodes, bvh.bvhNode, bvh.usedNodes * sizeof(tinybvh::BVH_GPU::BVHNode));
 	// Use the indices that the bvh gave
 	auto* newIndices = ALIGNED_NEW(64) uint32_t[3 * bvh.triCount];
 	for (int i = 0; i < bvh.triCount; ++i)

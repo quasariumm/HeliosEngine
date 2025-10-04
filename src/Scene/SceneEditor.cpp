@@ -105,7 +105,7 @@ void SceneEditor::ObjectEditor()
         if (m_selectedObject == 0)
             ImGui::Text(ICON_CUBE" No object selected");
         else
-            ImGui::Text(WStringToUTF8(STR_TO_WSTR(ICON_CUBE) + L" " + selectedObject->GetName()).c_str());
+            ImGui::Text("%s", WStringToUTF8(STR_TO_WSTR(ICON_CUBE) + L" " + selectedObject->GetName()).c_str());
 
         ImGui::EndMenuBar();
     }
