@@ -149,8 +149,8 @@ extern "C" int __declspec(dllexport) __stdcall main()
 #if !(defined __MINGW64__ || defined __MINGW32__)
 	// Audio test
 	Engine::Audio::AudioPlayer audioPlayer{&camera};
-	audioPlayer.LoadSound(R"(C:\Users\patri\Downloads\Testbericht.mp3)", false);
-	audioPlayer.PlaySound(R"(C:\Users\patri\Downloads\Testbericht.mp3)");
+	audioPlayer.LoadSound("assets/Testbericht.mp3", false);
+	audioPlayer.PlaySound("assets/Testbericht.mp3");
 #endif
 
 	// Setting default material
