@@ -35,9 +35,14 @@ public:
 		Component::OnLoad();
 	}
 
-	void Tick() override
+	void Update() override
 	{
-		Component::Tick();
+		Component::Update();
+	}
+
+	void DisplayProperties() override
+	{
+		Component::DisplayProperties();
 
 		if (m_attachedObject->GetTransformChanged())
 			ObjectRenderer::Instance().UpdateModelTransforms();
@@ -49,11 +54,6 @@ public:
 			modelInstance = ModelFileHandler::LoadModel(modelPath);
 			ObjectRenderer::Instance().UpdateModelSSBOs();
 		}
-	}
-
-	void DisplayProperties() override
-	{
-		Component::DisplayProperties();
 
 		if (modelInstance.modelData == nullptr) return;
 		// Display the meshes and their properties
