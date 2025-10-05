@@ -146,12 +146,10 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	Engine::Viewport::AppendEditorCamera(&camera);
 
-#if !(defined __MINGW64__ || defined __MINGW32__)
 	// Audio test
 	Engine::Audio::AudioPlayer audioPlayer{&camera};
 	audioPlayer.LoadSound("assets/Testbericht.mp3", false);
 	audioPlayer.PlaySound("assets/Testbericht.mp3");
-#endif
 
 	// Setting default material
 	auto defaultMaterial = Engine::Material();
@@ -191,9 +189,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 
 	while (!window->ShouldClose())
     {
-#if !(defined __MINGW64__ || defined __MINGW32__)
 		audioPlayer.Update();
-#endif
     	ZoneScopedNC("Frame", tracy::Color::CornflowerBlue);
 
     	Engine::ObjectRenderer::Instance().SendObjectData();

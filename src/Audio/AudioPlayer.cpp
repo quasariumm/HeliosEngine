@@ -1,15 +1,15 @@
-﻿// FMOD does not support MinGW
-#if !(defined __MINGW64__ || defined __MINGW32__)
-#include "Audio/AudioPlayer.h"
-
-#include <ranges>
-#include <fmod/core/inc/fmod.hpp>
-#include <fmod/studio/inc/fmod_studio.hpp>
-
+﻿#include "Audio/AudioPlayer.h"
 #include "Debugger/Debugger.h"
 #include "Graphics/Camera.h"
 
 using namespace Engine::Audio;
+
+// FMOD does not support MinGW
+#if !(defined __MINGW64__ || defined __MINGW32__)
+#include <ranges>
+#include <fmod/core/inc/fmod.hpp>
+#include <fmod/studio/inc/fmod_studio.hpp>
+
 
 AudioPlayer::AudioPlayer(const Camera* camera)
 	: m_camera(camera)
@@ -268,4 +268,65 @@ void AudioPlayer::SetChannelPaused(const int channelID, const bool paused) const
     }
     channel->setPaused(paused);
 };
+#else
+AudioPlayer::AudioPlayer(const Camera* camera)
+	: m_camera(camera)
+{
+	DebugLog(LogSeverity::WARNING, L"Audio player does not support MinGW builds (yet). Please build the engine using Visual Studio or clang-cl on Windows or any compiler on Linux.");
+}
+
+// The rest is just made no-op
+
+AudioPlayer::~AudioPlayer()
+{
+}
+
+
+void AudioPlayer::Update()
+{
+}
+
+
+void AudioPlayer::LoadBank( const std::filesystem::path& )
+{
+}
+
+
+void AudioPlayer::UnloadBank( const std::filesystem::path& )
+{
+}
+
+
+int AudioPlayer::StartEvent( const std::string&, const glm::vec3& )
+{
+	return 0;
+}
+
+
+void AudioPlayer::SetParameter( const std::string&, float, int )
+{
+}
+
+
+void AudioPlayer::SetParameter( const std::string&, const std::string&, int )
+{
+}
+
+
+void AudioPlayer::LoadSound( const std::filesystem::path&, bool )
+{
+}
+
+
+#undef PlaySound
+int AudioPlayer::PlaySound( const std::filesystem::path& )
+{
+	return 0;
+}
+
+
+void AudioPlayer::SetChannelPaused( int, bool ) const
+{
+}
+
 #endif

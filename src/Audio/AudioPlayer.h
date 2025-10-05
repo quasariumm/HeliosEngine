@@ -1,6 +1,4 @@
 ﻿#pragma once
-// FMOD does not support MinGW
-#if !(defined __MINGW64__ || defined __MINGW32__)
 
 #include <string>
 #include <unordered_map>
@@ -133,5 +131,3 @@ private:
 	int m_nextEventID = 0;
 };
 } // namespace bee
-
-#endif
