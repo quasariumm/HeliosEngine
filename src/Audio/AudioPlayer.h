@@ -64,7 +64,7 @@ public:
 	 * @returns The ID of the newly created event instance.
 	 *		If the operation failed, this function returns -1 and prints information to the console.
 	 */
-	int StartEvent( const std::string& name, const glm::vec3& position = glm::vec3(-INFINITY) );
+	int StartEvent( const std::string& name, const glm::vec3& position = glm::vec3(FLT_MAX) );
 
 	/**
 	 * @brief Sets an FMOD Studio floating-point parameter to the given value.
@@ -101,10 +101,12 @@ public:
 	 * @attention This uses FMOD Core only and offers limited control.
 	 *		We recommend to use FMOD Studio banks and events for all audio handling.
 	 * @param file The name of the sound file to play.</param>
+	 * @param position The position of the sound in the world
+	 * @param volume The volume of the sound
 	 * @returns The ID of the channel on which the sound will play.
 	 *		If the operation failed, this function returns -1 and prints information to the console.
 	 */
-	int PlaySound( const std::filesystem::path& file );
+int PlaySound( const std::filesystem::path& file, const glm::vec3& position = glm::vec3(FLT_MAX), float volume = 1.f );
 
 	/**
 	 * @brief Pauses or unpauses a sound channel.

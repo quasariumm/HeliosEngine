@@ -1,4 +1,7 @@
 ﻿#include "Audio/AudioPlayer.h"
+
+#include "PrecompCXX.h"
+#include "PrecompCXX.h"
 #include "Debugger/Debugger.h"
 #include "Graphics/Camera.h"
 
@@ -15,6 +18,13 @@ AudioPlayer::AudioPlayer(const Camera* camera)
 	: m_camera(camera)
 {
     DebugLog(Engine::LogSeverity::INFO, L"Audio Engine: FMOD Studio by Firelight Technologies Pty Ltd.");
+
+	FMOD::Debug_Initialize(
+		FMOD_DEBUG_LEVEL_ERROR | FMOD_DEBUG_LEVEL_WARNING,
+		FMOD_DEBUG_MODE_TTY,
+		nullptr,
+		nullptr
+	);
 
     // Create the Studio System object
     FMOD_RESULT result = FMOD::Studio::System::create(&m_system);
@@ -74,7 +84,7 @@ void AudioPlayer::Update()
 
 	// Set the spatial attributes
 	FMOD_3D_ATTRIBUTES attributes = { { 0 } };
-	const glm::vec3 forward = m_camera->GetCameraFrontVec();
+	const glm::vec3 forward = -m_camera->GetCameraFrontVec();
 	const glm::vec3 up = m_camera->GetCameraUpVec();
 	const glm::vec3 position = m_camera->GetCameraPosition();
 
@@ -155,7 +165,7 @@ int AudioPlayer::StartEvent(const std::string& name, const glm::vec3& position)
     ++m_nextEventID;
 
 	// Set the spatial parameters if wanted
-	if (position.x > -1e30f)
+	if (position.x < 1e30f)
 	{
 		FMOD_3D_ATTRIBUTES attributes = {{0}};
 		attributes.forward.z = 1.0f;
@@ -164,7 +174,7 @@ int AudioPlayer::StartEvent(const std::string& name, const glm::vec3& position)
 		attributes.position.y = position.y;
 		attributes.position.z = position.z;
 		if (evi->set3DAttributes(&attributes) != FMOD_OK)
-			DebugLog(LogSeverity::SEVERE, L"Event spatial parameters failed to set.");
+			DebugLog(LogSeverity::WARNING, L"Event spatial parameters failed to set. Falling back to no spatial settings...");
 	}
 
     // trigger the event
@@ -223,7 +233,7 @@ void AudioPlayer::LoadSound(const std::filesystem::path& file, bool isMusic)
     // try to load the sound file
     const FMOD_MODE mode = isMusic ? (FMOD_CREATESTREAM | FMOD_LOOP_NORMAL) : FMOD_DEFAULT;
     FMOD::Sound* sound = nullptr;
-    const FMOD_RESULT result = m_core_system->createSound(file.string().c_str(), mode, nullptr, &sound);
+    const FMOD_RESULT result = m_core_system->createSound(file.string().c_str(), mode | FMOD_3D, nullptr, &sound);
     if (result != FMOD_OK)
     {
         DebugLog(LogSeverity::SEVERE, std::format(L"Sound with filename {} could not be loaded!", file.wstring()));
@@ -236,7 +246,7 @@ void AudioPlayer::LoadSound(const std::filesystem::path& file, bool isMusic)
 }
 
 #undef PlaySound
-int AudioPlayer::PlaySound(const std::filesystem::path& file)
+int AudioPlayer::PlaySound(const std::filesystem::path& file, const glm::vec3& position, const float volume)
 {
     // check if the sound exists
     const int hash = static_cast<int>(std::hash<std::filesystem::path>{}(file));
@@ -250,6 +260,17 @@ int AudioPlayer::PlaySound(const std::filesystem::path& file)
     // play it
     FMOD::Channel* channel = nullptr;
     m_core_system->playSound(sound->second, nullptr, false, &channel);
+
+	// Set the spatial parameters if wanted
+	if (position.x < 1e30f)
+	{
+		const FMOD_VECTOR pos = {position.x, position.y, position.z};
+		constexpr static FMOD_VECTOR vel = {0, 0, 0};
+		if (channel->set3DAttributes(&pos, &vel) != FMOD_OK)
+			DebugLog(LogSeverity::WARNING, L"Sound spatial parameters failed to set. Falling back to no spatial settings...");
+		if (channel->setVolume(volume) != FMOD_OK)
+			DebugLog(LogSeverity::WARNING, L"Volume for sound could not be set. Falls back to 1?");
+	}
 
     // return the index of the channel on which it plays
     int channel_index = 0;
@@ -319,7 +340,7 @@ void AudioPlayer::LoadSound( const std::filesystem::path&, bool )
 
 
 #undef PlaySound
-int AudioPlayer::PlaySound( const std::filesystem::path& )
+int AudioPlayer::PlaySound( const std::filesystem::path&, const glm::vec3& )
 {
 	return 0;
 }
