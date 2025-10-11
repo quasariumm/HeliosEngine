@@ -307,6 +307,29 @@ add_custom_command(TARGET Engine POST_BUILD
 		COMMENT "Copying FMOD DLLs"
 )
 
+
+##############################################
+##  	    	FMOD Studio API	    		##
+##############################################
+
+find_package(OpenCL MODULE)
+
+if (NOT OpenCL_FOUND)
+	message(FATAL_ERROR "OpenCL not found. See README.md for install instructions.")
+endif()
+
+target_link_libraries(Engine PRIVATE OpenCL::OpenCL)
+
+math(EXPR CL_TARGET_VERSION "${OpenCL_VERSION_MAJOR} * 100 + ${OpenCL_VERSION_MINOR} * 10")
+
+target_compile_definitions(Engine PRIVATE
+		CL_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
+		CL_HPP_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
+		# TODO: Determine this minimum version based on implementation of the kernels
+		CL_HPP_MINIMUM_OPENCL_VERSION=100
+		CL_HPP_ENABLE_EXCEPTIONS
+)
+
 ##############################################
 ## Include directories + precompiled header ##
 ##############################################
