@@ -80,7 +80,6 @@ public:
 
 		AssignProperty(L"PBR Roughness", &m_PBR_Roughness);
 		AssignProperty(L"PBR Metallic", &m_PBR_Metallic);
-		AssignProperty(L"PBR Reflectance", &m_PBR_Reflectance);
 		MaterialRegister::Instance().RegisterMaterial(this);
 	}
 
@@ -156,7 +155,6 @@ public:
 
 	float m_PBR_Roughness = 0.f;
 	float m_PBR_Metallic = 0.f;
-	float m_PBR_Reflectance = 0.f;
 
 };
 

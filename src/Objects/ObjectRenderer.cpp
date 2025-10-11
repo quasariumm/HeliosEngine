@@ -290,11 +290,11 @@ struct GPUMaterial
 	float absorption;
 	float PBR_Roughness;
 	float PBR_Metallic;
-	float PBR_Reflectance;
 	float alphaX;
 	float alphaY;
 	float _padding1 = 0.f;
 	float _padding2 = 0.f;
+	float _padding3 = 0.f;
 };
 
 void ObjectRenderer::UpdateMaterialSSBO()
@@ -334,7 +334,6 @@ void ObjectRenderer::UpdateMaterialSSBO()
 			.absorption = mat->m_absorption,
 			.PBR_Roughness = mat->m_PBR_Roughness,
 			.PBR_Metallic = mat->m_PBR_Metallic,
-			.PBR_Reflectance = mat->m_PBR_Reflectance,
 			.alphaX = mat->m_microfacetModel.alphaX,
 			.alphaY = mat->m_microfacetModel.alphaY
 		};
