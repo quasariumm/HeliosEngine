@@ -60,7 +60,7 @@ cl::Program& ComputeProgram::LoadFromFile( const std::filesystem::path& path )
 
 	m_program = cl::Program{m_context, sources};
 
-	if (const auto err = m_program.build(m_device);
+	if (const auto err = m_program.build(m_device, std::format("-cl-std={}", CL_VERSION_STR));
 		err != CL_SUCCESS)
 		DebugLog(LogSeverity::SEVERE,
 		         std::format(L"Failed to build compute program {}. Error: {}", path.wstring(), CLErrorString(err)));

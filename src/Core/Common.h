@@ -216,6 +216,22 @@ inline std::wstring GLSeverityToString( const GLenum sev )
 	}
 }
 
+#if defined CL_VERSION_3_0
+static constexpr const char* CL_VERSION_STR = "CL3.0";
+#elif defined CL_VERSION_2_2
+static constexpr const char* CL_VERSION_STR = "CL2.2";
+#elif defined CL_VERSION_2_1
+static constexpr const char* CL_VERSION_STR = "CL2.1";
+#elif defined CL_VERSION_2_0
+static constexpr const char* CL_VERSION_STR = "CL2.0";
+#elif defined CL_VERSION_1_2
+static constexpr const char* CL_VERSION_STR = "CL1.2";
+#elif defined CL_VERSION_1_1
+static constexpr const char* CL_VERSION_STR = "CL1.1";
+#elif defined CL_VERSION_1_0
+static constexpr const char* CL_VERSION_STR = "CL1.0";
+#endif
+
 inline std::wstring CLErrorString( const cl_int result )
 {
 	switch (result)
