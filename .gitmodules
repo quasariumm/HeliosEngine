@@ -1,0 +1,16 @@
+[submodule "extern/imgui"]
+	path = extern/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
+[submodule "extern/nativefiledialog-extended"]
+	path = extern/nativefiledialog-extended
+	url = https://github.com/btzy/nativefiledialog-extended.git
+[submodule "extern/Tracy"]
+	path = extern/Tracy
+	url = https://github.com/QuillanW/EngineTracy.git
+[submodule "extern/Assimp"]
+	path = extern/Assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "extern/glm"]
+	path = extern/glm
+	url = https://github.com/g-truc/glm
