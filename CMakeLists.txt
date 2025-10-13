@@ -309,7 +309,7 @@ add_custom_command(TARGET Engine POST_BUILD
 
 
 ##############################################
-##  	    	FMOD Studio API	    		##
+##  	    		OpenCL		    		##
 ##############################################
 
 find_package(OpenCL MODULE)
