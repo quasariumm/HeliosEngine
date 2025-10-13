@@ -8,6 +8,8 @@
 # Other
 **/Tmp/
 
+**/.idea
+
 # User specific
 **/.idea/**/workspace.xml
 **/.idea/**/tasks.xml
@@ -440,3 +442,5 @@ scene.scn
 latest-log.md
 RecentProjects.txt
 EditorSettings.txt
+.idea/workspace.xml
+.idea/editor.xml

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include "cereal/archives/json.hpp"
 #include "core/ecs.hpp"
-#include "glm/gtx/euler_angles.hpp"
 
 namespace glm {
 template<class Archive>
