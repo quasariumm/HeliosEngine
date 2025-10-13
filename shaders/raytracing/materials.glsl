@@ -66,46 +66,45 @@ vec3 GetBRDFAndBounce(inout Ray ray, inout uint seed)
 
 	RayTracingMaterial material = Materials[ray.hit.materialIndex];
 
-	if ((material.type & MATERIAL_DIFFUSE) != 0)
+	if ((material.type & MATERIAL_MICROFACET) != 0)
 	{
-		// Direction
+		// Direction: roughness affects the reflection
 		if ((material.type & MATERIAL_REFLECTION) != 0)
-			diffuse.direction = LambertianBounce(seed, ray.hit.normal);
-
-		if ((material.type & MATERIAL_MICROFACET) != 0)
 		{
-			// Factor
-			diffuse.factor = material.PBR_Roughness;
-			// BRDF
-			const vec3 F0 = mix(
-				vec3(0.16 * material.PBR_Reflectance * material.PBR_Reflectance),
-				material.specularColor,
-				material.PBR_Metallic
-			);
-			vec3 F = FresnelSchlick(abs(-dot(ray.hit.normal, ray.dir)), F0);
-			diffuse.BRDF = (1.0 - F) * (1.0 - material.PBR_Metallic) * material.diffuseColor * INVPI;
+			if (material.PBR_Roughness < 0.001)
+			{
+				// Perfect mirror reflection
+				specular.direction = Reflect(-ray.dir, ray.hit.normal);
+			}
+			else
+			{
+				// Rough reflection: sample GGX distribution
+				vec3 wh = SampleGGX(seed, ray.hit.normal, ray.hit.tangent, -ray.dir, material.PBR_Roughness);
+				specular.direction = Reflect(-ray.dir, wh);
+			}
 		}
-		else
+
+		specular.factor = 1.f;
+		specular.BRDF = MicrofacetBRDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
+	}
+	else
+	{
+		if ((material.type & MATERIAL_DIFFUSE) != 0)
 		{
+			// Direction
+			if ((material.type & MATERIAL_REFLECTION) != 0)
+				diffuse.direction = LambertianBounce(seed, ray.hit.normal);
 			// Factor
 			diffuse.factor = 1.0 - material.specularity;
 			// BRDF
 			diffuse.BRDF = material.diffuseColor * INVPI;
 		}
-	}
-	if ((material.type & MATERIAL_SPECULAR) != 0)
-	{
-		// Direction
-		if ((material.type & MATERIAL_REFLECTION) != 0)
-			specular.direction = Reflect(-ray.dir, ray.hit.normal);
+		if ((material.type & MATERIAL_SPECULAR) != 0)
+		{
+			// Direction
+			if ((material.type & MATERIAL_REFLECTION) != 0)
+				specular.direction = Reflect(-ray.dir, ray.hit.normal);
 
-		if ((material.type & MATERIAL_MICROFACET) != 0)
-		{
-			specular.factor = 1.0 - material.PBR_Roughness;
-			specular.BRDF = MicrofacetBRDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
-		}
-		else
-		{
 			specular.factor = material.specularity;
 			// BRDF
 			// https://www.cs.cmu.edu/afs/cs/academic/class/15462-f09/www/lec/lec8.pdf
@@ -114,38 +113,38 @@ vec3 GetBRDFAndBounce(inout Ray ray, inout uint seed)
 			float k = (material.shininess + 2.0) * INV2PI;
 			specular.BRDF = k * material.specularColor * pow(overlap, material.shininess);
 		}
-	}
-	if ((material.type & MATERIAL_TRANSMISSION) != 0
+		if ((material.type & MATERIAL_TRANSMISSION) != 0
 		&& material.refractivity > 0.0)
-	{
-		transmission.factor = material.refractivity;
-
-		if ((material.type & MATERIAL_REFLECTION) != 0)
 		{
-			float etaI = ray.hit.inside ? material.refractionCoefficient : 1.0;
-			float etaO = ray.hit.inside ? 1.0 : material.refractionCoefficient;
-			// Direction
-			vec4 res = Refract(-ray.dir, ray.hit.normal, etaI, etaO);
-			float fresnel = res.w;
-			if (Xi(seed) <= mix(1.0, fresnel, transmission.factor))
-				glassReflect = true;
-			specular.factor *= float(glassReflect);
+			transmission.factor = material.refractivity;
 
-			transmission.direction = res.xyz;
-			// BRDF
-			if ((material.type & MATERIAL_MICROFACET) != 0)
+			if ((material.type & MATERIAL_REFLECTION) != 0)
 			{
-				transmission.BRDF = MicrofacetBRDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
-			}
-			else
-			{
-				// https://cgg.mff.cuni.cz/~jaroslav/teaching/2017-npgr010/slides/03%20-%20npgr010-2017%20-%20BRDF.pdf
-				float overlap = max(0.001, -dot(res.xyz, ray.dir));
-				float changeOfRadiance = (etaO * etaO) / (etaI * etaI);
-				// Physically-plausible Phong Distributuion
-				vec3 DPPPhong = material.specularColor * ((material.shininess + 2.0) / TWO_PI) * pow(overlap, material.shininess);
-				transmission.BRDF = changeOfRadiance * (1.0 - fresnel) * DPPPhong / dot(ray.hit.normal, ray.hit.lightVector);
-				transmission.factor *= float(!glassReflect);
+				float etaI = ray.hit.inside ? material.refractionCoefficient : 1.0;
+				float etaO = ray.hit.inside ? 1.0 : material.refractionCoefficient;
+				// Direction
+				vec4 res = Refract(-ray.dir, ray.hit.normal, etaI, etaO);
+				float fresnel = res.w;
+				if (Xi(seed) <= mix(1.0, fresnel, transmission.factor))
+					glassReflect = true;
+				specular.factor *= float(glassReflect);
+
+				transmission.direction = res.xyz;
+				// BRDF
+				if ((material.type & MATERIAL_MICROFACET) != 0)
+				{
+					transmission.BRDF = MicrofacetBRDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
+				}
+				else
+				{
+					// https://cgg.mff.cuni.cz/~jaroslav/teaching/2017-npgr010/slides/03%20-%20npgr010-2017%20-%20BRDF.pdf
+					float overlap = max(0.001, -dot(res.xyz, ray.dir));
+					float changeOfRadiance = (etaO * etaO) / (etaI * etaI);
+					// Physically-plausible Phong Distributuion
+					vec3 DPPPhong = material.specularColor * ((material.shininess + 2.0) / TWO_PI) * pow(overlap, material.shininess);
+					transmission.BRDF = changeOfRadiance * (1.0 - fresnel) * DPPPhong / dot(ray.hit.normal, ray.hit.lightVector);
+					transmission.factor *= float(!glassReflect);
+				}
 			}
 		}
 	}
@@ -188,6 +187,9 @@ float GetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, ve
 
 	if ((material.type & MATERIAL_MICROFACET) != 0)
 	{
+		specularTransmission.factor = material.PBR_Metallic;
+		diffuse.factor = 1.0 - specularTransmission.factor;
+
 		specularTransmission.PDF = MicrofacetPDF(material, normal, tangent, wo, wi);
 	}
 

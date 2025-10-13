@@ -6,9 +6,11 @@ namespace Engine
 // Forward declare all systems
 class EntityComponentSystem;
 class Renderer;
+class Camera;
 namespace Log { class LogHandler; }
 namespace Editor { class EditorInterface; }
 namespace Physics { class PhysicsCore; }
+namespace Audio { class AudioPlayer; }
 
 // =============================================================
 // Main system handler
@@ -38,6 +40,7 @@ public:
     [[nodiscard]] EntityComponentSystem*    GetECS()                const { return m_entityComponentSystem; }
     [[nodiscard]] Editor::EditorInterface*  GetEditorInterface()    const { return m_editorInterface; }
     [[nodiscard]] Physics::PhysicsCore*     GetPhysics()            const { return m_physics; }
+	[[nodiscard]] Audio::AudioPlayer*       GetAudio()              const { return m_audioPlayer; }
 
 
 private:
@@ -48,6 +51,9 @@ private:
     EntityComponentSystem*      m_entityComponentSystem = nullptr;
     Editor::EditorInterface*    m_editorInterface = nullptr;
     Physics::PhysicsCore*       m_physics = nullptr;
+	Audio::AudioPlayer*			m_audioPlayer = nullptr;
+
+	Camera*						m_camera = nullptr;
 };
 
 // Shorthands
@@ -58,6 +64,7 @@ namespace Systems
     static EntityComponentSystem*       GetECS()                { return SystemsCore::Get()->GetECS(); }
     static Editor::EditorInterface*     GetEditorInterface()    { return SystemsCore::Get()->GetEditorInterface(); }
     static Physics::PhysicsCore*        GetPhysics()            { return SystemsCore::Get()->GetPhysics(); }
+    static Audio::AudioPlayer*			GetAudio()	            { return SystemsCore::Get()->GetAudio(); }
 }
 
 }

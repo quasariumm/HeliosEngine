@@ -13,54 +13,71 @@
 #define MICROFACET_GGX_ANISO	256		// Anisotropic version of GGX model
 #define MICROFACET_BLINNPHONG	512		// Blinn-Phong model
 
-float BeckmannD(float alpha, vec3 normal, vec3 wh);
-float BeckmannG1(float alpha, vec3 normal, vec3 w);
-float BeckmannG(float alpha, vec3 normal, vec3 wo, vec3 wi);
+float BeckmannD(float alpha, float NdotH);
+float BeckmannG1(float alpha, float NdotW);
+float BeckmannG(float alpha,float NdotO, float NdotI);
 
-float GGXIsoD(float alpha, vec3 normal, vec3 wh);
-float GGXIsoG1(float alpha, vec3 normal, vec3 w);
-float GGXIsoG(float alpha, vec3 normal, vec3 wo, vec3 wi);
+float GGXIsoD(float alpha, float NdotH);
+float GGXIsoG1(float alpha, float NdotW);
+float GGXIsoG(float alpha, float NdotO, float NdotI);
+float GGXIsoV(float alpha, float NdotO, float NdotI);
+vec3 SampleGGX(inout uint seed, vec3 N, vec3 T, vec3 wo, float roughness);
 
 float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh);
 float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 tangent, vec3 w);
 float GGXAnisoG(vec3 alpha, vec3 normal, vec3 tangent, vec3 wo, vec3 wi);
 
-float BlinnPhongD(float alpha, vec3 normal, vec3 wh);
-float BlinnPhongG1(float alpha, vec3 normal, vec3 w);
-float BlinnPhongG(float alpha, vec3 normal, vec3 wo, vec3 wi);
+float BlinnPhongD(float alpha, float NdotH);
+float BlinnPhongG1(float alpha, float NdotW);
+float BlinnPhongG(float alpha, float NdotO, float NdotI);
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
 
 vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
 {
 	if (dot(normal, wo) == 0.0 || dot(normal, wi) == 0.0) return vec3(0.0);
 
 	const vec3 wh = normalize(wo + wi);
-	const vec3 F0 = mix( vec3(0.16 * material.PBR_Reflectance * material.PBR_Reflectance), material.specularColor, material.PBR_Metallic );
+	const vec3 F0 = mix( vec3(0.04), material.diffuseColor, material.PBR_Metallic );
 
 	float alpha = material.PBR_Roughness * material.PBR_Roughness;
 
-	float DG = 0.0;
+	float NdotO = clamp(dot(normal, wo), 0.0001, 1.0);
+	float NdotI = clamp(dot(normal, wi), 0.0001, 1.0);
+	float NdotH = clamp(dot(normal, wh), 0.0, 1.0);
+	float OdotH = clamp(dot(wo, wh), 0.0, 1.0);
+
+	float DV = 0.0;
 	if ((material.type & MICROFACET_BECKMANN) != 0)
 	{
-		DG = BeckmannD(alpha, normal, wh) * BeckmannG(alpha, normal, wo, wi);
+		DV = BeckmannD(alpha, NdotH) * BeckmannG(alpha, NdotO, NdotI);
+		DV /= 4.0 * NdotO * NdotI;
 	}
 	if ((material.type & MICROFACET_GGX_ISO) != 0)
 	{
-		DG = GGXIsoD(alpha, normal, wh) * GGXIsoG(alpha, normal, wo, wi);
+		DV = GGXIsoD(alpha, NdotH) * GGXIsoV(alpha, NdotO, NdotI);
 	}
 	if ((material.type & MICROFACET_GGX_ANISO) != 0)
 	{
 		vec3 anisoAlpha = vec3(material.alphaX, material.alphaY, sqrt(material.alphaX * material.alphaY));
-		DG = GGXAnisoD(anisoAlpha, normal, tangent, wh) * GGXAnisoG(anisoAlpha, normal, tangent, wo, wi);
+		DV = GGXAnisoD(anisoAlpha, normal, tangent, wh) * GGXAnisoG(anisoAlpha, normal, tangent, wo, wi);
+		DV /= 4.0 * NdotO * NdotI;
 	}
 	if ((material.type & MICROFACET_BLINNPHONG) != 0)
 	{
-		DG = BlinnPhongD(alpha, normal, wh) * BlinnPhongG(alpha, normal, wo, wi);
+		DV = BlinnPhongD(alpha, NdotH) * BlinnPhongG(alpha, NdotO, NdotI);
+		DV /= 4.0 * NdotO * NdotI;
 	}
 
-	vec3 F = FresnelSchlick(dot(normal, wo), F0);
-	return (DG * F) / (4.0 * dot(normal, wo) * dot(normal, wi));
+	vec3 F = FresnelSchlickRoughness(OdotH, F0, material.PBR_Roughness);
+	vec3 specular = vec3(DV);
+
+	float kD = (1.f - material.PBR_Metallic);
+	vec3 diffuse = kD * material.diffuseColor * INVPI;
+
+	// Return the basic BRDF
+	return mix(diffuse * NdotI, specular * NdotI, F);
 }
 
 float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
@@ -70,17 +87,21 @@ float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 	const vec3 wh = normalize(wo + wi);
 	float alpha = material.PBR_Roughness * material.PBR_Roughness;
 
+	float NdotO = clamp(dot(normal, wo), 0.0001, 1.0);
+	float NdotH = clamp(dot(normal, wh), 0.0, 1.0);
+	float OdotH = clamp(dot(wo, wh), 0.0, 1.0);
+
 	float D = 0.0;
 	float G1 = 0.0;
 	if ((material.type & MICROFACET_BECKMANN) != 0)
 	{
-		D = BeckmannD(alpha, normal, wh);
-		G1 = BeckmannG1(alpha, normal, wo);
+		D = BeckmannD(alpha, NdotH);
+		G1 = BeckmannG1(alpha, NdotO);
 	}
 	if ((material.type & MICROFACET_GGX_ISO) != 0)
 	{
-		D = GGXIsoD(alpha, normal, wh);
-		G1 = GGXIsoG1(alpha, normal, wo);
+		D = GGXIsoD(alpha, NdotH);
+		G1 = GGXIsoG1(alpha, NdotO);
 	}
 	if ((material.type & MICROFACET_GGX_ANISO) != 0)
 	{
@@ -90,18 +111,24 @@ float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 	}
 	if ((material.type & MICROFACET_BLINNPHONG) != 0)
 	{
-		D = BlinnPhongD(alpha, normal, wh);
-		G1 = BlinnPhongG1(alpha, normal, wo);
+		D = BlinnPhongD(alpha, NdotH);
+		G1 = BlinnPhongG1(alpha, NdotO);
 	}
 
-	float PDF = G1 / abs(dot(normal, wo)) * D * abs(dot(wo, wh));
-	return PDF / (4.0 * dot(wo, wh));
+	float PDF = G1 * OdotH * D / NdotO;
+	return PDF / (4.0 * OdotH);
 }
 
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * cosTheta * cosTheta * cosTheta * cosTheta * cosTheta;
+}
+
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+	const float x = clamp(1.0f - cosTheta, 0.0, 1.0);
+	return F0 + (max(vec3(1.0f - roughness), F0) - F0) * x * x * x * x * x;
 }
 
 /****************************************************************************
@@ -113,58 +140,90 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 	Beckmann
 */
 
-float BeckmannD(float alpha, vec3 normal, vec3 wh)
+float BeckmannD(float alpha, float NdotH)
 {
-	float NdotH = max(0.001, dot(normal, wh));
 	float NdotH2 = NdotH * NdotH;
 	float NdotH4 = NdotH2 * NdotH2;
 	float alpha2 = alpha * alpha;
 	return 1.0 / (PI * alpha2 * NdotH4) * exp((NdotH2 - 1.0) / (alpha2 * NdotH2));
 }
 
-float BeckmannG1(float alpha, vec3 normal, vec3 w)
+float BeckmannG1(float alpha, float NdotW)
 {
-	float NdotV = max(0.001, dot(normal, w));
-	float c = abs(NdotV) / (alpha * sqrt(1.0 - NdotV * NdotV));
-	if (c < 1.6)
-	{
-		return (3.535 * c + 2.181 * c * c) / (1.0 + 2.276 * c + 2.577 * c * c);
-	}
-	else
-	{
-		return 1.0;
-	}
+	float k = alpha * SQRT_TWO_OVER_PI;
+	return (NdotW) / (NdotW * (1.0 - k) + k);
 }
 
-float BeckmannG(float alpha, vec3 normal, vec3 wo, vec3 wi)
+float BeckmannG(float alpha, float NdotO, float NdotI)
 {
-	return BeckmannG1(alpha, normal, wo) * BeckmannG1(alpha, normal, wi);
+	return BeckmannG1(alpha, NdotO) * BeckmannG1(alpha, NdotI);
 }
 
 /*
 	Isotropic GGX
 */
 
-float GGXIsoD(float alpha, vec3 normal, vec3 wh)
+float GGXIsoD(float alpha, float NdotH)
 {
-	float alpha2 = alpha * alpha;
-	float NdotH = max(0.001, dot(normal, wh));
-
-	float f = NdotH * NdotH * (alpha2 - 1.0) + 1.0;
-
-	return alpha2 / (PI * f * f);
+	const float a = NdotH * alpha;
+	float k = alpha / (1.f - NdotH * NdotH + a * a);
+	return k * k * (1.f / PI);
 }
 
-float GGXIsoG1(float alpha, vec3 normal, vec3 w)
+float GGXIsoG1(float alpha, float NdotW)
 {
-	float NdotV = max(0.001, dot(normal, w));
-	float alpha2 = alpha * alpha;
-	return (2.0 * NdotV) / (NdotV + sqrt( alpha2 + (1.0 - alpha2) * NdotV * NdotV ));
+	float k = 0.5 * alpha;
+	return (NdotW) / (NdotW * (1.0 - k) + k);
 }
 
-float GGXIsoG(float alpha, vec3 normal, vec3 wo, vec3 wi)
+float GGXIsoG(float alpha, float NdotO, float NdotI)
 {
-	return GGXIsoG1(alpha, normal, wo) * GGXIsoG1(alpha, normal, wi);
+	return GGXIsoG1(alpha, NdotO) * GGXIsoG1(alpha, NdotI);
+}
+
+float GGXIsoV(float alpha, float NdotO, float NdotI)
+{
+	return mix(2.f * NdotO * NdotI, NdotO + NdotI, alpha * alpha);
+}
+
+vec3 SampleGGX(inout uint seed, vec3 N, vec3 T, vec3 wo, float roughness)
+{
+	// https://jcgt.org/published/0007/04/01/paper.pdf
+	float alpha = roughness * roughness;
+
+	// Orthonormal basis
+	vec3 B = normalize(cross(N, T));
+	T = normalize(cross(B, N));
+
+	// Transform view direction to local space
+	vec3 wo_local = vec3(dot(wo, T), dot(wo, B), dot(wo, N));
+
+	// Section 3.2: transforming the view direction to the hemisphere configuration
+	vec3 wh = normalize(vec3(alpha * wo_local.x, alpha * wo_local.y, wo_local.z));
+
+	// Section 4.1: orthonormal basis
+	float lensq = wh.x * wh.x + wh.y * wh.y;
+	vec3 T1 = lensq > 0.0 ? vec3(-wh.y, wh.x, 0.0) / sqrt(lensq) : vec3(1.0, 0.0, 0.0);
+	vec3 T2 = cross(wh, T1);
+
+	// Section 4.2: parameterization of the projected area
+	float r1 = RandomFloat(seed);
+	float r2 = RandomFloat(seed);
+	float r = sqrt(r1);
+	float phi = 2.0 * PI * r2;
+	float t1 = r * cos(phi);
+	float t2 = r * sin(phi);
+	float s = 0.5 * (1.0 + wh.z);
+	t2 = (1.0 - s) * sqrt(1.0 - t1 * t1) + s * t2;
+
+	// Section 4.3: reprojection onto hemisphere
+	vec3 Nh = t1 * T1 + t2 * T2 + sqrt(max(0.0, 1.0 - t1 * t1 - t2 * t2)) * wh;
+
+	// Section 3.4: transforming the normal back to the ellipsoid configuration
+	vec3 Ne = normalize(vec3(alpha * Nh.x, alpha * Nh.y, max(0.0, Nh.z)));
+
+	// Transform back to world space
+	return normalize(Ne.x * T + Ne.y * B + Ne.z * N);
 }
 
 /*
@@ -205,7 +264,7 @@ float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh)
 
 float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 tangent, vec3 w)
 {
-	return GGXIsoG1(alpha.z, normal, w);
+	return GGXIsoG1(alpha.z, dot(normal, w));
 }
 
 float GGXAnisoG(vec3 alpha, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
@@ -217,22 +276,22 @@ float GGXAnisoG(vec3 alpha, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
 	Blinn-Phong
 */
 
-float BlinnPhongD(float alpha, vec3 normal, vec3 wh)
+float BlinnPhongD(float alpha, float NdotH)
 {
 	float alpha2 = alpha * alpha;
 
-	return 1.0 / (PI * alpha2) * pow( max(0.001, dot(normal, wh)), 2.0 / alpha2 - 2.0 );
+	return 1.0 / (PI * alpha2) * pow( NdotH, 2.0 / alpha2 - 2.0 );
 }
 
-float BlinnPhongG1(float alpha, vec3 normal, vec3 w)
+float BlinnPhongG1(float alpha, float NdotW)
 {
 	// The Smith integral has no closed form solution for Blinn-Phong. Walter [4] suggests using the same equation as Beckmann.
-	return BeckmannG1(alpha, normal, w);
+	return BeckmannG1(alpha, NdotW);
 }
 
-float BlinnPhongG(float alpha, vec3 normal, vec3 wo, vec3 wi)
+float BlinnPhongG(float alpha, float NdotO, float NdotI)
 {
-	return BlinnPhongG1(alpha, normal, wo) * BlinnPhongG1(alpha, normal, wi);
+	return BlinnPhongG1(alpha, NdotO) * BlinnPhongG1(alpha, NdotI);
 }
 
 

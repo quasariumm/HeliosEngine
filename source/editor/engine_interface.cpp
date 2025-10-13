@@ -1,6 +1,6 @@
 ﻿#include "editor/engine_interface.hpp"
 
-#include "tools/Icon_defines.hpp"
+#include "tools/icon_defines.hpp"
 
 constexpr float font_size = 16.0f;
 

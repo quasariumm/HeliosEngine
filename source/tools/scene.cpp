@@ -1,5 +1,5 @@
 #include "tools/scene.hpp"
-#include "Components/basic_Components.hpp"
+#include "components/basic_components.hpp"
 
 using namespace Engine;
 using namespace Components;

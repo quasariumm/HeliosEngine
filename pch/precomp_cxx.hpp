@@ -1,6 +1,8 @@
 #ifndef PCH_CXX_H_
 #define PCH_CXX_H_
 
+#define NOMINMAX
+
 // SIMD
 // Defines by Jacco Bikker
 // SSE/AVX/AVX2/NEON support.

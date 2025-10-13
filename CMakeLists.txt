@@ -2,6 +2,29 @@ cmake_minimum_required(VERSION 3.16)
 project(Engine)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_C_STANDARD 17)
+
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+	if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+		set(PLATFORM "x64")
+	elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+		set(PLATFORM "arm64")
+	else()
+		set(PLATFORM "unknown")
+	endif()
+elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(PLATFORM "x64")
+	elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+		set(PLATFORM "x86")
+	elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
+		set(PLATFORM "arm64")
+	else()
+		set(PLATFORM "unknown")
+	endif()
+else()
+	set(PLATFORM "unknown")
+endif()
 
 include(FetchContent)
 
@@ -124,6 +147,7 @@ add_subdirectory(extern/Tracy)
 ##############################################
 set(BUILD_SHARED_LIBS 	OFF	)
 set(ASSIMP_INSTALL 		OFF	)
+set(ASSIMP_WARNINGS_AS_ERRORS OFF)
 # Optimise build times by turning off certain importers
 # and turning off exporters, since we don't support it (yet?)
 set(ASSIMP_NO_EXPORT 						ON	)
@@ -193,18 +217,79 @@ target_compile_definitions(Engine PRIVATE
 )
 
 # UTF8 compile flags
-target_compile_options(Engine PRIVATE
-		"$<$<C_COMPILER_ID:MSVC>:/utf-8>"
-		"$<$<NOT:$<C_COMPILER_ID:MSVC>>:-finput-charset=UTF-8;-fexec-charset=UTF-8>"
+if (WIN32)
+	if (MSVC)
+		target_compile_options(Engine PRIVATE "/utf-8")
+	elseif (NOT MINGW) # clang-cl
+		target_compile_options(Engine PRIVATE "/source-charset=utf-8")
+	endif ()
+else() # MinGW and Linux
+	target_compile_options(Engine PRIVATE "-finput-charset=UTF-8;-fexec-charset=UTF-8")
+endif ()
+
+
+##############################################
+##  	    	FMOD Studio API	    		##
+##############################################
+set(FMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/fmod)
+
+target_include_directories(Engine PUBLIC
+		${FMOD_DIR}/core/inc
+		${FMOD_DIR}/studio/inc
 )
-target_compile_options(Engine PRIVATE
-		"$<$<CXX_COMPILER_ID:MSVC>:/utf-8>"
-		"$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-finput-charset=UTF-8;-fexec-charset=UTF-8>"
+if (WIN32 AND PLATFORM STREQUAL "x64")
+	target_link_directories(Engine PUBLIC
+			${FMOD_DIR}/core/lib/x64
+			${FMOD_DIR}/studio/lib/x64
+	)
+	set (FMOD_DYN_LIBS_DEBUG
+			"$<$<CONFIG:Debug>:${FMOD_DIR}/core/lib/x64/fmodL.dll>"
+			"$<$<CONFIG:Debug>:${FMOD_DIR}/studio/lib/x64/fmodstudioL.dll>"
+	)
+	set (FMOD_DYN_LIBS_RELEASE
+			"$<$<CONFIG:Release>:${FMOD_DIR}/core/lib/x64/fmod.dll>"
+			"$<$<CONFIG:Release>:${FMOD_DIR}/studio/lib/x64/fmodstudio.dll>"
+	)
+elseif (WIN2 AND PLATFORM STREQUAL "arm64")
+	target_link_directories(Engine PUBLIC
+			${FMOD_DIR}/core/lib/arm64
+			${FMOD_DIR}/studio/lib/arm64
+	)
+	set (FMOD_DYN_LIBS_DEBUG
+			"$<$<CONFIG:Debug>:${FMOD_DIR}/core/lib/arm64/fmodL.dll>"
+			"$<$<CONFIG:Debug>:${FMOD_DIR}/studio/lib/arm64/fmodstudioL.dll>"
+	)
+	set (FMOD_DYN_LIBS_RELEASE
+			"$<$<CONFIG:Release>:${FMOD_DIR}/core/lib/arm64/fmod.dll>"
+			"$<$<CONFIG:Release>:${FMOD_DIR}/studio/lib/arm64/fmodstudio.dll>"
+	)
+else()
+	message(FATAL_ERROR "Linux libs for FMOD Studio not yet added. x86 is just not supported by us. Mac users will not get support for a LONG while.")
+endif()
+target_link_libraries(Engine PUBLIC
+		winmm ole32 user32
+		"$<$<CONFIG:Debug>:fmodL_vc>"
+		"$<$<CONFIG:Release>:fmod_vc>"
+		"$<$<CONFIG:Debug>:fmodstudioL_vc>"
+		"$<$<CONFIG:Release>:fmodstudio_vc>"
+)
+
+# Copy the FMOD dlls
+add_custom_command(TARGET Engine POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"$<$<CONFIG:Debug>:${FMOD_DYN_LIBS_DEBUG}>"
+		"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
+		${CMAKE_CURRENT_BINARY_DIR}
+		COMMAND_EXPAND_LISTS
+		COMMENT "Copying FMOD DLLs"
 )
 
 ##############################################
 ##		    Fetch external libraries		##
 ##############################################
+
+set(ENABLE_ALL_WARNINGS OFF)
+set(BUILD_SHARED_LIBS 	ON)
 
 fetchcontent_declare(
 		JoltPhysics
@@ -213,6 +298,16 @@ fetchcontent_declare(
 		SOURCE_SUBDIR "Build"
 )
 fetchcontent_makeavailable(JoltPhysics)
+
+# Copy the Jolt dlls TODO: this
+#add_custom_command(TARGET Engine POST_BUILD
+#		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#		"$<$<CONFIG:Debug>:>"
+#		"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
+#		${CMAKE_CURRENT_BINARY_DIR}
+#		COMMAND_EXPAND_LISTS
+#		COMMENT "Copying FMOD DLLs"
+#)
 
 ##############################################
 ## Include directories + precompiled header ##
@@ -226,8 +321,9 @@ target_include_directories(Engine PUBLIC
 		extern/nativefiledialog-extended/src/include
 		extern/Assimp/include
 		extern/glm
-		extern/glfw/include
-		extern/glad/include
+		lib
+		lib/glfw/include
+		lib/glad/include
 		${JoltPhysics_SOURCE_DIR}/..
 		${TRACY_PUBLIC_DIR}
 )

@@ -3,7 +3,7 @@ list(REMOVE_ITEM SOURCE ${DX12_BACKEND})
 list(REMOVE_ITEM SOURCE ${VK_BACKEND})
 
 file(GLOB IMGUI CONFIGURE_DEPENDS
-		extern/glad/src/glad.c
+		lib/glad/src/glad.c
 		extern/imgui/backends/imgui_impl_opengl3.h
 		extern/imgui/backends/imgui_impl_opengl3.cpp
 		extern/imgui/backends/imgui_impl_opengl3_loader.h

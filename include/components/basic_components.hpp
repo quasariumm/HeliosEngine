@@ -214,19 +214,19 @@ struct DebugCube : BaseComponent
 
 REGISTER_COMPONENT(DebugCube, ICON_CUBE_OUTLINE" Debug Cube", INSPECTABLE | ADDABLE);
 
-struct Camera : BaseComponent
-{
-    float fov = 65.0f;
-    float near_plane = 0.01f;
-    float far_plane = 1000.0f;
-
-    template<typename Archive>
-    void serialize(Archive &archive) { archive(CEREAL_NVP(fov), CEREAL_NVP(near_plane), CEREAL_NVP(far_plane)); }
-
-    void Inspector() override;
-};
-
-REGISTER_COMPONENT(Camera, ICON_VIDEO" Camera", ADDABLE | INSPECTABLE);
+// struct Camera : BaseComponent
+// {
+//     float fov = 65.0f;
+//     float near_plane = 0.01f;
+//     float far_plane = 1000.0f;
+//
+//     template<typename Archive>
+//     void serialize(Archive &archive) { archive(CEREAL_NVP(fov), CEREAL_NVP(near_plane), CEREAL_NVP(far_plane)); }
+//
+//     void Inspector() override;
+// };
+//
+// REGISTER_COMPONENT(Camera, ICON_VIDEO" Camera", ADDABLE | INSPECTABLE);
 
 // Add to object to mark for delete
 struct DeleteMarker {};

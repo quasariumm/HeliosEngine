@@ -1,6 +1,6 @@
 ﻿#include "components/basic_components.hpp"
 
-#include "tools/Icon_defines.hpp"
+#include "tools/icon_defines.hpp"
 
 using namespace Engine;
 using namespace Components;
@@ -61,9 +61,10 @@ void DebugCube::Inspector()
     ImGui::ColorPicker3("Color", value_ptr(color));
 }
 
-void Camera::Inspector()
-{
-    ImGui::InputFloat("FOV", &fov);
-    ImGui::InputFloat("Near Plane", &near_plane);
-    ImGui::InputFloat("Far Plane", &far_plane);
-}
+// TODO(Quillan): Pls make thhis thhe way you want to
+// void Camera::Inspector()
+// {
+//     ImGui::InputFloat("FOV", &fov);
+//     ImGui::InputFloat("Near Plane", &near_plane);
+//     ImGui::InputFloat("Far Plane", &far_plane);
+// }

@@ -6,12 +6,12 @@ if (MSVC)
 	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
 		# 64-bit
 		target_link_directories(Engine PUBLIC
-				extern/glfw/lib-vc2010-64
+				lib/glfw/lib-vc2010-64
 		)
 	else ()
 		# 32 bit
 		target_link_directories(Engine PUBLIC
-				extern/glfw/lib-vc2010-32
+				lib/glfw/lib-vc2010-32
 		)
 	endif ()
 
@@ -20,7 +20,7 @@ if (MSVC)
 else ()
 
 	target_link_directories(Engine PUBLIC
-			extern/glfw/lib-mingw
+			lib/glfw/lib-mingw
 	)
 
 	target_link_libraries(Engine PUBLIC ${UNIX_LIBS})
