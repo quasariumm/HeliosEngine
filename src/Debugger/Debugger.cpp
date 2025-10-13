@@ -14,11 +14,18 @@ Logger* Logger::Get()
     return instance;
 }
 
+static const std::wstring logTags[] = {
+	ANSI_INFO,
+	ANSI_WARN,
+	ANSI_ERR,
+	ANSI_DONE
+};
+
 void DebugLog(const LogSeverity type, const std::wstring& message, const int level, std::source_location location)
 {
     Logger::Get()->g_logs.emplace_back(type, message, level, location);
     Logger::Get()->m_totalLog += Logger::Get()->g_logs.back().FileText();
-    std::cout << WStringToUTF8(message) << "\n";
+    std::cout << WStringToUTF8(logTags[(int)type] + message) << std::endl;
 }
 
 void Debugger::DrawInterface()
