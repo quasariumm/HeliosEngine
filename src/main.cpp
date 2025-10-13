@@ -20,6 +20,8 @@
 #include <tracy/Tracy.hpp>
 
 #include "Audio/AudioPlayer.h"
+#include "Graphics/compute_buffer.hpp"
+#include "Graphics/compute_program.hpp"
 #include "Scene/SceneStorage.h"
 
 #ifdef _WIN32
@@ -87,6 +89,22 @@ extern "C" int __declspec(dllexport) __stdcall main()
 #else
 	std::cout << "Running engine library as include" << std::endl;
 #endif
+
+	Engine::Graphics::ComputeProgram::Initialize();
+
+	Engine::Graphics::ComputeProgram program;
+	program.LoadFromFile("src/Shaders/OpenCL/raytrace.cl");
+
+	auto kernel = program.GetKernel("HelloWorld");
+
+	char buf[13];
+	Engine::Graphics::ComputeBuffer<char> str{std::span{buf}};
+
+	kernel.SetArguments(0, *str);
+	kernel.Run(glm::uvec2{1});
+
+	str.EnqueueRead();
+	std::cout << buf;
 
 	Engine::EditorSettings::Load();
 

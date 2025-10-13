@@ -114,12 +114,15 @@ using namespace Microsoft::WRL;
 #include <glm/glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// OpenCL
+#include <CL/opencl.hpp>
+
 // Engine libraries
 #include "Math/Random.h"
 #include "Core/Common.h"
 #include "Core/Timer.h"
 
-// External libraries
+// Dear ImGUI
 #define IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_USE_WCHAR32
 #define IMGUI_API ENGINE_API

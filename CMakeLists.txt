@@ -51,7 +51,7 @@ add_subdirectory(launcher)
 ##############################################
 ##  	  Determine files to build  		##
 ##############################################
-file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h)
+file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h src/*.hpp)
 
 file(GLOB_RECURSE GL46_BACKEND CONFIGURE_DEPENDS src/Backends/OpenGL46_GLFW/*.cpp src/Backends/OpenGL46_GLFW/*.h)
 file(GLOB_RECURSE DX12_BACKEND CONFIGURE_DEPENDS src/Backends/DirectX12/*.cpp src/Backends/DirectX12/*.h)
