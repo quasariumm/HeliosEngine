@@ -1,6 +1,5 @@
 #pragma once
 
-#include "systems.hpp"
 #include "entt/entt.hpp"
 
 namespace cereal
@@ -24,6 +23,14 @@ class EntityComponentSystem
 {
 public:
     EntityComponentSystem() = default;
+
+    static EntityComponentSystem* Get()
+    {
+        static EntityComponentSystem system;
+        return &system;
+    }
+
+    static entt::registry* Registry() { return &Get()->registry; }
 
     // ======================
     //        Systems
@@ -81,10 +88,6 @@ public:
     template<auto Candidate, typename Type>
     void AssignGameSystem(Type* instance) { gameSystemSink.connect<Candidate>(instance); gameUsed = true; }
 
-    // TODO(Quillan): Maybe remove access to the registry and only allow this method? Move this to helper file or namespace with other funcs?
-    template<typename T>
-    T& AddComponent(entt::entity object) { return registry.emplace<T>(object); }
-
     // ======================
     //       Snapshots
     // ======================
@@ -100,12 +103,6 @@ public:
      * @note overwrites current state of the registry completely
      */
     void LoadSnapshot();
-
-    // ======================
-    //        Getters
-    // ======================
-
-    entt::registry* Registry() { return &registry; }
 
     // ======================
     //       Variables
@@ -163,7 +160,7 @@ struct Component
     /// @note Should only ever be called via the macro REGISTER_COMPONENT()
     explicit Component(const std::string& name, const int flags = ComponentFlags::NONE)
     {
-        ECS* ecs = Systems::GetECS();
+        ECS* ecs = ECS::Get();
 
         // Skip duplicates
         auto& types = ecs->serializedComponentTypes;
@@ -177,7 +174,7 @@ struct Component
         {
             ecs->inspectableComponents.push_back([name, flags](const entt::entity& e)
             {
-                T* c = Systems::GetECS()->Registry()->try_get<T>(e);
+                T* c = ECS::Get()->Registry()->try_get<T>(e);
                 if (c)
                 {
                     if (flags & ComponentFlags::ADDABLE)
@@ -187,7 +184,7 @@ struct Component
                         ImGui::SetCursorPosX(ImGui::GetWindowSize().x - ImGui::GetFontSize() * 1.75f);
                         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
                         if (ImGui::Button((ICON_TRASH_CAN"##DeleteComp_" + name).c_str()))
-                            Systems::GetECS()->Registry()->remove<T>(e);
+                            ECS::Get()->Registry()->remove<T>(e);
                         ImGui::PopStyleColor();
                         if (inspecting) c->Inspector();
                     }
@@ -207,11 +204,11 @@ struct Component
                 ImVec2 textSize = ImGui::CalcTextSize(name.c_str());
                 ImVec2 btnSize = ImVec2(std::max(ImGui::GetContentRegionAvail().x, textSize.x + ImGui::GetFontSize()), textSize.y * 1.5f);
                 
-                if (!Systems::GetECS()->Registry()->try_get<T>(e))
+                if (!ECS::Get()->Registry()->try_get<T>(e))
                 {
                     if (ImGui::Button(name.c_str(), btnSize))
                     {
-                        Systems::GetECS()->Registry()->emplace<T>(e);
+                        ECS::Get()->Registry()->emplace<T>(e);
                         ImGui::CloseCurrentPopup();
                     }
                 }

@@ -4,6 +4,8 @@
 #include "rendering/window.hpp"
 #include <memory>
 
+#include "editor/editor_menus.hpp"
+
 // The main loop for the engine
 // Controls only the timestep, runtime state, and camera state
 
@@ -20,12 +22,6 @@ enum class Mode
 class EngineCore
 {
 public:
-    static EngineCore* Get()
-    {
-        static EngineCore instance;
-        return &instance;
-    }
-
     void Initialize();
     void Shutdown();
     void Run();
@@ -51,5 +47,7 @@ private:
 
     std::unique_ptr<Window> window;
 };
+
+extern EngineCore EngineHandle;
 
 }

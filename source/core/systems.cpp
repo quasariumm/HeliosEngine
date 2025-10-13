@@ -1,14 +1,16 @@
 #include "core/systems.hpp"
 
 #include "debugging/logger.hpp"
-#include "core/ecs.hpp"
-#include "editor/engine_interface.hpp"
 #include "rendering/renderer.hpp"
 #include "physics/physics.hpp"
 #include "audio/audio_player.hpp"
 #include "rendering/camera.hpp"
 
 using namespace Engine;
+
+namespace Engine {
+	SystemsCore SystemsHandler;
+}
 
 void SystemsCore::Initialize()
 {
@@ -17,8 +19,6 @@ void SystemsCore::Initialize()
 
     m_renderer = new Renderer();
     m_logHandler = new Log::LogHandler();
-    m_entityComponentSystem = new EntityComponentSystem();
-    m_editorInterface = new Editor::EditorInterface();
     m_physics = new Physics::PhysicsCore();
 	m_camera = new Camera();
 	m_audioPlayer = new Audio::AudioPlayer(m_camera);
@@ -28,8 +28,6 @@ void SystemsCore::Shutdown() const
 {
     delete m_renderer;
     delete m_logHandler;
-    delete m_entityComponentSystem;
-    delete m_editorInterface;
     delete m_physics;
 	delete m_camera;
 	delete m_audioPlayer;

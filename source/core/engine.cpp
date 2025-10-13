@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "audio/audio_player.hpp"
 #include "core/ecs.hpp"
 #include "editor/engine_interface.hpp"
 #include "rendering/renderer.hpp"
@@ -9,16 +10,21 @@
 #include "physics/physics.hpp"
 
 using namespace Engine;
+using namespace Editor;
+
+namespace Engine {
+    EngineCore EngineHandle;
+}
 
 void EngineCore::Initialize()
 {
-    SystemsCore::Get();
+    SystemsHandler.Initialize();
     Systems::GetRenderer()->Initialize();
 }
 
 void EngineCore::Shutdown()
 {
-    SystemsCore::Get()->Shutdown();
+    SystemsHandler.Shutdown();
 }
 
 void EngineCore::Run()
@@ -35,26 +41,29 @@ void EngineCore::Run()
         m_engine_stats.SetData(1.0f / dt, dt);
 
         Systems::GetRenderer()->Prepare();
+        Editor::EditorInterface::Get()->StartFrame();
+        Systems::GetAudio()->Update();
 
         //m_input->Update();
         //EditorInterface::StartFrame();
         //m_viewport->Prepare();
 
-        Systems::GetEditorInterface()->StartFrame();
 
-        Systems::GetECS()->UpdateEngineSystem(dt);
+        ECS::Get()->UpdateEngineSystem(dt);
 
         if (m_mode == Mode::Editor)
-            Systems::GetECS()->UpdateEditorSystem(dt);
+            ECS::Get()->UpdateEditorSystem(dt);
         else if (m_mode == Mode::Game)
-            Systems::GetECS()->UpdateGameSystem(dt);
+            ECS::Get()->UpdateGameSystem(dt);
 
         DestroyMarkedSceneObjects();
 
         //if (m_using_editor_cam) m_camera_system->UpdateEditorCamera(dt);
 
-        Systems::GetEditorInterface()->DrawInterfaces();
-        Systems::GetEditorInterface()->EndFrame();
+        EditorInterface::Get()->DrawInterfaces();
+        EditorInterface::Get()->Render();
+        Systems::GetRenderer()->Clear();
+        EditorInterface::Get()->EndFrame();
         Systems::GetRenderer()->Render();
 
         time = ctime;
@@ -72,7 +81,7 @@ void EngineCore::Play()
     if (m_mode == Mode::Game) return;
     if (m_mode == Mode::Editor)
     {
-        Systems::GetECS()->SaveSnapshot();
+        ECS::Get()->SaveSnapshot();
     }
     m_mode = Mode::Game;
     LockCamera();
@@ -95,7 +104,7 @@ void EngineCore::Stop()
     
     //m_ECS->StopSystems();
     Systems::GetPhysics()->ResetObjects();
-    Systems::GetECS()->LoadSnapshot();
+    ECS::Get()->LoadSnapshot();
 }
 
 void EngineCore::ReleaseCamera()

@@ -61,7 +61,7 @@ void EntityInspector::Draw()
         }
     }
 
-    for (const auto& c : Systems::GetECS()->inspectableComponents)
+    for (const auto& c : ECS::Get()->inspectableComponents)
         c(target_entity);
 
     ImGui::SetCursorPosY(ImGui::GetCursorPos().y + f_s);
@@ -74,7 +74,7 @@ void EntityInspector::Draw()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(f_s, f_s));
     if (ImGui::BeginPopup("Add Component"))
     {
-        for (const auto& c : Systems::GetECS()->addableComponents)
+        for (const auto& c : ECS::Get()->addableComponents)
             c(target_entity);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + f_s * 0.5f);
         ImGui::Separator();

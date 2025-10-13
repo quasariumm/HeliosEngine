@@ -51,34 +51,34 @@ void EditorMenu::Draw()
     float h_o = btn_width * 0.5f;
     float oh_o = btn_width * 1.5f;
 
-    switch (EngineCore::Get()->GetMode())
+    switch (EngineHandle.GetMode())
     {
     case Mode::Editor:
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - oh_o);
         ImGui::BeginDisabled(); ImGui::Button(ICON_PAUSE, {btn_width, 0}); ImGui::EndDisabled();
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - h_o);
-        if (ImGui::Button(ICON_PLAY, {btn_width, 0})) EngineCore::Get()->Play();
+        if (ImGui::Button(ICON_PLAY, {btn_width, 0})) EngineHandle.Play();
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f + h_o);
         ImGui::BeginDisabled(); ImGui::Button(ICON_EJECT, {btn_width, 0}); ImGui::EndDisabled();
         break;
     case Mode::Game:
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - oh_o);
-        if (ImGui::Button(ICON_PAUSE, {btn_width, 0})) EngineCore::Get()->Pause();
+        if (ImGui::Button(ICON_PAUSE, {btn_width, 0})) EngineHandle.Pause();
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - h_o);
-        if (ImGui::Button(ICON_STOP, {btn_width, 0})) EngineCore::Get()->Stop();
+        if (ImGui::Button(ICON_STOP, {btn_width, 0})) EngineHandle.Stop();
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f + h_o);
-        if (EngineCore::Get()->GetUsingEditorCam())
+        if (EngineHandle.GetUsingEditorCam())
         {
-            if (ImGui::Button(ICON_CAMERA_LOCK, {btn_width, 0})) EngineCore::Get()->LockCamera();
+            if (ImGui::Button(ICON_CAMERA_LOCK, {btn_width, 0})) EngineHandle.LockCamera();
         }
         else
-            if (ImGui::Button(ICON_EJECT, {btn_width, 0})) EngineCore::Get()->ReleaseCamera();
+            if (ImGui::Button(ICON_EJECT, {btn_width, 0})) EngineHandle.ReleaseCamera();
         break;
     case Mode::Paused:
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - oh_o);
-        if (ImGui::Button(ICON_PLAY, {btn_width, 0})) EngineCore::Get()->Play();
+        if (ImGui::Button(ICON_PLAY, {btn_width, 0})) EngineHandle.Play();
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - h_o);
-        if (ImGui::Button(ICON_STOP, {btn_width, 0})) EngineCore::Get()->Stop();
+        if (ImGui::Button(ICON_STOP, {btn_width, 0})) EngineHandle.Stop();
         ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f + h_o);
         ImGui::BeginDisabled(); ImGui::Button(ICON_EJECT, {btn_width, 0}); ImGui::EndDisabled();
         break;

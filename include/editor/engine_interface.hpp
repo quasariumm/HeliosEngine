@@ -11,8 +11,15 @@ public:
     EditorInterface();
     ~EditorInterface();
 
+    static EditorInterface* Get()
+    {
+        static EditorInterface instance;
+        return &instance;
+    }
+
     void StartFrame();
     void DrawInterfaces();
+    void Render();
     void EndFrame();
 
     ImFont* GetCodeFont() const { return m_codeFont; }
@@ -32,12 +39,12 @@ struct InterfaceHelper
     InterfaceHelper()
     {
         // Skip duplicates
-        auto* types = &Systems::GetEditorInterface()->interfaceTypes;
-        if (types->contains(std::type_index(typeid(T)))) return;
+        auto types = EditorInterface::Get()->interfaceTypes;
+        if (types.contains(std::type_index(typeid(T)))) return;
         
-        Systems::GetEditorInterface()->interfaceTypes.insert(std::type_index(typeid(T)));
+        EditorInterface::Get()->interfaceTypes.insert(std::type_index(typeid(T)));
         
-        Systems::GetEditorInterface()->RegisterInterface<T>();
+        EditorInterface::Get()->RegisterInterface<T>();
     }
 };
 

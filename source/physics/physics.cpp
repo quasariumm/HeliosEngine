@@ -67,13 +67,13 @@ PhysicsCore::PhysicsCore()
 
 void PhysicsCore::InitializeObjects()
 {
-    auto spheres = Systems::GetECS()->Registry()->view<PhysicsSphere, Transform>();
+    auto spheres = ECS::Registry()->view<PhysicsSphere, Transform>();
     for (auto [e, s, t] : spheres.each())
     {
         if (!s.initialized) s.Initialize(e);
     }
     
-    auto cubes = Systems::GetECS()->Registry()->view<PhysicsCube, Transform>();
+    auto cubes = ECS::Registry()->view<PhysicsCube, Transform>();
     for (auto [e, c, t] : cubes.each())
     {
         if (!c.initialized) c.Initialize(e);
@@ -84,7 +84,7 @@ void PhysicsCore::Update(float dt)
 {
     physicsSystem.Update(dt, 1, tempAllocator.get(), jobSystem.get());
 
-    auto spheres = Systems::GetECS()->Registry()->view<PhysicsSphere, Transform>();
+    auto spheres = ECS::Registry()->view<PhysicsSphere, Transform>();
     for (auto [e, s, t] : spheres.each())
     {
         if (!s.initialized) continue;
@@ -94,7 +94,7 @@ void PhysicsCore::Update(float dt)
         t.SetRotation( {rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ() });
     }
 
-    auto cubes = Systems::GetECS()->Registry()->view<PhysicsCube, Transform>();
+    auto cubes = ECS::Registry()->view<PhysicsCube, Transform>();
     for (auto [e, c, t] : cubes.each())
     {
         if (!c.initialized) continue;

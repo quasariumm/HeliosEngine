@@ -5,57 +5,11 @@ using namespace Engine;
 using namespace Components;
 using namespace entt;
 
-template <typename T>
-T& Engine::AddComponent(const SceneObject& object)
-{
-    if (HasComponent<T>(object))
-    {
-        Log::Error("Object already has the requested Components!");
-    }
-
-    return Systems::GetECS()->Registry()->emplace<T>(object);
-}
-
-template <typename T>
-void Engine::RemoveComponent(const SceneObject& object)
-{
-    if (!HasComponent<T>(object))
-    {
-        Log::Error("Object does not have the Components that was requested to be removed!");
-        return;
-    }
-
-    Systems::GetECS()->Registry()->remove<T>(object);
-}
-
-template <typename T>
-T& Engine::GetComponent(const SceneObject& object)
-{
-    if (!HasComponent<T>(object))
-    {
-        Log::Error("Object does not have the requested Component!");
-    }
-
-    return Systems::GetECS()->Registry()->get<T>(object);
-}
-
-template <typename T>
-T* Engine::TryGetComponent(const SceneObject& object)
-{
-    return Systems::GetECS()->Registry()->try_get<T>(object);
-}
-
-template <typename T>
-bool Engine::HasComponent(const SceneObject& object)
-{
-    return Systems::GetECS()->Registry()->try_get<T>(object);
-}
-
 void Engine::ReParent(const SceneObject& parent, const SceneObject& child)
 {
     // Make sure that you cannot make an objects parent their child
     if (IsChildOf(child, parent)) return;
-    auto* reg = Systems::GetECS()->Registry();
+    auto* reg = ECS::Registry();
     // Make sure the child is no longer set as a child of its current parent
     ChildObject* child_comp = reg->try_get<ChildObject>(child);
     if (child_comp != nullptr)
@@ -87,7 +41,7 @@ bool Engine::IsChildOf(const SceneObject& parent, const SceneObject& possibleChi
 
 bool Engine::IsVisible(const SceneObject& sceneObject) // NOLINT(*-no-recursion)
 {
-    for (const auto& [e] : Systems::GetECS()->Registry()->view<Hidden>().each()) if (e == sceneObject) return false;
+    for (const auto& [e] : ECS::Registry()->view<Hidden>().each()) if (e == sceneObject) return false;
     const auto* child = TryGetComponent<ChildObject>(sceneObject);
     if (child != nullptr) return IsVisible(child->parent);
     return true;
@@ -98,9 +52,9 @@ void Engine::SetVisible(const SceneObject& sceneObject, bool visible)
     if (IsVisible(sceneObject) == visible) return;
 
     if (visible)
-        Systems::GetECS()->Registry()->remove<Hidden>(sceneObject);
+        ECS::Registry()->remove<Hidden>(sceneObject);
     else
-        Systems::GetECS()->Registry()->emplace<Hidden>(sceneObject);
+        ECS::Registry()->emplace<Hidden>(sceneObject);
 
 }
 
@@ -118,7 +72,7 @@ glm::mat4 Engine::GetGlobalTransform(const SceneObject& sceneObject) // NOLINT(*
 
 SceneObject Engine::CreateSceneObject(const std::string& name)
 {
-    auto* reg = Systems::GetECS()->Registry();
+    auto* reg = ECS::Registry();
 
     const SceneObject newObject = reg->create();
     reg->emplace<SceneObjectInfo>(newObject, name);
@@ -129,12 +83,12 @@ SceneObject Engine::CreateSceneObject(const std::string& name)
 
 void Engine::DestroySceneObject(const SceneObject& object)
 {
-    Systems::GetECS()->Registry()->emplace<DeleteMarker>(object);
+    ECS::Registry()->emplace<DeleteMarker>(object);
 }
 
 void Engine::DestroyMarkedSceneObjects()
 {
-    const auto view = Systems::GetECS()->Registry()->view<DeleteMarker>();
+    const auto view = ECS::Registry()->view<DeleteMarker>();
     for (auto [e] : view.each())
-        Systems::GetECS()->Registry()->destroy(e);
+        ECS::Registry()->destroy(e);
 }

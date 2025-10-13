@@ -126,7 +126,7 @@ bool GL46_Window::Init(const glm::uvec2& size, const std::string& title, const u
 	static constexpr ImWchar32 icon_ranges[] = {ICON_MIN_MDI, ICON_MAX_MDI, 0};
 	io.Fonts->AddFontFromFileTTF("assets/fonts/materialdesignicons-webfont.ttf", font_size * 1.1f, &config, icon_ranges);
 
-	Systems::GetEditorInterface()->m_codeFont = io.Fonts->AddFontFromFileTTF("assets/fonts/CascadiaCode.ttf", font_size);
+	Editor::EditorInterface::Get()->m_codeFont = io.Fonts->AddFontFromFileTTF("assets/fonts/CascadiaCode.ttf", font_size);
 
 	io.Fonts->Build();
 

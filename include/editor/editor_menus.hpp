@@ -38,7 +38,7 @@ class SceneGraph
 {
 public:
     static void Draw();
-    static void DrawObjectGraph(entt::entity entity);
+    static void DrawObjectGraph(SceneObject entity);
 
     static SceneObject selected;
 };

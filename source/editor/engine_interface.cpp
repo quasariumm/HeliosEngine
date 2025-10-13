@@ -51,8 +51,14 @@ void EditorInterface::DrawInterfaces()
         draw();
 }
 
-void EditorInterface::EndFrame()
+void EditorInterface::Render()
 {
     ImGui::Render();
+}
+
+void EditorInterface::EndFrame()
+{
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
 }

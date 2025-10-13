@@ -5,8 +5,6 @@
 namespace Engine
 {
 
-class Window;
-
 class Renderer
 {
 
@@ -14,6 +12,7 @@ public:
     void Initialize();
 
     void Prepare() const;
+    void Clear() const;
     void Render() const;
 
     // void Shutdown();

@@ -119,6 +119,14 @@ using namespace Microsoft::WRL;
 // ENTT
 #include <entt/entt.hpp>
 
+// External libraries
+#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_USE_WCHAR32
+#include <imgui.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+#include <imgui/backends/imgui_impl_opengl3.h>
+
 // Engine libraries
 #include "core/common.hpp"
 #include "tools/random.hpp"
@@ -127,14 +135,6 @@ using namespace Microsoft::WRL;
 #include "core/systems.hpp"
 #include "tools/icon_defines.hpp"
 #include "tools/scene.hpp"
-
-// External libraries
-#define IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_USE_WCHAR32
-#include <imgui.h>
-#include <imgui/backends/imgui_impl_glfw.h>
-#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#include <imgui/backends/imgui_impl_opengl3.h>
 
 // Jolt
 // TODO(Quillan): Add a way to turn off debug rendering

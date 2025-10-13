@@ -46,7 +46,7 @@ void SceneGraph::Draw()
 
         if (open)
         {
-            auto root_objects = Systems::GetECS()->Registry()->view<SceneObjectInfo, ParentObject>(entt::exclude<ChildObject>);
+            auto root_objects = ECS::Registry()->view<SceneObjectInfo, ParentObject>(entt::exclude<ChildObject>);
             for(const auto& [entity, scene, parent]: root_objects.each())
                 DrawObjectGraph(entity);
             ImGui::TreePop();
@@ -59,16 +59,16 @@ void SceneGraph::Draw()
     ImGui::PopStyleVar();
 }
 
-void SceneGraph::DrawObjectGraph(entity entity)
+void SceneGraph::DrawObjectGraph(SceneObject entity)
 {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     
     const std::string id = to_string(static_cast<uint32_t>(entity));
-    auto scene_object = GetComponent<SceneObjectInfo>(entity);
+    auto scene_object = Engine::GetComponent<SceneObjectInfo>(entity);
     std::string name = scene_object.name;
     bool is_visible = IsVisible(entity);
-    vector<entt::entity> children = GetComponent<ParentObject>(entity).children;
+    vector<SceneObject> children = GetComponent<ParentObject>(entity).children;
 
     ImGuiTreeNodeFlags tree_flags = ImGuiTreeNodeFlags_DrawLinesFull;
     if (children.empty())

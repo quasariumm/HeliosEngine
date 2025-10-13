@@ -1,7 +1,5 @@
 #include "rendering/renderer.hpp"
 
-#include "rendering/window.hpp"
-
 using namespace Engine;
 
 void Renderer::Initialize()
@@ -21,6 +19,12 @@ void Renderer::Initialize()
 void Renderer::Prepare() const
 {
     m_window.get()->BeginFrame();
+    m_window.get()->PollEvents();
+}
+
+void Renderer::Clear() const
+{
+    m_window.get()->ClearViewport();
 }
 
 void Renderer::Render() const

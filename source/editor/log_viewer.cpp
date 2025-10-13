@@ -49,7 +49,7 @@ void LogViewer::Draw()
             }
             
             ImGui::TableNextColumn();
-            ImGui::PushFont(Systems::GetEditorInterface()->GetCodeFont());
+            ImGui::PushFont(EditorInterface::Get()->GetCodeFont());
             ImGui::Text("%s", logs[row].message.c_str());
             ImGui::PopFont();
         }
