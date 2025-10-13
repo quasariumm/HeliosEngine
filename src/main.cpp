@@ -93,7 +93,7 @@ extern "C" int __declspec(dllexport) __stdcall main()
 	Engine::Graphics::ComputeProgram::Initialize();
 
 	Engine::Graphics::ComputeProgram program;
-	program.LoadFromFile("src/Shaders/OpenCL/raytrace.cl");
+	program.LoadFromFile("src/Shaders/OpenCL/helloworld.cl");
 
 	auto kernel = program.GetKernel("HelloWorld");
 
