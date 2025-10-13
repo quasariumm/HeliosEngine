@@ -231,7 +231,8 @@ endif ()
 ##############################################
 ##  	    	FMOD Studio API	    		##
 ##############################################
-set(FMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/fmod)
+set(FMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/fmod
+		CACHE INTERNAL "")
 
 target_include_directories(Engine PUBLIC
 		${FMOD_DIR}/core/inc
@@ -245,10 +246,12 @@ if (WIN32 AND PLATFORM STREQUAL "x64")
 	set (FMOD_DYN_LIBS_DEBUG
 			"$<$<CONFIG:Debug>:${FMOD_DIR}/core/lib/x64/fmodL.dll>"
 			"$<$<CONFIG:Debug>:${FMOD_DIR}/studio/lib/x64/fmodstudioL.dll>"
+			CACHE INTERNAL ""
 	)
 	set (FMOD_DYN_LIBS_RELEASE
 			"$<$<CONFIG:Release>:${FMOD_DIR}/core/lib/x64/fmod.dll>"
 			"$<$<CONFIG:Release>:${FMOD_DIR}/studio/lib/x64/fmodstudio.dll>"
+			CACHE INTERNAL ""
 	)
 elseif (WIN2 AND PLATFORM STREQUAL "arm64")
 	target_link_directories(Engine PUBLIC
@@ -258,10 +261,12 @@ elseif (WIN2 AND PLATFORM STREQUAL "arm64")
 	set (FMOD_DYN_LIBS_DEBUG
 			"$<$<CONFIG:Debug>:${FMOD_DIR}/core/lib/arm64/fmodL.dll>"
 			"$<$<CONFIG:Debug>:${FMOD_DIR}/studio/lib/arm64/fmodstudioL.dll>"
+			CACHE INTERNAL ""
 	)
 	set (FMOD_DYN_LIBS_RELEASE
 			"$<$<CONFIG:Release>:${FMOD_DIR}/core/lib/arm64/fmod.dll>"
 			"$<$<CONFIG:Release>:${FMOD_DIR}/studio/lib/arm64/fmodstudio.dll>"
+			CACHE INTERNAL ""
 	)
 else()
 	message(FATAL_ERROR "Linux libs for FMOD Studio not yet added. x86 is just not supported by us. Mac users will not get support for a LONG while.")
