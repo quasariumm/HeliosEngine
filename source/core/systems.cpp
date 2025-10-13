@@ -10,8 +10,6 @@
 
 using namespace Engine;
 
-Engine::SystemsCore g_SystemsHandler;
-
 void SystemsCore::Initialize()
 {
     if (m_initialized) return;
