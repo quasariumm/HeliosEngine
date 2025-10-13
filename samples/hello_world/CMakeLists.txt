@@ -9,4 +9,6 @@ add_subdirectory(${ENGINE_PATH} engine)
 
 add_executable(HelloWorldSample main.cpp)
 
+copy_engine_dlls(HelloWorldSample)
+
 target_link_libraries(HelloWorldSample PRIVATE Engine)

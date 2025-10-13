@@ -274,16 +274,6 @@ target_link_libraries(Engine PUBLIC
 		"$<$<CONFIG:Release>:fmodstudio_vc>"
 )
 
-# Copy the FMOD dlls
-add_custom_command(TARGET Engine POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"$<$<CONFIG:Debug>:${FMOD_DYN_LIBS_DEBUG}>"
-		"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
-		${CMAKE_CURRENT_BINARY_DIR}
-		COMMAND_EXPAND_LISTS
-		COMMENT "Copying FMOD DLLs"
-)
-
 ##############################################
 ##		    Fetch external libraries		##
 ##############################################
@@ -299,15 +289,23 @@ fetchcontent_declare(
 )
 fetchcontent_makeavailable(JoltPhysics)
 
-# Copy the Jolt dlls TODO: this
-#add_custom_command(TARGET Engine POST_BUILD
-#		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#		"$<$<CONFIG:Debug>:>"
-#		"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
-#		${CMAKE_CURRENT_BINARY_DIR}
-#		COMMAND_EXPAND_LISTS
-#		COMMENT "Copying FMOD DLLs"
-#)
+##############################################
+##		      Copy external DLLs  			##
+##############################################
+
+function(copy_engine_dlls PROJ)
+	# Copy the FMOD dlls
+	add_custom_command(TARGET ${PROJ} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"$<$<CONFIG:Debug>:${FMOD_DYN_LIBS_DEBUG}>"
+			"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
+			"$<$<CONFIG:Debug>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Joltd.dll>"
+			"$<$<CONFIG:Release>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Jolt.dll>"
+			$<TARGET_FILE_DIR:${PROJ}>
+			COMMAND_EXPAND_LISTS
+			COMMENT "Copying FMOD DLLs"
+	)
+endfunction()
 
 ##############################################
 ## Include directories + precompiled header ##
