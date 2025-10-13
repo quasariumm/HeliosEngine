@@ -9,6 +9,7 @@ class Camera;
 namespace Log { class LogHandler; }
 namespace Physics { class PhysicsCore; }
 namespace Audio { class AudioPlayer; }
+namespace Editor { class Viewport; }
 
 // =============================================================
 // Main system handler
@@ -31,6 +32,7 @@ public:
     [[nodiscard]] Log::LogHandler*          GetLogHandler()         const { return m_logHandler; }
     [[nodiscard]] Physics::PhysicsCore*     GetPhysics()            const { return m_physics; }
 	[[nodiscard]] Audio::AudioPlayer*       GetAudio()              const { return m_audioPlayer; }
+	[[nodiscard]] Editor::Viewport*         GetViewport()           const { return m_viewport; }
 
 
 private:
@@ -40,6 +42,7 @@ private:
     Log::LogHandler*            m_logHandler = nullptr;
     Physics::PhysicsCore*       m_physics = nullptr;
 	Audio::AudioPlayer*			m_audioPlayer = nullptr;
+	Editor::Viewport*			m_viewport = nullptr;
 
 	Camera*						m_camera = nullptr;
 };
@@ -53,6 +56,7 @@ namespace Systems
     static Log::LogHandler*             GetLogHandler()         { return SystemsHandler.GetLogHandler(); }
     static Physics::PhysicsCore*        GetPhysics()            { return SystemsHandler.GetPhysics(); }
     static Audio::AudioPlayer*			GetAudio()	            { return SystemsHandler.GetAudio(); }
+    static Editor::Viewport*			GetViewport()	        { return SystemsHandler.GetViewport(); }
 }
 
 }

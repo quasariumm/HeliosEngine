@@ -60,6 +60,8 @@ class Viewport
 public:
     void Draw();
 
+    void Viewport::DrawOverlay(ImVec2 pos, ImVec2 size);
+
     void SetRenderImage(GL46_Texture2D* image) { m_renderedImage = image; }
 
     bool drawStatistics = true;

@@ -61,6 +61,7 @@ void EngineCore::Run()
         //if (m_using_editor_cam) m_camera_system->UpdateEditorCamera(dt);
 
         EditorInterface::Get()->DrawInterfaces();
+        Systems::GetViewport()->Draw();
         EditorInterface::Get()->Render();
         Systems::GetRenderer()->Clear();
         EditorInterface::Get()->EndFrame();
