@@ -444,10 +444,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Other
 imgui.ini
-scene.scn
 latest-log.md
-RecentProjects.txt
-EditorSettings.txt
-.idea/workspace.xml
-.idea/editor.xml
