@@ -26,15 +26,7 @@ else()
 	set(PLATFORM "unknown")
 endif()
 
-# Determines whether the engine loads in standalone:
-# - OFF (Default):
-# 		Normal way of loading the engine. Launches using a dynamic library and separate launcher executable
-# - ON (Standalone):
-# 		Launches it as an executable, which makes debugging easier, but does not allow project loading
-# 		NOTE: Make sure to use a config that launches the executable Engine.exe
-option( ENGINE_STANDALONE
-		"Use standalone mode"
-		OFF)
+include(FetchContent)
 
 # Determines which graphics API the engine uses. The following are supported
 # Name				Alias
@@ -43,19 +35,17 @@ option( ENGINE_STANDALONE
 # Vulkan			VK
 set(HELIOS_GRAPHICS_API "GL46")
 
-# Adds the launcher to the project
-# Used in Default launch option
-add_subdirectory(launcher)
-
 
 ##############################################
 ##  	  Determine files to build  		##
 ##############################################
-file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS src/*.cpp src/*.h src/*.hpp)
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.hpp)
+file(GLOB_RECURSE SOURCE CONFIGURE_DEPENDS source/*.cpp)
+file(GLOB_RECURSE BACKENDS CONFIGURE_DEPENDS backends/*.cpp backends/*.hpp)
 
-file(GLOB_RECURSE GL46_BACKEND CONFIGURE_DEPENDS src/Backends/OpenGL46_GLFW/*.cpp src/Backends/OpenGL46_GLFW/*.h)
-file(GLOB_RECURSE DX12_BACKEND CONFIGURE_DEPENDS src/Backends/DirectX12/*.cpp src/Backends/DirectX12/*.h)
-file(GLOB_RECURSE VK_BACKEND CONFIGURE_DEPENDS src/Backends/Vulkan/*.cpp src/Backends/Vulkan/*.h)
+file(GLOB_RECURSE GL46_BACKEND CONFIGURE_DEPENDS backends/opengl46_glfw/*.cpp backends/opengl46_glfw/*.hpp)
+file(GLOB_RECURSE DX12_BACKEND CONFIGURE_DEPENDS src/Backends/DirectX12/*.cpp src/Backends/DirectX12/*.hpp)
+file(GLOB_RECURSE VK_BACKEND CONFIGURE_DEPENDS src/Backends/Vulkan/*.cpp src/Backends/Vulkan/*.hpp)
 
 file(GLOB LIBS CONFIGURE_DEPENDS
 		extern/imgui/*.cpp
@@ -101,11 +91,11 @@ endif ()
 ##############################################
 
 if (HELIOS_GRAPHICS_API MATCHES "OpenGL 4.6|GL46")
-	include(cmake/GL46_includes.cmake)
+	include(backends/opengl46_glfw/cmake/GL46_includes.cmake)
 elseif(HELIOS_GRAPHICS_API MATCHES "DirectX 12|DX12")
-	include(cmake/DX12_includes.cmake)
+	include(backends/cmake/DX12_includes.cmake)
 elseif(HELIOS_GRAPHICS_API MATCHES "Vulkan|VK")
-	include(cmake/VK_includes.cmake)
+	include(backends/cmake/VK_includes.cmake)
 endif()
 
 ###############################################
@@ -127,15 +117,7 @@ endforeach ()
 ##############################################
 ##  Create lib/exe based on launch option	##
 ##############################################
-if (ENGINE_STANDALONE)
-	add_executable(Engine ${LIBS} ${SOURCE})
-	message("Launching engine in standalone mode... Creating executable")
-else ()
-	add_library(Engine SHARED ${LIBS} ${SOURCE})
-	message("Launching engine in default mode... Creating library")
-endif ()
-
-target_compile_definitions(Engine PRIVATE ENGINE_BUILD_DLL)
+add_library(Engine ${LIBS} ${HEADERS} ${SOURCE} ${BACKENDS})
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	set(TRACY_ENABLE ON)
@@ -146,11 +128,11 @@ endif ()
 ##############################################
 
 if (HELIOS_GRAPHICS_API MATCHES "OpenGL 4.6|GL46")
-	include(cmake/GL46_config.cmake)
+	include(backends/opengl46_glfw/cmake/GL46_config.cmake)
 elseif(HELIOS_GRAPHICS_API MATCHES "DirectX 12|DX12")
-	include(cmake/DX12_config.cmake)
+	include(backends/cmake/DX12_config.cmake)
 elseif(HELIOS_GRAPHICS_API MATCHES "Vulkan|VK")
-	include(cmake/VK_config.cmake)
+	include(backends/cmake/VK_config.cmake)
 endif()
 
 
@@ -222,7 +204,6 @@ set(ASSIMP_BUILD_TESTS 						OFF )
 add_subdirectory(extern/Assimp)
 set(CMAKE_CXX_STANDARD 20) # Because Assimp changes it back to C++17
 
-
 ##############################################
 ##  	  Compile defs and options  		##
 ##############################################
@@ -235,10 +216,6 @@ target_compile_definitions(Engine PRIVATE
 		"$<$<CONFIG:Debug>:TRACY_CALLSTACK=10>"
 )
 
-# Build director defs
-target_compile_definitions(Engine PRIVATE CMAKE_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-target_compile_definitions(launcher PRIVATE CMAKE_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-
 # UTF8 compile flags
 if (WIN32)
 	if (MSVC)
@@ -247,14 +224,15 @@ if (WIN32)
 		target_compile_options(Engine PRIVATE "/source-charset=utf-8")
 	endif ()
 else() # MinGW and Linux
-		target_compile_options(Engine PRIVATE "-finput-charset=UTF-8;-fexec-charset=UTF-8")
+	target_compile_options(Engine PRIVATE "-finput-charset=UTF-8;-fexec-charset=UTF-8")
 endif ()
 
 
 ##############################################
 ##  	    	FMOD Studio API	    		##
 ##############################################
-set(FMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/fmod)
+set(FMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/fmod
+		CACHE INTERNAL "")
 
 target_include_directories(Engine PUBLIC
 		${FMOD_DIR}/core/inc
@@ -266,12 +244,14 @@ if (WIN32 AND PLATFORM STREQUAL "x64")
 			${FMOD_DIR}/studio/lib/x64
 	)
 	set (FMOD_DYN_LIBS_DEBUG
-		"$<$<CONFIG:Debug>:${FMOD_DIR}/core/lib/x64/fmodL.dll>"
-		"$<$<CONFIG:Debug>:${FMOD_DIR}/studio/lib/x64/fmodstudioL.dll>"
+			"$<$<CONFIG:Debug>:${FMOD_DIR}/core/lib/x64/fmodL.dll>"
+			"$<$<CONFIG:Debug>:${FMOD_DIR}/studio/lib/x64/fmodstudioL.dll>"
+			CACHE INTERNAL ""
 	)
 	set (FMOD_DYN_LIBS_RELEASE
-		"$<$<CONFIG:Release>:${FMOD_DIR}/core/lib/x64/fmod.dll>"
-		"$<$<CONFIG:Release>:${FMOD_DIR}/studio/lib/x64/fmodstudio.dll>"
+			"$<$<CONFIG:Release>:${FMOD_DIR}/core/lib/x64/fmod.dll>"
+			"$<$<CONFIG:Release>:${FMOD_DIR}/studio/lib/x64/fmodstudio.dll>"
+			CACHE INTERNAL ""
 	)
 elseif (WIN2 AND PLATFORM STREQUAL "arm64")
 	target_link_directories(Engine PUBLIC
@@ -279,12 +259,14 @@ elseif (WIN2 AND PLATFORM STREQUAL "arm64")
 			${FMOD_DIR}/studio/lib/arm64
 	)
 	set (FMOD_DYN_LIBS_DEBUG
-		"$<$<CONFIG:Debug>:${FMOD_DIR}/core/lib/arm64/fmodL.dll>"
-		"$<$<CONFIG:Debug>:${FMOD_DIR}/studio/lib/arm64/fmodstudioL.dll>"
+			"$<$<CONFIG:Debug>:${FMOD_DIR}/core/lib/arm64/fmodL.dll>"
+			"$<$<CONFIG:Debug>:${FMOD_DIR}/studio/lib/arm64/fmodstudioL.dll>"
+			CACHE INTERNAL ""
 	)
 	set (FMOD_DYN_LIBS_RELEASE
-		"$<$<CONFIG:Release>:${FMOD_DIR}/core/lib/arm64/fmod.dll>"
-		"$<$<CONFIG:Release>:${FMOD_DIR}/studio/lib/arm64/fmodstudio.dll>"
+			"$<$<CONFIG:Release>:${FMOD_DIR}/core/lib/arm64/fmod.dll>"
+			"$<$<CONFIG:Release>:${FMOD_DIR}/studio/lib/arm64/fmodstudio.dll>"
+			CACHE INTERNAL ""
 	)
 else()
 	message(FATAL_ERROR "Linux libs for FMOD Studio not yet added. x86 is just not supported by us. Mac users will not get support for a LONG while.")
@@ -297,15 +279,38 @@ target_link_libraries(Engine PUBLIC
 		"$<$<CONFIG:Release>:fmodstudio_vc>"
 )
 
-# Copy the FMOD dlls
-add_custom_command(TARGET Engine POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"$<$<CONFIG:Debug>:${FMOD_DYN_LIBS_DEBUG}>"
-		"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
-		${CMAKE_CURRENT_BINARY_DIR}/launcher
-		COMMAND_EXPAND_LISTS
-		COMMENT "Copying FMOD DLLs"
+##############################################
+##		    Fetch external libraries		##
+##############################################
+
+set(ENABLE_ALL_WARNINGS OFF)
+set(BUILD_SHARED_LIBS 	ON)
+
+fetchcontent_declare(
+		JoltPhysics
+		GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
+		GIT_TAG "v5.4.0"
+		SOURCE_SUBDIR "Build"
 )
+fetchcontent_makeavailable(JoltPhysics)
+
+##############################################
+##		      Copy external DLLs  			##
+##############################################
+
+function(copy_engine_dlls PROJ)
+	# Copy the FMOD dlls
+	add_custom_command(TARGET ${PROJ} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"$<$<CONFIG:Debug>:${FMOD_DYN_LIBS_DEBUG}>"
+			"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
+			"$<$<CONFIG:Debug>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Joltd.dll>"
+			"$<$<CONFIG:Release>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Jolt.dll>"
+			$<TARGET_FILE_DIR:${PROJ}>
+			COMMAND_EXPAND_LISTS
+			COMMENT "Copying FMOD DLLs"
+	)
+endfunction()
 
 
 ##############################################
@@ -335,7 +340,8 @@ target_compile_definitions(Engine PRIVATE
 ##############################################
 target_include_directories(Engine PUBLIC
 		pch
-		src
+		source
+		include
 		extern
 		extern/imgui
 		extern/nativefiledialog-extended/src/include
@@ -344,19 +350,22 @@ target_include_directories(Engine PUBLIC
 		lib
 		lib/glfw/include
 		lib/glad/include
-		include
+		${JoltPhysics_SOURCE_DIR}/..
 		${TRACY_PUBLIC_DIR}
-		lib/fmod/core/inc
-		lib/fmod/studio/inc
 )
 
 target_precompile_headers(Engine PUBLIC
-		"$<$<COMPILE_LANGUAGE:CXX>:PrecompCXX.h>"
-		"$<$<COMPILE_LANGUAGE:C>:PrecompC.h>"
+		"$<$<COMPILE_LANGUAGE:CXX>:precomp_cxx.hpp>"
+		"$<$<COMPILE_LANGUAGE:C>:precomp_c.hpp>"
 )
 
 
 ##############################################
 ##  		  Linking libraries  			##
 ##############################################
-target_link_libraries(Engine PUBLIC nfd Tracy::TracyClient assimp::assimp)
+target_link_libraries(Engine PUBLIC
+		nfd
+		Tracy::TracyClient
+		assimp::assimp
+		Jolt
+)
