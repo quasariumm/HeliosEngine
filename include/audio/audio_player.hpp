@@ -106,7 +106,7 @@ public:
 	 * @returns The ID of the channel on which the sound will play.
 	 *		If the operation failed, this function returns -1 and prints information to the console.
 	 */
-int PlaySound( const std::filesystem::path& file, const glm::vec3& position = glm::vec3(FLT_MAX), float volume = 1.f );
+	int PlaySound( const std::filesystem::path& file, const glm::vec3& position = glm::vec3(FLT_MAX), float volume = 1.f );
 
 	/**
 	 * @brief Pauses or unpauses a sound channel.

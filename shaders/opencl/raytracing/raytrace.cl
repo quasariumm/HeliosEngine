@@ -1,8 +1,8 @@
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
 
-#include "Core/common.cl"
-#include "Raytracing/intersections.cl"
-#include "Raytracing/lighting.cl"
+#include "core/common.cl"
+#include "raytracing/intersections.cl"
+#include "raytracing/lighting.cl"
 
 //#define REPROJECTION
 //#define REPROJECTION_BILERP

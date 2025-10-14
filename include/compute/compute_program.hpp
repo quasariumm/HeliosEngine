@@ -3,25 +3,25 @@
 #include "compute_kernel.hpp"
 
 
-namespace Engine::Graphics
+namespace Engine::Compute
 {
 
 /**
  * Simple compute shader class. Takes the best GPU to dispatch work groups on
  */
-class ComputeProgram
+class Program
 {
 
 public:
 
-	ComputeProgram() = default;
+	Program() = default;
 
 	static void Initialize();
 
 	cl::Program& LoadFromFile( const std::filesystem::path& path );
 
 	[[nodiscard]]
-	ComputeKernel& GetKernel( const std::string& name );
+	Kernel& GetKernel( const std::string& name );
 
 	[[nodiscard]]
 	cl::Program& GetProgram() { return m_program; }
@@ -37,9 +37,9 @@ public:
 
 private:
 
-	friend class ComputeKernel;
+	friend class Kernel;
 	template <typename T>
-	friend class ComputeBuffer;
+	friend class Buffer;
 
 	static cl::Platform     m_platform;
 	static cl::Device       m_device;
@@ -48,7 +48,7 @@ private:
 
 	cl::Program m_program;
 
-	std::map<std::string, ComputeKernel> m_loadedKernels;
+	std::map<std::string, Kernel> m_loadedKernels;
 
 };
 

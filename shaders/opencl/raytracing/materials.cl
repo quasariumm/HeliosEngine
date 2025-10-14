@@ -1,8 +1,8 @@
 #ifndef MATERIALS_CL_
 #define MATERIALS_CL_
 
-#include "Raytracing/ray.cl"
-#include "Raytracing/microfacet.cl"
+#include "raytracing/ray.cl"
+#include "raytracing/microfacet.cl"
 
 /*
 	Bounces

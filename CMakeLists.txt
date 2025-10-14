@@ -333,6 +333,7 @@ target_compile_definitions(Engine PRIVATE
 		# TODO: Determine this minimum version based on implementation of the kernels
 		CL_HPP_MINIMUM_OPENCL_VERSION=100
 		CL_HPP_ENABLE_EXCEPTIONS
+		CL_VERSION_STR="${OpenCL_VERSION_MAJOR}.${OpenCL_VERSION_MINOR}"
 )
 
 ##############################################
@@ -350,8 +351,11 @@ target_include_directories(Engine PUBLIC
 		lib
 		lib/glfw/include
 		lib/glad/include
+		lib/fmod/core/inc
+		lib/fmod/studio/inc
 		${JoltPhysics_SOURCE_DIR}/..
 		${TRACY_PUBLIC_DIR}
+		${OpenCL_INCLUDE_DIRS}
 )
 
 target_precompile_headers(Engine PUBLIC

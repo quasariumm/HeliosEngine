@@ -338,7 +338,7 @@ void AudioPlayer::LoadSound( const std::filesystem::path&, bool )
 
 
 #undef PlaySound
-int AudioPlayer::PlaySound( const std::filesystem::path&, const glm::vec3& )
+int AudioPlayer::PlaySound( const std::filesystem::path&, const glm::vec3&, float )
 {
 	return 0;
 }

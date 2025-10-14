@@ -1,8 +1,8 @@
 #ifndef LIGHTING_CL_
 #define LIGHTING_CL_
 
-#include "Core/common.cl"
-#include "Core/random.cl"
+#include "core/common.cl"
+#include "core/random.cl"
 
 /*
 	Stores the light classes and light sampling logic

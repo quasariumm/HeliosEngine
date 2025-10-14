@@ -5,8 +5,8 @@
 	Microfacet-related functions
 */
 
-#include "Raytracing/material_struct.cl"
-#include "Core/random.cl"
+#include "raytracing/material_struct.cl"
+#include "core/random.cl"
 
 // EXTENDS UPON MATERIAL_XXXX. THIS IS INCLUDED IN THE MATERIAL TYPE
 #define MICROFACET_BECKMANN		64		// Beckmann–Spizzichino model

@@ -3,15 +3,15 @@
 #include <utility>
 
 
-namespace Engine::Graphics
+namespace Engine::Compute
 {
 
-class ComputeKernel
+class Kernel
 {
 
 public:
 
-	ComputeKernel() = delete;
+	Kernel() = delete;
 
 
 	template <typename... Args>
@@ -39,10 +39,10 @@ public:
 
 private:
 
-	friend class ComputeProgram;
+	friend class Program;
 
 
-	explicit ComputeKernel( cl::Kernel kernel )
+	explicit Kernel( cl::Kernel kernel )
 		: m_kernel{std::move(kernel)} {};
 
 	cl::Kernel m_kernel;

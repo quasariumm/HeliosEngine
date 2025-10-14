@@ -1,8 +1,8 @@
 #ifndef INTERSECTIONS_CL_
 #define INTERSECTIONS_CL_
 
-#include "Core/common.cl"
-#include "Raytracing/materials.cl"
+#include "core/common.cl"
+#include "raytracing/materials.cl"
 
 /*
 	Holds the primitve structs and the ray-primitive intersection logic

@@ -2,14 +2,14 @@
 
 #include <span>
 
-#include "compute_program.hpp"
+#include "compute/compute_program.hpp"
 
 
-namespace Engine::Graphics
+namespace Engine::Compute
 {
 
 template <typename T>
-class ComputeBuffer
+class Buffer
 {
 
 public:
@@ -39,7 +39,7 @@ public:
 	 *		For more efficient code, consider changing the access to include Access::DEVICE_COPY_HOST_PTR.
 	 * @attention We prefer you use the constructor taking in an std::span<T> object.
 	 */
-	explicit ComputeBuffer( T* data, size_t numElements, access_flag_t access =
+	explicit Buffer( T* data, size_t numElements, access_flag_t access =
 			                        Access::DEVICE_READ_WRITE | Access::DEVICE_USE_HOST_PTR
 			);
 
@@ -47,7 +47,7 @@ public:
 	 * @brief Constructs a buffer using the more modern span object
 	 * @param span The data as a span object.
 	 */
-	explicit ComputeBuffer( const std::span<T>& span, access_flag_t access =
+	explicit Buffer( const std::span<T>& span, access_flag_t access =
 			                        Access::DEVICE_READ_WRITE | Access::DEVICE_USE_HOST_PTR );
 
 
@@ -80,11 +80,11 @@ private:
  */
 
 template <typename T>
-ComputeBuffer<T>::ComputeBuffer( T* data, size_t numElements, access_flag_t access )
+Buffer<T>::Buffer( T* data, size_t numElements, access_flag_t access )
 	: m_data{data, numElements}
 {
 	m_buffer = cl::Buffer{
-			ComputeProgram::m_context,
+			Program::m_context,
 			access,
 			sizeof(T) * numElements,
 			data
@@ -93,11 +93,11 @@ ComputeBuffer<T>::ComputeBuffer( T* data, size_t numElements, access_flag_t acce
 
 
 template <typename T>
-ComputeBuffer<T>::ComputeBuffer( const std::span<T>& span, access_flag_t access )
+Buffer<T>::Buffer( const std::span<T>& span, access_flag_t access )
 	: m_data{span}
 {
 	m_buffer = cl::Buffer{
-			ComputeProgram::m_context,
+			Program::m_context,
 			access,
 			span.size_bytes(),
 			span.data()
@@ -106,9 +106,9 @@ ComputeBuffer<T>::ComputeBuffer( const std::span<T>& span, access_flag_t access 
 
 
 template <typename T>
-void ComputeBuffer<T>::EnqueueRead()
+void Buffer<T>::EnqueueRead()
 {
-	ComputeProgram::m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0, m_data.size_bytes(), m_data.data());
+	Program::m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0, m_data.size_bytes(), m_data.data());
 }
 
 } // namespace Engine::Graphics
