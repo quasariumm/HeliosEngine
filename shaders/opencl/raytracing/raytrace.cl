@@ -109,7 +109,7 @@ float3 Trace(
 				incommingLight += emittance * mixedColor + BRDF / PDF * light * rayColor * max(0.001f, -dot(ray->hit.normal, ray->dir));
 
 			float specularity = material->specularity;
-			if ((material->type & MATERIAL_MICROFACET) != 0)
+			if ((material->properties & MATERIAL_MICROFACET) != 0)
 			{
 				specularity = 1.f - material->PBR_Roughness;
 			}
@@ -254,7 +254,7 @@ __kernel void Raytrace(
     // #elif defined(ACCUMULATION)
 	if (*frame != 0)
     {
-        float4 accumulatorColor = read_imagef(outImage, texSampler, texelCoord);
+        float4 accumulatorColor = read_imagef(outImage, texelCoord);
         pixel = mix(accumulatorColor, pixel, 1.f / (float)(*frame + 1));
         pixel.a = 1.0;
     }

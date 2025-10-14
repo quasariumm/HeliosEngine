@@ -62,10 +62,10 @@ static float3 GetBRDFAndBounce(struct Ray* ray, struct Material* material, uint*
 
 	bool glassReflect = false;
 
-	if ((material->type & MATERIAL_MICROFACET) != 0)
+	if ((material->properties & MATERIAL_MICROFACET) != 0)
 	{
 		// Direction: roughness affects the reflection
-		if ((material->type & MATERIAL_REFLECTION) != 0)
+		if ((material->properties & MATERIAL_REFLECTION) != 0)
 		{
 			if (material->PBR_Roughness < 0.001)
 			{
@@ -85,20 +85,20 @@ static float3 GetBRDFAndBounce(struct Ray* ray, struct Material* material, uint*
 	}
 	else
 	{
-		if ((material->type & MATERIAL_DIFFUSE) != 0)
+		if ((material->properties & MATERIAL_DIFFUSE) != 0)
 		{
 			// Direction
-			if ((material->type & MATERIAL_REFLECTION) != 0)
+			if ((material->properties & MATERIAL_REFLECTION) != 0)
 				diffuse.direction = LambertianBounce(seed, ray->hit.normal);
 			// Factor
 			diffuse.factor = 1.f - material->specularity;
 			// BRDF
 			diffuse.BRDF = material->diffuseColor * M_1_PI_F;
 		}
-		if ((material->type & MATERIAL_SPECULAR) != 0)
+		if ((material->properties & MATERIAL_SPECULAR) != 0)
 		{
 			// Direction
-			if ((material->type & MATERIAL_REFLECTION) != 0)
+			if ((material->properties & MATERIAL_REFLECTION) != 0)
 				specular.direction = Reflect(-ray->dir, ray->hit.normal);
 
 			specular.factor = material->specularity;
@@ -109,12 +109,12 @@ static float3 GetBRDFAndBounce(struct Ray* ray, struct Material* material, uint*
 			float k = (material->shininess + 2.f) * 0.5f * M_1_PI_F;
 			specular.BRDF = k * material->specularColor * pow(overlap, material->shininess);
 		}
-		if ((material->type & MATERIAL_TRANSMISSION) != 0
+		if ((material->properties & MATERIAL_TRANSMISSION) != 0
 		    && material->refractivity > 0.f)
 		{
 			transmission.factor = material->refractivity;
 
-			if ((material->type & MATERIAL_REFLECTION) != 0)
+			if ((material->properties & MATERIAL_REFLECTION) != 0)
 			{
 				float etaI = ray->hit.inside ? material->refractionCoefficient : 1.f;
 				float etaO = ray->hit.inside ? 1.f : material->refractionCoefficient;
@@ -127,7 +127,7 @@ static float3 GetBRDFAndBounce(struct Ray* ray, struct Material* material, uint*
 
 				transmission.direction = res.xyz;
 				// BRDF
-				if ((material->type & MATERIAL_MICROFACET) != 0)
+				if ((material->properties & MATERIAL_MICROFACET) != 0)
 				{
 					transmission.BRDF = MicrofacetBRDF(material, ray->hit.normal, ray->hit.tangent, -ray->dir, ray->hit.lightVector);
 				}
@@ -145,7 +145,7 @@ static float3 GetBRDFAndBounce(struct Ray* ray, struct Material* material, uint*
 		}
 	}
 
-	if ((material->type & MATERIAL_MICROFACET) != 0 && (material->type & MICROFACET_GGX_ANISO) != 0)
+	if ((material->properties & MATERIAL_MICROFACET) != 0 && (material->properties & MICROFACET_GGX_ANISO) != 0)
 	{
 		float3 wh = normalize(-ray->dir + ray->hit.lightVector);
 		float3 wh_tangent = normalize((float3)(
@@ -181,7 +181,7 @@ static float GetPDF(struct Material* material, float3 normal, float3 tangent, fl
 		1.f
     };
 
-	if ((material->type & MATERIAL_MICROFACET) != 0)
+	if ((material->properties & MATERIAL_MICROFACET) != 0)
 	{
 		specularTransmission.factor = material->PBR_Metallic;
 		diffuse.factor = 1.f - specularTransmission.factor;

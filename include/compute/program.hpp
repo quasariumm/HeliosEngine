@@ -18,7 +18,7 @@ public:
 
 	static void Initialize();
 
-	cl::Program& LoadFromFile( const std::filesystem::path& path );
+	cl::Program& LoadFromFile( const std::filesystem::path& path, const std::string& includeDir = "", const std::vector<std::string>& includeSources = {} );
 
 	[[nodiscard]]
 	Kernel& GetKernel( const std::string& name );

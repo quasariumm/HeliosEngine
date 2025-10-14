@@ -121,6 +121,8 @@ using namespace Microsoft::WRL;
 // OpenCL
 #include <CL/opencl.hpp>
 
+#include "float16_t.hpp"
+
 // Dear ImGUI
 #define IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_USE_WCHAR32

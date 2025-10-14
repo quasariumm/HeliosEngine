@@ -56,11 +56,6 @@ void Transform::Inspector()
         onModified();
 }
 
-void DebugCube::Inspector()
-{
-    ImGui::ColorPicker3("Color", value_ptr(color));
-}
-
 // TODO(Quillan): Pls make thhis thhe way you want to
 // void Camera::Inspector()
 // {

@@ -332,7 +332,7 @@ target_compile_definitions(Engine PRIVATE
 		CL_HPP_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
 		# TODO: Determine this minimum version based on implementation of the kernels
 		CL_HPP_MINIMUM_OPENCL_VERSION=100
-		CL_HPP_ENABLE_EXCEPTIONS
+		#CL_HPP_ENABLE_EXCEPTIONS
 		CL_VERSION_STR="${OpenCL_VERSION_MAJOR}.${OpenCL_VERSION_MINOR}"
 )
 

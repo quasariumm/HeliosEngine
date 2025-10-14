@@ -24,8 +24,8 @@ struct LightsContext
     uint numDirectionalLights;
     struct PointLight* pointLights;
     uint numPointLights;
-    struct SimpleSpotLight* simpleSpotLights;
-    uint numSimpleSpotLights;
+    struct SpotLight* spotLights;
+    uint numSpotLights;
 };
 
 

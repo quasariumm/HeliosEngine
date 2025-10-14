@@ -36,29 +36,39 @@ void Program::Initialize()
 }
 
 
-cl::Program& Program::LoadFromFile( const std::filesystem::path& path )
+cl::Program& Program::LoadFromFile( const std::filesystem::path& path, const std::string& includeDir, const std::vector<std::string>& includeSources )
 {
-	std::ifstream file;
-	file.open(path);
-
-	if (!file.is_open())
-	{
-		Log::Error(std::format("Failed to open file: {}", path.string()));
-		return m_program;
-	}
-
-	const auto programSource = std::string{
-			std::istreambuf_iterator<char>(file),
-			std::istreambuf_iterator<char>()
-	};
-
-	const cl::Program::Sources sources{1, programSource};
+	cl::Program::Sources sources{1, LoadFile(path)};
+	sources.insert(sources.begin(), includeSources.begin(), includeSources.end());
 
 	m_program = cl::Program{m_context, sources};
 
-	if (const auto err = m_program.build(m_device, "-cl-std=CL" CL_VERSION_STR);
+	std::string buildOptions = "-g -cl-std=CL" CL_VERSION_STR;
+
+	if (!includeDir.empty())
+		buildOptions += " -I " + includeDir;
+
+	if (const auto err = m_program.build(m_device, buildOptions.c_str());
 		err != CL_SUCCESS)
-		Log::Error(std::format("Failed to build compute program {}. Error: {}", path.string(), CLErrorString(err)));
+	{
+		// Get the size of the build log
+		size_t log_size;
+		clGetProgramBuildInfo(m_program.get(), m_device.get(), CL_PROGRAM_BUILD_LOG,
+							  0, NULL, &log_size);
+
+		// Allocate memory for the log
+		auto *log = static_cast<char*>(malloc(log_size));
+
+		// Get the actual build log
+		clGetProgramBuildInfo(m_program.get(), m_device.get(), CL_PROGRAM_BUILD_LOG,
+							  log_size, log, NULL);
+
+		// Print it
+		Log::Error(std::format("Failed to build compute program {}. See log below. CL error: {}", path.string(), CLErrorString(err)));
+		Log::Info(std::format("Build log:\n{}\n", log));
+
+		free(log);
+	}
 
 	return m_program;
 }

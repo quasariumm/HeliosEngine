@@ -1,10 +1,6 @@
 #pragma once
 
-namespace Engine
-{
-class Material;
-class Light;
-}
+#include "debugging/logger.hpp"
 
 /*
  * Console logging tags
@@ -39,7 +35,6 @@ using SceneObject = entt::entity;
 // TODO: Replace these with handlers to prevent issues with project dll loading
 
 static std::unordered_set<std::string> loadedShaders;
-static std::vector<Engine::Light*> lights;
 
 /*
  * Defines
@@ -94,6 +89,23 @@ static constexpr float LARGE_FLOAT	=	1e34f;
 /*
  * Functions
  */
+
+inline std::string LoadFile(const std::filesystem::path& path)
+{
+	std::ifstream file;
+	file.open(path);
+
+	if (!file.is_open())
+	{
+		Engine::Log::Error(std::format("Failed to open file: {}", path.string()));
+		return "";
+	}
+
+	return {
+		std::istreambuf_iterator<char>(file),
+		std::istreambuf_iterator<char>()
+	};
+}
 
 // TODO(Patrick): Should prob be somewhere like window cuz its platform dependent
 // inline std::string GLDebugTypeToString( const GLenum type )
@@ -305,7 +317,7 @@ inline std::string EnginePath(bool stringSafe = false)
  * @note Complies with OpenGL standards: \n
  *			The first vector component specifies the 16 least-significant bits of the result; the second component specifies the 16 most-significant bits.
  */
-// inline std::uint32_t PackHalf2x16(const float a, const float b)
-// {
-// 	return (uint32_t)( (uint16_t)numeric::float_15(b) << 16 | (uint16_t)numeric::float16_t(a) );
-// }
+inline std::uint32_t PackHalf2x16(const float a, const float b)
+{
+	return (uint32_t)( (uint16_t)numeric::float16_t(b) << 16 | (uint16_t)numeric::float16_t(a) );
+}

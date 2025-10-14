@@ -8,27 +8,34 @@
 namespace Engine::Compute
 {
 
+enum BufferAccess : uint16_t
+{
+	BufferAccess_DEVICE_READ_WRITE     = (1 << 0),
+	BufferAccess_DEVICE_WRITE_ONLY     = (1 << 1),
+	BufferAccess_DEVICE_READ_ONLY      = (1 << 2),
+	BufferAccess_DEVICE_USE_HOST_PTR   = (1 << 3),
+	BufferAccess_DEVICE_ALLOC_HOST_PTR = (1 << 4),
+	BufferAccess_DEVICE_COPY_HOST_PTR  = (1 << 5),
+	BufferAccess_HOST_WRITE_ONLY       = (1 << 7),
+	BufferAccess_HOST_READ_ONLY        = (1 << 8),
+	BufferAccess_HOST_NO_ACCESS        = (1 << 9),
+
+	// Common use-cases
+	BufferAccess_COPIED_READ_ONLY	   = BufferAccess_DEVICE_READ_ONLY | BufferAccess_DEVICE_COPY_HOST_PTR,
+};
+
+using access_flag_t = uint16_t;
+
 template <typename T>
 class Buffer
 {
 
 public:
 
-	enum Access : uint16_t
-	{
-		DEVICE_READ_WRITE     = (1 << 0),
-		DEVICE_WRITE_ONLY     = (1 << 1),
-		DEVICE_READ_ONLY      = (1 << 2),
-		DEVICE_USE_HOST_PTR   = (1 << 3),
-		DEVICE_ALLOC_HOST_PTR = (1 << 4),
-		DEVICE_COPY_HOST_PTR  = (1 << 5),
-		HOST_WRITE_ONLY       = (1 << 7),
-		HOST_READ_ONLY        = (1 << 8),
-		HOST_NO_ACCESS        = (1 << 9)
-	};
+	Buffer() = default;
 
-
-	using access_flag_t = uint16_t;
+	explicit Buffer( const access_flag_t access )
+		: m_access{access} {}
 
 	/**
 	 * @brief Constructs a new buffer using a pointer and element count
@@ -40,7 +47,7 @@ public:
 	 * @attention We prefer you use the constructor taking in an std::span<T> object.
 	 */
 	explicit Buffer( T* data, size_t numElements, access_flag_t access =
-			                        Access::DEVICE_READ_WRITE | Access::DEVICE_USE_HOST_PTR
+			                 BufferAccess_DEVICE_READ_WRITE | BufferAccess_DEVICE_USE_HOST_PTR
 			);
 
 	/**
@@ -48,8 +55,13 @@ public:
 	 * @param span The data as a span object.
 	 */
 	explicit Buffer( const std::span<T>& span, access_flag_t access =
-			                        Access::DEVICE_READ_WRITE | Access::DEVICE_USE_HOST_PTR );
+			                 BufferAccess_DEVICE_READ_WRITE | BufferAccess_DEVICE_USE_HOST_PTR );
 
+	void ChangeData( T* data, size_t numElements );
+
+	void ChangeData( const std::span<T>& span );
+
+	std::span<T>& GetData() { return m_data; }
 
 	void EnqueueRead();
 
@@ -70,10 +82,12 @@ public:
 
 private:
 
-	std::span<T> m_data;
-	cl::Buffer   m_buffer;
+	access_flag_t m_access;
+	std::span<T>  m_data;
+	cl::Buffer    m_buffer;
 
 };
+
 
 /*
  * Implementation
@@ -81,7 +95,7 @@ private:
 
 template <typename T>
 Buffer<T>::Buffer( T* data, size_t numElements, access_flag_t access )
-	: m_data{data, numElements}
+	: m_access{access}, m_data{data, numElements}
 {
 	m_buffer = cl::Buffer{
 			Program::m_context,
@@ -94,11 +108,35 @@ Buffer<T>::Buffer( T* data, size_t numElements, access_flag_t access )
 
 template <typename T>
 Buffer<T>::Buffer( const std::span<T>& span, access_flag_t access )
-	: m_data{span}
+	: m_access{access}, m_data{span}
 {
 	m_buffer = cl::Buffer{
 			Program::m_context,
 			access,
+			span.size_bytes(),
+			span.data()
+	};
+}
+
+
+template <typename T>
+void Buffer<T>::ChangeData( T* data, size_t numElements )
+{
+	m_buffer = cl::Buffer{
+			Program::m_context,
+			m_access,
+			sizeof(T) * numElements,
+			data
+	};
+}
+
+
+template <typename T>
+void Buffer<T>::ChangeData( const std::span<T>& span )
+{
+	m_buffer = cl::Buffer{
+			Program::m_context,
+			m_access,
 			span.size_bytes(),
 			span.data()
 	};

@@ -51,7 +51,7 @@ float3 SamplePointLight(struct PointLight* light, float3 intersection, float3 no
 	Simple SpotLight
 */
 
-struct SimpleSpotLight
+struct SpotLight
 {
 	float3 position;
 	float3 color;
@@ -61,7 +61,7 @@ struct SimpleSpotLight
 	float outerCutOff;
 };
 
-float3 SampleSimpleSpotLight(struct SimpleSpotLight* light, float3 intersection, float3 normal)
+float3 SampleSpotLight(struct SpotLight* light, float3 intersection, float3 normal)
 {
 	float3 lightDir = normalize(light->position - intersection);
 	float theta = dot(lightDir, -light->direction);
@@ -83,7 +83,7 @@ void SampleSceneLights(
     float3* outLightVec, float3* outLight
 )
 {
-	uint numLights = ctx->numDirectionalLights + ctx->numPointLights + ctx->numSimpleSpotLights;
+	uint numLights = ctx->numDirectionalLights + ctx->numPointLights + ctx->numSpotLights;
 
 	if (numLights == 0)
 		return;
@@ -101,12 +101,12 @@ void SampleSceneLights(
 		*outLightVec = normalize(light->position - intersection);
         *outLight = (float)(numLights) * SamplePointLight(light, intersection, normal);
 	}
-	else if (sampledLight < ctx->numDirectionalLights + ctx->numPointLights + ctx->numSimpleSpotLights)
+	else if (sampledLight < ctx->numDirectionalLights + ctx->numPointLights + ctx->numSpotLights)
 	{
 		// TODO: Fix this not compiling
-		struct SimpleSpotLight* light = &ctx->simpleSpotLights[sampledLight - ctx->numDirectionalLights - ctx->numPointLights];
+		struct SpotLight* light = &ctx->spotLights[sampledLight - ctx->numDirectionalLights - ctx->numPointLights];
 		*outLightVec = normalize(light->position - intersection);
-        *outLight = (float)(numLights) * SampleSimpleSpotLight(light, intersection, normal);
+        *outLight = (float)(numLights) * SampleSpotLight(light, intersection, normal);
 	}
 }
 
