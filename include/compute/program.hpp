@@ -38,7 +38,7 @@ public:
 private:
 
 	friend class Kernel;
-	template <typename T>
+	template <typename T, bool Owning>
 	friend class Buffer;
 
 	static cl::Platform     m_platform;

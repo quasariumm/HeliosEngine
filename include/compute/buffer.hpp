@@ -26,13 +26,18 @@ enum BufferAccess : uint16_t
 
 using access_flag_t = uint16_t;
 
-template <typename T>
+static constexpr bool BUFFER_OWNING = true;
+static constexpr bool BUFFER_BORROWED = false;
+
+template <typename T, bool Owning = BUFFER_OWNING>
 class Buffer
 {
 
 public:
 
 	Buffer() = default;
+
+	~Buffer();
 
 	explicit Buffer( const access_flag_t access )
 		: m_access{access} {}
@@ -93,10 +98,23 @@ private:
  * Implementation
  */
 
-template <typename T>
-Buffer<T>::Buffer( T* data, size_t numElements, access_flag_t access )
+template <typename T, bool Owning>
+Buffer<T, Owning>::~Buffer()
+{
+	if constexpr (Owning)
+		delete m_data.data();
+}
+
+
+template <typename T, bool Owning>
+Buffer<T, Owning>::Buffer( T* data, size_t numElements, access_flag_t access )
 	: m_access{access}, m_data{data, numElements}
 {
+	if constexpr (Owning)
+	{
+		m_data = std::span<T>{new T[numElements], numElements};
+		memcpy(m_data.data(), data, numElements * sizeof(T));
+	}
 	m_buffer = cl::Buffer{
 			Program::m_context,
 			access,
@@ -106,10 +124,15 @@ Buffer<T>::Buffer( T* data, size_t numElements, access_flag_t access )
 }
 
 
-template <typename T>
-Buffer<T>::Buffer( const std::span<T>& span, access_flag_t access )
+template <typename T, bool Owning>
+Buffer<T, Owning>::Buffer( const std::span<T>& span, access_flag_t access )
 	: m_access{access}, m_data{span}
 {
+	if constexpr (Owning)
+	{
+		m_data = std::span<T>{new T[span.size()], span.size()};
+		memcpy(m_data.data(), span.data(), span.size_bytes());
+	}
 	m_buffer = cl::Buffer{
 			Program::m_context,
 			access,
@@ -119,9 +142,19 @@ Buffer<T>::Buffer( const std::span<T>& span, access_flag_t access )
 }
 
 
-template <typename T>
-void Buffer<T>::ChangeData( T* data, size_t numElements )
+template <typename T, bool Owning>
+void Buffer<T, Owning>::ChangeData( T* data, size_t numElements )
 {
+	if constexpr (Owning)
+	{
+		delete m_data.data();
+		m_data = std::span<T>{new T[numElements], numElements};
+		memcpy(m_data.data(), data, numElements * sizeof(T));
+	}
+	else
+	{
+		m_data = std::span<T>{data, numElements};
+	}
 	m_buffer = cl::Buffer{
 			Program::m_context,
 			m_access,
@@ -131,20 +164,30 @@ void Buffer<T>::ChangeData( T* data, size_t numElements )
 }
 
 
-template <typename T>
-void Buffer<T>::ChangeData( const std::span<T>& span )
+template <typename T, bool Owning>
+void Buffer<T, Owning>::ChangeData( const std::span<T>& span )
 {
+	if constexpr (Owning)
+	{
+		delete m_data.data();
+		m_data = std::span<T>{new T[span.size()], span.size()};
+		memcpy(m_data.data(), span.data(), span.size_bytes());
+	}
+	else
+	{
+		m_data = span;
+	}
 	m_buffer = cl::Buffer{
-			Program::m_context,
-			m_access,
-			span.size_bytes(),
-			span.data()
+		Program::m_context,
+		m_access,
+		span.size_bytes(),
+		span.data()
 	};
 }
 
 
-template <typename T>
-void Buffer<T>::EnqueueRead()
+template <typename T, bool Owning>
+void Buffer<T, Owning>::EnqueueRead()
 {
 	Program::m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0, m_data.size_bytes(), m_data.data());
 }
