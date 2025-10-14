@@ -2,7 +2,7 @@
 
 #include <span>
 
-#include "compute/compute_program.hpp"
+#include "compute/program.hpp"
 
 
 namespace Engine::Compute

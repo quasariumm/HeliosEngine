@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "compute_kernel.hpp"
+#include "kernel.hpp"
 
 
 namespace Engine::Compute

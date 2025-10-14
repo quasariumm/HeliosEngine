@@ -1,6 +1,6 @@
-﻿#include "compute/compute_kernel.hpp"
+﻿#include "compute/kernel.hpp"
 
-#include "compute/compute_program.hpp"
+#include "compute/program.hpp"
 #include "debugging/logger.hpp"
 
 using namespace Engine::Compute;

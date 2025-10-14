@@ -1,4 +1,4 @@
-﻿#include "compute/compute_program.hpp"
+﻿#include "compute/program.hpp"
 
 #include <CL/Utils/Utils.hpp>
 
