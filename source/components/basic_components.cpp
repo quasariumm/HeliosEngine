@@ -1,27 +1,10 @@
 ﻿#include "components/basic_components.hpp"
 
+#include "tools/editor_widgets.hpp"
 #include "tools/icon_defines.hpp"
 
 using namespace Engine;
 using namespace Components;
-
-static bool ColoredFloatInput(const std::string& label, float* v, ImVec4 color, const char* id, bool same_line)
-{
-    ImGui::PushID(id);
-    if (same_line)
-        ImGui::SameLine();
-    ImGui::Text("%s", label.c_str());
-    ImGui::SameLine();
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, {0,0,0,0});
-    ImGui::PushStyleColor(ImGuiCol_Border, color);
-    ImGui::SetNextItemWidth(4 * ImGui::GetFontSize());
-    bool changed = ImGui::DragFloat("", v, 0.001f);
-    ImGui::PopStyleVar();
-    ImGui::PopStyleColor(2);
-    ImGui::PopID();
-    return changed;
-}
 
 void Transform::Inspector()
 {
@@ -32,25 +15,25 @@ void Transform::Inspector()
     bool modified = false;
 
     ImGui::Text(ICON_AXIS_ARROW);
-    modified |= ColoredFloatInput("X", &PositionRef()->x, red, "PositionX", true );
-    modified |= ColoredFloatInput("Y", &PositionRef()->y, green, "PositionY", true );
-    modified |= ColoredFloatInput("Z", &PositionRef()->z, blue, "PositionZ", true );
+    modified |= ImGui::ColoredFloatInput("X", &PositionRef()->x, red, "PositionX", true );
+    modified |= ImGui::ColoredFloatInput("Y", &PositionRef()->y, green, "PositionY", true );
+    modified |= ImGui::ColoredFloatInput("Z", &PositionRef()->z, blue, "PositionZ", true );
 
     glm::vec3 rot = degrees(GetEulerRotation());
     bool changed = false;
         
     ImGui::Text(ICON_ROTATE_ORBIT);
-    changed |= ColoredFloatInput("X", &rot.x, red, "RotationX", true);
-    changed |= ColoredFloatInput("Y", &rot.y, green, "RotationY", true );
-    changed |= ColoredFloatInput("Z", &rot.z, blue, "RotationZ", true );
+    changed |= ImGui::ColoredFloatInput("X", &rot.x, red, "RotationX", true);
+    changed |= ImGui::ColoredFloatInput("Y", &rot.y, green, "RotationY", true );
+    changed |= ImGui::ColoredFloatInput("Z", &rot.z, blue, "RotationZ", true );
 
     if (changed) SetEulerRotation(rot);
     modified |= changed;
 
     ImGui::Text(ICON_RESIZE);
-    modified |= ColoredFloatInput("X", &ScaleRef()->x, red, "ScaleX", true );
-    modified |= ColoredFloatInput("Y", &ScaleRef()->y, green, "ScaleY", true );
-    modified |= ColoredFloatInput("Z", &ScaleRef()->z, blue, "ScaleZ", true );
+    modified |= ImGui::ColoredFloatInput("X", &ScaleRef()->x, red, "ScaleX", true );
+    modified |= ImGui::ColoredFloatInput("Y", &ScaleRef()->y, green, "ScaleY", true );
+    modified |= ImGui::ColoredFloatInput("Z", &ScaleRef()->z, blue, "ScaleZ", true );
 
     if (modified && onModifiedUsed)
         onModified();
