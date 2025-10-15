@@ -2,7 +2,7 @@
 #include <string>
 
 #include "imgui.h"
-#include "glm/gtc/type_ptr.inl"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace ImGui
 {
