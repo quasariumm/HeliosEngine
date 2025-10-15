@@ -10,22 +10,23 @@ struct GeometryContext
 {
     struct Material* materials;
     struct Sphere* spheres;
-    uint numSpheres;
     struct Mesh* meshes;
     struct BVHNode* bvhNodes;
     struct Vertex* vertices;
     uint* indices;
+    uint numSpheres;
     uint numMeshes;
 };
 
 struct LightsContext
 {
     struct DirectionalLight* directionalLights;
-    uint numDirectionalLights;
     struct PointLight* pointLights;
-    uint numPointLights;
     struct SpotLight* spotLights;
+    uint numDirectionalLights;
+    uint numPointLights;
     uint numSpotLights;
+    uint _padding;
 };
 
 

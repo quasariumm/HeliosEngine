@@ -3,16 +3,6 @@
 #include "debugging/logger.hpp"
 
 /*
- * Console logging tags
- */
-
-static const std::string ANSI_OK = "[\033[32m OK \033[0m] ";
-static const std::string ANSI_DONE = "[\033[32mDONE\033[0m] ";
-static const std::string ANSI_ERR = "[\033[31mERRO\033[0m] ";
-static const std::string ANSI_WARN = "[\033[33mWARN\033[0m] ";
-static const std::string ANSI_INFO = "[\033[36mINFO\033[0m] ";
-
-/*
  * Typedefs
  */
 
@@ -188,6 +178,49 @@ inline std::string LoadFile(const std::filesystem::path& path)
 // 		return std::to_string(sev);
 // 	}
 // }
+
+// Vector conversions
+inline cl_float2 glmToCL(const glm::vec2& v) { return {v.x, v.y}; }
+inline cl_float3 glmToCL(const glm::vec3& v) { return {v.x, v.y, v.z}; }
+inline cl_float4 glmToCL(const glm::vec4& v) { return {v.x, v.y, v.z, v.w}; }
+
+// Integer vector conversions
+inline cl_int2 glmToCL(const glm::ivec2& v) { return {v.x, v.y}; }
+inline cl_int3 glmToCL(const glm::ivec3& v) { return {v.x, v.y, v.z}; }
+inline cl_int4 glmToCL(const glm::ivec4& v) { return {v.x, v.y, v.z, v.w}; }
+
+// Unsigned integer vector conversions
+inline cl_uint2 glmToCL(const glm::uvec2& v) { return {v.x, v.y}; }
+inline cl_uint3 glmToCL(const glm::uvec3& v) { return {v.x, v.y, v.z}; }
+inline cl_uint4 glmToCL(const glm::uvec4& v) { return {v.x, v.y, v.z, v.w}; }
+
+// Matrix conversions to float16 (column-major, matching OpenCL)
+inline cl_float16 glmToCL(const glm::mat4& m) {
+	return {
+		m[0][0], m[0][1], m[0][2], m[0][3],
+		m[1][0], m[1][1], m[1][2], m[1][3],
+		m[2][0], m[2][1], m[2][2], m[2][3],
+		m[3][0], m[3][1], m[3][2], m[3][3]
+	};
+}
+
+inline cl_float16 glmToCL(const glm::mat3& m) {
+	return {
+		m[0][0], m[0][1], m[0][2], 0.0f,
+		m[1][0], m[1][1], m[1][2], 0.0f,
+		m[2][0], m[2][1], m[2][2], 0.0f,
+		0.0f,    0.0f,    0.0f,    1.0f
+	};
+}
+
+inline cl_float16 glmToCL(const glm::mat2& m) {
+	return {
+		m[0][0], m[0][1], 0.0f, 0.0f,
+		m[1][0], m[1][1], 0.0f, 0.0f,
+		0.0f,    0.0f,    1.0f, 0.0f,
+		0.0f,    0.0f,    0.0f, 1.0f
+	};
+}
 
 inline std::string CLErrorString( const cl_int result )
 {

@@ -102,7 +102,7 @@ template <typename T, bool Owning>
 Buffer<T, Owning>::~Buffer()
 {
 	if constexpr (Owning)
-		delete m_data.data();
+		free(m_data.data());
 }
 
 
@@ -112,8 +112,8 @@ Buffer<T, Owning>::Buffer( T* data, size_t numElements, access_flag_t access )
 {
 	if constexpr (Owning)
 	{
-		m_data = std::span<T>{new T[numElements], numElements};
-		memcpy(m_data.data(), data, numElements * sizeof(T));
+		m_data = std::span<T>{(T*)malloc(sizeof(T) * numElements), numElements};
+		memcpy((void*)m_data.data(), (void*)data, numElements * sizeof(T));
 	}
 	m_buffer = cl::Buffer{
 			Program::m_context,
@@ -130,8 +130,8 @@ Buffer<T, Owning>::Buffer( const std::span<T>& span, access_flag_t access )
 {
 	if constexpr (Owning)
 	{
-		m_data = std::span<T>{new T[span.size()], span.size()};
-		memcpy(m_data.data(), span.data(), span.size_bytes());
+		m_data = std::span<T>{(T*)malloc(sizeof(T) * span.size()), span.size()};
+		memcpy((void*)m_data.data(), (void*)span.data(), span.size_bytes());
 	}
 	m_buffer = cl::Buffer{
 			Program::m_context,
@@ -148,8 +148,8 @@ void Buffer<T, Owning>::ChangeData( T* data, size_t numElements )
 	if constexpr (Owning)
 	{
 		delete m_data.data();
-		m_data = std::span<T>{new T[numElements], numElements};
-		memcpy(m_data.data(), data, numElements * sizeof(T));
+		m_data = std::span<T>{(T*)malloc(sizeof(T) * numElements), numElements};
+		memcpy((void*)m_data.data(), (void*)data, numElements * sizeof(T));
 	}
 	else
 	{
@@ -170,8 +170,8 @@ void Buffer<T, Owning>::ChangeData( const std::span<T>& span )
 	if constexpr (Owning)
 	{
 		delete m_data.data();
-		m_data = std::span<T>{new T[span.size()], span.size()};
-		memcpy(m_data.data(), span.data(), span.size_bytes());
+		m_data = std::span<T>{(T*)malloc(sizeof(T) * span.size()), span.size()};
+		memcpy((void*)m_data.data(), (void*)span.data(), span.size_bytes());
 	}
 	else
 	{
@@ -189,7 +189,10 @@ void Buffer<T, Owning>::ChangeData( const std::span<T>& span )
 template <typename T, bool Owning>
 void Buffer<T, Owning>::EnqueueRead()
 {
-	Program::m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0, m_data.size_bytes(), m_data.data());
+	auto err = Program::m_commandQueue.enqueueReadBuffer(m_buffer, CL_TRUE, 0, m_data.size_bytes(), m_data.data());
+
+	if (err != CL_SUCCESS)
+		Log::Error(std::format("Failed to enqueue a read. Error: {}", CLErrorString(err)));
 }
 
 } // namespace Engine::Graphics

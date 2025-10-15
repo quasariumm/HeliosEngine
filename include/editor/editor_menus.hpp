@@ -60,14 +60,18 @@ class Viewport
 public:
     void Draw();
 
-    void Viewport::DrawOverlay(ImVec2 pos, ImVec2 size);
+    void DrawOverlay(ImVec2 pos, ImVec2 size);
 
     void SetRenderImage(GL46_Texture2D* image) { m_renderedImage = image; }
+
+	glm::uvec2 GetViewportSize() const { return m_viewportSize; }
 
     bool drawStatistics = true;
 
 private:
     GL46_Texture2D* m_renderedImage = nullptr;
+
+	glm::uvec2 m_viewportSize{1920u, 1080u};
 };
 
 }

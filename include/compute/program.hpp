@@ -3,6 +3,12 @@
 #include "kernel.hpp"
 
 
+namespace Engine
+{
+class GL46_Texture2D;
+}
+
+
 namespace Engine::Compute
 {
 
@@ -19,6 +25,8 @@ public:
 	static void Initialize();
 
 	cl::Program& LoadFromFile( const std::filesystem::path& path, const std::string& includeDir = "", const std::vector<std::string>& includeSources = {} );
+
+	void Finish() const;
 
 	[[nodiscard]]
 	Kernel& GetKernel( const std::string& name );
@@ -40,6 +48,9 @@ private:
 	friend class Kernel;
 	template <typename T, bool Owning>
 	friend class Buffer;
+
+	friend class ::Engine::GL46_Texture2D;
+	friend class ::Engine::Renderer;
 
 	static cl::Platform     m_platform;
 	static cl::Device       m_device;

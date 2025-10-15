@@ -33,6 +33,7 @@ public:
     [[nodiscard]] Physics::PhysicsCore*     GetPhysics()            const { return m_physics; }
 	[[nodiscard]] Audio::AudioPlayer*       GetAudio()              const { return m_audioPlayer; }
 	[[nodiscard]] Editor::Viewport*         GetViewport()           const { return m_viewport; }
+	[[nodiscard]] Camera*					GetCamera()				const { return m_camera; }
 
 
 private:
@@ -57,6 +58,7 @@ namespace Systems
     static Physics::PhysicsCore*        GetPhysics()            { return SystemsHandler.GetPhysics(); }
     static Audio::AudioPlayer*			GetAudio()	            { return SystemsHandler.GetAudio(); }
     static Editor::Viewport*			GetViewport()	        { return SystemsHandler.GetViewport(); }
+    static Camera*						GetCamera()				{ return SystemsHandler.GetCamera(); }
 }
 
 }

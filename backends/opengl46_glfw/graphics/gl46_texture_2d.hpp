@@ -126,7 +126,17 @@ public:
 	[[nodiscard]]
 	float* GetDataHDR() const;
 
+	/**
+	 * @brief Gives you the OpenCL texture object
+	 * @return The internal CL image object
+	 */
+	[[nodiscard]]
+	cl::Image2D GetImage() const;
+
 private:
+
+	cl::Image2D m_clImage2D;
+	uint32_t m_clBufferFormat = 0;
 
 	TextureFormat m_internalFormat = TextureFormat::RGBA8;
 	uint32_t m_glInternalFormat = 0;

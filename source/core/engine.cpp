@@ -19,7 +19,6 @@ namespace Engine {
 void EngineCore::Initialize()
 {
     SystemsHandler.Initialize();
-	Compute::Program::Initialize();
     Systems::GetRenderer()->Initialize();
 }
 

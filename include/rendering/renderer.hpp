@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../backends/opengl46_glfw/graphics/gl46_texture_2d.hpp"
 #include "compute/program.hpp"
 #include "compute/buffer.hpp"
 #include "rendering/window.hpp"
@@ -28,19 +29,24 @@ public:
 
 	void Initialize();
 
-	void Prepare();
+	void Prepare() const;
 
 	void Clear() const;
 
-	void Render() const;
-
-	void Shutdown();
+	void Render();
 
 	[[nodiscard]] Window* GetWindow() const { return m_window.get(); }
 
 private:
 
 	std::unique_ptr<Window> m_window;
+
+	// TODO(Patrick): Change to interface class
+	GL46_Texture2D m_renderTexture;
+
+	uint64_t m_frame = 0;
+
+	glm::mat4 m_prevVP{1.f};
 
 	Compute::Program m_program;
 
@@ -52,11 +58,11 @@ private:
 	{
 		Components::Material* materials  = nullptr;
 		Components::Sphere*   spheres    = nullptr;
-		uint32_t              numSpheres = 0;
 		Components::Mesh*     meshes     = nullptr;
 		Components::BVHNode*  bvhNodes   = nullptr;
 		Components::Vertex*   vertices   = nullptr;
 		uint32_t*             indices    = nullptr;
+		uint32_t              numSpheres = 0;
 		uint32_t              numMeshes  = 0;
 	};
 
@@ -64,16 +70,33 @@ private:
 	struct LightsContext
 	{
 		Components::DirectionalLight* directionalLights    = nullptr;
-		uint32_t                      numDirectionalLights = 0;
 		Components::PointLight*       pointLights          = nullptr;
+		Components::SpotLight*        spotLights           = nullptr;
+		uint32_t                      numDirectionalLights = 0;
 		uint32_t                      numPointLights       = 0;
-		Components::SpotLight*        simpleSpotLights     = nullptr;
-		uint32_t                      numSimpleSpotLights  = 0;
+		uint32_t                      numSpotLights        = 0;
+		uint32_t                      _padding             = 0;
+	};
+
+
+	struct SkyboxInfo
+	{
+		glm::vec3 groundColor;
+		glm::vec3 horizonColor;
+		glm::vec3 zenithColor;
+		glm::vec3 sunDirection;
+
+		float sunFocus;
+		float sunIntensity;
+
+		bool    useSkyboxTexture;
+		uint8_t _padding[3]{0};
 	};
 
 
 	Compute::Buffer<GeometryContext> m_geometryContext{};
 	Compute::Buffer<LightsContext>   m_lightsContext{};
+	Compute::Buffer<SkyboxInfo>      m_skyboxInfo{};
 
 	// Buffers for in the contexts
 	Compute::Buffer<Components::Material> m_materials{Compute::BufferAccess_COPIED_READ_ONLY};

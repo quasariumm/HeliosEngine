@@ -37,8 +37,12 @@ void Viewport::Draw()
             //Log::Error("Something went wrong when trying to show the rendered image");
         }
 
-        DrawOverlay( ImVec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + ImGui::GetFontSize() * 2.0f), ImGui::GetContentRegionAvail());
-        
+    	const auto size = ImGui::GetContentRegionAvail();
+    	if (size.x > 0.f && size.y > 0.f)
+			m_viewportSize = {size.x, size.y};
+
+        DrawOverlay( ImVec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + ImGui::GetFontSize() * 2.0f), size);
+
         ImGui::End();
     }
     ImGui::PopStyleVar(2);

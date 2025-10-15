@@ -10,26 +10,17 @@
 
 struct SkyboxInfo
 {
-    bool useSkyboxTexture;
+	float3 groundColor;
+	float3 horizonColor;
+	float3 zenithColor;
+	float3 sunDirection;
 
-    float3 groundColor;
-    float3 horizonColor;
-    float3 zenithColor;
-    float3 sunDirection;
-    float sunFocus;
-    float sunIntensity;
+	float sunFocus;
+	float sunIntensity;
+
+	bool useSkyboxTexture;
+	uint8 _padding[3];
 };
-
-// uniform vec3 GroundColor  = vec3(0.5, 0.5, 0.5);
-// uniform vec3 HorizonColor = vec3(0.78, 0.87, 1.0);
-// uniform vec3 ZenithColor  = vec3(0.68, 0.84, 1.0);
-
-// uniform vec3 SunDirection	= normalize(vec3(1.0, -1.0, 0.0));
-// uniform float SunFocus    	= 150.0;
-// uniform float SunIntensity	= 3.0;
-
-// uniform  = false;
-// uniform sampler2D SkyboxTexture;
 
 float3 GetSkyboxColor(
     struct Ray* ray, 
@@ -176,8 +167,7 @@ float4 SamplePrevColor(float2 PixelCoord, float depth, float16 VPMat, float16 Pr
 }
 
 __kernel void Raytrace(
-    __read_write image2d_t outImage, uint2 screenDimensions, float16 camToWorld, float16 vp, float16 prevVP, float3 viewParams,
-    __global uint* frame,
+    __read_write image2d_t outImage, uint2 screenDimensions, float16 camToWorld, float16 vp, float16 prevVP, float3 viewParams, ulong frame,
     __read_only image2d_t skyboxTexture, __global struct SkyboxInfo* skyboxInfo,
     __global struct GeometryContext* geometryContext,
     __global struct LightsContext* lightsContext
@@ -191,6 +181,9 @@ __kernel void Raytrace(
 
 	float2 tc = (float2)(texelCoord.x, texelCoord.y) / (float2)(screenDimensions.x, screenDimensions.y);
 
+	write_imagef(outImage, texelCoord, (float4)(tc, 0.f, 1.f));
+	return;
+
 	float3 focusDirLocal = (float3)((tc - 0.5f) * viewParams.xy, viewParams.z);
 	float3 focusDir = normalize(transform_point(camToWorld, focusDirLocal).xyz);
 	struct Ray ray = {
@@ -200,7 +193,7 @@ __kernel void Raytrace(
 	};
 
 	uint seed = (uint)(floor(tc.y * screenDimensions.y * screenDimensions.x + tc.x * screenDimensions.x));
-	seed ^= WangHash(frame);
+	seed ^= WangHash((uint*)&frame);
 	seed = WangHash(&seed);
 	
 	struct Ray firstRay; 
@@ -252,10 +245,10 @@ __kernel void Raytrace(
     //     pixel.a = 1.0;
     // }
     // #elif defined(ACCUMULATION)
-	if (*frame != 0)
+	if (frame != 0)
     {
         float4 accumulatorColor = read_imagef(outImage, texelCoord);
-        pixel = mix(accumulatorColor, pixel, 1.f / (float)(*frame + 1));
+        pixel = mix(accumulatorColor, pixel, 1.f / (float)(frame + 1));
         pixel.a = 1.0;
     }
     // #endif // ACCUMULATION
