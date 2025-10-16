@@ -6,7 +6,7 @@ AccessModifierOffset: -4
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AlignOperands: true
-AlignTrailingComments: true
+AlignTrailingComments: false
 AllowShortIfStatementsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: false
 AlwaysBreakTemplateDeclarations: Yes
@@ -29,7 +29,11 @@ BraceWrapping:
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
 BreakBeforeBraces: Custom
+BreakConstructorInitializers: AfterColon
+BreakConstructorInitializersBeforeComma: false
 ColumnLimit: 120
+CompactNamespaces: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ContinuationIndentWidth: 8
 EmptyLineAfterAccessModifier: Always
 IncludeCategories: 
@@ -40,7 +44,6 @@ IncludeCategories:
   - Regex: '.*'
     Priority: 3
 IncludeIsMainRegex: '([-_](test|unittest))?$'
-IndentPPDirectives: BeforeHash
 IndentWidth: 4
 InsertNewlineAtEOF: true
 MacroBlockBegin: ''
@@ -48,6 +51,7 @@ MacroBlockEnd: ''
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: Inner
 PointerAlignment: Left
+SpaceAfterTemplateKeyword: true
 SpaceInEmptyParentheses: false
 SpacesInAngles: false
 SpacesInConditionalStatement: false
