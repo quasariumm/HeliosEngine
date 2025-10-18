@@ -5,6 +5,8 @@
 
 namespace Engine::Compute
 {
+template <typename T>
+concept KernelArgs = std::is_base_of_v<cl::Memory, std::decay_t<T>> || std::is_arithmetic_v<std::decay_t<T>> || is_cl_vector_v<std::decay_t<T>>;
 
 class Kernel
 {
@@ -22,11 +24,17 @@ public:
 	 * @attention For any type in Engine::Compute, use the dereference operator (*) as the argument <br>
 	 *		E.g.: kernel.SetArguments(*buffer, *texture);
 	 */
-	template<typename... Args>
+	template<KernelArgs... Args>
 	void SetArguments( int startIdx, Args&&... args )
 	{
 		(SetArgument(startIdx, std::forward<Args>(args)), ...);
 	}
+
+
+	/**
+	 * @brief Runs the kernel once
+	 */
+	void Run() const;
 
 
 	/**
@@ -89,11 +97,12 @@ private:
 	friend class Program;
 
 
-	explicit Kernel( cl::Kernel kernel )
-		: m_kernel{std::move(kernel)}
+	explicit Kernel( std::string name, cl::Kernel kernel )
+		: m_name{std::move(name)}, m_kernel{std::move(kernel)}
 	{
 	};
 
+	std::string m_name;
 	cl::Kernel m_kernel;
 
 };

@@ -6,6 +6,14 @@
 using namespace Engine::Compute;
 
 
+void Kernel::Run() const
+{
+	auto err = Program::m_commandQueue.enqueueNDRangeKernel(m_kernel, cl::NullRange, cl::NDRange{1, 1});
+	if (err != CL_SUCCESS)
+		Log::Error(std::format("Compute kernel \"{}\" dispatch failed. Error: {}", m_name, CLErrorString(err)));
+}
+
+
 void Kernel::Run( const glm::uvec2& groups, const glm::uvec2& local ) const
 {
 	auto err = Program::m_commandQueue.enqueueNDRangeKernel(m_kernel, cl::NullRange,
@@ -15,7 +23,7 @@ void Kernel::Run( const glm::uvec2& groups, const glm::uvec2& local ) const
 	                                                                    static_cast<uint64_t>(local.y)});
 
 	if (err != CL_SUCCESS)
-		Log::Error(std::format("Compute kernel dispatch failed. Error: {}", CLErrorString(err)));
+		Log::Error(std::format("Compute kernel \"{}\" dispatch failed. Error: {}", m_name, CLErrorString(err)));
 }
 
 
@@ -30,7 +38,7 @@ void Kernel::Run( const glm::uvec3& groups, const glm::uvec3& local ) const
 	                                                                    static_cast<uint64_t>(local.z)});
 
 	if (err != CL_SUCCESS)
-		Log::Error(std::format("Compute kernel dispatch failed. Error: {}", CLErrorString(err)));
+		Log::Error(std::format("Compute kernel \"{}\" dispatch failed. Error: {}", m_name, CLErrorString(err)));
 }
 
 
@@ -47,7 +55,7 @@ void Kernel::PrintKernelArgs() const
 		return;
 	}
 
-	Log::Info(std::format("Kernel has {} arguments:", num_args));
+	Log::Info(std::format("Kernel \"{}\" has {} arguments:", m_name, num_args));
 
 	// Iterate through each argument
 	for (cl_uint i = 0; i < num_args; i++)

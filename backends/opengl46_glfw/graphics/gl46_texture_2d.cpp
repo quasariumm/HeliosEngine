@@ -109,6 +109,9 @@ void GL46_Texture2D::FillBlank(
 	// Clean up if initialised
 	if (m_initialized)
 	{
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+		glUnmapNamedBuffer(m_pbo);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		glDeleteTextures(1, &m_ID);
 		glDeleteBuffers(1, &m_pbo);
 		m_pbo = 0;
@@ -179,26 +182,10 @@ void GL46_Texture2D::FillBlank(
 		                                    GL_MAP_COHERENT_BIT);
 	}
 
-	cl_int err;
-
-	const cl::ImageFormat imageFormat{
-		m_clBufferFormat,
-		static_cast<cl_channel_type>(isHDR ? CL_FLOAT : CL_UNSIGNED_INT8),
-	};
-
-	m_clImage2D = cl::Image2D{
-		Compute::Program::m_context,
-		CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-		imageFormat,
-		static_cast<cl::size_type>(m_width),
-		static_cast<cl::size_type>(m_height),
-		0,
-		(isHDR) ? (void*)m_dataHDR : (void*)m_data,
-		&err
-	};
-
-	if (err != CL_SUCCESS)
-		Log::Error(std::format("Failed to set CL texture: Error: {}", CLErrorString(err)));
+	m_clImage2D.ChangeData(
+		m_dataHDR, width * height * channels,
+		static_cast<unsigned int>(m_width), static_cast<unsigned int>(m_height), static_cast<unsigned char>(m_channels)
+	);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -217,9 +204,13 @@ void GL46_Texture2D::LoadFromFile(
 	// Clean up if initialised
 	if (m_initialized)
 	{
+		free(m_data);
+		free(m_dataHDR);
 		glDeleteTextures(1, &m_ID);
 		glDeleteBuffers(1, &m_pbo);
 		m_pbo = 0;
+		m_data = nullptr;
+		m_dataHDR = nullptr;
 	}
 
 	// Load the image
@@ -278,6 +269,7 @@ void GL46_Texture2D::LoadFromFile(
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
 		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, m_textureByteSize, m_data,
 		                GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		// TODO: Fix this so that I can call glUnmapNamedBuffer
 		uint8_t* tmp = (uint8_t*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, m_textureByteSize,
 		                                          GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT |
 		                                          GL_MAP_COHERENT_BIT);
@@ -286,23 +278,10 @@ void GL46_Texture2D::LoadFromFile(
 		m_data = tmp;
 	}
 
-	cl_int err;
-
-	const cl::ImageFormat imageFormat{
-		m_clBufferFormat,
-		static_cast<cl_channel_type>(isHDR ? CL_FLOAT : CL_UNSIGNED_INT8),
-	};
-
-	m_clImage2D = cl::Image2D{
-		Compute::Program::m_context,
-		CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-		imageFormat,
-		static_cast<cl::size_type>(m_width),
-		static_cast<cl::size_type>(m_height),
-		0,
-		(isHDR) ? (void*)m_dataHDR : (void*)m_data,
-		&err
-	};
+	m_clImage2D.ChangeData(
+		m_dataHDR, static_cast<size_t>(m_width * m_height * m_channels),
+		static_cast<unsigned int>(m_width), static_cast<unsigned int>(m_height), static_cast<unsigned char>(m_channels)
+	);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -395,7 +374,7 @@ float* GL46_Texture2D::GetDataHDR() const
 }
 
 
-cl::Image2D GL46_Texture2D::GetImage() const
+Compute::Image2D<float, Compute::IMAGE_BORROWED>& GL46_Texture2D::GetImage()
 {
 	return m_clImage2D;
 }

@@ -45,6 +45,8 @@ IncludeCategories:
     Priority: 3
 IncludeIsMainRegex: '([-_](test|unittest))?$'
 IndentWidth: 4
+IndentCaseLabels: false
+IndentCaseBlocks: false
 InsertNewlineAtEOF: true
 MacroBlockBegin: ''
 MacroBlockEnd: ''

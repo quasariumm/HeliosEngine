@@ -1,31 +1,46 @@
 #pragma once
+#include "compute/image2d.hpp"
+
 
 namespace Engine
 {
-
 // TODO: Move to general texture file
 enum class TextureFormat : uint8_t
 {
-	RED8 = 0u,	/* 1 channel  (8-bit int)			*/
-	RED16,		/* 1 channel  (16-bit int)			*/
-	RED16F,		/* 1 channel  (16-bit float)		*/
-	RED32F,		/* 1 channel  (32-bit float) 		*/
-	RG8,		/* 2 channels (8-bit int)			*/
-	RG16,		/* 2 channels (16-bit int)			*/
-	RG16F,		/* 2 channels (16-bit float)		*/
-	RG32F,		/* 2 channels (32-bit float) 		*/
-	RGB8,		/* 3 channels (8-bit int)			*/
-	RGB16F,		/* 3 channels (16-bit 'half' float)	*/
-	RGB32F,		/* 3 channels (32-bit float)		*/
-	RGBA8,		/* 4 channels (8-bit int) 			*/
-	RGBA16,		/* 4 channels (16-bit int) 			*/
-	RGBA16F,	/* 4 channels (16-bit 'half' float)	*/
-	RGBA32F		/* 4 channels (32-bit float)		*/
+	RED8 = 0u,
+	/* 1 channel  (8-bit int)			*/
+	RED16,
+	/* 1 channel  (16-bit int)			*/
+	RED16F,
+	/* 1 channel  (16-bit float)		*/
+	RED32F,
+	/* 1 channel  (32-bit float) 		*/
+	RG8,
+	/* 2 channels (8-bit int)			*/
+	RG16,
+	/* 2 channels (16-bit int)			*/
+	RG16F,
+	/* 2 channels (16-bit float)		*/
+	RG32F,
+	/* 2 channels (32-bit float) 		*/
+	RGB8,
+	/* 3 channels (8-bit int)			*/
+	RGB16F,
+	/* 3 channels (16-bit 'half' float)	*/
+	RGB32F,
+	/* 3 channels (32-bit float)		*/
+	RGBA8,
+	/* 4 channels (8-bit int) 			*/
+	RGBA16,
+	/* 4 channels (16-bit int) 			*/
+	RGBA16F,
+	/* 4 channels (16-bit 'half' float)	*/
+	RGBA32F /* 4 channels (32-bit float)		*/
 };
+
 
 class GL46_Texture2D
 {
-
 public:
 
 	GL46_Texture2D() = default;
@@ -42,10 +57,12 @@ public:
 	 * @warning Will delete old data if the image was initialised before
 	 */
 	void FillBlank(
-		uint32_t width, uint32_t height, uint32_t channels,
-		TextureFormat format,
-		bool isHDR
-	);
+			uint32_t      width,
+			uint32_t      height,
+			uint32_t      channels,
+			TextureFormat format,
+			bool          isHDR
+			);
 
 	/**
 	 * @brief Loads a texture from disk
@@ -56,10 +73,10 @@ public:
 	 * @throws runtime_error The texture cannot be opened
 	 */
 	void LoadFromFile(
-		const std::string& filename,
-		TextureFormat format = TextureFormat::RGBA8,
-		bool isHDR = false
-	);
+			const std::string& filename,
+			TextureFormat      format = TextureFormat::RGBA8,
+			bool               isHDR  = false
+			);
 
 	/**
 	 * @brief Sets the texture to the active on the given slot
@@ -67,7 +84,7 @@ public:
 	 * @param updateTexture Whether the texture should be filled with the data in this object
 	 * @throws range_error The slot is not in the bindable range
 	 */
-	void Use(uint32_t slot, bool updateTexture = false) const;
+	void Use( uint32_t slot, bool updateTexture = false ) const;
 
 	/**
 	 * @brief Sets the texture to the active on the given slot. Only used for compute shaders
@@ -75,7 +92,7 @@ public:
 	 * @param updateTexture Whether the texture should be filled with the data in this object
 	 * @throws range_error The slot is not in the bindable range
 	 */
-	void UseCompute(uint32_t slot, bool updateTexture = false) const;
+	void UseCompute( uint32_t slot, bool updateTexture = false ) const;
 
 	/**
 	 * @brief Updates the pixel unwrap buffer to the data in the texture
@@ -131,33 +148,32 @@ public:
 	 * @return The internal CL image object
 	 */
 	[[nodiscard]]
-	cl::Image2D GetImage() const;
+	Compute::Image2D<float, Compute::IMAGE_BORROWED>& GetImage();
 
 private:
 
-	cl::Image2D m_clImage2D;
+	Compute::Image2D<float, Compute::IMAGE_BORROWED> m_clImage2D{
+			Compute::Access::Access_DEVICE_COPY_HOST_PTR | Compute::Access::Access_DEVICE_READ_WRITE};
 	uint32_t m_clBufferFormat = 0;
 
-	TextureFormat m_internalFormat = TextureFormat::RGBA8;
-	uint32_t m_glInternalFormat = 0;
-	TextureFormat m_bufferFormat = TextureFormat::RGBA8;
-	uint32_t m_glBufferFormat = 0;
+	TextureFormat m_internalFormat   = TextureFormat::RGBA8;
+	uint32_t      m_glInternalFormat = 0;
+	TextureFormat m_bufferFormat     = TextureFormat::RGBA8;
+	uint32_t      m_glBufferFormat   = 0;
 
-	int32_t m_width = 0;
-	int32_t m_height = 0;
-	int32_t m_channels = 0;
-	size_t m_textureByteSize = 0ull;
+	int32_t m_width           = 0;
+	int32_t m_height          = 0;
+	int32_t m_channels        = 0;
+	size_t  m_textureByteSize = 0ull;
 
-	uint32_t m_ID = 0;
+	uint32_t m_ID  = 0;
 	uint32_t m_pbo = 0;
 
-	uint8_t* m_data = nullptr;
-	float* m_dataHDR = nullptr;
+	uint8_t* m_data    = nullptr;
+	float*   m_dataHDR = nullptr;
 
-	bool m_isHDR = false;
-	bool m_isSTBBuffer= false;
+	bool m_isHDR       = false;
+	bool m_isSTBBuffer = false;
 	bool m_initialized = false;
-
 };
-
 } // Engine

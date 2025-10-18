@@ -3,28 +3,11 @@
 #include <span>
 
 #include "compute/program.hpp"
+#include "compute/access.hpp"
 
 
 namespace Engine::Compute
 {
-
-enum BufferAccess : uint16_t
-{
-	BufferAccess_DEVICE_READ_WRITE     = (1 << 0),
-	BufferAccess_DEVICE_WRITE_ONLY     = (1 << 1),
-	BufferAccess_DEVICE_READ_ONLY      = (1 << 2),
-	BufferAccess_DEVICE_USE_HOST_PTR   = (1 << 3),
-	BufferAccess_DEVICE_ALLOC_HOST_PTR = (1 << 4),
-	BufferAccess_DEVICE_COPY_HOST_PTR  = (1 << 5),
-	BufferAccess_HOST_WRITE_ONLY       = (1 << 7),
-	BufferAccess_HOST_READ_ONLY        = (1 << 8),
-	BufferAccess_HOST_NO_ACCESS        = (1 << 9),
-
-	// Common use-cases
-	BufferAccess_COPIED_READ_ONLY	   = BufferAccess_DEVICE_READ_ONLY | BufferAccess_DEVICE_COPY_HOST_PTR,
-};
-
-using access_flag_t = uint16_t;
 
 static constexpr bool BUFFER_OWNING = true;
 static constexpr bool BUFFER_BORROWED = false;
@@ -35,7 +18,7 @@ class Buffer
 
 public:
 
-	Buffer() = default;
+	Buffer() = delete;
 
 	~Buffer();
 
@@ -52,7 +35,7 @@ public:
 	 * @attention We prefer you use the constructor taking in an std::span<T> object.
 	 */
 	explicit Buffer( T* data, size_t numElements, access_flag_t access =
-			                 BufferAccess_DEVICE_READ_WRITE | BufferAccess_DEVICE_USE_HOST_PTR
+			                 Access_DEVICE_READ_WRITE | Access_DEVICE_USE_HOST_PTR
 			);
 
 	/**
@@ -60,13 +43,15 @@ public:
 	 * @param span The data as a span object.
 	 */
 	explicit Buffer( const std::span<T>& span, access_flag_t access =
-			                 BufferAccess_DEVICE_READ_WRITE | BufferAccess_DEVICE_USE_HOST_PTR );
+			                 Access_DEVICE_READ_WRITE | Access_DEVICE_USE_HOST_PTR );
 
 	void ChangeData( T* data, size_t numElements );
 
 	void ChangeData( const std::span<T>& span );
 
 	std::span<T>& GetData() { return m_data; }
+
+	void UpdateDevicePointer();
 
 	void EnqueueRead();
 
@@ -101,6 +86,10 @@ private:
 template <typename T, bool Owning>
 Buffer<T, Owning>::~Buffer()
 {
+	const cl_int err = clReleaseMemObject(m_buffer.get());
+	if (err != CL_SUCCESS)
+		Log::Error(std::format("Failed to release buffer object: {}", CLErrorString(err)));
+
 	if constexpr (Owning)
 		free(m_data.data());
 }
@@ -147,7 +136,7 @@ void Buffer<T, Owning>::ChangeData( T* data, size_t numElements )
 {
 	if constexpr (Owning)
 	{
-		delete m_data.data();
+		free(m_data.data());
 		m_data = std::span<T>{(T*)malloc(sizeof(T) * numElements), numElements};
 		memcpy((void*)m_data.data(), (void*)data, numElements * sizeof(T));
 	}
@@ -169,7 +158,7 @@ void Buffer<T, Owning>::ChangeData( const std::span<T>& span )
 {
 	if constexpr (Owning)
 	{
-		delete m_data.data();
+		free(m_data.data());
 		m_data = std::span<T>{(T*)malloc(sizeof(T) * span.size()), span.size()};
 		memcpy((void*)m_data.data(), (void*)span.data(), span.size_bytes());
 	}
@@ -185,6 +174,12 @@ void Buffer<T, Owning>::ChangeData( const std::span<T>& span )
 	};
 }
 
+
+template <typename T, bool Owning>
+void Buffer<T, Owning>::UpdateDevicePointer()
+{
+	Program::m_commandQueue.enqueueWriteBuffer(m_buffer, CL_BLOCKING, 0, m_data.size(), m_data.data());
+}
 
 template <typename T, bool Owning>
 void Buffer<T, Owning>::EnqueueRead()

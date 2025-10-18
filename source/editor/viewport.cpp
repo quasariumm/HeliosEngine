@@ -12,20 +12,20 @@ void Viewport::Draw()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
     if (ImGui::Begin(ICON_MONITOR_SCREENSHOT" Viewport"))
     {
+        ImVec2 screenSize = ImGui::GetContentRegionAvail();
         if (m_renderedImage != nullptr)
         {
             // Thanks envoyious! https://github.com/ocornut/imgui/issues/5118
-            ImVec2 screenSize = ImGui::GetContentRegionAvail();
-            float scale = std::min(screenSize.x / static_cast<float>(m_renderedImage->GetWidth()),
+            const float scale = std::min(screenSize.x / static_cast<float>(m_renderedImage->GetWidth()),
                                    screenSize.y / static_cast<float>(m_renderedImage->GetHeight()));
-            ImVec2 textureSize = ImVec2(static_cast<float>(m_renderedImage->GetWidth()) * scale,
+            const auto textureSize = ImVec2(static_cast<float>(m_renderedImage->GetWidth()) * scale,
                                         static_cast<float>(m_renderedImage->GetHeight()) * scale);
 
-            ImVec2 offset = (screenSize - textureSize) * 0.5f;
+            const ImVec2 offset = (screenSize - textureSize) * 0.5f;
             ImGui::SetCursorPos(ImGui::GetCursorStartPos() + offset);
             // Draw the final rendered image
             ImGui::Image(
-                (ImTextureID)(intptr_t)m_renderedImage->GetID(),
+                static_cast<ImTextureID>(static_cast<intptr_t>(m_renderedImage->GetID())),
                 ImVec2(
                     static_cast<float>(m_renderedImage->GetWidth()) * scale,
                     static_cast<float>(m_renderedImage->GetHeight()) * scale
@@ -37,11 +37,10 @@ void Viewport::Draw()
             //Log::Error("Something went wrong when trying to show the rendered image");
         }
 
-    	const auto size = ImGui::GetContentRegionAvail();
-    	if (size.x > 0.f && size.y > 0.f)
-			m_viewportSize = {size.x, size.y};
+    	if (screenSize.x > 0.f && screenSize.y > 0.f)
+    		m_viewportSize = {screenSize.x, screenSize.y};
 
-        DrawOverlay( ImVec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + ImGui::GetFontSize() * 2.0f), size);
+        DrawOverlay( ImVec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + ImGui::GetFontSize() * 2.0f), screenSize);
 
         ImGui::End();
     }

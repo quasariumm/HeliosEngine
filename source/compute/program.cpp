@@ -102,5 +102,5 @@ Kernel& Program::GetKernel( const std::string& name )
 	if (m_loadedKernels.contains(name))
 		return m_loadedKernels.at(name);
 
-	return m_loadedKernels.emplace(name, Kernel{cl::Kernel{m_program, name}}).first->second;
+	return m_loadedKernels.emplace(name, Kernel{name, cl::Kernel{m_program, name}}).first->second;
 }

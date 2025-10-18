@@ -8,21 +8,21 @@ __constant sampler_t texSampler = CLK_NORMALIZED_COORDS_TRUE |
 
 struct GeometryContext
 {
-    struct Material* materials;
-    struct Sphere* spheres;
-    struct Mesh* meshes;
-    struct BVHNode* bvhNodes;
-    struct Vertex* vertices;
-    uint* indices;
+    __global struct Material* materials;
+    __global struct Sphere* spheres;
+    __global struct Mesh* meshes;
+    __global struct BVHNode* bvhNodes;
+    __global struct Vertex* vertices;
+    __global uint* indices;
     uint numSpheres;
     uint numMeshes;
 };
 
 struct LightsContext
 {
-    struct DirectionalLight* directionalLights;
-    struct PointLight* pointLights;
-    struct SpotLight* spotLights;
+    __global struct DirectionalLight* directionalLights;
+    __global struct PointLight* pointLights;
+    __global struct SpotLight* spotLights;
     uint numDirectionalLights;
     uint numPointLights;
     uint numSpotLights;

@@ -27,27 +27,24 @@ void Renderer::Initialize()
 	m_intersectKernel = &m_program.GetKernel("GetIntersectionIdx");
 
 	// Create context buffers
-	m_geometryContext = Compute::Buffer{
-			new GeometryContext{},
-			1,
-			Compute::BufferAccess_COPIED_READ_ONLY
-	};
-	m_lightsContext = Compute::Buffer{
-			new LightsContext{},
-			1,
-			Compute::BufferAccess_COPIED_READ_ONLY
-	};
-	m_skyboxInfo = Compute::Buffer{
-			new SkyboxInfo{},
-			1,
-			Compute::BufferAccess_COPIED_READ_ONLY
-	};
+	auto* geomCtx = new GeometryContext{};
+	m_geometryContext.ChangeData(geomCtx, 1);
+	delete geomCtx;
+	auto* lightsCtx = new LightsContext{};
+	m_lightsContext.ChangeData(lightsCtx, 1);
+	delete lightsCtx;
+	auto* skyboxInfo = new SkyboxInfo{};
+	m_skyboxInfo.ChangeData(skyboxInfo, 1);
+	delete skyboxInfo;
 
 	// Initialise texture
 	const glm::uvec2 viewportSize = Systems::GetViewport()->GetViewportSize();
 	m_renderTexture.FillBlank(viewportSize.x, viewportSize.y, 4, TextureFormat::RGBA32F, true);
 
 	Systems::GetViewport()->SetRenderImage(&m_renderTexture);
+
+	// Set out texture and viewport size
+	m_raytraceKernel->SetArguments(0, *m_renderTexture.GetImage(), glmToCL(viewportSize));
 }
 
 
@@ -66,10 +63,13 @@ void Renderer::Clear() const
 
 void Renderer::Render()
 {
+	// No-op if kernel is null
+	if (m_raytraceKernel == nullptr)
+		return;
 	// Fill/Override the geometry context
 	auto* geomCtx = m_geometryContext.GetData().data();
 
-	auto AssignData = []<typename T>( Compute::Buffer<T>& buffer, T*& data, uint32_t* count = nullptr ) -> void
+	auto AssignData = []<typename T>( Compute::Buffer<T>& buffer, cl_mem& data, uint32_t* count = nullptr ) -> void
 	{
 		std::vector<T> vec;
 		ECS::Registry()->view<T>().each([&vec]( const T& o )
@@ -77,11 +77,13 @@ void Renderer::Render()
 			vec.push_back(o);
 		});
 		buffer.ChangeData(vec.data(), vec.size());
-		data = buffer.GetData().data();
+		if (!vec.empty())
+			data = buffer.GetBuffer().get();
 		if (count)
 			*count = vec.size();
 	};
 
+	// Fill/Override the geometry context
 	// Materials
 	AssignData(m_materials, geomCtx->materials);
 	// Spheres
@@ -94,7 +96,6 @@ void Renderer::Render()
 
 	// Directional lights
 	AssignData(m_directionalLights, lightsCtx->directionalLights, &lightsCtx->numDirectionalLights);
-
 	// Point lights
 	AssignData(m_pointLights, lightsCtx->pointLights, &lightsCtx->numPointLights);
 
@@ -110,6 +111,11 @@ void Renderer::Render()
 	skyboxInfo->sunFocus         = 150.f;
 	skyboxInfo->sunIntensity     = 3.f;
 	skyboxInfo->useSkyboxTexture = false;
+
+	// Update device pointers
+	m_geometryContext.UpdateDevicePointer();
+	m_lightsContext.UpdateDevicePointer();
+	m_skyboxInfo.UpdateDevicePointer();
 
 	// NOTE: This is just a reference
 	// __read_write image2d_t outImage, uint2 screenDimensions, float16 camToWorld, float16 vp, float16 prevVP, float3 viewParams, uint frame,
@@ -128,45 +134,35 @@ void Renderer::Render()
 	    || m_renderTexture.GetHeight() != viewportSize.y)
 	{
 		m_renderTexture.FillBlank(viewportSize.x, viewportSize.y, 4, TextureFormat::RGBA32F, true);
+		// Set out texture and viewport size
+		m_raytraceKernel->SetArguments(0, *m_renderTexture.GetImage(), glmToCL(viewportSize));
 		// Reset the frame to clear accumulator since the texture has a new size thus faulty data
 		m_frame = 0;
 	}
 
-	// Set out texture
-	m_raytraceKernel->SetArguments(0, m_renderTexture.GetImage());
-
 	// Set viewport and camera parameters
-	m_raytraceKernel->SetArguments(1, glmToCL(viewportSize), glmToCL(camToWorld), glmToCL(vp), glmToCL(m_prevVP),
+	m_raytraceKernel->SetArguments(2, glmToCL(camToWorld), glmToCL(vp), glmToCL(m_prevVP),
 	                               glmToCL(Systems::GetCamera()->GetViewportParameters(viewportSize)), m_frame);
 
 	// Set skybox info
 	// TODO: Make filler texture object for this
-	m_raytraceKernel->SetArguments(7, m_renderTexture.GetImage());
+	m_raytraceKernel->SetArguments(7, *m_renderTexture.GetImage());
 	m_raytraceKernel->SetArguments(8, *m_skyboxInfo);
 
 	// Set contexts
 	m_raytraceKernel->SetArguments(9, *m_geometryContext, *m_lightsContext);
 
-	const glm::uvec2 groups = (viewportSize + 7u) >> 3u;
+	const glm::uvec2 groups = (viewportSize + 15u) >> 4u;
 
 	std::flush(std::cout);
-	m_raytraceKernel->Run(groups, glm::uvec2{8, 8});
+	m_raytraceKernel->Run(groups, glm::uvec2{16, 16});
 
-
-	// Hacky. TODO: Change to separate Image2D class in Compute namespace
-	Compute::Program::m_commandQueue.enqueueReadImage(
-		m_renderTexture.GetImage(), CL_BLOCKING,
-		cl::array<size_t, 3>{0},
-		cl::array<size_t, 3>{static_cast<size_t>(m_renderTexture.GetWidth()), static_cast<size_t>(m_renderTexture.GetHeight()), 0ull}, \
-		0, 0,
-		m_renderTexture.GetDataHDR()
-	);
+	m_renderTexture.GetImage().EnqueueRead();
 
 #ifdef HELIOS_API_GL46
-	m_renderTexture.UpdateData();
+	m_renderTexture.Use(0, true);
 #endif
 
-	m_program.Finish();
 	m_frame++;
 
 	m_prevVP = vp;

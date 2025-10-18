@@ -173,16 +173,12 @@ __kernel void Raytrace(
     __global struct LightsContext* lightsContext
 )
 {
-    size_t id = get_global_id(0);
-	int2 texelCoord = (int2)(id % screenDimensions.x, id / screenDimensions.x);
+	int2 texelCoord = (int2)(get_global_id(0), get_global_id(1));
 	
 	if (texelCoord.x >= screenDimensions.x || texelCoord.y >= screenDimensions.y)
 		return;
-
+		
 	float2 tc = (float2)(texelCoord.x, texelCoord.y) / (float2)(screenDimensions.x, screenDimensions.y);
-
-	write_imagef(outImage, texelCoord, (float4)(tc, 0.f, 1.f));
-	return;
 
 	float3 focusDirLocal = (float3)((tc - 0.5f) * viewParams.xy, viewParams.z);
 	float3 focusDir = normalize(transform_point(camToWorld, focusDirLocal).xyz);
@@ -201,57 +197,57 @@ __kernel void Raytrace(
 	float4 pixel = (float4)(Trace(&ray, seed, &firstRay, skyboxTexture, skyboxInfo, geometryContext, lightsContext), 1.f);
 	pixel = max(pixel, (float4)(0.f, 0.f, 0.f, 1.f));
     
-    // #ifdef REPROJECTION
-	// if (!ClearAccumulator && firstRay.hit.didHit)
-    // {
-	// 	vec4 accumulatorColor;
+    #ifdef REPROJECTION
+	if (frame != 0 && firstRay.hit.hit)
+    {
+		float4 accumulatorColor;
 		
-	// 	#ifdef REPROJECTION_BILERP
-	// 	//Bilinear interpolation
-	// 	if (tc.x >= 0 && tc.x < ScreenWidth - 2 && tc.y >= 0 && tc.y < ScreenHeight - 2)
-	// 	{
-	// 		vec4 currNDC = vec4(tc * 2.0 - 1.0, firstRay.hit.dst, 1.0);
-	// 		vec4 worldPos = inverse(VPMat) * currNDC;
-	// 		worldPos /= worldPos.w;
+		#ifdef REPROJECTION_BILERP
+		//Bilinear interpolation
+		if (tc.x >= 0 && tc.x < screenDimensions.x - 2 && tc.y >= 0 && tc.y < screenDimensions.y - 2)
+		{
+			float4 currNDC = (float4)(tc * 2.f - 1.f, firstRay.hit.dst, 1.f);
+			float4 worldPos = inverse_mat4(vp) * currNDC;
+			worldPos /= worldPos.w;
 
-	// 		vec4 prevNDC = PrevVPMat * worldPos;
-	// 		vec2 prevUV = (prevNDC.xy / prevNDC.w) * 0.5 + 0.5;
-	// 		vec2 clampedPrevUV = clamp(prevUV, vec2(0.0), vec2(1.0 - 1.0 / vec2(ScreenWidth, ScreenHeight)));
-	// 		ivec2 prevTexelCoord = ivec2(clampedPrevUV * vec2(ScreenWidth, ScreenHeight));
+			float4 prevNDC = mat4_mul_vec4(prevVP, worldPos);
+			float2 prevUV = (prevNDC.xy / prevNDC.w) * 0.5f + 0.5f;
+			float2 clampedPrevUV = clamp(prevUV, (float2)(0.f), (float2)(1.f - 1.f / (float2)(screenDimensions.x, screenDimensions.y)));
+			int2 prevTexelCoord = (int2)(clampedPrevUV * (float2)(screenDimensions.x, screenDimensions.y));
 			
-	// 		float fx = fract( prevTexelCoord.x ), fy = fract( prevTexelCoord.y );
-	// 		float w0 = (1 - fx) * (1 - fy);
-	// 		float w1 = fx * (1 - fy);
-	// 		float w2 = (1 - fx) * fy;
-	// 		float w3 = fx * fy;
+			float fx = fract( prevTexelCoord.x ), fy = fract( prevTexelCoord.y );
+			float w0 = (1.f - fx) * (1.f - fy);
+			float w1 = fx * (1.f - fy);
+			float w2 = (1.f - fx) * fy;
+			float w3 = fx * fy;
 			
-	// 		vec4 p0 = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
-	// 		vec4 p1 = SamplePrevColor(vec2(tc.x + 1, tc.y), firstRay.hit.dst); // (x+1,y)
-	// 		vec4 p2 = SamplePrevColor(vec2(tc.x, tc.y + 1), firstRay.hit.dst); // (x,y+1)
-	// 		vec4 p3 = SamplePrevColor(vec2(tc.x + 1, tc.y+ 1), firstRay.hit.dst); // (x+1,y+1)
-	// 		accumulatorColor = p0 * w0 + p1 * w1 + p2 * w2 + p3 * w3;
-	// 	}
-	// 	else
-	// 	{
-	// 		accumulatorColor = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
-	// 	}
-	// 	#else //REPROJECTION_NO_BILERP
+			float4 p0 = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
+			float4 p1 = SamplePrevColor((float2)(tc.x + 1.f, tc.y), firstRay.hit.dst); // (x+1,y)
+			float4 p2 = SamplePrevColor((float2)(tc.x, tc.y + 1.f), firstRay.hit.dst); // (x,y+1)
+			float4 p3 = SamplePrevColor((float2)(tc.x + 1.f, tc.y+ 1.f), firstRay.hit.dst); // (x+1,y+1)
+			accumulatorColor = p0 * w0 + p1 * w1 + p2 * w2 + p3 * w3;
+		}
+		else
+		{
+			accumulatorColor = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
+		}
+		#else //REPROJECTION_NO_BILERP
 
-	// 	accumulatorColor = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
+		accumulatorColor = SamplePrevColor(tc, firstRay.hit.dst); // (x,y)
 		
-	// 	#endif //REPROJECTION_BILERP
+		#endif //REPROJECTION_BILERP
 		
-    //     pixel = mix(accumulatorColor, pixel, 0.01);
-    //     pixel.a = 1.0;
-    // }
-    // #elif defined(ACCUMULATION)
+        pixel = mix(accumulatorColor, pixel, 0.01);
+        pixel.a = 1.0;
+    }
+    #elif defined(ACCUMULATION)
 	if (frame != 0)
     {
         float4 accumulatorColor = read_imagef(outImage, texelCoord);
         pixel = mix(accumulatorColor, pixel, 1.f / (float)(frame + 1));
         pixel.a = 1.0;
     }
-    // #endif // ACCUMULATION
+    #endif // ACCUMULATION
 
 	write_imagef(outImage, texelCoord, pixel);
 }
