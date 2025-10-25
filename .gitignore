@@ -448,3 +448,4 @@ FodyWeavers.xsd
 # Other
 imgui.ini
 latest-log.md
+/shaders/opencl/.vscode/settings.json
