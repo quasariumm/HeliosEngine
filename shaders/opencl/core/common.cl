@@ -1,10 +1,7 @@
 #ifndef COMMON_CL_
 #define COMMON_CL_
 
-__constant sampler_t texSampler = CLK_NORMALIZED_COORDS_TRUE |
-                                  CLK_ADDRESS_CLAMP_TO_EDGE |
-                                  CLK_FILTER_NEAREST;
-
+#include "core/images.cl"
 
 struct GeometryContext
 {
@@ -30,7 +27,8 @@ struct LightsContext
 };
 
 
-float4 mat4_mul_vec4(float16 m, float4 v) {
+float4 mat4_mul_vec4(float16 m, float4 v) 
+{
     return (float4)(
         dot(m.s0123, v),
         dot(m.s4567, v),
@@ -39,7 +37,8 @@ float4 mat4_mul_vec4(float16 m, float4 v) {
     );
 }
 
-float4 transform_point(float16 mat, float3 position) {
+float4 transform_point(float16 mat, float3 position) 
+{
     float4 v = (float4)(position, 1.f);
     return (float4)(
         dot(mat.s0123, v),
@@ -49,7 +48,8 @@ float4 transform_point(float16 mat, float3 position) {
     );
 }
 
-float4 transform_vector(float16 mat, float3 vector) {
+float4 transform_vector(float16 mat, float3 vector) 
+{
     float4 v = (float4)(vector, 0.f);
     return (float4)(
         dot(mat.s0123, v),
@@ -61,7 +61,8 @@ float4 transform_vector(float16 mat, float3 vector) {
 
 // Inverts a 4x4 matrix stored as float16 (row-major)
 // Returns true if successful, false if matrix is singular
-bool inverse_mat4(float16 m, float16* inv) {
+bool inverse_mat4(float16 m, float16* inv) 
+{
     float16 temp;
     float det;
     
@@ -118,7 +119,8 @@ bool inverse_mat4(float16 m, float16* inv) {
     det = m.s0 * temp.s0 + m.s1 * temp.s4 + m.s2 * temp.s8 + m.s3 * temp.sC;
     
     // Check if matrix is singular
-    if (fabs(det) < 1e-9f) {
+    if (fabs(det) < 1e-9f) 
+    {
         return false;
     }
     

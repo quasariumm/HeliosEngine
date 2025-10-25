@@ -24,7 +24,7 @@ struct SkyboxInfo
 
 float3 GetSkyboxColor(
     struct Ray* ray, 
-    image2d_t skyboxTexture,
+    struct HDRTexture* skyboxTexture,
     struct SkyboxInfo* skyboxInfo
 )
 {
@@ -36,7 +36,7 @@ float3 GetSkyboxColor(
 		if (u > 1.f || u < 0.f || v > 1.f || v < 0.f)
 			return (float3)(0.f);
 
-		const float3 pixel = sqrt(read_imagef(skyboxTexture, texSampler, (float2)(u, v)).xyz);
+		const float3 pixel = sqrt(SamplefHDRImage3(skyboxTexture, (float2)(u, v)));
 
 		return 0.55f * pixel;
 	}
@@ -56,7 +56,7 @@ float3 GetSkyboxColor(
 
 float3 Trace(
     struct Ray* ray, uint seed, struct Ray* firstRay,
-    image2d_t skyboxTexture, struct SkyboxInfo* skyboxInfo,
+    struct HDRTexture* skyboxTexture, struct SkyboxInfo* skyboxInfo,
     struct GeometryContext* geometryContext,
     struct LightsContext* lightsContext
 )
@@ -64,6 +64,8 @@ float3 Trace(
 	float3 incommingLight = (float3)(0.f);
 	float3 rayColor = (float3)(1.f);
 	float3 mixedColor = (float3)(1.f); /* For determining the light */
+
+	return (float3)(0.1f, 0.4f, 0.6f);
 
 	for (int i = 0; i < 10; ++i)
 	{
@@ -139,7 +141,7 @@ float3 Trace(
 	return incommingLight;
 }
 
-float4 SamplePrevColor(float2 PixelCoord, float depth, float16 VPMat, float16 PrevVPMat, uint2 screenDimensions, image2d_t outImage, sampler_t texSampler)
+float4 SamplePrevColor(float2 PixelCoord, float depth, float16 VPMat, float16 PrevVPMat, uint2 screenDimensions, struct HDRTexture* outTexture)
 {
 	// Convert pixel coordinate and depth to NDC
 	float4 currNDC = (float4)(PixelCoord * 2.f - 1.f, -depth/1e30f * 2.f - 1.f, 1.f);
@@ -163,12 +165,12 @@ float4 SamplePrevColor(float2 PixelCoord, float depth, float16 VPMat, float16 Pr
 	float2 tmp = round(prevTexelCoord);
     int2 prevPixelCoord = (int2)((int)tmp.x, (int)tmp.y);
 
-	return read_imagef(outImage, texSampler, prevPixelCoord);
+	return SampleiHDRImage4(outTexture, prevPixelCoord);
 }
 
 __kernel void Raytrace(
-    __read_write image2d_t outImage, uint2 screenDimensions, float16 camToWorld, float16 vp, float16 prevVP, float3 viewParams, ulong frame,
-    __read_only image2d_t skyboxTexture, __global struct SkyboxInfo* skyboxInfo,
+    __global struct HDRTexture* outTexture, uint2 screenDimensions, float16 camToWorld, float16 vp, float16 prevVP, float3 viewParams, ulong frame,
+    __global struct HDRTexture* skyboxTexture, __global struct SkyboxInfo* skyboxInfo,
     __global struct GeometryContext* geometryContext,
     __global struct LightsContext* lightsContext
 )
@@ -179,6 +181,9 @@ __kernel void Raytrace(
 		return;
 		
 	float2 tc = (float2)(texelCoord.x, texelCoord.y) / (float2)(screenDimensions.x, screenDimensions.y);
+
+	WriteHDRImage4(outTexture, texelCoord, (float4)(tc, 0.f, 1.f));
+	return;
 
 	float3 focusDirLocal = (float3)((tc - 0.5f) * viewParams.xy, viewParams.z);
 	float3 focusDir = normalize(transform_point(camToWorld, focusDirLocal).xyz);
@@ -243,13 +248,13 @@ __kernel void Raytrace(
     #elif defined(ACCUMULATION)
 	if (frame != 0)
     {
-        float4 accumulatorColor = read_imagef(outImage, texelCoord);
+        float4 accumulatorColor = SampleiHDRImage4(outTexture, texelCoord);
         pixel = mix(accumulatorColor, pixel, 1.f / (float)(frame + 1));
         pixel.a = 1.0;
     }
     #endif // ACCUMULATION
 
-	write_imagef(outImage, texelCoord, pixel);
+	WriteHDRImage4(outTexture, texelCoord, pixel);
 }
 
 

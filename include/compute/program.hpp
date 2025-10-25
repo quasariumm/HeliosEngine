@@ -49,7 +49,7 @@ private:
 	template <typename T, bool Owning>
 	friend class Buffer;
 	template <typename T, bool Owning>
-		requires std::is_integral_v<T> || std::is_floating_point_v<T>
+		requires std::is_same_v<std::decay_t<T>, uint8_t> || std::is_floating_point_v<T>
 	friend class Image2D;
 
 	friend class ::Engine::GL46_Texture2D;

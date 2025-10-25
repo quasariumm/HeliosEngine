@@ -1,5 +1,6 @@
 #include "rendering/renderer.hpp"
 
+#include "stb_image.h"
 #include "components/light_components.hpp"
 #include "components/render_components.hpp"
 #include "editor/editor_menus.hpp"
@@ -40,6 +41,11 @@ void Renderer::Initialize()
 	// Initialise texture
 	const glm::uvec2 viewportSize = Systems::GetViewport()->GetViewportSize();
 	m_renderTexture.FillBlank(viewportSize.x, viewportSize.y, 4, TextureFormat::RGBA32F, true);
+
+	int w, h, c;
+	float* data = stbi_loadf("assets/qwantani_morning_puresky_4k.hdr", &w, &h, &c, 3);
+	m_skyboxImage.ChangeData(data, w * h * c, w, h, c);
+	stbi_image_free(data);
 
 	Systems::GetViewport()->SetRenderImage(&m_renderTexture);
 
@@ -146,7 +152,7 @@ void Renderer::Render()
 
 	// Set skybox info
 	// TODO: Make filler texture object for this
-	m_raytraceKernel->SetArguments(7, *m_renderTexture.GetImage());
+	m_raytraceKernel->SetArguments(7, *m_skyboxImage);
 	m_raytraceKernel->SetArguments(8, *m_skyboxInfo);
 
 	// Set contexts
@@ -156,8 +162,6 @@ void Renderer::Render()
 
 	std::flush(std::cout);
 	m_raytraceKernel->Run(groups, glm::uvec2{16, 16});
-
-	m_renderTexture.GetImage().EnqueueRead();
 
 #ifdef HELIOS_API_GL46
 	m_renderTexture.Use(0, true);

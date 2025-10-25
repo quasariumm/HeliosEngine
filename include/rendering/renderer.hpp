@@ -42,6 +42,7 @@ private:
 
 	// TODO(Patrick): Change to interface class
 	GL46_Texture2D m_renderTexture;
+	Compute::hdrImage2D_t<> m_skyboxImage{Compute::Access_DEVICE_USE_HOST_PTR | Compute::Access_DEVICE_READ_WRITE};
 
 	uint64_t m_frame = 0;
 

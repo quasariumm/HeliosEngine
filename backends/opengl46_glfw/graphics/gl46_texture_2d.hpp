@@ -152,8 +152,9 @@ public:
 
 private:
 
+	// TODO: Change this to an option when constructing
 	Compute::Image2D<float, Compute::IMAGE_BORROWED> m_clImage2D{
-			Compute::Access::Access_DEVICE_COPY_HOST_PTR | Compute::Access::Access_DEVICE_READ_WRITE};
+			Compute::Access::Access_DEVICE_USE_HOST_PTR | Compute::Access::Access_DEVICE_READ_WRITE};
 	uint32_t m_clBufferFormat = 0;
 
 	TextureFormat m_internalFormat   = TextureFormat::RGBA8;
