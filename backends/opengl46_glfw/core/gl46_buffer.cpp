@@ -35,7 +35,7 @@ void GL46_Buffer::Init(BufferType type)
 {
 	m_type = type;
 	glGenBuffers( 1, &m_bufferID );
-	glBindBuffer( GLBufferType[(uint8_t)type], m_bufferID );
+	glBindBuffer( GLBufferType[static_cast<uint8_t>(type)], m_bufferID );
 }
 
 
@@ -46,18 +46,18 @@ void GL46_Buffer::Bind()
 		//DebugLog(LogSeverity::INFO, L"Tried to use Bind() on a non-initialised buffer.");
 		return;
 	}
-	glBindBuffer( GLBufferType[(uint8_t)m_type], m_bufferID );
+	glBindBuffer( GLBufferType[static_cast<uint8_t>(m_type)], m_bufferID );
 }
 
 
-void GL46_Buffer::BindBase( uint32_t base )
+void GL46_Buffer::BindBase( const uint32_t base )
 {
 	if (m_bufferID == 0)
 	{
 		//DebugLog(LogSeverity::INFO, L"Tried to use BindBase() on a non-initialised buffer.");
 		return;
 	}
-	glBindBufferBase(GLBufferType[(uint8_t)m_type], base, m_bufferID);
+	glBindBufferBase(GLBufferType[static_cast<uint8_t>(m_type)], base, m_bufferID);
 }
 
 
@@ -75,7 +75,7 @@ void GL46_Buffer::Fill( const size_t size, const void* data ) const
 		//DebugLog(LogSeverity::INFO, L"Tried to use FillNone() on a non-initialised buffer.");
 		return;
 	}
-	glNamedBufferStorage( m_bufferID, size, data, GL_DYNAMIC_STORAGE_BIT );
+	glNamedBufferStorage( m_bufferID, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT );
 }
 
 
@@ -86,7 +86,7 @@ void GL46_Buffer::SubData( const size_t offset, const size_t size, const void* d
 		//DebugLog(LogSeverity::INFO, L"Tried to use SubData() on a non-initialised buffer.");
 		return;
 	}
-	glNamedBufferSubData( m_bufferID, offset, size, data );
+	glNamedBufferSubData( m_bufferID, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data );
 }
 
 
@@ -94,9 +94,9 @@ void* GL46_Buffer::Map( BufferAccess access, const size_t offset, const size_t l
 {
 	if (offset == -1 && length == -1)
 	{
-		return glMapNamedBuffer(m_bufferID, GLBufferAccess[(uint8_t)access]);
+		return glMapNamedBuffer(m_bufferID, GLBufferAccess[static_cast<uint8_t>(access)]);
 	}
-	return glMapNamedBufferRange(m_bufferID, offset, length, GLBufferAccess[(uint8_t)access]);
+	return glMapNamedBufferRange(m_bufferID, offset, length, GLBufferAccess[static_cast<uint8_t>(access)]);
 }
 
 

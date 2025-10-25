@@ -10,14 +10,14 @@
 namespace glm
 {
 template <class Archive>
-void serialize( Archive& archive, glm::vec3& v )
+void serialize( Archive& archive, vec3& v )
 {
 	archive(CEREAL_NVP(v.x), CEREAL_NVP(v.y), CEREAL_NVP(v.z));
 }
 
 
 template <class Archive>
-void serialize( Archive& archive, glm::quat& q )
+void serialize( Archive& archive, quat& q )
 {
 	archive(CEREAL_NVP(q.w), CEREAL_NVP(q.x), CEREAL_NVP(q.y), CEREAL_NVP(q.z));
 }
@@ -26,7 +26,6 @@ void serialize( Archive& archive, glm::quat& q )
 
 namespace Engine::Components
 {
-
 struct Transform final : BaseComponent
 {
 	Transform() = default;
@@ -124,8 +123,8 @@ struct Transform final : BaseComponent
 	void RotateAxis( const glm::vec3& axis, const float& degrees )
 	{
 		MarkDirty();
-		glm::quat rot = glm::angleAxis(glm::radians(degrees), glm::normalize(axis));
-		rotation      = rot * rotation;
+		const glm::quat rot = glm::angleAxis(glm::radians(degrees), glm::normalize(axis));
+		rotation            = rot * rotation;
 	}
 
 
@@ -152,10 +151,10 @@ struct Transform final : BaseComponent
 	{
 		if (dirty)
 		{
-			glm::mat4 model_translate = glm::translate(glm::mat4(1.0f), position);
-			glm::mat4 model_rotate    = glm::mat4_cast(rotation);
-			glm::mat4 model_scale     = glm::scale(glm::mat4(1.0f), scale);
-			transform                 = model_translate * model_rotate * model_scale;
+			const glm::mat4 modelTranslate = glm::translate(glm::mat4(1.0f), position);
+			const glm::mat4 modelRotate    = glm::mat4_cast(rotation);
+			const glm::mat4 modelScale     = glm::scale(glm::mat4(1.0f), scale);
+			transform                      = modelTranslate * modelRotate * modelScale;
 
 			dirty = false;
 		}
@@ -299,6 +298,4 @@ REGISTER_COMPONENT(ChildObject, "Child Object", NONE);
 // Add to object to mark for delete
 struct DeleteMarker
 {};
-
-
 }

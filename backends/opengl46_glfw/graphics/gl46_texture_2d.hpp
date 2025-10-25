@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 #pragma once
 
 namespace Engine
@@ -126,16 +127,16 @@ public:
 	[[nodiscard]]
 	float* GetDataHDR() const;
 
-	/**
-	 * @brief Gives you the OpenCL texture object
-	 * @return The internal CL image object
-	 */
-	[[nodiscard]]
-	cl::Image2D GetImage() const;
+	// /**
+	//  * @brief Gives you the OpenCL texture object
+	//  * @return The internal CL image object
+	//  */
+	// [[nodiscard]]
+	// cl::Image2D GetImage() const;
 
 private:
 
-	cl::Image2D m_clImage2D;
+	// cl::Image2D m_clImage2D;
 	uint32_t m_clBufferFormat = 0;
 
 	TextureFormat m_internalFormat = TextureFormat::RGBA8;
@@ -148,14 +149,14 @@ private:
 	int32_t m_channels = 0;
 	size_t m_textureByteSize = 0ull;
 
-	uint32_t m_ID = 0;
+	uint32_t m_id = 0;
 	uint32_t m_pbo = 0;
 
 	uint8_t* m_data = nullptr;
-	float* m_dataHDR = nullptr;
+	float* m_dataHdr = nullptr;
 
-	bool m_isHDR = false;
-	bool m_isSTBBuffer= false;
+	bool m_isHdr = false;
+	bool m_isStbBuffer= false;
 	bool m_initialized = false;
 
 };

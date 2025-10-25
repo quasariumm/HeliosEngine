@@ -77,16 +77,16 @@ using namespace Microsoft::WRL;
 #endif
 
 // Include common STL libraries
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cfloat>
 #include <chrono>
 #include <climits>
 #include <cmath>
 #include <complex>
-#include <cstdio>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -107,8 +107,8 @@ using namespace Microsoft::WRL;
 #include <vector>
 
 // C++ 20 features
-#include <concepts>
 #include <compare>
+#include <concepts>
 #include <numbers>
 #include <type_traits>
 
@@ -133,12 +133,12 @@ using namespace Microsoft::WRL;
 
 // Engine libraries
 #include "core/common.hpp"
-#include "tools/random.hpp"
-#include "tools/timer.hpp"
-#include "debugging/logger.hpp"
 #include "core/systems.hpp"
+#include "debugging/logger.hpp"
 #include "tools/icon_defines.hpp"
+#include "tools/random.hpp"
 #include "tools/scene.hpp"
+#include "tools/timer.hpp"
 
 // Jolt
 // TODO(Quillan): Add a way to turn off debug rendering
@@ -148,15 +148,15 @@ using namespace Microsoft::WRL;
 
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
-#include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
+#include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Body/BodyActivationListener.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Collision/ObjectLayer.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
-#include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Body/BodyActivationListener.h>
 
 // #include <Jolt/Renderer/DebugRenderer.h>
 // #include <Jolt/Renderer/DebugRendererSimple.h>

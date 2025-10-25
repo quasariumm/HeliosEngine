@@ -7,9 +7,9 @@
 #include <float.h>
 #include <limits.h>
 #include <math.h>
-#include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #endif // PCH_C_H_

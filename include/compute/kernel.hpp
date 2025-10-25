@@ -5,10 +5,8 @@
 
 namespace Engine::Compute
 {
-
 class Kernel
 {
-
 public:
 
 	Kernel() = delete;
@@ -22,7 +20,7 @@ public:
 	 * @attention For any type in Engine::Compute, use the dereference operator (*) as the argument <br>
 	 *		E.g.: kernel.SetArguments(*buffer, *texture);
 	 */
-	template<typename... Args>
+	template <typename... Args>
 	void SetArguments( int startIdx, Args&&... args )
 	{
 		(SetArgument(startIdx, std::forward<Args>(args)), ...);
@@ -62,23 +60,19 @@ public:
 
 private:
 
-	template<typename T>
+	template <typename T>
 	void SetArgument( int& startIdx, T&& arg )
 	{
 		cl_int err;
 
-		using DecayT = std::decay_t<T>;
+		using decay_t = std::decay_t<T>;
 
-		// For cl::Buffer, cl::Image, and other OpenCL C++ wrapper types
-		if constexpr (std::is_base_of_v<cl::Memory, DecayT>)
-		{
+		if constexpr (std::is_base_of_v<cl::Memory, decay_t>)
+			// For cl::Buffer, cl::Image, and other OpenCL C++ wrapper types
 			err = m_kernel.setArg(startIdx++, std::forward<T>(arg));
-		}
-		// For all POD types (scalars, vectors, etc.)
 		else
-		{
-			err = clSetKernelArg(m_kernel(), startIdx++, sizeof(DecayT), &arg);
-		}
+			// For all POD types (scalars, vectors, etc.)
+			err = clSetKernelArg(m_kernel(), startIdx++, sizeof(decay_t), &arg);
 
 		if (err != CL_SUCCESS)
 			Log::Error(std::format("Argument of type {} failed to set. Error: {}",
@@ -89,13 +83,10 @@ private:
 	friend class Program;
 
 
-	explicit Kernel( cl::Kernel kernel )
-		: m_kernel{std::move(kernel)}
-	{
-	};
+	explicit Kernel( cl::Kernel kernel ) :
+		m_kernel{std::move(kernel)}
+	{};
 
 	cl::Kernel m_kernel;
-
 };
-
 } // namespace Engine::Graphics

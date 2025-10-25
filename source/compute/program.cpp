@@ -37,12 +37,12 @@ void Program::Initialize()
 	                      m_device.getInfo<CL_DEVICE_VERSION>()));
 
 #ifdef HELIOS_API_GL46
-	GLFWwindow* window = glfwGetCurrentContext();
-	cl_context_properties props[] = {
-		CL_GL_CONTEXT_KHR, (cl_context_properties)glfwGetWGLContext(window),
-		CL_WGL_HDC_KHR, (cl_context_properties)GetDC(glfwGetWin32Window(window)),
-		CL_CONTEXT_PLATFORM, (cl_context_properties)m_platform(),
-		0
+	GLFWwindow*                 window  = glfwGetCurrentContext();
+	const cl_context_properties props[] = {
+			CL_GL_CONTEXT_KHR, reinterpret_cast<cl_context_properties>(glfwGetWGLContext(window)),
+			CL_WGL_HDC_KHR, reinterpret_cast<cl_context_properties>(GetDC(glfwGetWin32Window(window))),
+			CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(m_platform()),
+			0
 	};
 	m_context = cl::Context{m_device, props, nullptr, nullptr, &err};
 	if (err != CL_SUCCESS)
@@ -55,7 +55,9 @@ void Program::Initialize()
 }
 
 
-cl::Program& Program::LoadFromFile( const std::filesystem::path& path, const std::string& includeDir, const std::vector<std::string>& includeSources )
+cl::Program& Program::LoadFromFile( const std::filesystem::path&    path,
+                                    const std::string&              includeDir,
+                                    const std::vector<std::string>& includeSources )
 {
 	cl::Program::Sources sources{1, LoadFile(path)};
 	sources.insert(sources.begin(), includeSources.begin(), includeSources.end());
@@ -69,18 +71,19 @@ cl::Program& Program::LoadFromFile( const std::filesystem::path& path, const std
 
 	if (const auto err = m_program.build(m_device, buildOptions.c_str());
 		err != CL_SUCCESS)
-		Log::Error(std::format("Failed to build compute program {}. See log below. CL error: {}", path.string(), CLErrorString(err)));
+		Log::Error(std::format("Failed to build compute program {}. See log below. CL error: {}", path.string(),
+		                       CLErrorString(err)));
 	// Get the size of the build log
-	size_t log_size;
+	size_t logSize;
 	clGetProgramBuildInfo(m_program.get(), m_device.get(), CL_PROGRAM_BUILD_LOG,
-						  0, NULL, &log_size);
+	                      0, nullptr, &logSize);
 
 	// Allocate memory for the log
-	auto *log = static_cast<char*>(malloc(log_size));
+	auto* log = static_cast<char*>(malloc(logSize));
 
 	// Get the actual build log
 	clGetProgramBuildInfo(m_program.get(), m_device.get(), CL_PROGRAM_BUILD_LOG,
-						  log_size, log, NULL);
+	                      logSize, log, nullptr);
 
 	Log::Info(std::format("Build log:\n{}\n", log));
 	free(log);
@@ -89,10 +92,10 @@ cl::Program& Program::LoadFromFile( const std::filesystem::path& path, const std
 }
 
 
-void Program::Finish() const
+void Program::Finish()
 {
-	cl_int err = m_commandQueue.finish();
-	if (err != CL_SUCCESS)
+	if (const cl_int err = m_commandQueue.finish();
+		err != CL_SUCCESS)
 		Log::Error(std::format("Failed to finish command queue. Error: {}", CLErrorString(err)));
 }
 

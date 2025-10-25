@@ -5,14 +5,13 @@
 
 namespace Engine::Components
 {
-
 struct Sphere final : BaseComponent
 {
 	Sphere() = default;
 
 
-	Sphere( const float r, const glm::vec3& pos )
-		: radius(r), position(pos) {}
+	Sphere( const float r, const glm::vec3& pos ) :
+		radius(r), position(pos) {}
 
 
 	template <typename Archive>
@@ -67,7 +66,7 @@ struct Material final : BaseComponent
 		uint8_t glossy       : 1 = 1u;
 		uint8_t specular     : 1 = 1u;
 		uint8_t bitPadding   : 2 = 0u;
-		char    padding[3]{0};
+		char    padding[3];
 
 	private:
 
@@ -88,7 +87,7 @@ struct Material final : BaseComponent
 		uint8_t ggx_aniso  : 1 = 0u;
 		uint8_t blinnphong : 1 = 0u;
 		uint8_t selector   : 4 = 0u; /* for use with Dear ImGUI */
-		char    padding[3]{0};
+		char    padding[3];
 		float   alphaX = 0.f; /* For use with anisotropic GGX */
 		float   alphaY = 0.f; /* For use with anisotropic GGX */
 
@@ -101,7 +100,6 @@ struct Material final : BaseComponent
 
 		template <typename Archive>
 		void load( Archive& archive );
-
 	} microfacetModel;
 
 
@@ -120,7 +118,6 @@ struct Material final : BaseComponent
 
 	float PBR_Roughness = 0.f;
 	float PBR_Metallic  = 0.f;
-
 };
 
 

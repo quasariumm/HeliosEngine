@@ -3,12 +3,12 @@
 
 int main()
 {
-    Engine::EngineHandle.Initialize();
+    Engine::engineHandle.Initialize();
 
 	Engine::Systems::GetAudio()->LoadSound("assets/Testbericht.mp3", false);
 	Engine::Systems::GetAudio()->PlaySound("assets/Testbericht.mp3");
 
-    Engine::EngineHandle.Run();
-    Engine::EngineHandle.Shutdown();
+    Engine::engineHandle.Run();
+    Engine::engineHandle.Shutdown();
     return 0;
 }

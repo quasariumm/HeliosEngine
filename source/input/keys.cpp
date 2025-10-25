@@ -5,8 +5,7 @@
 
 namespace Engine
 {
-
-int ConvertKeyGLFW(const Key key)
+int ConvertKeyGlfw( const Key key )
 {
 	switch (key)
 	{
@@ -255,7 +254,7 @@ int ConvertKeyGLFW(const Key key)
 }
 
 
-Key ConvertGLFWKey(const int key)
+Key ConvertGlfwKey( const int key )
 {
 	switch (key)
 	{
@@ -502,7 +501,7 @@ Key ConvertGLFWKey(const int key)
 }
 
 
-int ConvertButtonGLFW(const MouseButton button)
+int ConvertButtonGlfw( const MouseButton button )
 {
 	switch (button)
 	{
@@ -522,7 +521,7 @@ int ConvertButtonGLFW(const MouseButton button)
 }
 
 
-MouseButton ConvertGLFWButton(int button)
+MouseButton ConvertGlfwButton( const int button )
 {
 	switch (button)
 	{
@@ -540,5 +539,4 @@ MouseButton ConvertGLFWButton(int button)
 		return MouseButton::MAX;
 	}
 }
-
 }

@@ -1,53 +1,61 @@
 #pragma once
 
+#include <memory>
 #include "statistics.hpp"
 #include "rendering/window.hpp"
-#include <memory>
-
-#include "editor/editor_menus.hpp"
 
 // The main loop for the engine
 // Controls only the timestep, runtime state, and camera state
 
 namespace Engine
 {
-
 enum class Mode
 {
-    Editor,  // Editor mode, editor time
-    Game,    // Game mode, run time
-    Paused,  // Game is paused
+	EDITOR,
+	// Editor mode, editor time
+	GAME,
+	// Game mode, run time
+	PAUSED,
+	// Game is paused
 };
+
 
 class EngineCore
 {
 public:
-    void Initialize();
-    void Shutdown();
-    void Run();
 
-    void Play();
-    void Pause();
-    void Stop();
+	static void Initialize();
 
-    void ReleaseCamera();
-    void LockCamera();
+	static void Shutdown();
 
-    void SetFixedTimeStep(const float& ms) { m_fixed_step = ms; }
+	void Run();
 
-    [[nodiscard]] Mode GetMode() const { return m_mode; }
-    [[nodiscard]] bool GetUsingEditorCam() const { return m_using_editor_cam; }
-    [[nodiscard]] EngineStats GetEngineStats() const { return m_engine_stats; }
+	void Play();
+
+	void Pause();
+
+	void Stop();
+
+	void ReleaseCamera();
+
+	void LockCamera();
+
+	void SetFixedTimeStep( const float& ms ) { m_fixedStep = ms; }
+
+	[[nodiscard]] Mode        GetMode() const { return m_mode; }
+	[[nodiscard]] bool        GetUsingEditorCam() const { return m_usingEditorCam; }
+	[[nodiscard]] EngineStats GetEngineStats() const { return m_engineStats; }
 
 private:
-    bool m_using_editor_cam = true;
-    Mode m_mode = Mode::Editor;
-    EngineStats m_engine_stats = {};
-    float m_fixed_step = -1.0f;
 
-    std::unique_ptr<Window> window;
+	bool        m_usingEditorCam = true;
+	Mode        m_mode           = Mode::EDITOR;
+	EngineStats m_engineStats    = {};
+	float       m_fixedStep      = -1.0f;
+
+	std::unique_ptr<Window> m_window;
 };
 
-extern EngineCore EngineHandle;
 
+extern EngineCore engineHandle;
 }

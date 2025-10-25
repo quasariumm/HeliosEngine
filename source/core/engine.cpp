@@ -4,124 +4,141 @@
 
 #include "audio/audio_player.hpp"
 #include "core/ecs.hpp"
+#include "editor/editor_menus.hpp"
 #include "editor/engine_interface.hpp"
+#include "physics/physics.hpp"
 #include "rendering/renderer.hpp"
 #include "rendering/window.hpp"
-#include "physics/physics.hpp"
 
 using namespace Engine;
 using namespace Editor;
 
-namespace Engine {
-    EngineCore EngineHandle;
+
+namespace Engine
+{
+EngineCore engineHandle;
 }
+
 
 void EngineCore::Initialize()
 {
-    SystemsHandler.Initialize();
-    Systems::GetRenderer()->Initialize();
+	systemsHandler.Initialize();
+	Systems::GetRenderer()->Initialize();
 }
+
 
 void EngineCore::Shutdown()
 {
-    SystemsHandler.Shutdown();
+	systemsHandler.Shutdown();
 }
+
 
 void EngineCore::Run()
 {
-    auto time = std::chrono::high_resolution_clock::now();
+	auto time = std::chrono::high_resolution_clock::now();
 
-    // TODO(Quillan): Fix main loop
-    while (!Systems::GetRenderer()->GetWindow()->ShouldClose())
-    {
-        auto ctime = std::chrono::high_resolution_clock::now();
-        auto elapsed = ctime - time;
-        float dt = (float)((double)std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 1000000.0);
+	// TODO(Quillan): Fix main loop
+	while (!Systems::GetRenderer()->GetWindow()->ShouldClose())
+	{
+		auto        ctime   = std::chrono::high_resolution_clock::now();
+		auto        elapsed = ctime - time;
+		const float dt      = static_cast<float>(static_cast<double>(std::chrono::duration_cast<
+			                                    std::chrono::microseconds>(elapsed).count()) /
+		                                    1000000.0);
 
-        m_engine_stats.SetData(1.0f / dt, dt);
+		m_engineStats.SetData(1.0f / dt, dt);
 
-        Systems::GetRenderer()->Prepare();
-        Editor::EditorInterface::Get()->StartFrame();
-        Systems::GetAudio()->Update();
+		Systems::GetRenderer()->Prepare();
+		EditorInterface::Get()->StartFrame();
+		Systems::GetAudio()->Update();
 
-        //m_input->Update();
-        //EditorInterface::StartFrame();
-        //m_viewport->Prepare();
+		//m_input->Update();
+		//EditorInterface::StartFrame();
+		//m_viewport->Prepare();
 
 
-        ECS::Get()->UpdateEngineSystem(dt);
+		ECS::Get()->UpdateEngineSystem(dt);
 
-        if (m_mode == Mode::Editor)
-            ECS::Get()->UpdateEditorSystem(dt);
-        else if (m_mode == Mode::Game)
-            ECS::Get()->UpdateGameSystem(dt);
+		if (m_mode == Mode::EDITOR)
+			ECS::Get()->UpdateEditorSystem(dt);
+		else if (m_mode == Mode::GAME)
+			ECS::Get()->UpdateGameSystem(dt);
 
-        DestroyMarkedSceneObjects();
+		DestroyMarkedSceneObjects();
 
-        //if (m_using_editor_cam) m_camera_system->UpdateEditorCamera(dt);
+		//if (m_using_editor_cam) m_camera_system->UpdateEditorCamera(dt);
 
-        EditorInterface::Get()->DrawInterfaces();
-        Systems::GetViewport()->Draw();
-        EditorInterface::Get()->Render();
-        Systems::GetRenderer()->Clear();
-        EditorInterface::Get()->EndFrame();
-        Systems::GetRenderer()->Render();
+		EditorInterface::Get()->DrawInterfaces();
+		Systems::GetViewport()->Draw();
+		EditorInterface::Get()->Render();
+		Systems::GetRenderer()->Clear();
+		EditorInterface::Get()->EndFrame();
+		Systems::GetRenderer()->Render();
 
-        time = ctime;
+		time = ctime;
 
-        if (m_fixed_step > 1.0f)
-        {
-            std::chrono::time_point next = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds((long long)m_fixed_step);
-            std::this_thread::sleep_until(next);
-        }
-    }
+		if (m_fixedStep > 1.0f)
+		{
+			std::chrono::time_point next = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(
+					                               static_cast<long long>(m_fixedStep));
+			std::this_thread::sleep_until(next);
+		}
+	}
 }
+
 
 void EngineCore::Play()
-{    
-    if (m_mode == Mode::Game) return;
-    if (m_mode == Mode::Editor)
-    {
-        ECS::Get()->SaveSnapshot();
-    }
-    m_mode = Mode::Game;
-    LockCamera();
+{
+	if (m_mode == Mode::GAME)
+		return;
+	if (m_mode == Mode::EDITOR)
+	{
+		ECS::Get()->SaveSnapshot();
+	}
+	m_mode = Mode::GAME;
+	LockCamera();
 }
+
 
 void EngineCore::Pause()
 {
-    if (m_mode == Mode::Paused) return;
-    ReleaseCamera();
-    assert(m_mode == Mode::Game);
-    m_mode = Mode::Paused;
+	if (m_mode == Mode::PAUSED)
+		return;
+	ReleaseCamera();
+	assert(m_mode == Mode::GAME);
+	m_mode = Mode::PAUSED;
 }
+
 
 void EngineCore::Stop()
 {
-    if (m_mode == Mode::Editor) return;
-    ReleaseCamera();
-    assert(m_mode == Mode::Game || m_mode == Mode::Paused);
-    m_mode = Mode::Editor;
-    
-    //m_ECS->StopSystems();
-    Systems::GetPhysics()->ResetObjects();
-    ECS::Get()->LoadSnapshot();
+	if (m_mode == Mode::EDITOR)
+		return;
+	ReleaseCamera();
+	assert(m_mode == Mode::GAME || m_mode == Mode::PAUSED);
+	m_mode = Mode::EDITOR;
+
+	//m_ECS->StopSystems();
+	Systems::GetPhysics()->ResetObjects();
+	ECS::Get()->LoadSnapshot();
 }
+
 
 void EngineCore::ReleaseCamera()
 {
-    // if (!m_using_editor_cam)
-    //     m_renderer->AssignCamera(m_camera_system->GetEditorCamera());
-    m_using_editor_cam = true;
+	// if (!m_using_editor_cam)
+	//     m_renderer->AssignCamera(m_camera_system->GetEditorCamera());
+	m_usingEditorCam = true;
 }
+
 
 void EngineCore::LockCamera()
 {
-    // if (m_using_editor_cam)
-    // {
-    //     entt::entity cam = CameraSystem::GetActiveGameCamera();
-    //     if (cam != entt::null)
-    //         m_renderer->AssignCamera(cam);
-    // }
-    m_using_editor_cam = false;
+	// if (m_using_editor_cam)
+	// {
+	//     entt::entity cam = CameraSystem::GetActiveGameCamera();
+	//     if (cam != entt::null)
+	//         m_renderer->AssignCamera(cam);
+	// }
+	m_usingEditorCam = false;
 }

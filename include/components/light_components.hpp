@@ -2,32 +2,33 @@
 
 #include "components/basic_components.hpp"
 
+
 namespace Engine::Components
 {
-
 struct DirectionalLight final : BaseComponent
 {
 	template <typename Archive>
-	void serialise( Archive & archive ) { archive(CEREAL_NVP(direction), CEREAL_NVP(color), CEREAL_NVP(intensity)); }
+	void serialise( Archive& archive ) { archive(CEREAL_NVP(direction), CEREAL_NVP(color), CEREAL_NVP(intensity)); }
+
 
 	void Inspector() override;
 
 	glm::vec3 direction;
 	glm::vec3 color;
-	float intensity;
+	float     intensity;
 };
 
 
 struct PointLight final : BaseComponent
 {
 	template <typename Archive>
-	void serialise( Archive & archive ) { archive(CEREAL_NVP(position), CEREAL_NVP(color), CEREAL_NVP(intensity)); }
+	void serialise( Archive& archive ) { archive(CEREAL_NVP(position), CEREAL_NVP(color), CEREAL_NVP(intensity)); }
+
 
 	void Inspector() override;
 
 	glm::vec3 position;
 	glm::vec3 color;
-	float intensity;
+	float     intensity;
 };
-
 }

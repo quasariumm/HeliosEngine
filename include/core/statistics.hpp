@@ -1,42 +1,52 @@
 #pragma once
 #include <algorithm>
 
+
 struct EngineStats
 {
-    // Assuming this is called each frame, will also auto count frames
-    void SetData(float fps, float dt)
-    {
-        frame_count++;
-        average_frame_count++;
-        frames_per_second += fps;
-        delta_time += dt;
-        if (frame_count == next_average_frame)
-        {
-            float mult = 1.0f / static_cast<float>(average_frame_count);
-            average_frame_count = 0;
+	// Assuming this is called each frame, will also auto count frames
+	void SetData( float fps, float dt )
+	{
+		m_frameCount++;
+		m_averageFrameCount++;
+		m_framesPerSecond += fps;
+		m_deltaTime += dt;
+		if (m_frameCount == m_nextAverageFrame)
+		{
+			const float mult    = 1.0f / static_cast<float>(m_averageFrameCount);
+			m_averageFrameCount = 0;
 
-            average_fps = frames_per_second * mult;
-            average_dt = delta_time * mult;
-            frames_per_second = 0.0f;
-            delta_time = 0.0f;
+			m_averageFps      = m_framesPerSecond * mult;
+			m_averageDt       = m_deltaTime * mult;
+			m_framesPerSecond = 0.0f;
+			m_deltaTime       = 0.0f;
 
-            // It will update the framerate about four times per second (keep a min and max so it can't break)
-            next_average_frame = frame_count + static_cast<int>(std::clamp(average_fps * 0.25f, 10.0f, 300.0f));
-        }
-    }
+			// It will update the framerate about four times per second (keep a min and max so it can't break)
+			m_nextAverageFrame = m_frameCount + static_cast<int>(std::clamp(m_averageFps * 0.25f, 10.0f, 300.0f));
+		}
+	}
 
-    float GetFPS()        const { return average_fps; }
-    float GetDeltaTime()  const { return average_dt;  }
-    int   GetFrameCount() const { return frame_count; }
+
+	[[nodiscard]]
+	float GetFPS() const { return m_averageFps; }
+
+
+	[[nodiscard]]
+	float GetDeltaTime() const { return m_averageDt; }
+
+
+	[[nodiscard]]
+	int GetFrameCount() const { return m_frameCount; }
 
 private:
-    int frame_count = 0;
-    float frames_per_second = 0.0f;
-    float delta_time = 0.0f;
 
-    int next_average_frame = 60;
+	int   m_frameCount      = 0;
+	float m_framesPerSecond = 0.0f;
+	float m_deltaTime       = 0.0f;
 
-    int average_frame_count = 0;
-    float average_fps = 0.0f;
-    float average_dt = 0.0f;
+	int m_nextAverageFrame = 60;
+
+	int   m_averageFrameCount = 0;
+	float m_averageFps        = 0.0f;
+	float m_averageDt         = 0.0f;
 };

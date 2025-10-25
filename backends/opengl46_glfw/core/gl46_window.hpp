@@ -2,12 +2,14 @@
 #include "../../../include/rendering/window.hpp"
 
 
-class GLFWwindow;
+// ReSharper disable once CppInconsistentNaming
+struct GLFWwindow;
 
 namespace Engine
 {
 
-class GL46_Window : public Window
+// ReSharper disable once CppInconsistentNaming
+class GL46_Window final : public Window
 {
 
 public:
@@ -39,6 +41,7 @@ public:
      * @brief Gets the vendor from OpenGL
      * @note This in mostly used for internal purposes
      */
+	[[nodiscard]]
     const std::string& GetVendor() const;
 
 	void RequestClose() override;
@@ -51,21 +54,21 @@ public:
 
 private:
 
-    GLFWwindow* m_window;
+    GLFWwindow* m_window{};
 
-	glm::uvec2 m_screenSize;
-	glm::vec2 m_mousePos;
+	glm::uvec2 m_screenSize{};
+	glm::vec2 m_mousePos{};
 
 	std::string m_vendor;
 
-    static void ResizeCallbackGLFW(GLFWwindow* w, int width, int height);
-    static void FocusCallbackGLFW(GLFWwindow* w, int f);
+    static void ResizeCallbackGlfw(GLFWwindow* w, int width, int height);
+    static void FocusCallbackGlfw(GLFWwindow* w, int f);
 
-    static void KeyCallbackGLFW(GLFWwindow* w, int key, int scancode, int action, int mods);
+    static void KeyCallbackGlfw(GLFWwindow* w, int key, int, int action, int);
 
-    static void ButtonCallbackGLFW(GLFWwindow* w, int button, int action, int mods);
-    static void MouseMoveCallbackGLFW(GLFWwindow* w, double x, double y);
-    static void MouseScrollCallbackGLFW(GLFWwindow* w, double x, double y);
+    static void ButtonCallbackGlfw(GLFWwindow* w, int button, int action, int);
+    static void MouseMoveCallbackGlfw(GLFWwindow* w, double x, double y);
+    static void MouseScrollCallbackGlfw(GLFWwindow* w, double x, double y);
 
 };
 

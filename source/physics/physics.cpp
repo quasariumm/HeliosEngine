@@ -40,90 +40,101 @@ using namespace JPH;
 
 PhysicsCore::PhysicsCore()
 {
-    RegisterDefaultAllocator();
+	RegisterDefaultAllocator();
 
-    Factory::sInstance = new Factory();
-    
-    tempAllocator = std::make_unique<TempAllocatorImpl>(10 * 1024 * 1024);
-    jobSystem = std::make_unique<JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, static_cast<int>(thread::hardware_concurrency()) - 1);
+	Factory::sInstance = new Factory();
 
-    RegisterTypes();
-	
-    physicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broadPhaseLayerInterface, objectVSBroadPhaseLayerFilter, objectVSObjectLayerFilter);
+	tempAllocator = std::make_unique<TempAllocatorImpl>(10 * 1024 * 1024);
+	jobSystem     = std::make_unique<JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers,
+	                                                      static_cast<int>(thread::hardware_concurrency()) - 1);
 
-    physicsSystem.SetGravity({0.0f, 0.0f, -9.81f}); // Jolt defaults to -Y, but this engine uses -Z
+	RegisterTypes();
 
-    physicsSystem.OptimizeBroadPhase();
+	physicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broadPhaseLayerInterface,
+	                   objectVSBroadPhaseLayerFilter, objectVSObjectLayerFilter);
 
-    // TODO(Quillan & Patrick): Debug Renderer for Jolt
-    // debugRenderer = std::make_unique<PhysicsDebugRenderer>();
-    // DebugRenderer::sInstance = debugRenderer.get();
-    // debugRenderer->Init();
-    // drawSettings.mDrawShape = true;
-    //drawSettings.mDrawShapeWireframe = true;
+	physicsSystem.SetGravity({0.0f, 0.0f, -9.81f}); // Jolt defaults to -Y, but this engine uses -Z
 
-    //ECS::AssignEngineSystem<&PhysicsSystem::DrawBodies>(&physicsSystem);
+	physicsSystem.OptimizeBroadPhase();
+
+	// TODO(Quillan & Patrick): Debug Renderer for Jolt
+	// debugRenderer = std::make_unique<PhysicsDebugRenderer>();
+	// DebugRenderer::sInstance = debugRenderer.get();
+	// debugRenderer->Init();
+	// drawSettings.mDrawShape = true;
+	//drawSettings.mDrawShapeWireframe = true;
+
+	//ECS::AssignEngineSystem<&PhysicsSystem::DrawBodies>(&physicsSystem);
 }
+
 
 void PhysicsCore::InitializeObjects()
 {
-    auto spheres = ECS::Registry()->view<PhysicsSphere, Transform>();
-    for (auto [e, s, t] : spheres.each())
-    {
-        if (!s.initialized) s.Initialize(e);
-    }
-    
-    auto cubes = ECS::Registry()->view<PhysicsCube, Transform>();
-    for (auto [e, c, t] : cubes.each())
-    {
-        if (!c.initialized) c.Initialize(e);
-    }
+	auto spheres = ECS::Registry()->view<PhysicsSphere, Transform>();
+	for (auto [e, s, t] : spheres.each())
+	{
+		if (!s.initialized)
+			s.Initialize(e);
+	}
+
+	auto cubes = ECS::Registry()->view<PhysicsCube, Transform>();
+	for (auto [e, c, t] : cubes.each())
+	{
+		if (!c.initialized)
+			c.Initialize(e);
+	}
 }
 
-void PhysicsCore::Update(float dt)
+
+void PhysicsCore::Update( float dt )
 {
-    physicsSystem.Update(dt, 1, tempAllocator.get(), jobSystem.get());
+	physicsSystem.Update(dt, 1, tempAllocator.get(), jobSystem.get());
 
-    auto spheres = ECS::Registry()->view<PhysicsSphere, Transform>();
-    for (auto [e, s, t] : spheres.each())
-    {
-        if (!s.initialized) continue;
-        RVec3 pos = BodyInterface().GetPosition(s.GetBodyID());
-        Quat rot = BodyInterface().GetRotation(s.GetBodyID());
-        t.SetPosition({pos.GetX(), pos.GetY(), pos.GetZ()});
-        t.SetRotation( {rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ() });
-    }
+	auto spheres = ECS::Registry()->view<PhysicsSphere, Transform>();
+	for (auto [e, s, t] : spheres.each())
+	{
+		if (!s.initialized)
+			continue;
+		RVec3 pos = BodyInterface().GetPosition(s.GetBodyID());
+		Quat  rot = BodyInterface().GetRotation(s.GetBodyID());
+		t.SetPosition({pos.GetX(), pos.GetY(), pos.GetZ()});
+		t.SetRotation({rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ()});
+	}
 
-    auto cubes = ECS::Registry()->view<PhysicsCube, Transform>();
-    for (auto [e, c, t] : cubes.each())
-    {
-        if (!c.initialized) continue;
-        RVec3 pos = BodyInterface().GetPosition(c.GetBodyID());
-        Quat rot = BodyInterface().GetRotation(c.GetBodyID());
-        t.SetPosition({pos.GetX(), pos.GetY(), pos.GetZ()});
-        t.SetRotation( {rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ() });
-    }
+	auto cubes = ECS::Registry()->view<PhysicsCube, Transform>();
+	for (auto [e, c, t] : cubes.each())
+	{
+		if (!c.initialized)
+			continue;
+		RVec3 pos = BodyInterface().GetPosition(c.GetBodyID());
+		Quat  rot = BodyInterface().GetRotation(c.GetBodyID());
+		t.SetPosition({pos.GetX(), pos.GetY(), pos.GetZ()});
+		t.SetRotation({rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ()});
+	}
 }
+
 
 void PhysicsCore::ResetObjects()
 {
-    BodyIDVector bodies;
-    physicsSystem.GetBodies(bodies);
-    for (BodyID id : bodies)
-    {
-        BodyInterface().RemoveBody(id);
-        BodyInterface().DestroyBody(id);
-    }
+	BodyIDVector bodies;
+	physicsSystem.GetBodies(bodies);
+	for (BodyID id : bodies)
+	{
+		BodyInterface().RemoveBody(id);
+		BodyInterface().DestroyBody(id);
+	}
 }
+
 
 void PhysicsCore::DrawDebug()
 {
-    if (!drawDebug) return;
+	if (!drawDebug)
+		return;
 
-    // TODO(Quillan): Editor camera
-    // entt::entity camera = Engine.Renderer().GetCamera();
-    // glm::vec3 pos = GetComponent<Transform>(camera).GetPosition();
-    // debugRenderer->SetCameraPos({pos.x, pos.y, pos.z});
-    // DebugRenderer* test = DebugRenderer::sInstance;
-    // physicsSystem.DrawBodies(drawSettings, test);
+	// TODO(Quillan): Editor camera
+	// entt::entity camera = Engine.Renderer().GetCamera();
+	// glm::vec3 pos = GetComponent<Transform>(camera).GetPosition();
+	// debugRenderer->SetCameraPos({pos.x, pos.y, pos.z});
+	// DebugRenderer* test = DebugRenderer::sInstance;
+	// physicsSystem.DrawBodies(drawSettings, test);
 }

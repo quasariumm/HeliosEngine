@@ -2,6 +2,7 @@
 
 namespace Engine {
 
+// ReSharper disable once CppInconsistentNaming
 /**
  * @brief Shader class used as a base class for all shader types
  */
@@ -148,7 +149,7 @@ protected:
 	GL46_ShaderBase() = default;
 	~GL46_ShaderBase();
 
-	uint32_t programID = 0;
+	uint32_t m_programId = 0;
 
 };
 

@@ -2,14 +2,34 @@
 
 namespace Engine
 {
-
 // Forward declare all systems
 class Renderer;
 class Camera;
-namespace Log { class LogHandler; }
-namespace Physics { class PhysicsCore; }
-namespace Audio { class AudioPlayer; }
-namespace Editor { class Viewport; }
+
+
+namespace Log
+{
+	class LogHandler;
+}
+
+
+namespace Physics
+{
+	class PhysicsCore;
+}
+
+
+namespace Audio
+{
+	class AudioPlayer;
+}
+
+
+namespace Editor
+{
+	class Viewport;
+}
+
 
 // =============================================================
 // Main system handler
@@ -19,46 +39,48 @@ namespace Editor { class Viewport; }
 class SystemsCore
 {
 public:
-    SystemsCore() { Initialize(); }
-    ~SystemsCore() { Shutdown(); }
 
-    /// Create instance of all systems
-    void Initialize();
-    /// Delete instances of all systems
-    void Shutdown() const;
+	SystemsCore() { Initialize(); }
+	~SystemsCore() { Shutdown(); }
 
-    // Getters
-    [[nodiscard]] Renderer*                 GetRenderer()           const { return m_renderer; }
-    [[nodiscard]] Log::LogHandler*          GetLogHandler()         const { return m_logHandler; }
-    [[nodiscard]] Physics::PhysicsCore*     GetPhysics()            const { return m_physics; }
-	[[nodiscard]] Audio::AudioPlayer*       GetAudio()              const { return m_audioPlayer; }
-	[[nodiscard]] Editor::Viewport*         GetViewport()           const { return m_viewport; }
-	[[nodiscard]] Camera*					GetCamera()				const { return m_camera; }
+	/// Create instance of all systems
+	void Initialize();
 
+	/// Delete instances of all systems
+	void Shutdown() const;
+
+	// Getters
+	[[nodiscard]] Renderer*             GetRenderer() const { return m_renderer; }
+	[[nodiscard]] Log::LogHandler*      GetLogHandler() const { return m_logHandler; }
+	[[nodiscard]] Physics::PhysicsCore* GetPhysics() const { return m_physics; }
+	[[nodiscard]] Audio::AudioPlayer*   GetAudio() const { return m_audioPlayer; }
+	[[nodiscard]] Editor::Viewport*     GetViewport() const { return m_viewport; }
+	[[nodiscard]] Camera*               GetCamera() const { return m_camera; }
 
 private:
-    bool m_initialized = false;
 
-    Renderer*                   m_renderer = nullptr;
-    Log::LogHandler*            m_logHandler = nullptr;
-    Physics::PhysicsCore*       m_physics = nullptr;
-	Audio::AudioPlayer*			m_audioPlayer = nullptr;
-	Editor::Viewport*			m_viewport = nullptr;
+	bool m_initialized = false;
 
-	Camera*						m_camera = nullptr;
+	Renderer*             m_renderer    = nullptr;
+	Log::LogHandler*      m_logHandler  = nullptr;
+	Physics::PhysicsCore* m_physics     = nullptr;
+	Audio::AudioPlayer*   m_audioPlayer = nullptr;
+	Editor::Viewport*     m_viewport    = nullptr;
+
+	Camera* m_camera = nullptr;
 };
 
-    extern SystemsCore SystemsHandler;
+
+extern SystemsCore systemsHandler;
+
 
 // Shorthands
 namespace Systems
 {
-    static Renderer*                    GetRenderer()           { return SystemsHandler.GetRenderer(); }
-    static Log::LogHandler*             GetLogHandler()         { return SystemsHandler.GetLogHandler(); }
-    static Physics::PhysicsCore*        GetPhysics()            { return SystemsHandler.GetPhysics(); }
-    static Audio::AudioPlayer*			GetAudio()	            { return SystemsHandler.GetAudio(); }
-    static Editor::Viewport*			GetViewport()	        { return SystemsHandler.GetViewport(); }
-    static Camera*						GetCamera()				{ return SystemsHandler.GetCamera(); }
-}
-
-}
+	static Renderer*             GetRenderer() { return systemsHandler.GetRenderer(); }
+	static Log::LogHandler*      GetLogHandler() { return systemsHandler.GetLogHandler(); }
+	static Physics::PhysicsCore* GetPhysics() { return systemsHandler.GetPhysics(); }
+	static Audio::AudioPlayer*   GetAudio() { return systemsHandler.GetAudio(); }
+	static Editor::Viewport*     GetViewport() { return systemsHandler.GetViewport(); }
+	static Camera*               GetCamera() { return systemsHandler.GetCamera(); }
+}}

@@ -1,8 +1,7 @@
 #include "components/render_components.hpp"
 
-#include "Jolt/Physics/Constraints/MotorSettings.h"
-
 using namespace Engine::Components;
+
 
 void Sphere::Inspector()
 {
@@ -52,9 +51,9 @@ void Material::Inspector()
 	if (ImGui::Selectable("Blinn-Phong", microfacetModel.selector == 3))
 		microfacetModel.selector = 3;
 
-	microfacetModel.beckmann = (microfacetModel.selector == 0) ? 1 : 0;
-	microfacetModel.ggx_iso = (microfacetModel.selector == 1) ? 1 : 0;
-	microfacetModel.ggx_aniso = (microfacetModel.selector == 2) ? 1 : 0;
+	microfacetModel.beckmann   = (microfacetModel.selector == 0) ? 1 : 0;
+	microfacetModel.ggx_iso    = (microfacetModel.selector == 1) ? 1 : 0;
+	microfacetModel.ggx_aniso  = (microfacetModel.selector == 2) ? 1 : 0;
 	microfacetModel.blinnphong = (microfacetModel.selector == 3) ? 1 : 0;
 
 	if (microfacetModel.selector == 2)
@@ -65,14 +64,17 @@ void Material::Inspector()
 	}
 	ImGui::Separator();
 
-	ImGui::ColorEdit3("Diffuse Color", glm::value_ptr(diffuseColor), ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
-	ImGui::ColorEdit3("Specular Color", glm::value_ptr(specularColor), ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
+	ImGui::ColorEdit3("Diffuse Color", glm::value_ptr(diffuseColor),
+	                  ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
+	ImGui::ColorEdit3("Specular Color", glm::value_ptr(specularColor),
+	                  ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
 
 	ImGui::SliderFloat("Specularity", &specularity, 0.0f, 1.0f);
 	ImGui::DragFloat("Shininess", &shininess, 0.01f);
 	ImGui::DragFloat("Glossiness", &glossiness, 0.01f);
 
-	ImGui::ColorEdit3("Emission Color", glm::value_ptr(emissionColor), ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
+	ImGui::ColorEdit3("Emission Color", glm::value_ptr(emissionColor),
+	                  ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
 	ImGui::DragFloat("Emission Strength", &emissionStrength);
 
 	ImGui::SliderFloat("Refractivity", &refractivity, 0.0f, 1.0f);

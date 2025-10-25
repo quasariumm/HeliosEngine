@@ -2,9 +2,6 @@
 
 #include "core/resources.hpp"
 
+
 namespace Engine::Resources
-{
-
-
-
-}
+{}

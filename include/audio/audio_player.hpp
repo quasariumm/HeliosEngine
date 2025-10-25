@@ -24,9 +24,9 @@ namespace Engine
 class Camera;
 }
 
+
 namespace Engine::Audio
 {
-
 /**
  * A class with a number of functions for audio handling in Bee.
  * The implementation uses FMOD Studio. We recommend to handle your game's audio using FMOD Studio banks and events.
@@ -36,7 +36,7 @@ class AudioPlayer
 {
 public:
 
-	AudioPlayer(const Camera* camera);
+	AudioPlayer( const Camera* camera );
 
 	~AudioPlayer();
 
@@ -106,7 +106,9 @@ public:
 	 * @returns The ID of the channel on which the sound will play.
 	 *		If the operation failed, this function returns -1 and prints information to the console.
 	 */
-	int PlaySound( const std::filesystem::path& file, const glm::vec3& position = glm::vec3(FLT_MAX), float volume = 1.f );
+	int PlaySound( const std::filesystem::path& file,
+	               const glm::vec3&             position = glm::vec3(FLT_MAX),
+	               float                        volume   = 1.f );
 
 	/**
 	 * @brief Pauses or unpauses a sound channel.
@@ -115,21 +117,21 @@ public:
 	 * @param channelID The ID of the channel to pause or unpause.
 	 * @param paused true if the channel should be paused; false if it should resume playing.
 	 */
-	void SetChannelPaused(int channelID, bool paused) const;
+	void SetChannelPaused( int channelID, bool paused ) const;
 
 private:
 
 	const Camera* m_camera;
 
-	FMOD::Studio::System* m_system = nullptr;
-	FMOD::System* m_core_system = nullptr;
+	FMOD::Studio::System* m_system      = nullptr;
+	FMOD::System*         m_core_system = nullptr;
 
 	std::unordered_map<int, FMOD::Sound*> m_sounds;
-	FMOD::SoundGroup* m_soundGroupSFX = nullptr;
-	FMOD::SoundGroup* m_soundGroupMusic = nullptr;
+	FMOD::SoundGroup*                     m_soundGroupSFX   = nullptr;
+	FMOD::SoundGroup*                     m_soundGroupMusic = nullptr;
 
-	std::unordered_map<int, FMOD::Studio::Bank*> m_banks;
+	std::unordered_map<int, FMOD::Studio::Bank*>          m_banks;
 	std::unordered_map<int, FMOD::Studio::EventInstance*> m_events;
-	int m_nextEventID = 0;
+	int                                                   m_nextEventID = 0;
 };
 } // namespace bee

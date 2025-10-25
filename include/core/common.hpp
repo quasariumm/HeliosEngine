@@ -8,15 +8,18 @@
 
 namespace Engine
 {
-typedef glm::u8vec4		Color8;
-typedef glm::vec4		Color32F;
+using color8_t    = glm::u8vec4;
+using color32_f_t = glm::vec4;
 }
+
 
 // Changing name of entity to scene object for clearer naming
 namespace Engine
 {
+// ReSharper disable once CppInconsistentNaming
 using SceneObject = entt::entity;
 }
+
 
 /*
  * Static lists
@@ -30,13 +33,12 @@ static std::unordered_set<std::string> loadedShaders;
  * Defines
  */
 
-static constexpr float PI 			= 	std::numbers::pi_v<float>;
-static constexpr float INVPI 		= 	std::numbers::inv_pi_v<float>;
-static constexpr float INV2PI		=	1.f / (2.f * PI);
-static constexpr float TWOPI		=	2.f * PI;
-static constexpr float SQRT_PI_INV	=	std::numbers::inv_sqrtpi_v<float>;
-static constexpr float LARGE_FLOAT	=	1e34f;
-
+static constexpr float PI          = std::numbers::pi_v<float>;
+static constexpr float INVPI       = std::numbers::inv_pi_v<float>;
+static constexpr float INV2PI      = 1.f / (2.f * PI);
+static constexpr float TWOPI       = 2.f * PI;
+static constexpr float SQRT_PI_INV = std::numbers::inv_sqrtpi_v<float>;
+static constexpr float LARGE_FLOAT = 1e34f;
 
 
 /*
@@ -75,12 +77,11 @@ static constexpr float LARGE_FLOAT	=	1e34f;
 #define CHECK_AABB3D(cmp, min, max) ((cmp).x >= (min).x && (cmp).x <= (max).x && (cmp).y >= (min).y && (cmp).y <= (max).y && (cmp).z >= (min).z && (cmp).z <= (max).z)
 
 
-
 /*
  * Functions
  */
 
-inline std::string LoadFile(const std::filesystem::path& path)
+inline std::string LoadFile( const std::filesystem::path& path )
 {
 	std::ifstream file;
 	file.open(path);
@@ -92,10 +93,11 @@ inline std::string LoadFile(const std::filesystem::path& path)
 	}
 
 	return {
-		std::istreambuf_iterator<char>(file),
-		std::istreambuf_iterator<char>()
+			std::istreambuf_iterator(file),
+			std::istreambuf_iterator<char>()
 	};
 }
+
 
 // TODO(Patrick): Should prob be somewhere like window cuz its platform dependent
 // inline std::string GLDebugTypeToString( const GLenum type )
@@ -180,47 +182,53 @@ inline std::string LoadFile(const std::filesystem::path& path)
 // }
 
 // Vector conversions
-inline cl_float2 glmToCL(const glm::vec2& v) { return {v.x, v.y}; }
-inline cl_float3 glmToCL(const glm::vec3& v) { return {v.x, v.y, v.z}; }
-inline cl_float4 glmToCL(const glm::vec4& v) { return {v.x, v.y, v.z, v.w}; }
+inline cl_float2 glmToCL( const glm::vec2& v ) { return {v.x, v.y}; }
+inline cl_float3 glmToCL( const glm::vec3& v ) { return {v.x, v.y, v.z}; }
+inline cl_float4 glmToCL( const glm::vec4& v ) { return {v.x, v.y, v.z, v.w}; }
 
 // Integer vector conversions
-inline cl_int2 glmToCL(const glm::ivec2& v) { return {v.x, v.y}; }
-inline cl_int3 glmToCL(const glm::ivec3& v) { return {v.x, v.y, v.z}; }
-inline cl_int4 glmToCL(const glm::ivec4& v) { return {v.x, v.y, v.z, v.w}; }
+inline cl_int2 glmToCL( const glm::ivec2& v ) { return {v.x, v.y}; }
+inline cl_int3 glmToCL( const glm::ivec3& v ) { return {v.x, v.y, v.z}; }
+inline cl_int4 glmToCL( const glm::ivec4& v ) { return {v.x, v.y, v.z, v.w}; }
 
 // Unsigned integer vector conversions
-inline cl_uint2 glmToCL(const glm::uvec2& v) { return {v.x, v.y}; }
-inline cl_uint3 glmToCL(const glm::uvec3& v) { return {v.x, v.y, v.z}; }
-inline cl_uint4 glmToCL(const glm::uvec4& v) { return {v.x, v.y, v.z, v.w}; }
+inline cl_uint2 glmToCL( const glm::uvec2& v ) { return {v.x, v.y}; }
+inline cl_uint3 glmToCL( const glm::uvec3& v ) { return {v.x, v.y, v.z}; }
+inline cl_uint4 glmToCL( const glm::uvec4& v ) { return {v.x, v.y, v.z, v.w}; }
 
 // Matrix conversions to float16 (column-major, matching OpenCL)
-inline cl_float16 glmToCL(const glm::mat4& m) {
+inline cl_float16 glmToCL( const glm::mat4& m )
+{
 	return {
-		m[0][0], m[0][1], m[0][2], m[0][3],
-		m[1][0], m[1][1], m[1][2], m[1][3],
-		m[2][0], m[2][1], m[2][2], m[2][3],
-		m[3][0], m[3][1], m[3][2], m[3][3]
+			m[0][0], m[0][1], m[0][2], m[0][3],
+			m[1][0], m[1][1], m[1][2], m[1][3],
+			m[2][0], m[2][1], m[2][2], m[2][3],
+			m[3][0], m[3][1], m[3][2], m[3][3]
 	};
 }
 
-inline cl_float16 glmToCL(const glm::mat3& m) {
+
+inline cl_float16 glmToCL( const glm::mat3& m )
+{
 	return {
-		m[0][0], m[0][1], m[0][2], 0.0f,
-		m[1][0], m[1][1], m[1][2], 0.0f,
-		m[2][0], m[2][1], m[2][2], 0.0f,
-		0.0f,    0.0f,    0.0f,    1.0f
+			m[0][0], m[0][1], m[0][2], 0.0f,
+			m[1][0], m[1][1], m[1][2], 0.0f,
+			m[2][0], m[2][1], m[2][2], 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
 	};
 }
 
-inline cl_float16 glmToCL(const glm::mat2& m) {
+
+inline cl_float16 glmToCL( const glm::mat2& m )
+{
 	return {
-		m[0][0], m[0][1], 0.0f, 0.0f,
-		m[1][0], m[1][1], 0.0f, 0.0f,
-		0.0f,    0.0f,    1.0f, 0.0f,
-		0.0f,    0.0f,    0.0f, 1.0f
+			m[0][0], m[0][1], 0.0f, 0.0f,
+			m[1][0], m[1][1], 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
 	};
 }
+
 
 inline std::string CLErrorString( const cl_int result )
 {
@@ -337,20 +345,23 @@ inline std::string CLErrorString( const cl_int result )
 	}
 }
 
-inline std::string EnginePath(bool stringSafe = false)
+
+inline std::string EnginePath( bool stringSafe = false )
 {
-    std::string enginePath = std::filesystem::current_path().generic_string();
-    if (!stringSafe) return enginePath;
-    std::ranges::replace(enginePath, '\\', '/');
-    return enginePath;
+	std::string enginePath = std::filesystem::current_path().generic_string();
+	if (!stringSafe)
+		return enginePath;
+	std::ranges::replace(enginePath, '\\', '/');
+	return enginePath;
 }
+
 
 /**
  * @brief Packs two floats into one 32-bit int containing the two floats as half floats complying with IEEE 754
  * @note Complies with OpenGL standards: \n
  *			The first vector component specifies the 16 least-significant bits of the result; the second component specifies the 16 most-significant bits.
  */
-inline std::uint32_t PackHalf2x16(const float a, const float b)
+inline std::uint32_t PackHalf2x16( const float a, const float b )
 {
-	return (uint32_t)( (uint16_t)numeric::float16_t(b) << 16 | (uint16_t)numeric::float16_t(a) );
+	return (uint32_t)((uint16_t)numeric::float16_t(b) << 16 | (uint16_t)numeric::float16_t(a));
 }

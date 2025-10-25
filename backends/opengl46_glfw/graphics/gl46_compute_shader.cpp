@@ -1,6 +1,4 @@
 #include "gl46_compute_shader.hpp"
-#include "../backends/opengl46_glfw/core/gl46_window.hpp"
-
 
 namespace Engine
 {
@@ -15,7 +13,7 @@ GL46_ComputeShader::~GL46_ComputeShader()
 	if (!m_initialised)
 		return;
 
-	glDeleteProgram(programID);
+	glDeleteProgram(m_programId);
 	glDeleteShader(m_shaderID);
 }
 
@@ -24,7 +22,7 @@ void GL46_ComputeShader::LoadFromFile(const std::string& filename, const bool sp
 {
 	if (m_initialised)
 	{
-		glDeleteProgram(programID);
+		glDeleteProgram(m_programId);
 		glDeleteShader(m_shaderID);
 	}
 
@@ -87,9 +85,9 @@ void GL46_ComputeShader::LoadFromFile(const std::string& filename, const bool sp
 	}
 
 	// Create the shader program
-	programID = glCreateProgram();
-	glAttachShader(programID, m_shaderID);
-	glLinkProgram(programID);
+	m_programId = glCreateProgram();
+	glAttachShader(m_programId, m_shaderID);
+	glLinkProgram(m_programId);
 
 	glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &success);
 	if (!success)

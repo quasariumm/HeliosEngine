@@ -3,43 +3,43 @@
 #include "input/keys.hpp"
 
 
-static constexpr uint32_t EngineWindowFlags_None				= 0x00000000u;
-static constexpr uint32_t EngineWindowFlags_NoVsync 			= 0x00000001u;
-static constexpr uint32_t EngineWindowFlags_NoResize 			= 0x00000002u;
-static constexpr uint32_t EngineWindowFlags_NoDecoration 		= 0x00000004u;
-static constexpr uint32_t EngineWindowFlags_Fullscreen			= 0x00000008u;
-static constexpr uint32_t EngineWindowFlags_WindowedBorderless	= 0x00000010u;
+static constexpr uint32_t EngineWindowFlags_None               = 0x00000000u;
+static constexpr uint32_t EngineWindowFlags_NoVsync            = 0x00000001u;
+static constexpr uint32_t EngineWindowFlags_NoResize           = 0x00000002u;
+static constexpr uint32_t EngineWindowFlags_NoDecoration       = 0x00000004u;
+static constexpr uint32_t EngineWindowFlags_Fullscreen         = 0x00000008u;
+static constexpr uint32_t EngineWindowFlags_WindowedBorderless = 0x00000010u;
 
 
 namespace Engine
 {
-
 // Predefine the windows for all the platforms
 class GL46_Window;
 class DX12_Window;
 class VK_Window;
 
+
 enum class CursorMode
 {
-	NORMAL,
-	HIDDEN,
-	DISABLED
+	NORMAL, HIDDEN, DISABLED
 };
+
 
 class Window
 {
-
 public:
 
-    using resizeCallback_t		= std::function<void(Window&, const glm::uvec2&)>;
-    using focusCallback_t		= std::function<void(Window&, bool)>;
-    using mouseMoveCallback_t	= std::function<void(Window&, glm::vec2)>;
-    using mouseButtonCallback_t = std::function<void(Window&, MouseButton)>;
-    using mouseScrollCallback_t = std::function<void(Window&, float, float)>;
-    using keyCallback_t			= std::function<void(Window&, Key)>;
+	using resizeCallback_t      = std::function<void( Window&, const glm::uvec2& )>;
+	using focusCallback_t       = std::function<void( Window&, bool )>;
+	using mouseMoveCallback_t   = std::function<void( Window&, glm::vec2 )>;
+	using mouseButtonCallback_t = std::function<void( Window&, MouseButton )>;
+	using mouseScrollCallback_t = std::function<void( Window&, float, float )>;
+	using keyCallback_t         = std::function<void( Window&, Key )>;
 
-    Window() = default;
+	Window() = default;
+
 	virtual ~Window() = default;
+
 
 	auto* GetPlatformPtr()
 	{
@@ -54,16 +54,21 @@ public:
 #endif
 	}
 
-    virtual bool Init(const glm::uvec2& size, const std::string& title, uint32_t flags) = 0;
 
-    virtual void PollEvents() = 0;
+	virtual bool Init( const glm::uvec2& size, const std::string& title, uint32_t flags ) = 0;
+
+	virtual void PollEvents() = 0;
+
 	virtual void BeginFrame() {} /* OpenGL does not need this function, but modern APIs do */
 	virtual void SwapBuffers() = 0;
-	virtual void ClearViewport() = 0;
-    virtual bool ShouldClose() = 0;
 
-    virtual int GetMouseButton(MouseButton button) = 0;
-    virtual int GetKey(Key key) = 0;
+	virtual void ClearViewport() = 0;
+
+	virtual bool ShouldClose() = 0;
+
+	virtual int GetMouseButton( MouseButton button ) = 0;
+
+	virtual int GetKey( Key key ) = 0;
 
 	[[nodiscard]]
 	virtual glm::uvec2 GetSize() const = 0;
@@ -71,53 +76,59 @@ public:
 	[[nodiscard]]
 	virtual const std::string& GetTitle() const;
 
-	virtual void SetTitle(const std::string& title) = 0;
+	virtual void SetTitle( const std::string& title ) = 0;
 
 	[[nodiscard]]
 	virtual CursorMode GetCursorMode() = 0;
 
-	virtual void SetCursorMode(CursorMode mode) = 0;
+	virtual void SetCursorMode( CursorMode mode ) = 0;
 
 	virtual void RequestClose();
 
-	virtual void SetMaximized(bool maximized) = 0;
+	virtual void SetMaximized( bool maximized ) = 0;
 
-    /*
-     * Window callbacks
-     */
+	/*
+	 * Window callbacks
+	 */
 
-    void SetResizeCallback(const resizeCallback_t& callback);
-    void SetFocusCallback(const focusCallback_t& callback);
+	void SetResizeCallback( const resizeCallback_t& callback );
 
-    void SetMouseMoveCallback(const mouseMoveCallback_t& callback);
+	void SetFocusCallback( const focusCallback_t& callback );
 
-    void SetMouseButtonDownCallback(const mouseButtonCallback_t& callback);
-    void SetMouseButtonUpCallback(const mouseButtonCallback_t& callback);
-    void SetMouseScrollCallback(const mouseScrollCallback_t& callback);
+	void SetMouseMoveCallback( const mouseMoveCallback_t& callback );
 
-    void SetKeyDownCallback(const keyCallback_t& callback);
-    void SetKeyUpCallback(const keyCallback_t& callback);
+	void SetMouseButtonDownCallback( const mouseButtonCallback_t& callback );
+
+	void SetMouseButtonUpCallback( const mouseButtonCallback_t& callback );
+
+	void SetMouseScrollCallback( const mouseScrollCallback_t& callback );
+
+	void SetKeyDownCallback( const keyCallback_t& callback );
+
+	void SetKeyUpCallback( const keyCallback_t& callback );
 
 protected:
-	bool m_shouldClose = false;
+
+	bool        m_shouldClose = false;
 	std::string m_title;
 
-    resizeCallback_t onResize;
-    focusCallback_t onFocus;
+	resizeCallback_t onResize;
+	focusCallback_t  onFocus;
 
-    mouseMoveCallback_t onMouseMove;
-    mouseButtonCallback_t onMouseDown;
-    mouseButtonCallback_t onMouseUp;
-    mouseScrollCallback_t onMouseScroll;
+	mouseMoveCallback_t   onMouseMove;
+	mouseButtonCallback_t onMouseDown;
+	mouseButtonCallback_t onMouseUp;
+	mouseScrollCallback_t onMouseScroll;
 
-    keyCallback_t onKeyDown;
-    keyCallback_t onKeyUp;
+	keyCallback_t onKeyDown;
+	keyCallback_t onKeyUp;
 };
 
-void CreateWin(
-	std::unique_ptr<Window>& window,
-	const glm::uvec2& size, const std::string& title,
-	uint32_t flags = EngineWindowFlags_None
-);
 
+void CreateWin(
+		std::unique_ptr<Window>& window,
+		const glm::uvec2&        size,
+		const std::string&       title,
+		uint32_t                 flags = EngineWindowFlags_None
+		);
 } // Engine
