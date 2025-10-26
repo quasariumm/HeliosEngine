@@ -75,7 +75,7 @@ void GL46_Buffer::Fill( const size_t size, const void* data ) const
 		//DebugLog(LogSeverity::INFO, L"Tried to use FillNone() on a non-initialised buffer.");
 		return;
 	}
-	glNamedBufferStorage( m_bufferID, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_STORAGE_BIT );
+	glNamedBufferData( m_bufferID, static_cast<GLsizeiptr>(size), data, GL_DYNAMIC_DRAW );
 }
 
 
