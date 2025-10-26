@@ -257,12 +257,20 @@ namespace Components
 								ECS::Registry()->remove<T>(e);
 							ImGui::PopStyleColor();
 							if (inspecting)
+							{
+								ImGui::PushID(c);
 								c->Inspector();
+								ImGui::PopID();
+							}
 						}
 						else
 						{
 							if (ImGui::CollapsingHeader(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushID(c);
 								c->Inspector();
+								ImGui::PopID();
+							}
 						}
 					}
 				});
