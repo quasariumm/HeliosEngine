@@ -73,7 +73,7 @@ void AssignData( const GL46_Buffer& buffer, uint32_t* count = nullptr )
 	{
 		vec.push_back(o);
 	});
-	buffer.Fill(vec.size(), vec.data());
+	buffer.Fill(vec.size() * sizeof(T), vec.data());
 	if (count)
 		*count = vec.size();
 };
@@ -159,15 +159,23 @@ void Renderer::SendData()
 	// Bind geometry context
 	m_geometryContext.materials.BindBase(8);
 	m_geometryContext.spheres.BindBase(3);
+	m_shader.SetUInt("NumSpheres", m_geometryContext.numSpheres);
 	m_geometryContext.bvhNodes.BindBase(4);
+	m_shader.SetUInt("NumBVHNodes", m_geometryContext.numBVHNodes);
 	m_geometryContext.vertices.BindBase(5);
+	m_shader.SetUInt("NumVertices", m_geometryContext.numVertices);
 	m_geometryContext.indices.BindBase(6);
+	m_shader.SetUInt("NumIndices", m_geometryContext.numIndices);
 	m_geometryContext.meshes.BindBase(7);
+	m_shader.SetUInt("NumMeshes", m_geometryContext.numMeshes);
 
 	// Bind lights context
 	m_lightsContext.directionalLights.BindBase(0);
+	m_shader.SetUInt("NumDirectionalLights", m_lightsContext.numDirectionalLights);
 	m_lightsContext.pointLights.BindBase(1);
+	m_shader.SetUInt("NumPointLights", m_lightsContext.numPointLights);
 	m_lightsContext.spotLights.BindBase(2);
+	m_shader.SetUInt("NumSpotLigts", m_lightsContext.numSpotLights);
 
 	// Bind skybox info
 	m_shader.SetVec3("GroundColor", m_skyboxInfo.groundColor);
