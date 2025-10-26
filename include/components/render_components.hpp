@@ -11,7 +11,7 @@ struct Sphere final : BaseComponent
 
 
 	Sphere( const float r, const glm::vec3& pos ) :
-		radius(r), position(pos) {}
+		position(pos), radius(r) {}
 
 
 	template <typename Archive>
@@ -20,9 +20,10 @@ struct Sphere final : BaseComponent
 
 	void Inspector() override;
 
-	float     radius{1.f};
 	glm::vec3 position{0.f};
+	float     radius{1.f};
 	int       materialIdx{0};
+	int       padding[3]{0};
 };
 
 

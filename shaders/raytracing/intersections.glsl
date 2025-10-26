@@ -10,12 +10,12 @@
 
 struct Sphere
 {
-	vec3 center;
+	vec3 position;
 	float radius;
 	int materialIndex;
-	ivec3 padding;
+	int padding[3];
 };
-uniform int NumSpheres = 0;
+uniform uint NumSpheres = 0;
 layout (std430, binding = 3) readonly buffer SpheresBuffer
 {
 	Sphere Spheres[];
@@ -24,7 +24,7 @@ layout (std430, binding = 3) readonly buffer SpheresBuffer
 void RaySphere(inout Ray ray, Sphere sphere)
 {
 	// Thanks for the code, Sebastian Lague
-	vec3 oc = ray.origin - sphere.center;
+	vec3 oc = ray.origin - sphere.position;
 	float b = dot(oc, ray.dir);
 	float d = b * b - (dot(oc, oc) - sphere.radius * sphere.radius);
 
@@ -42,7 +42,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 		ray.hit.materialIndex = sphere.materialIndex;
 		ray.hit.dst = t1;
 		ray.hit.hitPoint = ray.origin + ray.dir * t1;
-		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.center);
+		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.position);
 
 		// Calculate tangent vector
 		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
@@ -60,7 +60,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 		ray.hit.materialIndex = sphere.materialIndex;
 		ray.hit.dst = t2;
 		ray.hit.hitPoint = ray.origin + ray.dir * t2;
-		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.center) * sign(b);
+		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.position) * sign(b);
 
 		// Calculate tangent vector
 		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
@@ -245,7 +245,7 @@ void RayCollision(inout Ray ray)
 	ray.hit = defaultHitInfo;
 	ray.hit.didHit = false;
 	ray.hit.dst = 1e30;
-	for (int i = 0; i < NumSpheres; ++i)
+	for (uint i = 0; i < NumSpheres; ++i)
 		RaySphere(ray, Spheres[i]);
 
 	for (uint i = 0; i < NumMeshes; ++i)
