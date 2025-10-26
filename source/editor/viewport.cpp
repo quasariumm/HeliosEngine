@@ -13,16 +13,16 @@ void Viewport::Draw()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
 	if (ImGui::Begin(ICON_MONITOR_SCREENSHOT" Viewport"))
 	{
+		const auto size = ImGui::GetContentRegionAvail();
 		if (m_renderedImage != nullptr)
 		{
 			// Thanks envoyious! https://github.com/ocornut/imgui/issues/5118
-			const ImVec2 screenSize = ImGui::GetContentRegionAvail();
-			const float  scale      = std::min(screenSize.x / static_cast<float>(m_renderedImage->GetWidth()),
-			                             screenSize.y / static_cast<float>(m_renderedImage->GetHeight()));
+			const float  scale      = std::min(size.x / static_cast<float>(m_renderedImage->GetWidth()),
+			                             size.y / static_cast<float>(m_renderedImage->GetHeight()));
 			const auto textureSize = ImVec2(static_cast<float>(m_renderedImage->GetWidth()) * scale,
 			                                static_cast<float>(m_renderedImage->GetHeight()) * scale);
 
-			const ImVec2 offset = (screenSize - textureSize) * 0.5f;
+			const ImVec2 offset = (size - textureSize) * 0.5f;
 			ImGui::SetCursorPos(ImGui::GetCursorStartPos() + offset);
 			// Draw the final rendered image
 			ImGui::Image(
@@ -38,7 +38,6 @@ void Viewport::Draw()
 			//Log::Error("Something went wrong when trying to show the rendered image");
 		}
 
-		const auto size = ImGui::GetContentRegionAvail();
 		if (size.x > 0.f && size.y > 0.f)
 			m_viewportSize = {size.x, size.y};
 

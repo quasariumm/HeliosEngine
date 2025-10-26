@@ -13,46 +13,7 @@ Camera::Camera()
 {
 	// Set up a basic view frustum
 	m_camPos = glm::vec3(0, 0, -2);
-
-	m_camFront = glm::vec3(0, 0, 1);
-	m_camRight = glm::normalize(glm::cross(m_worldUp, m_camFront));
-	m_camUp    = glm::normalize(glm::cross(m_camFront, m_camRight));
-
 	UpdateCameraVectors();
-}
-
-
-glm::vec3 Camera::GetViewportParameters( const glm::uvec2& viewportSize ) const
-{
-	// Viewport size
-	const float viewportHeight = 2.f * std::tan(RAD(0.25f * m_fov)) * m_focusPlaneDistance;
-	const float viewportWidth  = viewportHeight * (
-		                            static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y));
-	return {viewportWidth, viewportHeight, m_focusPlaneDistance};
-}
-
-
-glm::mat4 Camera::GetViewMatrix() const
-{
-	return glm::lookAt(m_camPos, m_camFront, m_camUp);
-}
-
-
-glm::mat4 Camera::GetProjectionMatrix( const glm::uvec2& viewportSize ) const
-{
-	return glm::perspective(m_fov, static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y), 0.1f,
-	                        100.0f);
-}
-
-
-glm::mat4 Camera::GetCamToWorldMatrix() const
-{
-	return {
-			glm::vec4{m_camRight.x, m_camRight.y, m_camRight.z, m_camPos.x},
-			glm::vec4{-m_camUp.x, -m_camUp.y, -m_camUp.z, m_camPos.y},
-			glm::vec4{m_camFront.x, m_camFront.y, m_camFront.z, m_camPos.z},
-			glm::vec4{0, 0, 0, 0}
-	};
 }
 
 
@@ -120,6 +81,40 @@ void Camera::MouseButtonUp( const MouseButton& button )
 {
 	if (button == MouseButton::RIGHT)
 		m_usingCamera = false;
+}
+
+
+glm::vec3 Camera::GetViewportParameters( const glm::uvec2& viewportSize ) const
+{
+	// Viewport size
+	const float viewportHeight = 2.f * std::tan(RAD(0.25f * m_fov)) * m_focusPlaneDistance;
+	const float viewportWidth  = viewportHeight * (
+		                            static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y));
+	return {viewportWidth, viewportHeight, m_focusPlaneDistance};
+}
+
+
+glm::mat4 Camera::GetViewMatrix() const
+{
+	return glm::lookAt(m_camPos, m_camFront, m_camUp);
+}
+
+
+glm::mat4 Camera::GetProjectionMatrix( const glm::uvec2& viewportSize ) const
+{
+	return glm::perspective(m_fov, static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y), 0.1f,
+	                        100.0f);
+}
+
+
+glm::mat4 Camera::GetCamToWorldMatrix() const
+{
+	return {
+			glm::vec4{m_camRight.x, m_camRight.y, m_camRight.z, m_camPos.x},
+			glm::vec4{-m_camUp.x, -m_camUp.y, -m_camUp.z, m_camPos.y},
+			glm::vec4{m_camFront.x, m_camFront.y, m_camFront.z, m_camPos.z},
+			glm::vec4{0, 0, 0, 1}
+	};
 }
 
 

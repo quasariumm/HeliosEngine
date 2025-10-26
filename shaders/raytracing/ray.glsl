@@ -5,7 +5,7 @@
 	Very basic file to just store the ray struct
 */
 
-#include "/Engine/Raytracing/materialStruct.glsl"
+#include "/Engine/raytracing/materialStruct.glsl"
 
 struct RayHitInfo
 {

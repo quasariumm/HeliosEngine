@@ -5,31 +5,31 @@ namespace Engine
 
 enum class BufferType : uint8_t
 {
-	Array = 0,
-	ElementArray,
-	CopyRead,
-	CopyWrite,
-	PixelUnpack,
-	PixelPack,
-	Query,
-	Texture,
-	TransformFeedback,
-	Uniform,
-	DrawIndirect,
-	AtomicCounter,
-	DispatchIndirect,
-	ShaderStorage,
-	Parameter
+	ARRAY = 0,
+	ELEMENT_ARRAY,
+	COPY_READ,
+	COPY_WRITE,
+	PIXEL_UNPACK,
+	PIXEL_PACK,
+	QUERY,
+	TEXTURE,
+	TRANSFORM_FEEDBACK,
+	UNIFORM,
+	DRAW_INDIRECT,
+	ATOMIC_COUNTER,
+	DISPATCH_INDIRECT,
+	SHADER_STORAGE,
+	PARAMETER
 };
 
 enum class BufferAccess : uint8_t
 {
-	ReadOnly = 0,
-	WriteOnly,
-	ReadWrite
+	READ_ONLY = 0,
+	WRITE_ONLY,
+	READ_WRITE
 };
 
-class GL46_Buffer 
+class GL46_Buffer
 {
 
 public:

@@ -1,10 +1,10 @@
 #ifndef MATERIALS_GLSL
 #define MATERIALS_GLSL
 
-#include "/Engine/Core/random.glsl"
-#include "/Engine/Raytracing/ray.glsl"
-#include "/Engine/Raytracing/materialStruct.glsl"
-#include "/Engine/Raytracing/microfacet.glsl"
+#include "/Engine/core/random.glsl"
+#include "/Engine/raytracing/ray.glsl"
+#include "/Engine/raytracing/materialStruct.glsl"
+#include "/Engine/raytracing/microfacet.glsl"
 
 /*
 	Bounces

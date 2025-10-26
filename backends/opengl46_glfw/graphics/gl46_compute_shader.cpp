@@ -1,8 +1,8 @@
 #include "gl46_compute_shader.hpp"
 
+
 namespace Engine
 {
-
 /*
  * Class: GL46_ComputeShader => GL64_ShaderBase
  * Interface of ComputeShader for OpenGL 4.6
@@ -18,7 +18,7 @@ GL46_ComputeShader::~GL46_ComputeShader()
 }
 
 
-void GL46_ComputeShader::LoadFromFile(const std::string& filename, const bool spirV)
+void GL46_ComputeShader::LoadFromFile( const std::string& filename, const bool spirV )
 {
 	if (m_initialised)
 	{
@@ -27,7 +27,7 @@ void GL46_ComputeShader::LoadFromFile(const std::string& filename, const bool sp
 	}
 
 	// Load the file from disk
-	std::wifstream filestream;
+	std::ifstream filestream;
 	filestream.open(filename.c_str());
 
 	if (filestream.is_open())
@@ -40,19 +40,15 @@ void GL46_ComputeShader::LoadFromFile(const std::string& filename, const bool sp
 		throw std::runtime_error("Failed to load compute shader");
 	}
 
-	// Load contents
-	std::stringstream contentStream;
-	contentStream << filestream.rdbuf();
-
 	// Get the includes
 	std::ostringstream includedStream;
 
 	static bool supportsGLSLIncludes = glfwExtensionSupported("ARB_shading_language_include") == GLFW_TRUE;
-	ManageIncludes(contentStream, includedStream, supportsGLSLIncludes);
+	ManageIncludes(filestream, includedStream, supportsGLSLIncludes);
 
 	// Set contents to the current version
 	std::string contentString = includedStream.str();
-	const char* content = contentString.c_str();
+	const char* content       = contentString.c_str();
 
 	// Create and compile shader
 	m_shaderID = glCreateShader(GL_COMPUTE_SHADER);
@@ -105,7 +101,7 @@ void GL46_ComputeShader::LoadFromFile(const std::string& filename, const bool sp
 }
 
 
-void GL46_ComputeShader::Dispatch(const glm::uvec3& threads) const
+void GL46_ComputeShader::Dispatch( const glm::uvec3& threads ) const
 {
 	if (!m_initialised)
 		throw std::runtime_error("Compute shader cannot be dispatched when no shader is loaded!");
@@ -116,20 +112,22 @@ void GL46_ComputeShader::Dispatch(const glm::uvec3& threads) const
 
 
 void GL46_ComputeShader::ManageIncludes(
-	std::stringstream& contents, std::ostringstream& outStream,
-	bool supportsGLSLIncludes, uint32_t currentFileIndex
-)
+		std::ifstream&      file,
+		std::ostringstream& outStream,
+		bool                supportsGLSLIncludes,
+		uint32_t            currentFileIndex
+		)
 {
 	std::string line;
-	uint32_t lineCount = 0;
-	while (std::getline(contents, line))
+	uint32_t    lineCount = 0;
+	while (std::getline(file, line))
 	{
 		lineCount++;
 		if (line.starts_with("#include"))
 		{
-			size_t firstSlash = line.find_first_of(L'/');
-			std::string path = line.substr(firstSlash, line.length() - firstSlash);
-			std::string glslPath = path;
+			size_t      firstSlash = line.find_first_of(L'/');
+			std::string path       = line.substr(firstSlash, line.length() - firstSlash);
+			std::string glslPath   = path;
 			// Remove trailing "
 			glslPath.erase(glslPath.length() - 1);
 
@@ -141,38 +139,36 @@ void GL46_ComputeShader::ManageIncludes(
 				continue;
 			}
 
-			std::wifstream included;
 			if (path.starts_with("/Engine"))
 			{
-				path.replace(0, 7, "src/Shaders");
+				path.replace(0, 7, "shaders");
 				// Remove trailing "
 				path.erase(path.length() - 1);
 
-				included = std::wifstream(path.c_str());
+				std::ifstream included;
+				included.open(path.c_str());
 
 				if (!included.is_open())
 					continue;
 
-				std::stringstream contentStream;
-				contentStream << included.rdbuf();
-
 				if (supportsGLSLIncludes)
 				{
-					std::string contentString = contentStream.str();
+					std::string contentString{std::istreambuf_iterator(included), std::istreambuf_iterator<char>()};
 					const char* content = contentString.c_str();
 
 					glNamedStringARB(GL_SHADER_INCLUDE_ARB, -1, glslPath.c_str(), -1, content);
 					outStream << line << "\n";
-					ManageIncludes(contentStream, outStream, supportsGLSLIncludes, currentFileIndex);
+					ManageIncludes(included, outStream, supportsGLSLIncludes, currentFileIndex);
 				}
 				else
 				{
 					const uint32_t fileIndex = ((alreadyLoaded)
-						? std::distance(loadedShaders.begin(), loadedShaders.find(glslPath))
-						: loadedShaders.size()) + 1ull;
+						                            ? std::distance(loadedShaders.begin(), loadedShaders.find(glslPath))
+						                            : loadedShaders.size()) + 1ull;
 					outStream << "#line 0 " << std::to_string(fileIndex) << "\n";
-					ManageIncludes(contentStream, outStream, supportsGLSLIncludes, fileIndex);
-					outStream << "#line " << std::to_string(lineCount + 1) << " " << std::to_string(currentFileIndex) << "\n";
+					ManageIncludes(included, outStream, supportsGLSLIncludes, fileIndex);
+					outStream << "#line " << std::to_string(lineCount + 1) << " " << std::to_string(currentFileIndex) <<
+							"\n";
 				}
 
 				included.close();
@@ -187,5 +183,4 @@ void GL46_ComputeShader::ManageIncludes(
 		}
 	}
 }
-
 }

@@ -42,9 +42,9 @@ public:
 private:
 
 	static void ManageIncludes(
-		std::stringstream& contents, std::ostringstream& outStream,
-		bool supportsGLSLIncludes, uint32_t currentFileIndex = 0
-	);
+			std::ifstream&      file,
+			std::ostringstream& outStream, bool supportsGLSLIncludes, uint32_t currentFileIndex = 0
+			);
 
 	uint32_t m_shaderID = 0;
 

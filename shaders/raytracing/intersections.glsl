@@ -1,8 +1,8 @@
 #ifndef INTERSECTIONS_GLSL
 #define INTERSECTIONS_GLSL
 
-#include "/Engine/Raytracing/ray.glsl"
-#include "/Engine/Raytracing/materials.glsl"
+#include "/Engine/raytracing/ray.glsl"
+#include "/Engine/raytracing/materials.glsl"
 
 /*
 	Holds the primitve structs and the ray-primitive intersection logic
@@ -13,10 +13,13 @@ struct Sphere
 	vec3 center;
 	float radius;
 	int materialIndex;
+	ivec3 padding;
 };
-#define SPHERES_MAX 16
-uniform Sphere Spheres[SPHERES_MAX];
 uniform int NumSpheres = 0;
+layout (std430, binding = 3) readonly buffer SpheresBuffer
+{
+	Sphere Spheres[];
+};
 
 void RaySphere(inout Ray ray, Sphere sphere)
 {

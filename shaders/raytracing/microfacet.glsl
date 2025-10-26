@@ -5,7 +5,7 @@
 	Houses the material struct and material-related functions
 */
 
-#include "/Engine/Raytracing/materialStruct.glsl"
+#include "/Engine/raytracing/materialStruct.glsl"
 
 // EXTENDS UPON MATERIAL_XXXX. THIS IS INCLUDED IN THE MATERIAL TYPE
 #define MICROFACET_BECKMANN		64		// Beckmann–Spizzichino model
