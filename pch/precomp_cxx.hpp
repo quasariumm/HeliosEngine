@@ -118,8 +118,6 @@ using namespace Microsoft::WRL;
 
 // ENTT
 #include <entt/entt.hpp>
-// OpenCL
-#include <CL/opencl.hpp>
 
 #include "float16_t.hpp"
 

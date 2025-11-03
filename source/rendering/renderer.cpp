@@ -2,7 +2,6 @@
 
 #include "components/light_components.hpp"
 #include "components/render_components.hpp"
-#include "compute/program.hpp"
 #include "editor/editor_menus.hpp"
 #include "rendering/camera.hpp"
 
@@ -17,8 +16,6 @@ void Renderer::Initialize()
 			"Helios Engine",
 			EngineWindowFlags_NoVsync
 			);
-
-	Compute::Program::Initialize();
 
 	m_window->SetMaximized(true);
 

@@ -2,8 +2,6 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#include "compute/program.hpp"
-
 
 namespace Engine
 {
@@ -59,23 +57,23 @@ static glm::uvec2 ConvertBufferFormat( const TextureFormat format )
 	case TextureFormat::RED16:
 	case TextureFormat::RED16F:
 	case TextureFormat::RED32F:
-		return {GL_RED, CL_R};
+		return {GL_RED, 0};
 	case TextureFormat::RG8:
 	case TextureFormat::RG16:
 	case TextureFormat::RG16F:
 	case TextureFormat::RG32F:
-		return {GL_RG, CL_RG};
+		return {GL_RG, 0};
 	case TextureFormat::RGB8:
 	case TextureFormat::RGB16F:
 	case TextureFormat::RGB32F:
-		return {GL_RGB, CL_RGB};
+		return {GL_RGB, 0};
 	case TextureFormat::RGBA8:
 	case TextureFormat::RGBA16:
 	case TextureFormat::RGBA16F:
 	case TextureFormat::RGBA32F:
-		return {GL_RGBA, CL_RGBA};
+		return {GL_RGBA, 0};
 	default:
-		return {GL_RGB, CL_RGB};
+		return {GL_RGB, 0};
 	}
 }
 
@@ -133,27 +131,22 @@ void GL46_Texture2D::FillBlank(
 	case 1:
 		m_bufferFormat = (isHDR) ? TextureFormat::RED32F : TextureFormat::RED8;
 		m_glBufferFormat = GL_RED;
-		m_clBufferFormat = CL_R;
 		break;
 	case 2:
 		m_bufferFormat = (isHDR) ? TextureFormat::RG32F : TextureFormat::RG8;
 		m_glBufferFormat = GL_RG;
-		m_clBufferFormat = CL_RG;
 		break;
 	case 3:
 		m_bufferFormat = (isHDR) ? TextureFormat::RGB32F : TextureFormat::RGB8;
 		m_glBufferFormat = GL_RGB;
-		m_clBufferFormat = CL_RGB;
 		break;
 	case 4:
 		m_bufferFormat = (isHDR) ? TextureFormat::RGBA32F : TextureFormat::RGBA8;
 		m_glBufferFormat = GL_RGBA;
-		m_clBufferFormat = CL_RGBA;
 		break;
 	default:
 		m_bufferFormat = (isHDR) ? TextureFormat::RGB32F : TextureFormat::RGB8;
 		m_glBufferFormat = GL_RGB;
-		m_clBufferFormat = CL_RGB;
 		break;
 	}
 	glTexStorage2D(GL_TEXTURE_2D, 1, m_glInternalFormat, m_width, m_height);

@@ -143,68 +143,6 @@ add_subdirectory(extern/nativefiledialog-extended)
 add_subdirectory(extern/Tracy)
 
 ##############################################
-##  		  Configure Assimp  			##
-##############################################
-set(BUILD_SHARED_LIBS 	OFF	)
-set(ASSIMP_INSTALL 		OFF	)
-set(ASSIMP_WARNINGS_AS_ERRORS OFF)
-# Optimise build times by turning off certain importers
-# and turning off exporters, since we don't support it (yet?)
-set(ASSIMP_NO_EXPORT 						ON	)
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT	OFF	)
-set(ASSIMP_BUILD_3DS_IMPORTER 				ON	)
-set(ASSIMP_BUILD_ASE_IMPORTER 				ON	)
-set(ASSIMP_BUILD_OBJ_IMPORTER				ON	)
-set(ASSIMP_BUILD_PLY_IMPORTER				ON	)
-set(ASSIMP_BUILD_FBX_IMPORTER				ON	)
-set(ASSIMP_BUILD_RAW_IMPORTER				ON	)
-set(ASSIMP_BUILD_GLTF_IMPORTER				ON	)
-set(ASSIMP_BUILD_AMF_IMPORTER 				OFF	)
-set(ASSIMP_BUILD_AC_IMPORTER 				OFF	)
-set(ASSIMP_BUILD_ASSBIN_IMPORTER			OFF	) # What is this name ?!?!?! XD
-set(ASSIMP_BUILD_B3D_IMPORTER				OFF	)
-set(ASSIMP_BUILD_BVH_IMPORTER				OFF	)
-set(ASSIMP_BUILD_COLLADA_IMPORTER			OFF	) # This is already legacy, so why support it
-set(ASSIMP_BUILD_DXF_IMPORTER				OFF	)
-set(ASSIMP_BUILD_CSM_IMPORTER				OFF	)
-set(ASSIMP_BUILD_HMP_IMPORTER				OFF	)
-set(ASSIMP_BUILD_IRRMESH_IMPORTER			OFF	)
-set(ASSIMP_BUILD_IQM_IMPORTER				OFF	)
-set(ASSIMP_BUILD_IRR_IMPORTER				OFF	)
-set(ASSIMP_BUILD_LWO_IMPORTER				OFF	)
-set(ASSIMP_BUILD_LWS_IMPORTER				OFF	)
-set(ASSIMP_BUILD_MD2_IMPORTER				OFF	)
-set(ASSIMP_BUILD_MD3_IMPORTER				OFF	)
-set(ASSIMP_BUILD_MD5_IMPORTER				OFF	)
-set(ASSIMP_BUILD_MDC_IMPORTER				OFF	)
-set(ASSIMP_BUILD_MDL_IMPORTER				OFF	)
-set(ASSIMP_BUILD_NFF_IMPORTER				OFF	)
-set(ASSIMP_BUILD_NDO_IMPORTER				OFF	)
-set(ASSIMP_BUILD_OFF_IMPORTER				OFF	)
-set(ASSIMP_BUILD_OGRE_IMPORTER				OFF	)
-set(ASSIMP_BUILD_OPENGEX_IMPORTER			OFF	)
-set(ASSIMP_BUILD_MS3D_IMPORTER				OFF	)
-set(ASSIMP_BUILD_COB_IMPORTER				OFF	)
-set(ASSIMP_BUILD_BLEND_IMPORTER				OFF	)
-set(ASSIMP_BUILD_IFC_IMPORTER				OFF	)
-set(ASSIMP_BUILD_XGL_IMPORTER				OFF	)
-set(ASSIMP_BUILD_Q3D_IMPORTER				OFF	)
-set(ASSIMP_BUILD_Q3BSP_IMPORTER				OFF	)
-set(ASSIMP_BUILD_SIB_IMPORTER				OFF	)
-set(ASSIMP_BUILD_SMD_IMPORTER				OFF	)
-set(ASSIMP_BUILD_STL_IMPORTER				OFF	)
-set(ASSIMP_BUILD_TERRAGEN_IMPORTER			OFF	)
-set(ASSIMP_BUILD_3D_IMPORTER				OFF	)
-set(ASSIMP_BUILD_X_IMPORTER					OFF	)
-set(ASSIMP_BUILD_X3D_IMPORTER				OFF	)
-set(ASSIMP_BUILD_3MF_IMPORTER				OFF	)
-set(ASSIMP_BUILD_MDD_IMPORTER				OFF	)
-set(ASSIMP_BUILD_TESTS 						OFF )
-
-add_subdirectory(extern/Assimp)
-set(CMAKE_CXX_STANDARD 20) # Because Assimp changes it back to C++17
-
-##############################################
 ##  	  Compile defs and options  		##
 ##############################################
 
@@ -304,8 +242,8 @@ function(copy_engine_dlls PROJ)
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"$<$<CONFIG:Debug>:${FMOD_DYN_LIBS_DEBUG}>"
 			"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
-			"$<$<CONFIG:Debug>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Joltd.dll>"
-			"$<$<CONFIG:Release>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Jolt.dll>"
+			"$<$<CONFIG:Debug>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/libJolt.dll>"
+			"$<$<CONFIG:Release>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/libJolt.dll>"
 			$<TARGET_FILE_DIR:${PROJ}>
 			COMMAND_EXPAND_LISTS
 			COMMENT "Copying FMOD DLLs"
@@ -313,28 +251,28 @@ function(copy_engine_dlls PROJ)
 endfunction()
 
 
-##############################################
-##  	    		OpenCL		    		##
-##############################################
-
-find_package(OpenCL MODULE)
-
-if (NOT OpenCL_FOUND)
-	message(FATAL_ERROR "OpenCL not found. See README.md for install instructions.")
-endif()
-
-target_link_libraries(Engine PRIVATE OpenCL::OpenCL)
-
-math(EXPR CL_TARGET_VERSION "${OpenCL_VERSION_MAJOR} * 100 + ${OpenCL_VERSION_MINOR} * 10")
-
-target_compile_definitions(Engine PRIVATE
-		CL_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
-		CL_HPP_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
-		# TODO: Determine this minimum version based on implementation of the kernels
-		CL_HPP_MINIMUM_OPENCL_VERSION=200
-		#CL_HPP_ENABLE_EXCEPTIONS
-		CL_VERSION_STR="${OpenCL_VERSION_MAJOR}.${OpenCL_VERSION_MINOR}"
-)
+###############################################
+###  	    		OpenCL		    		##
+###############################################
+#
+#find_package(OpenCL MODULE)
+#
+#if (NOT OpenCL_FOUND)
+#	message(FATAL_ERROR "OpenCL not found. See README.md for install instructions.")
+#endif()
+#
+#target_link_libraries(Engine PRIVATE OpenCL::OpenCL)
+#
+#math(EXPR CL_TARGET_VERSION "${OpenCL_VERSION_MAJOR} * 100 + ${OpenCL_VERSION_MINOR} * 10")
+#
+#target_compile_definitions(Engine PRIVATE
+#		CL_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
+#		CL_HPP_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
+#		# TODO: Determine this minimum version based on implementation of the kernels
+#		CL_HPP_MINIMUM_OPENCL_VERSION=200
+#		#CL_HPP_ENABLE_EXCEPTIONS
+#		CL_VERSION_STR="${OpenCL_VERSION_MAJOR}.${OpenCL_VERSION_MINOR}"
+#)
 
 ##############################################
 ## Include directories + precompiled header ##
@@ -346,7 +284,6 @@ target_include_directories(Engine PUBLIC
 		extern
 		extern/imgui
 		extern/nativefiledialog-extended/src/include
-		extern/Assimp/include
 		extern/glm
 		lib
 		lib/glfw/include
@@ -370,6 +307,5 @@ target_precompile_headers(Engine PUBLIC
 target_link_libraries(Engine PUBLIC
 		nfd
 		Tracy::TracyClient
-		assimp::assimp
 		Jolt
 )
