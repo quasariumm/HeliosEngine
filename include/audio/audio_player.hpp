@@ -19,13 +19,13 @@ namespace Studio
 } // namespace Studio
 } // namespace FMOD
 
-namespace Engine
+namespace Helios
 {
 class Camera;
 }
 
 
-namespace Engine::Audio
+namespace Helios::Audio
 {
 /**
  * A class with a number of functions for audio handling in Bee.

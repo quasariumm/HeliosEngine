@@ -5,7 +5,7 @@
 #include <cstdlib>
 #endif
 
-namespace Engine
+namespace Helios
 {
 std::string Demangle( const char* name )
 {

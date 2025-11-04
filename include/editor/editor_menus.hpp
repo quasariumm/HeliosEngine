@@ -5,7 +5,7 @@
 
 
 // Forward declarations
-namespace Engine
+namespace Helios
 {
 // ReSharper disable once CppInconsistentNaming
 class GL46_Texture2D;
@@ -16,7 +16,7 @@ class GL46_Texture2D;
 using GLuint = unsigned int;
 
 
-namespace Engine::Editor
+namespace Helios::Editor
 {
 // Editor menu is the bar at the top of the entire editor
 class EditorMenu

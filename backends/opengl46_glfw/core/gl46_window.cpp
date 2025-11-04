@@ -5,7 +5,7 @@
 #include "editor/engine_interface.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 bool GL46_Window::Init( const glm::uvec2& size, const std::string& title, const uint32_t flags )
 {

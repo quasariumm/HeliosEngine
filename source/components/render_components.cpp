@@ -1,6 +1,6 @@
 #include "components/render_components.hpp"
 
-using namespace Engine::Components;
+using namespace Helios::Components;
 
 
 void Sphere::Inspector()

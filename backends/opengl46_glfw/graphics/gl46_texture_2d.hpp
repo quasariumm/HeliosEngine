@@ -1,7 +1,7 @@
 // ReSharper disable CppInconsistentNaming
 #pragma once
 
-namespace Engine
+namespace Helios
 {
 // TODO: Move to general texture file
 enum class TextureFormat : uint8_t

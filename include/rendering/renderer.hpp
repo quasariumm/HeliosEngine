@@ -6,7 +6,7 @@
 #include "rendering/window.hpp"
 
 
-namespace Engine::Components
+namespace Helios::Components
 {
 struct Sphere;
 struct Material;
@@ -20,7 +20,7 @@ struct SpotLight;
 }
 
 
-namespace Engine
+namespace Helios
 {
 class Renderer
 {

@@ -8,7 +8,7 @@
 #include "core/ecs.hpp"
 
 
-namespace Engine::Components
+namespace Helios::Components
 {
 using namespace JPH;
 using namespace Physics;

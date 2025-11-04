@@ -3,7 +3,7 @@
 #include "core/ecs.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 // Helper functions for the ECS
 

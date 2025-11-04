@@ -3,7 +3,7 @@
 #include "gl46_shader_base.hpp"
 
 
-namespace Engine {
+namespace Helios {
 
 class GL46_ComputeShader final : public GL46_ShaderBase
 {

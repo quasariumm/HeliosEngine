@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace Engine
+namespace Helios
 {
 extern uint32_t RandomSeed( uint32_t val );
 

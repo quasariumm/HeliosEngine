@@ -3,7 +3,7 @@
 #include "tools/icon_defines.hpp"
 
 
-namespace Engine::Components
+namespace Helios::Components
 {
 #define COMPONENT_FIELD_DECL(type, name, value) type name{value};
 #define COMPONENT_FIELD_INIT(type, name, value) .name = name,

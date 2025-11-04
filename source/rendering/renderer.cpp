@@ -5,7 +5,7 @@
 #include "editor/editor_menus.hpp"
 #include "rendering/camera.hpp"
 
-using namespace Engine;
+using namespace Helios;
 
 
 void Renderer::Initialize()

@@ -1,6 +1,6 @@
 #include "gl46_shader_base.hpp"
 
-namespace Engine
+namespace Helios
 {
 
 GL46_ShaderBase::~GL46_ShaderBase()

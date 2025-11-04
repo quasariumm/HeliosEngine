@@ -1,7 +1,7 @@
 #include "gl46_compute_shader.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 /*
  * Class: GL46_ComputeShader => GL64_ShaderBase

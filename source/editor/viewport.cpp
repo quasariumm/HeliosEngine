@@ -5,7 +5,7 @@
 #include "../backends/opengl46_glfw/graphics/gl46_texture_2d.hpp"
 #include "core/engine.hpp"
 
-using namespace Engine;
+using namespace Helios;
 using namespace Editor;
 
 

@@ -10,30 +10,30 @@
 #include "rendering/renderer.hpp"
 #include "rendering/window.hpp"
 
-using namespace Engine;
+using namespace Helios;
 using namespace Editor;
 
 
-namespace Engine
+namespace Helios
 {
-EngineCore engineHandle;
+Core engineHandle;
 }
 
 
-void EngineCore::Initialize()
+void Core::Initialize()
 {
 	systemsHandler.Initialize();
 	Systems::GetRenderer()->Initialize();
 }
 
 
-void EngineCore::Shutdown()
+void Core::Shutdown()
 {
 	systemsHandler.Shutdown();
 }
 
 
-void EngineCore::Run()
+void Core::Run()
 {
 	auto time = std::chrono::high_resolution_clock::now();
 
@@ -87,7 +87,7 @@ void EngineCore::Run()
 }
 
 
-void EngineCore::Play()
+void Core::Play()
 {
 	if (m_mode == Mode::GAME)
 		return;
@@ -100,7 +100,7 @@ void EngineCore::Play()
 }
 
 
-void EngineCore::Pause()
+void Core::Pause()
 {
 	if (m_mode == Mode::PAUSED)
 		return;
@@ -110,7 +110,7 @@ void EngineCore::Pause()
 }
 
 
-void EngineCore::Stop()
+void Core::Stop()
 {
 	if (m_mode == Mode::EDITOR)
 		return;
@@ -124,7 +124,7 @@ void EngineCore::Stop()
 }
 
 
-void EngineCore::ReleaseCamera()
+void Core::ReleaseCamera()
 {
 	// if (!m_using_editor_cam)
 	//     m_renderer->AssignCamera(m_camera_system->GetEditorCamera());
@@ -132,7 +132,7 @@ void EngineCore::ReleaseCamera()
 }
 
 
-void EngineCore::LockCamera()
+void Core::LockCamera()
 {
 	// if (m_using_editor_cam)
 	// {

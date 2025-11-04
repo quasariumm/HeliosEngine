@@ -7,7 +7,7 @@
 // The main loop for the engine
 // Controls only the timestep, runtime state, and camera state
 
-namespace Engine
+namespace Helios
 {
 enum class Mode
 {
@@ -20,7 +20,7 @@ enum class Mode
 };
 
 
-class EngineCore
+class Core
 {
 public:
 
@@ -42,20 +42,20 @@ public:
 
 	void SetFixedTimeStep( const float& ms ) { m_fixedStep = ms; }
 
-	[[nodiscard]] Mode        GetMode() const { return m_mode; }
-	[[nodiscard]] bool        GetUsingEditorCam() const { return m_usingEditorCam; }
-	[[nodiscard]] EngineStats GetEngineStats() const { return m_engineStats; }
+	[[nodiscard]] Mode  GetMode() const { return m_mode; }
+	[[nodiscard]] bool  GetUsingEditorCam() const { return m_usingEditorCam; }
+	[[nodiscard]] Stats GetEngineStats() const { return m_engineStats; }
 
 private:
 
-	bool        m_usingEditorCam = true;
-	Mode        m_mode           = Mode::EDITOR;
-	EngineStats m_engineStats    = {};
-	float       m_fixedStep      = -1.0f;
+	bool  m_usingEditorCam = true;
+	Mode  m_mode           = Mode::EDITOR;
+	Stats m_engineStats    = {};
+	float m_fixedStep      = -1.0f;
 
 	std::unique_ptr<Window> m_window;
 };
 
 
-extern EngineCore engineHandle;
+extern Core engineHandle;
 }

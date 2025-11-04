@@ -4,7 +4,7 @@
 #include <stb_image.h>
 
 
-namespace Engine
+namespace Helios
 {
 /*
  * Helper functions

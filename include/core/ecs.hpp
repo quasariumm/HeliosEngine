@@ -11,7 +11,7 @@ class JSONInputArchive;
 }
 
 
-namespace Engine
+namespace Helios
 {
 // =============================================================
 // Main class for the entity component system
@@ -320,6 +320,6 @@ namespace Components
 #define REGISTER_COMPONENT(TYPE, NAME, FLAGS) \
     namespace \
     { \
-        using namespace Engine::Components; \
-        Engine::Components::Component<TYPE> reg_##TYPE {NAME, FLAGS}; \
+        using namespace Helios::Components; \
+        Helios::Components::Component<TYPE> reg_##TYPE {NAME, FLAGS}; \
     }

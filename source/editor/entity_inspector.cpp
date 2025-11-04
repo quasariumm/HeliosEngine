@@ -3,7 +3,7 @@
 #include "components/basic_components.hpp"
 #include "core/ecs.hpp"
 
-using namespace Engine;
+using namespace Helios;
 using namespace Editor;
 using namespace Components;
 
