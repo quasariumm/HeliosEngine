@@ -5,13 +5,30 @@
 
 namespace Engine::Components
 {
-struct Sphere final : BaseComponent
-{
-	Sphere() = default;
+#define COMPONENT_FIELD_DECL(type, name, value) type name{value};
+#define COMPONENT_FIELD_INIT(type, name, value) .name = name,
 
+#define RENDER_COMPONENT(name, fields_macro, gpu_padding) \
+	struct name##GPU final { \
+		fields_macro(COMPONENT_FIELD_DECL) \
+		entt::entity entity{entt::null}; \
+		uint8_t padding[gpu_padding]; \
+	}; \
+	struct name final : BaseComponent { \
+		name() = default; \
+		name##GPU MakeGPU(entt::entity entity) const { \
+			return name##GPU{ fields_macro(COMPONENT_FIELD_INIT) .entity = entity }; \
+		} \
+		fields_macro(COMPONENT_FIELD_DECL) \
+		bool dirty = false;
+// Define your fields once
+#define SPHERE_FIELDS(F) \
+	F(glm::vec3, position, 0.f) \
+	F(float, radius, 1.f) \
+	F(int32_t, materialIdx, 0)
 
-	Sphere( const float r, const glm::vec3& pos ) :
-		position(pos), radius(r) {}
+// Usage
+RENDER_COMPONENT(Sphere, SPHERE_FIELDS, 8)
 
 
 	template <typename Archive>
@@ -19,11 +36,6 @@ struct Sphere final : BaseComponent
 
 
 	void Inspector() override;
-
-	glm::vec3 position{0.f};
-	float     radius{1.f};
-	int       materialIdx{0};
-	int       padding[3]{0};
 };
 
 

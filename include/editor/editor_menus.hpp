@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "ImGuizmo.h"
+// #include "ImGuizmo.h"
 #include "editor/engine_interface.hpp"
 
 
@@ -82,6 +82,8 @@ public:
 
 	void SetRenderImage( GL46_Texture2D* image ) { m_renderedImage = image; }
 
+	[[nodiscard]]
+	std::optional<glm::uvec2> GetMousePositionInViewport() const;
 
 	[[nodiscard]]
 	glm::uvec2 GetViewportSize() const { return m_viewportSize; }
@@ -93,9 +95,10 @@ private:
 
 	GL46_Texture2D* m_renderedImage = nullptr;
 
+	glm::uvec2 m_viewportPosition{0};
 	glm::uvec2 m_viewportSize{1920u, 1080u};
 
-	ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+	// ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
 	float snapGrid = 0.1f;
 	bool snapping = false;
 };

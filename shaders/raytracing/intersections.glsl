@@ -13,7 +13,8 @@ struct Sphere
 	vec3 position;
 	float radius;
 	int materialIndex;
-	int padding[3];
+	uint entity;
+	int padding[2];
 };
 uniform uint NumSpheres = 0;
 layout (std430, binding = 3) readonly buffer SpheresBuffer
@@ -40,6 +41,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 		ray.hit.didHit = true;
 		ray.hit.inside = b < 0.0;
 		ray.hit.materialIndex = sphere.materialIndex;
+		ray.hit.entity = sphere.entity;
 		ray.hit.dst = t1;
 		ray.hit.hitPoint = ray.origin + ray.dir * t1;
 		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.position);
@@ -58,6 +60,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 		ray.hit.didHit = true;
 		ray.hit.inside = b < 0.0;
 		ray.hit.materialIndex = sphere.materialIndex;
+		ray.hit.entity = sphere.entity;
 		ray.hit.dst = t2;
 		ray.hit.hitPoint = ray.origin + ray.dir * t2;
 		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.position) * sign(b);
@@ -113,10 +116,10 @@ struct Mesh
 {
 	vec3 position;
 	int materialIndex;
-	uint indexCount;
 	uint firstIndex;
-	uint bvhNodeCount;
 	uint firstBvhNode;
+	uint indexNodeCount; // Combines indexCount (left 2 bytes) and bvhNodeCount (right 2 bytes)
+	uint entity;
 };
 
 uniform uint NumMeshes = 0;

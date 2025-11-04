@@ -8,7 +8,13 @@ layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 //#define REPROJECTION_BILERP
 #define ACCUMULATION
 
+// The final out image
 layout(rgba32f, binding = 0) uniform image2D OutTexture;
+
+// Stores the entity IDs that each pixel hits on the first depth
+layout(r32ui, binding = 1) uniform uimage2D HitTexture;
+
+// Screen parameters
 uniform uint ScreenWidth;
 uniform uint ScreenHeight;
 
@@ -28,6 +34,7 @@ uniform bool ClearAccumulator = false;
 #include "/Engine/raytracing/intersections.glsl"
 #include "/Engine/raytracing/lighting.glsl"
 
+// Skybox parameters
 uniform vec3 GroundColor  = vec3(0.5, 0.5, 0.5);
 uniform vec3 HorizonColor = vec3(0.78, 0.87, 1.0);
 uniform vec3 ZenithColor  = vec3(0.68, 0.84, 1.0);
@@ -42,6 +49,7 @@ vec3 GetSkyboxColor(in Ray ray)
 {
 	if (UseSkyboxTexture)
 	{
+		// Sample the skbox texture
 		const float u = INV2PI * atan2(ray.dir.z, ray.dir.x);
 		const float v = INVPI * acos(ray.dir.y);
 
@@ -50,10 +58,12 @@ vec3 GetSkyboxColor(in Ray ray)
 
 		const vec3 pixel = sqrt(texture(SkyboxTexture, vec2(u, v)).xyz);
 
+		// Reduce intensity of the light
 		return 0.55 * pixel;
 	}
 	else
 	{
+		// Make skybox from colors
 		float skyGradientT = pow(smoothstep(0.0, 0.4, ray.dir.y), 0.35);
 		vec3 skyGradient = mix(HorizonColor, ZenithColor, skyGradientT);
 		float sun = pow(max(0.0, dot(ray.dir, -SunDirection)), SunFocus) * SunIntensity;
@@ -66,7 +76,7 @@ vec3 GetSkyboxColor(in Ray ray)
 	}
 }
 
-vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
+vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay, out uint entity)
 {
 	vec3 incommingLight = vec3(0);
 	vec3 rayColor = vec3(1);
@@ -76,12 +86,16 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 	{
 		RayCollision(ray);
 
+		if (i == 0)
+			entity = ray.hit.entity;
+
 		if (ray.hit.didHit)
 		{
 			RayTracingMaterial material = Materials[ray.hit.materialIndex];
 
 			vec3 emittance = material.emissionColor * material.emissionStrength;
 
+			// Sample scene lights
 			mat2x3 sampledLight = SampleSceneLights(seed, ray.hit.hitPoint, ray.hit.normal);
 			ray.hit.lightVector = sampledLight[0];
 			vec3 light = sampledLight[1];
@@ -96,15 +110,18 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay)
 			RayCollision(shadowRay);
 			light *= float(!shadowRay.hit.didHit);
 
+			// BRDF and PDF
 			vec3 BRDF = GetBRDFAndBounce(ray, seed);
 			float PDF = GetPDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
 
+			// Only mix PDF in if needed
 			if (PDF == 0.0)
 				incommingLight += emittance * mixedColor;
 			else
 				incommingLight += emittance * mixedColor + BRDF / PDF * light * rayColor * max(0.001, -dot(ray.hit.normal, ray.dir));
 
 			float specularity = material.specularity;
+			// Map specularity to roughness
 			if ((material.type & MATERIAL_MICROFACET) != 0)
 			{
 				specularity = 1.0 - material.PBR_Roughness;
@@ -203,9 +220,12 @@ void main()
 	seed = WangHash(seed);
 	
 	Ray firstRay; 
-	
-	vec4 pixel = vec4(Trace(ray, seed, firstRay), 1.0);
+
+	uint entity;
+	vec4 pixel = vec4(Trace(ray, seed, firstRay, entity), 1.0);
 	pixel = max(pixel, vec4(0.0, 0.0, 0.0, 1.0));
+
+	imageStore(HitTexture, texelCoord, uvec4(entity));
     
     #ifdef REPROJECTION
 	if (!ClearAccumulator && firstRay.hit.didHit)

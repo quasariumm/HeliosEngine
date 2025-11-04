@@ -1,10 +1,9 @@
-﻿#include "ImGuizmo.h"
+﻿// #include "ImGuizmo.h"
 #include "editor/editor_menus.hpp"
 #include "components/basic_components.hpp"
 
 #include "../backends/opengl46_glfw/graphics/gl46_texture_2d.hpp"
 #include "core/engine.hpp"
-#include "fmt/format.h"
 
 using namespace Engine;
 using namespace Editor;
@@ -16,6 +15,8 @@ void Viewport::Draw()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
 	if (ImGui::Begin(ICON_MONITOR_SCREENSHOT" Viewport"))
 	{
+		const auto pos = ImGui::GetWindowPos();
+		m_viewportPosition = {pos.x, pos.y};
 		const auto size = ImGui::GetContentRegionAvail();
 		if (m_renderedImage != nullptr)
 		{
@@ -83,6 +84,18 @@ void Viewport::DrawGizmos() const
     // }
 }
 
+
+std::optional<glm::uvec2> Viewport::GetMousePositionInViewport() const
+{
+	const auto mousePos = ImGui::GetMousePos();
+	if (!CHECK_AABB2D(mousePos, m_viewportPosition, m_viewportPosition + m_viewportSize))
+		return {};
+
+	const auto diff = glm::uvec2{mousePos.x, mousePos.y} - m_viewportPosition;
+	return diff;
+}
+
+
 void Viewport::DrawOverlay()
 {
     ImGui::SetNextWindowSize(ImGui::GetWindowSize());
@@ -139,19 +152,19 @@ void Viewport::DrawOverlay()
         ImVec2 area = { f_s * 9.0f, f_s * 1.5f };
         if (ImGui::BeginChild("Movement selector", area))
         {
-            ImVec2 btnSize     = { area.x / 3.0f, area.y };
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2( 0, 0));
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2( 0, 0));
-            ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, {0.5f, 0.5f});
-            if (ImGui::Selectable(ICON_AXIS_ARROW"", operation == ImGuizmo::TRANSLATE, ImGuiSelectableFlags_None, btnSize))
-                operation = ImGuizmo::TRANSLATE;
-            ImGui::SameLine();
-            if (ImGui::Selectable(ICON_ROTATE_ORBIT"", operation == ImGuizmo::ROTATE, ImGuiSelectableFlags_None, btnSize))
-                operation = ImGuizmo::ROTATE;
-            ImGui::SameLine();
-            if (ImGui::Selectable(ICON_RESIZE"", operation == ImGuizmo::SCALE, ImGuiSelectableFlags_None, btnSize))
-                operation = ImGuizmo::SCALE;
-            ImGui::PopStyleVar(3);
+            // ImVec2 btnSize     = { area.x / 3.0f, area.y };
+            // ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2( 0, 0));
+            // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2( 0, 0));
+            // ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, {0.5f, 0.5f});
+            // if (ImGui::Selectable(ICON_AXIS_ARROW"", operation == ImGuizmo::TRANSLATE, ImGuiSelectableFlags_None, btnSize))
+            //     operation = ImGuizmo::TRANSLATE;
+            // ImGui::SameLine();
+            // if (ImGui::Selectable(ICON_ROTATE_ORBIT"", operation == ImGuizmo::ROTATE, ImGuiSelectableFlags_None, btnSize))
+            //     operation = ImGuizmo::ROTATE;
+            // ImGui::SameLine();
+            // if (ImGui::Selectable(ICON_RESIZE"", operation == ImGuizmo::SCALE, ImGuiSelectableFlags_None, btnSize))
+            //     operation = ImGuizmo::SCALE;
+            // ImGui::PopStyleVar(3);
         }
         ImGui::EndChild();
         ImGui::PopStyleColor();
@@ -169,7 +182,7 @@ void Viewport::DrawOverlay()
             if (ImGui::BeginChild("Debug", {f_s * 10.0f ,0}, ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Border))
             {
                 ImGui::SetCursorPos({f_s * 0.5f, f_s * 0.5f});
-                ImGui::Text(ICON_SPEEDOMETER" %s", fmt::format( "{:.1f} FPS", engineHandle.GetEngineStats().GetFPS()).c_str());
+                ImGui::Text(ICON_SPEEDOMETER" %s", std::format( "{:.1f} FPS", engineHandle.GetEngineStats().GetFPS()).c_str());
                 ImGui::SetCursorPosX(f_s * 0.5f);
                 if (fixed_step)
                 {
@@ -179,7 +192,7 @@ void Viewport::DrawOverlay()
                 }
                 else
                 {
-                    ImGui::Text(ICON_SPEEDOMETER" %s", fmt::format("{:.3f} MS", engineHandle.GetEngineStats().GetDeltaTime() * 1000).c_str());
+                    ImGui::Text(ICON_SPEEDOMETER" %s", std::format("{:.3f} MS", engineHandle.GetEngineStats().GetDeltaTime() * 1000).c_str());
                     engineHandle.SetFixedTimeStep(-1.0f);
                 }
                 ImGui::SetCursorPosX(f_s * 0.5f);

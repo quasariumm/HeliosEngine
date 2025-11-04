@@ -34,7 +34,11 @@ public:
 
 	void Render();
 
-	[[nodiscard]] Window* GetWindow() const { return m_window.get(); }
+	[[nodiscard]]
+	Window* GetWindow() const { return m_window.get(); }
+
+	[[nodiscard]]
+	entt::entity GetEntityAtCursor(glm::uvec2 position) const;
 
 private:
 
@@ -44,6 +48,7 @@ private:
 
 	// TODO(Patrick): Change to interface class
 	GL46_Texture2D m_renderTexture;
+	GL46_Texture2D m_hitTexture;
 	GL46_Texture2D m_skyboxTexture;
 
 	uint64_t m_frame = 0;

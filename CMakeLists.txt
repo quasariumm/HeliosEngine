@@ -250,7 +250,7 @@ function(copy_engine_dlls PROJ)
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"$<$<CONFIG:Debug>:${FMOD_DYN_LIBS_DEBUG}>"
 			"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
-			"$<$<CONFIG:Debug>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Jolt.dll>"
+			"$<$<CONFIG:Debug>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Joltd.dll>"
 			"$<$<CONFIG:Release>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Jolt.dll>"
 			$<TARGET_FILE_DIR:${PROJ}>
 			COMMAND_EXPAND_LISTS
