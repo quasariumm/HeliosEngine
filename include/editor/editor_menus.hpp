@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "ImGuizmo.h"
 #include "editor/engine_interface.hpp"
 
 
@@ -95,7 +94,7 @@ private:
 
 	glm::uvec2 m_viewportSize{1920u, 1080u};
 
-	ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+	//ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
 	float snapGrid = 0.1f;
 	bool snapping = false;
 };

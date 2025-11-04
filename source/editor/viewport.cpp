@@ -1,5 +1,4 @@
-﻿#include "ImGuizmo.h"
-#include "editor/editor_menus.hpp"
+﻿#include "editor/editor_menus.hpp"
 #include "components/basic_components.hpp"
 
 #include "../backends/opengl46_glfw/graphics/gl46_texture_2d.hpp"
@@ -143,14 +142,14 @@ void Viewport::DrawOverlay()
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2( 0, 0));
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2( 0, 0));
             ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, {0.5f, 0.5f});
-            if (ImGui::Selectable(ICON_AXIS_ARROW"", operation == ImGuizmo::TRANSLATE, ImGuiSelectableFlags_None, btnSize))
-                operation = ImGuizmo::TRANSLATE;
-            ImGui::SameLine();
-            if (ImGui::Selectable(ICON_ROTATE_ORBIT"", operation == ImGuizmo::ROTATE, ImGuiSelectableFlags_None, btnSize))
-                operation = ImGuizmo::ROTATE;
-            ImGui::SameLine();
-            if (ImGui::Selectable(ICON_RESIZE"", operation == ImGuizmo::SCALE, ImGuiSelectableFlags_None, btnSize))
-                operation = ImGuizmo::SCALE;
+            // if (ImGui::Selectable(ICON_AXIS_ARROW"", operation == ImGuizmo::TRANSLATE, ImGuiSelectableFlags_None, btnSize))
+            //     operation = ImGuizmo::TRANSLATE;
+            // ImGui::SameLine();
+            // if (ImGui::Selectable(ICON_ROTATE_ORBIT"", operation == ImGuizmo::ROTATE, ImGuiSelectableFlags_None, btnSize))
+            //     operation = ImGuizmo::ROTATE;
+            // ImGui::SameLine();
+            // if (ImGui::Selectable(ICON_RESIZE"", operation == ImGuizmo::SCALE, ImGuiSelectableFlags_None, btnSize))
+            //     operation = ImGuizmo::SCALE;
             ImGui::PopStyleVar(3);
         }
         ImGui::EndChild();
