@@ -19,10 +19,7 @@ int main()
 					if (const auto mousePos = Engine::Systems::GetViewport()->GetMousePositionInViewport();
 						mousePos.has_value())
 					{
-						Engine::Log::Info(std::format("Entity at cursor: {}",
-						                              static_cast<uint32_t>(Engine::Systems::GetRenderer()->
-							                              GetEntityAtCursor(
-									                              mousePos.value()))));
+						Engine::Editor::SceneGraph::selected = Engine::Systems::GetRenderer()->GetEntityAtCursor(mousePos.value());
 					}
 				}
 			});
