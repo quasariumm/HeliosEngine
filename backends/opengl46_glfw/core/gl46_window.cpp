@@ -114,7 +114,7 @@ bool GL46_Window::Init( const glm::uvec2& size, const std::string& title, const 
 
 	// Add fonts
 	constexpr float fontSize = 16.0f;
-	io.Fonts->AddFontFromFileTTF("extern/imgui/misc/fonts/Roboto-Medium.ttf", fontSize);
+	io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Medium.ttf", fontSize);
 
 	ImFontConfig config;
 	config.MergeMode                         = true;

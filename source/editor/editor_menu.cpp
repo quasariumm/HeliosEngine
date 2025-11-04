@@ -40,15 +40,7 @@ void EditorMenu::Draw()
 		ImGui::EndMenu();
 	}
 
-	if (ImGui::BeginMenu("Add"))
-	{
-		if (ImGui::MenuItem(ICON_CUBE" Empty Object"))
-			CreateSceneObject();
-		//if (ImGui::MenuItem(ICON_CUBE_OUTLINE" Debug Cube")) CreateDebugCube();
-		ImGui::EndMenu();
-	}
-
-	const float btnWidth = ImGui::GetFontSize() * 3;
+	const float btnWidth = ImGui::GetFontSize() * 4;
 	const float hO       = btnWidth * 0.5f;
 	const float ohO      = btnWidth * 1.5f;
 

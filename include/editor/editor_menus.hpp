@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "ImGuizmo.h"
 #include "editor/engine_interface.hpp"
 
 
@@ -76,7 +77,8 @@ public:
 
 	void Draw();
 
-	void DrawOverlay( ImVec2 pos, ImVec2 size ) const;
+	void DrawOverlay();
+	void DrawGizmos() const;
 
 	void SetRenderImage( GL46_Texture2D* image ) { m_renderedImage = image; }
 
@@ -92,5 +94,9 @@ private:
 	GL46_Texture2D* m_renderedImage = nullptr;
 
 	glm::uvec2 m_viewportSize{1920u, 1080u};
+
+	ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+	float snapGrid = 0.1f;
+	bool snapping = false;
 };
 }

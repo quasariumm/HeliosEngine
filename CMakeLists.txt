@@ -232,6 +232,14 @@ fetchcontent_declare(
 )
 fetchcontent_makeavailable(JoltPhysics)
 
+set(FMT_INSTALL ON)
+FetchContent_Declare(
+		fmt
+		GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+		GIT_TAG 10.1.1
+)
+FetchContent_MakeAvailable(fmt)
+
 ##############################################
 ##		      Copy external DLLs  			##
 ##############################################
@@ -242,8 +250,8 @@ function(copy_engine_dlls PROJ)
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"$<$<CONFIG:Debug>:${FMOD_DYN_LIBS_DEBUG}>"
 			"$<$<CONFIG:Release>:${FMOD_DYN_LIBS_RELEASE}>"
-			"$<$<CONFIG:Debug>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/libJolt.dll>"
-			"$<$<CONFIG:Release>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/libJolt.dll>"
+			"$<$<CONFIG:Debug>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Jolt.dll>"
+			"$<$<CONFIG:Release>:${JoltPhysics_SOURCE_DIR}/../../joltphysics-build/Jolt.dll>"
 			$<TARGET_FILE_DIR:${PROJ}>
 			COMMAND_EXPAND_LISTS
 			COMMENT "Copying FMOD DLLs"
@@ -285,6 +293,7 @@ target_include_directories(Engine PUBLIC
 		extern/imgui
 		extern/nativefiledialog-extended/src/include
 		extern/glm
+		extern/fmt/include
 		lib
 		lib/glfw/include
 		lib/glad/include
@@ -292,7 +301,6 @@ target_include_directories(Engine PUBLIC
 		lib/fmod/studio/inc
 		${JoltPhysics_SOURCE_DIR}/..
 		${TRACY_PUBLIC_DIR}
-		${OpenCL_INCLUDE_DIRS}
 )
 
 target_precompile_headers(Engine PUBLIC
@@ -307,5 +315,6 @@ target_precompile_headers(Engine PUBLIC
 target_link_libraries(Engine PUBLIC
 		nfd
 		Tracy::TracyClient
+		fmt::fmt-header-only
 		Jolt
 )

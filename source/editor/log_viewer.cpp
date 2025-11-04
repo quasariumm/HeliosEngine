@@ -11,6 +11,7 @@ void LogViewer::Draw()
 	if (!ImGui::Begin("Logs"))
 	{
 		ImGui::PopStyleVar();
+		ImGui::End();
 		return;
 	}
 
