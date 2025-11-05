@@ -221,9 +221,9 @@ target_link_libraries(Engine PUBLIC
 ##		    Fetch external libraries		##
 ##############################################
 
+## JOLT PHYSICS
 set(ENABLE_ALL_WARNINGS OFF)
 set(BUILD_SHARED_LIBS 	ON)
-
 fetchcontent_declare(
 		JoltPhysics
 		GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
@@ -232,13 +232,32 @@ fetchcontent_declare(
 )
 fetchcontent_makeavailable(JoltPhysics)
 
+## FMT
 set(FMT_INSTALL ON)
 FetchContent_Declare(
 		fmt
-		GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-		GIT_TAG 10.1.1
+		GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
+		GIT_TAG "12.1.0"
 )
 FetchContent_MakeAvailable(fmt)
+
+## NLOHMANN JSON
+FetchContent_Declare(
+		json
+		GIT_REPOSITORY "https://github.com/nlohmann/json.git"
+		GIT_TAG "v3.12.0"
+)
+FetchContent_MakeAvailable(json)
+
+## VISIT STRUCT
+FetchContent_Declare(
+		visit_struct
+		GIT_REPOSITORY "https://github.com/cbeck88/visit_struct.git"
+		GIT_TAG "1.2.0"
+)
+add_library(visit_struct INTERFACE)
+target_include_directories(visit_struct INTERFACE ${visit_struct_SOURCE_DIR}/include)
+FetchContent_MakeAvailable(visit_struct)
 
 ##############################################
 ##		      Copy external DLLs  			##
@@ -317,4 +336,6 @@ target_link_libraries(Engine PUBLIC
 		Tracy::TracyClient
 		fmt::fmt-header-only
 		Jolt
+		nlohmann_json
+		visit_struct
 )

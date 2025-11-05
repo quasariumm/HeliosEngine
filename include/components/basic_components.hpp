@@ -3,30 +3,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "cereal/archives/json.hpp"
-#include "core/ecs.hpp"
+#include "component_registry.hpp"
 
-
-namespace glm
-{
-template <class Archive>
-void serialize( Archive& archive, vec3& v )
-{
-	archive(CEREAL_NVP(v.x), CEREAL_NVP(v.y), CEREAL_NVP(v.z));
-}
-
-
-template <class Archive>
-void serialize( Archive& archive, quat& q )
-{
-	archive(CEREAL_NVP(q.w), CEREAL_NVP(q.x), CEREAL_NVP(q.y), CEREAL_NVP(q.z));
-}
-}
-
-
-namespace Engine::Components
-{
-struct Transform final : BaseComponent
+COMPONENT(Transform, ICON_AXIS_ARROW" Transform", Engine::Components::INSPECTABLE)
 {
 	Transform() = default;
 
@@ -185,21 +164,6 @@ struct Transform final : BaseComponent
 	}
 
 
-	template <class Archive>
-	void save( Archive& ar ) const
-	{
-		ar(CEREAL_NVP(position), CEREAL_NVP(rotation), CEREAL_NVP(scale));
-	}
-
-
-	template <class Archive>
-	void load( Archive& ar )
-	{
-		MarkDirty();
-		ar(CEREAL_NVP(position), CEREAL_NVP(rotation), CEREAL_NVP(scale));
-	}
-
-
 	template <auto Candidate>
 	void SubscribeOnModify()
 	{
@@ -238,64 +202,48 @@ private:
 	mutable bool dirty = true;
 };
 
+//VISITABLE_STRUCT(Engine::Components::Transform, position, rotation, scale);
 
-REGISTER_COMPONENT(Transform, ICON_AXIS_ARROW" Transform", INSPECTABLE);
-
-
-struct SceneObjectInfo final : BaseComponent
+COMPONENT(SceneObjectInfo, "SceneObject", SERIALIZABLE)
 {
 	SceneObjectInfo() = default;
 
 	explicit SceneObjectInfo( const std::string& objectName ) { name = objectName; }
 
 	std::string name = "Object";
-
-
-	template <typename Archive>
-	void serialize( Archive& archive ) { archive(CEREAL_NVP(name)); }
 };
 
+VISITABLE_STRUCT(Engine::Components::SceneObjectInfo, name);
 
-REGISTER_COMPONENT(SceneObjectInfo, "SceneObject", NONE);
-
-
-// Add to object to hide from renderer
-struct Hidden
-{};
-
-
-struct ParentObject final : BaseComponent
+COMPONENT(ParentObject, "Parent Object", NONE)
 {
 	void RemoveChild( const entt::entity child )
 	{
 		children.erase(std::ranges::find(children, child));
 	}
 
-
 	void AddChild( const entt::entity child )
 	{
 		children.push_back(child);
 	}
 
-
 	std::vector<entt::entity> children;
 };
 
 
-struct ChildObject final : BaseComponent
+COMPONENT(ChildObject, "Child Object", SERIALIZABLE)
 {
 	entt::entity parent = entt::null;
-
-
-	template <typename Archive>
-	void serialize( Archive& archive ) { archive(CEREAL_NVP(parent)); }
 };
 
+VISITABLE_STRUCT(Engine::Components::ChildObject, parent);
 
-REGISTER_COMPONENT(ChildObject, "Child Object", NONE);
-
+namespace Engine::Components
+{
 
 // Add to object to mark for delete
-struct DeleteMarker
-{};
+struct DeleteMarker {};
+// Add to object to hide from renderer
+struct Hidden {};
+
 }

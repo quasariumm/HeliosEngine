@@ -13,9 +13,9 @@ struct Sphere final : BaseComponent
 	Sphere( const float r, const glm::vec3& pos ) :
 		position(pos), radius(r) {}
 
-
-	template <typename Archive>
-	void serialize( Archive& archive ) { archive(CEREAL_NVP(radius), CEREAL_NVP(position), CEREAL_NVP(materialIdx)); }
+	//
+	// template <typename Archive>
+	// void serialize( Archive& archive ) { archive(CEREAL_NVP(radius), CEREAL_NVP(position), CEREAL_NVP(materialIdx)); }
 
 
 	void Inspector() override;
@@ -44,15 +44,15 @@ struct Material final : BaseComponent
 	}
 
 
-	template <typename Archive>
-	void serialize( Archive& archive )
-	{
-		archive(CEREAL_NVP(properties), CEREAL_NVP(microfacetModel), CEREAL_NVP(diffuseColor),
-		        CEREAL_NVP(specularColor), CEREAL_NVP(specularity), CEREAL_NVP(shininess), CEREAL_NVP(glossiness),
-		        CEREAL_NVP(emissionColor), CEREAL_NVP(emissionStrength), CEREAL_NVP(refractivity),
-		        CEREAL_NVP(refractionCoefficient), CEREAL_NVP(absorption), CEREAL_NVP(PBR_Roughness),
-		        CEREAL_NVP(PBR_Metallic));
-	}
+	// template <typename Archive>
+	// void serialize( Archive& archive )
+	// {
+	// 	archive(CEREAL_NVP(properties), CEREAL_NVP(microfacetModel), CEREAL_NVP(diffuseColor),
+	// 	        CEREAL_NVP(specularColor), CEREAL_NVP(specularity), CEREAL_NVP(shininess), CEREAL_NVP(glossiness),
+	// 	        CEREAL_NVP(emissionColor), CEREAL_NVP(emissionStrength), CEREAL_NVP(refractivity),
+	// 	        CEREAL_NVP(refractionCoefficient), CEREAL_NVP(absorption), CEREAL_NVP(PBR_Roughness),
+	// 	        CEREAL_NVP(PBR_Metallic));
+	// }
 
 
 	void Inspector() override;
@@ -71,7 +71,7 @@ struct Material final : BaseComponent
 
 	private:
 
-		friend class cereal::access;
+		//friend class cereal::access;
 
 		template <typename Archive>
 		void save( Archive& archive ) const;
@@ -94,7 +94,7 @@ struct Material final : BaseComponent
 
 	private:
 
-		friend class cereal::access;
+		//friend class cereal::access;
 
 		template <typename Archive>
 		void save( Archive& archive ) const;
@@ -125,55 +125,55 @@ struct Material final : BaseComponent
 REGISTER_COMPONENT(Material, ICON_PALETTE_SWATCH_VARIANT" Material", ADDABLE | INSPECTABLE);
 
 
-template <typename Archive>
-void Material::MaterialProperties::save( Archive& archive ) const
-{
-	uint8_t data = reflection | (microfacet << 1) | (transmission << 2) | (diffuse << 3) | (glossy << 4) | (
-		               specular << 5);
-	archive(CEREAL_NVP(data));
-}
+// template <typename Archive>
+// void Material::MaterialProperties::save( Archive& archive ) const
+// {
+// 	uint8_t data = reflection | (microfacet << 1) | (transmission << 2) | (diffuse << 3) | (glossy << 4) | (
+// 		               specular << 5);
+// 	archive(CEREAL_NVP(data));
+// }
 
 
-template <typename Archive>
-void Material::MaterialProperties::load( Archive& archive )
-{
-	uint8_t data;
-	archive(data);
-	reflection   = data & 0x1;
-	microfacet   = (data & 0x2) >> 1;
-	transmission = (data & 0x4) >> 2;
-	diffuse      = (data & 0x8) >> 3;
-	glossy       = (data & 0x10) >> 4;
-	specular     = (data & 0x20) >> 5;
-}
+// template <typename Archive>
+// void Material::MaterialProperties::load( Archive& archive )
+// {
+// 	uint8_t data;
+// 	archive(data);
+// 	reflection   = data & 0x1;
+// 	microfacet   = (data & 0x2) >> 1;
+// 	transmission = (data & 0x4) >> 2;
+// 	diffuse      = (data & 0x8) >> 3;
+// 	glossy       = (data & 0x10) >> 4;
+// 	specular     = (data & 0x20) >> 5;
+// }
+//
+//
+// template <typename Archive>
+// void Material::MicrofacetModel::save( Archive& archive ) const
+// {
+// 	const uint8_t tmp   = beckmann | (ggx_iso << 1) | (ggx_aniso << 2) | (blinnphong << 3);
+// 	uint8_t       model = tmp;
+// 	if (ggx_iso)
+// 		model = tmp | (1 << 4);
+// 	if (ggx_aniso)
+// 		model = tmp | (2 << 4);
+// 	if (blinnphong)
+// 		model = tmp | (3 << 4);
+// 	archive(CEREAL_NVP(model), CEREAL_NVP(alphaX), CEREAL_NVP(alphaY));
+// }
 
 
-template <typename Archive>
-void Material::MicrofacetModel::save( Archive& archive ) const
-{
-	const uint8_t tmp   = beckmann | (ggx_iso << 1) | (ggx_aniso << 2) | (blinnphong << 3);
-	uint8_t       model = tmp;
-	if (ggx_iso)
-		model = tmp | (1 << 4);
-	if (ggx_aniso)
-		model = tmp | (2 << 4);
-	if (blinnphong)
-		model = tmp | (3 << 4);
-	archive(CEREAL_NVP(model), CEREAL_NVP(alphaX), CEREAL_NVP(alphaY));
-}
-
-
-template <typename Archive>
-void Material::MicrofacetModel::load( Archive& archive )
-{
-	uint8_t model;
-	archive(model, alphaX, alphaY);
-	beckmann   = model & 0x1;
-	ggx_iso    = (model & 0x2) >> 1;
-	ggx_aniso  = (model & 0x4) >> 2;
-	blinnphong = (model & 0x8) >> 3;
-	selector   = (model & 0xF0) >> 4;
-}
+// template <typename Archive>
+// void Material::MicrofacetModel::load( Archive& archive )
+// {
+// 	uint8_t model;
+// 	archive(model, alphaX, alphaY);
+// 	beckmann   = model & 0x1;
+// 	ggx_iso    = (model & 0x2) >> 1;
+// 	ggx_aniso  = (model & 0x4) >> 2;
+// 	blinnphong = (model & 0x8) >> 3;
+// 	selector   = (model & 0xF0) >> 4;
+// }
 
 
 // TODO(Patrick): Make a renderable component pls :)

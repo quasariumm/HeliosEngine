@@ -2,6 +2,7 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include "serialization/serializer.hpp"
 
 
 namespace cereal
@@ -13,12 +14,11 @@ class JSONInputArchive;
 
 namespace Engine
 {
-// =============================================================
+// =================================================================
 // Main class for the entity component system
-// Handles everything to do with components
-// Also holds the registry
-// It is a singleton, as it makes it easier to access
-// =============================================================
+// Handles everything to do with components and updating systems
+// It is a singleton, this is because it gets called by macros!
+// =================================================================
 
 /// Entity component system
 class EntityComponentSystem
@@ -163,12 +163,11 @@ public:
 	//       Variables
 	// ======================
 
-	std::vector<std::function<void( entt::snapshot_loader&, cereal::JSONInputArchive& )>> serializedComponentsInput =
-			{};
-	std::vector<std::function<void( entt::snapshot&, cereal::JSONOutputArchive& )>> serializedComponentsOutput = {};
-	std::vector<std::function<void( const entt::entity& )>>                         inspectableComponents      = {};
-	std::vector<std::function<void( const entt::entity& )>>                         addableComponents          = {};
-	std::unordered_set<std::type_index>                                             serializedComponentTypes   = {};
+	std::vector<std::function<void( const SceneObject&, Serialization::Serializer& )>> serializeComponents		= {};
+	std::vector<std::function<void( const SceneObject&, Serialization::Serializer&, entt::registry& )>> deserializeComponents		= {};
+	std::vector<std::function<void( const entt::entity& )>>              inspectableComponents      = {};
+	std::vector<std::function<void( const entt::entity& )>>              addableComponents          = {};
+	std::unordered_set<std::type_index>                                  serializedComponentTypes   = {};
 
 private:
 
@@ -182,144 +181,13 @@ private:
 
 	bool m_engineUsed = false, m_editorUsed = false, m_gameUsed = false;
 
-	std::stringstream m_snapshot;
-	entt::registry    m_registry = {};
+	nlohmann::json m_snapshot = "";
+	entt::registry m_registry = {};
 };
-
 
 /// Shorthand for ease of use
 using ECS = EntityComponentSystem;
 
-// =============================================================
-// Base classes for components
-// =============================================================
-
-namespace Components
-{
-	// TODO(Quillan): Maybe add serializable as an option? Since now not all components are being registered to prevent serialization of those
-	enum ComponentFlags : uint8_t
-	{
-		NONE        = 0,
-		INSPECTABLE = 1 << 0,
-		// Component shows up in the inspector if the selected entity has this component
-		ADDABLE = 1 << 1 // Component can be added and removed from entity using the inspector
-	};
+}
 
 
-	/// Empty struct used for shorthand
-	struct DefaultComponent
-	{};
-
-
-	/// Base class for all components
-	template <typename T>
-	struct Component
-	{
-		Component() = default;
-
-		/// Non default constructor. Registers the component to the ECS to be used later.
-		/// @note Should only ever be called via the macro REGISTER_COMPONENT()
-		explicit Component( const std::string& name, const int flags = ComponentFlags::NONE )
-		{
-			ECS* ecs = ECS::Get();
-
-			// Skip duplicates
-			if (const auto& types = ecs->serializedComponentTypes;
-				types.contains(std::type_index(typeid(T))))
-				return;
-
-			ecs->serializedComponentTypes.insert(std::type_index(typeid(T)));
-
-			ecs->serializedComponentsInput.push_back([]( entt::snapshot_loader& s, cereal::JSONInputArchive& archive )
-			{
-				s.get<T>(archive);
-			});
-			ecs->serializedComponentsOutput.push_back([]( const entt::snapshot& s, cereal::JSONOutputArchive& archive )
-			{
-				s.get<T>(archive);
-			});
-			if (flags & ComponentFlags::INSPECTABLE)
-			{
-				ecs->inspectableComponents.push_back([name, flags]( const entt::entity& e )
-				{
-					if (T* c = ECS::Registry()->try_get<T>(e))
-					{
-						if (flags & ComponentFlags::ADDABLE)
-						{
-							const bool inspecting = ImGui::CollapsingHeader(name.c_str(),
-							                                                ImGuiTreeNodeFlags_DefaultOpen |
-							                                                ImGuiTreeNodeFlags_SpanAvailWidth |
-							                                                ImGuiTreeNodeFlags_AllowOverlap);
-							ImGui::SameLine();
-							ImGui::SetCursorPosX(ImGui::GetWindowSize().x - ImGui::GetFontSize() * 1.75f);
-							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-							if (ImGui::Button((ICON_TRASH_CAN"##DeleteComp_" + name).c_str()))
-								ECS::Registry()->remove<T>(e);
-							ImGui::PopStyleColor();
-							if (inspecting)
-							{
-								ImGui::PushID(c);
-								c->Inspector();
-								ImGui::PopID();
-							}
-						}
-						else
-						{
-							if (ImGui::CollapsingHeader(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-							{
-								ImGui::PushID(c);
-								c->Inspector();
-								ImGui::PopID();
-							}
-						}
-					}
-				});
-			}
-
-			if (flags & ComponentFlags::ADDABLE)
-			{
-				ecs->addableComponents.push_back([name]( const entt::entity& e )
-				{
-					const ImVec2 textSize = ImGui::CalcTextSize(name.c_str());
-					const auto   btnSize  = ImVec2(
-							std::max(ImGui::GetContentRegionAvail().x, textSize.x + ImGui::GetFontSize()),
-							textSize.y * 1.5f);
-
-					if (!ECS::Registry()->try_get<T>(e))
-					{
-						if (ImGui::Button(name.c_str(), btnSize))
-						{
-							ECS::Registry()->emplace<T>(e);
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					else
-					{
-						ImGui::BeginDisabled();
-						ImGui::Button(name.c_str(), btnSize);
-						ImGui::EndDisabled();
-					}
-				});
-			}
-		}
-
-
-		virtual ~Component() = default;
-
-		/// Override if INSPECTABLE flag is set when registering component
-		virtual void Inspector() {}
-	};
-
-
-	/// Shorthand for component base class
-	using BaseComponent = Component<DefaultComponent>;
-}}
-
-
-/// This macro must be placed after any class that inherits BaseComponent to make it serializable, addable and inspectable (if set)
-#define REGISTER_COMPONENT(TYPE, NAME, FLAGS) \
-    namespace \
-    { \
-        using namespace Engine::Components; \
-        Engine::Components::Component<TYPE> reg_##TYPE {NAME, FLAGS}; \
-    }
