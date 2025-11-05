@@ -5,7 +5,7 @@
 #include "serialization/serializer.hpp"
 #include "tools/icon_defines.hpp"
 
-namespace Engine::Components
+namespace Helios::Components
 {
 	enum ComponentFlags
 	{
@@ -31,7 +31,7 @@ namespace Engine::Components
 		/// @note Should only ever be called via the macro REGISTER_COMPONENT()
 		explicit Component( const std::string& name, const int flags = ComponentFlags::NONE )
 		{
-			ECS* ecs = Engine::ECS::Get();
+			ECS* ecs = ECS::Get();
 
 			// Skip duplicates
 			if (const auto& types = ecs->serializedComponentTypes;
@@ -138,17 +138,17 @@ namespace Engine::Components
 
 /// Use to register a component
 #define COMPONENT(TYPE, DISPLAY_NAME, FLAGS) \
-	namespace Engine::Components \
+	namespace Helios::Components \
 	{ \
 		struct TYPE; \
 		inline Component<TYPE> reg_##TYPE {DISPLAY_NAME, FLAGS}; \
 	} \
-	struct Engine::Components::TYPE final : Engine::Components::BaseComponent
+	struct Helios::Components::TYPE final : Helios::Components::BaseComponent
 
 /// Alternate way of registering components, mainly useful for components that inherit a different base component
 #define REGISTER_COMPONENT(TYPE, NAME, FLAGS) \
 namespace \
 { \
-using namespace Engine::Components; \
-Engine::Components::Component<TYPE> reg_##TYPE {NAME, FLAGS}; \
+using namespace Helios::Components; \
+Helios::Components::Component<TYPE> reg_##TYPE {NAME, FLAGS}; \
 }

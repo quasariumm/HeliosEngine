@@ -54,20 +54,17 @@ struct adl_serializer<glm::quat> {
 };
 #pragma endregion
 
-#pragma region ENTT
-#pragma endregion
-
 #pragma region Helios
 
 // Resource handles
 template <typename T>
-struct adl_serializer<Engine::Resources::ResourceHandle<T>> {
-	static void to_json(json& j, const Engine::Resources::ResourceHandle<T>& v) {
+struct adl_serializer<Helios::Resources::ResourceHandle<T>> {
+	static void to_json(json& j, const Helios::Resources::ResourceHandle<T>& v) {
 		j["Path"] = v.Path();
 	}
 
-	static void from_json(const json& j, Engine::Resources::ResourceHandle<T>& v) {
-		v = Engine::Resources::LoadResource<T>(j.at("Path"));
+	static void from_json(const json& j, Helios::Resources::ResourceHandle<T>& v) {
+		v = Helios::Resources::LoadResource<T>(j.at("Path"));
 	}
 };
 

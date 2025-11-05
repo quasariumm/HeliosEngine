@@ -224,7 +224,7 @@ COMPONENT(SceneObjectInfo, "SceneObject", SERIALIZABLE)
 	std::string name = "Object";
 };
 
-VISITABLE_STRUCT(Engine::Components::SceneObjectInfo, name);
+VISITABLE_STRUCT(Helios::Components::SceneObjectInfo, name);
 
 COMPONENT(ParentObject, "Parent Object", SERIALIZABLE)
 {
@@ -241,7 +241,7 @@ COMPONENT(ParentObject, "Parent Object", SERIALIZABLE)
 	std::vector<SceneObject> children;
 };
 
-VISITABLE_STRUCT(Engine::Components::ParentObject, children);
+VISITABLE_STRUCT(Helios::Components::ParentObject, children);
 
 
 COMPONENT(ChildObject, "Child Object", SERIALIZABLE)
@@ -249,9 +249,9 @@ COMPONENT(ChildObject, "Child Object", SERIALIZABLE)
 	SceneObject parent = entt::null;
 };
 
-VISITABLE_STRUCT(Engine::Components::ChildObject, parent);
+VISITABLE_STRUCT(Helios::Components::ChildObject, parent);
 
-namespace Engine::Components
+namespace Helios::Components
 {
 
 // Add to object to mark for delete
