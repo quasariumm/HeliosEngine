@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Engine
+namespace Helios
 {
 // Forward declare all systems
 class Renderer;

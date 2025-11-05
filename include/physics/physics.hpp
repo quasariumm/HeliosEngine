@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace Engine::Physics
+namespace Helios::Physics
 {
 using namespace JPH;
 

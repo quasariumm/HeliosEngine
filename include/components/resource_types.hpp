@@ -3,5 +3,5 @@
 #include "core/resources.hpp"
 
 
-namespace Engine::Resources
+namespace Helios::Resources
 {}

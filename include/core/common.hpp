@@ -6,7 +6,7 @@
  * Typedefs
  */
 
-namespace Engine
+namespace Helios
 {
 using color8_t    = glm::u8vec4;
 using color32_f_t = glm::vec4;
@@ -14,7 +14,7 @@ using color32_f_t = glm::vec4;
 
 
 // Changing name of entity to scene object for clearer naming
-namespace Engine
+namespace Helios
 {
 // ReSharper disable once CppInconsistentNaming
 using SceneObject = entt::entity;
@@ -88,7 +88,7 @@ inline std::string LoadFile( const std::filesystem::path& path )
 
 	if (!file.is_open())
 	{
-		Engine::Log::Error(std::format("Failed to open file: {}", path.string()));
+		Helios::Log::Error(std::format("Failed to open file: {}", path.string()));
 		return "";
 	}
 

@@ -3,7 +3,7 @@
 struct ImFont;
 
 
-namespace Engine::Editor
+namespace Helios::Editor
 {
 class EditorInterface
 {
@@ -65,4 +65,4 @@ struct InterfaceHelper
 
 
 #define REGISTER_INTERFACE(TYPE) \
-    namespace { Engine::Editor::InterfaceHelper<TYPE> reg_##TYPE; }
+    namespace { Helios::Editor::InterfaceHelper<TYPE> reg_##TYPE; }

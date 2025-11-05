@@ -7,33 +7,34 @@
 #include "editor/editor_menus.hpp"
 #include "editor/engine_interface.hpp"
 #include "physics/physics.hpp"
+#include "rendering/camera.hpp"
 #include "rendering/renderer.hpp"
 #include "rendering/window.hpp"
 
-using namespace Engine;
+using namespace Helios;
 using namespace Editor;
 
 
-namespace Engine
+namespace Helios
 {
-EngineCore engineHandle;
+Core engineHandle;
 }
 
 
-void EngineCore::Initialize()
+void Core::Initialize()
 {
 	systemsHandler.Initialize();
 	Systems::GetRenderer()->Initialize();
 }
 
 
-void EngineCore::Shutdown()
+void Core::Shutdown()
 {
 	systemsHandler.Shutdown();
 }
 
 
-void EngineCore::Run()
+void Core::Run()
 {
 	auto time = std::chrono::high_resolution_clock::now();
 
@@ -49,8 +50,11 @@ void EngineCore::Run()
 		m_engineStats.SetData(1.0f / dt, dt);
 
 		Systems::GetRenderer()->Prepare();
-		EditorInterface::Get()->StartFrame();
+		EditorInterface::StartFrame();
 		Systems::GetAudio()->Update();
+
+		// TODO(Quillan): Make the camera a system
+		Systems::GetCamera()->HandleInput(*Systems::GetRenderer()->GetWindow(), dt);
 
 		//m_input->Update();
 		//EditorInterface::StartFrame();
@@ -70,9 +74,9 @@ void EngineCore::Run()
 
 		EditorInterface::Get()->DrawInterfaces();
 		Systems::GetViewport()->Draw();
-		EditorInterface::Get()->Render();
+		EditorInterface::Render();
 		Systems::GetRenderer()->Clear();
-		EditorInterface::Get()->EndFrame();
+		EditorInterface::EndFrame();
 		Systems::GetRenderer()->Render();
 
 		time = ctime;
@@ -87,7 +91,7 @@ void EngineCore::Run()
 }
 
 
-void EngineCore::Play()
+void Core::Play()
 {
 	if (m_mode == Mode::GAME)
 		return;
@@ -100,7 +104,7 @@ void EngineCore::Play()
 }
 
 
-void EngineCore::Pause()
+void Core::Pause()
 {
 	if (m_mode == Mode::PAUSED)
 		return;
@@ -110,7 +114,7 @@ void EngineCore::Pause()
 }
 
 
-void EngineCore::Stop()
+void Core::Stop()
 {
 	if (m_mode == Mode::EDITOR)
 		return;
@@ -124,7 +128,7 @@ void EngineCore::Stop()
 }
 
 
-void EngineCore::ReleaseCamera()
+void Core::ReleaseCamera()
 {
 	// if (!m_using_editor_cam)
 	//     m_renderer->AssignCamera(m_camera_system->GetEditorCamera());
@@ -132,7 +136,7 @@ void EngineCore::ReleaseCamera()
 }
 
 
-void EngineCore::LockCamera()
+void Core::LockCamera()
 {
 	// if (m_using_editor_cam)
 	// {

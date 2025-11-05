@@ -192,7 +192,7 @@ COMPONENT(Transform, ICON_AXIS_ARROW" Transform", SERIALIZABLE | INSPECTABLE)
 
 	void Inspector() override;
 
-//private:
+private:
 
 	friend class visitable;
 

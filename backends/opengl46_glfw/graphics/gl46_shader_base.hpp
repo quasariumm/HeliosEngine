@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Engine {
+namespace Helios {
 
 // ReSharper disable once CppInconsistentNaming
 /**

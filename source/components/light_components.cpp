@@ -1,6 +1,6 @@
 #include "components/light_components.hpp"
 
-using namespace Engine::Components;
+using namespace Helios::Components;
 
 
 void DirectionalLight::Inspector()

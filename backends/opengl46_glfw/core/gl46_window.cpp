@@ -2,10 +2,11 @@
 #include "input/keys.hpp"
 
 #include "stb_image.h"
+#include "core/engine.hpp"
 #include "editor/engine_interface.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 bool GL46_Window::Init( const glm::uvec2& size, const std::string& title, const uint32_t flags )
 {
@@ -268,9 +269,15 @@ void GL46_Window::KeyCallbackGlfw( GLFWwindow* w, int key, int, int action, int 
 	auto*     win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
 	const Key k   = ConvertGlfwKey(key);
 	if (action == GLFW_PRESS)
+	{
+		CoreCallbacks::KeyDown(*win, k);
 		CALL(win->onKeyDown, *win, k);
+	}
 	if (action == GLFW_RELEASE)
+	{
+		CoreCallbacks::KeyUp(*win, k);
 		CALL(win->onKeyUp, *win, k);
+	}
 }
 
 
@@ -279,9 +286,15 @@ void GL46_Window::ButtonCallbackGlfw( GLFWwindow* w, int button, int action, int
 	auto*             win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
 	const MouseButton b   = ConvertGlfwButton(button);
 	if (action == GLFW_PRESS)
+	{
+		CoreCallbacks::MouseDown(*win, b);
 		CALL(win->onMouseDown, *win, b);
+	}
 	if (action == GLFW_RELEASE)
+	{
+		CoreCallbacks::MouseUp(*win, b);
 		CALL(win->onMouseUp, *win, b);
+	}
 }
 
 
@@ -289,6 +302,7 @@ void GL46_Window::ResizeCallbackGlfw( GLFWwindow* w, int width, int height )
 {
 	auto* win         = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
 	win->m_screenSize = glm::uvec2(width, height);
+	CoreCallbacks::Resize(*win, glm::uvec2(width, height));
 	CALL(win->onResize, *win, glm::uvec2(width,height));
 }
 
@@ -296,6 +310,7 @@ void GL46_Window::ResizeCallbackGlfw( GLFWwindow* w, int width, int height )
 void GL46_Window::FocusCallbackGlfw( GLFWwindow* w, int f )
 {
 	auto* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+	CoreCallbacks::Focus(*win, f == GLFW_TRUE);
 	CALL(win->onFocus, *win, f == GLFW_TRUE);
 }
 
@@ -307,6 +322,7 @@ void GL46_Window::MouseMoveCallbackGlfw( GLFWwindow* w, double x, double y )
 			static_cast<float>(x) - win->m_mousePos.x,
 			static_cast<float>(y) - win->m_mousePos.y
 	};
+	CoreCallbacks::MouseMove(*win, diff);
 	CALL(win->onMouseMove, *win, diff);
 
 	win->m_mousePos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
@@ -316,6 +332,7 @@ void GL46_Window::MouseMoveCallbackGlfw( GLFWwindow* w, double x, double y )
 void GL46_Window::MouseScrollCallbackGlfw( GLFWwindow* w, double x, double y )
 {
 	auto* win = static_cast<GL46_Window*>(glfwGetWindowUserPointer(w));
+	CoreCallbacks::MouseScroll(*win, static_cast<float>(x), static_cast<float>(y));
 	CALL(win->onMouseScroll, *win, static_cast<float>(x), static_cast<float>(y));
 }
 } // Engine

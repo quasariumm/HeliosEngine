@@ -5,7 +5,7 @@
 // ReSharper disable once CppInconsistentNaming
 struct GLFWwindow;
 
-namespace Engine
+namespace Helios
 {
 
 // ReSharper disable once CppInconsistentNaming

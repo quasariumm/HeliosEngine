@@ -1,10 +1,11 @@
 ﻿#pragma once
 
+// #include "ImGuizmo.h"
 #include "editor/engine_interface.hpp"
 
 
 // Forward declarations
-namespace Engine
+namespace Helios
 {
 // ReSharper disable once CppInconsistentNaming
 class GL46_Texture2D;
@@ -15,7 +16,7 @@ class GL46_Texture2D;
 using GLuint = unsigned int;
 
 
-namespace Engine::Editor
+namespace Helios::Editor
 {
 // Editor menu is the bar at the top of the entire editor
 class EditorMenu
@@ -81,6 +82,8 @@ public:
 
 	void SetRenderImage( GL46_Texture2D* image ) { m_renderedImage = image; }
 
+	[[nodiscard]]
+	std::optional<glm::uvec2> GetMousePositionInViewport() const;
 
 	[[nodiscard]]
 	glm::uvec2 GetViewportSize() const { return m_viewportSize; }
@@ -92,9 +95,10 @@ private:
 
 	GL46_Texture2D* m_renderedImage = nullptr;
 
+	glm::uvec2 m_viewportPosition{0};
 	glm::uvec2 m_viewportSize{1920u, 1080u};
 
-	//ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+	// ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
 	float snapGrid = 0.1f;
 	bool snapping = false;
 };

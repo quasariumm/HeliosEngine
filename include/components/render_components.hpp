@@ -3,15 +3,33 @@
 #include "tools/icon_defines.hpp"
 
 
-namespace Engine::Components
+namespace Helios::Components
 {
-struct Sphere final : BaseComponent
-{
-	Sphere() = default;
+#define COMPONENT_FIELD_DECL(type, name, value) type name{value};
+#define COMPONENT_FIELD_INIT(type, name, value) .name = name,
 
+// A render component with a transform and entity on the GPU
+#define RENDER_COMPONENT_TRANSFORM_ENTITY(name, fields_macro, gpu_padding) \
+	struct name##GPU final { \
+		glm::mat4 transform{1.f}; \
+		fields_macro(COMPONENT_FIELD_DECL) \
+		entt::entity entity{entt::null}; \
+		uint8_t padding[gpu_padding]; \
+	}; \
+	struct name final : BaseComponent { \
+		name() = default; \
+		name##GPU MakeGPU(const glm::mat4& transform, entt::entity entity) const { \
+			return name##GPU{ .transform = transform, fields_macro(COMPONENT_FIELD_INIT) .entity = entity }; \
+		} \
+		fields_macro(COMPONENT_FIELD_DECL) \
+		bool dirty = false;
 
-	Sphere( const float r, const glm::vec3& pos ) :
-		position(pos), radius(r) {}
+// Define your fields once
+#define SPHERE_FIELDS(F) \
+	F(int32_t, materialIdx, 0)
+
+// Usage
+RENDER_COMPONENT_TRANSFORM_ENTITY(Sphere, SPHERE_FIELDS, 8)
 
 	//
 	// template <typename Archive>
@@ -19,11 +37,6 @@ struct Sphere final : BaseComponent
 
 
 	void Inspector() override;
-
-	glm::vec3 position{0.f};
-	float     radius{1.f};
-	int       materialIdx{0};
-	int       padding[3]{0};
 };
 
 

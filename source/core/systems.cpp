@@ -7,10 +7,10 @@
 #include "rendering/camera.hpp"
 #include "rendering/renderer.hpp"
 
-using namespace Engine;
+using namespace Helios;
 
 
-namespace Engine
+namespace Helios
 {
 SystemsCore systemsHandler;
 }

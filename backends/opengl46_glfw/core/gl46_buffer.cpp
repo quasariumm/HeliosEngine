@@ -4,7 +4,7 @@
 //#include "debugging/logger.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 
 constexpr static uint32_t GLBufferType[] = {

@@ -5,7 +5,7 @@
 #include "editor/editor_menus.hpp"
 #include "rendering/camera.hpp"
 
-using namespace Engine;
+using namespace Helios;
 
 
 void Renderer::Initialize()
@@ -25,15 +25,18 @@ void Renderer::Initialize()
 
 	// Initialise texture
 	const glm::uvec2 viewportSize = Systems::GetViewport()->GetViewportSize();
-	m_renderTexture.FillBlank(viewportSize.x, viewportSize.y, 4, TextureFormat::RGBA16F, true);
+	m_renderTexture.FillBlank(viewportSize.x, viewportSize.y, 4, TextureFormat::RGBA32F, true);
 
 	m_shader.SetUInt("ScreenWidth", viewportSize.x);
 	m_shader.SetUInt("ScreenHeight", viewportSize.y);
 
 	Systems::GetViewport()->SetRenderImage(&m_renderTexture);
 
+	// Initialise hit texture
+	m_hitTexture.FillBlank(viewportSize.x, viewportSize.y, 1, TextureFormat::RED32UI, false);
+
 	// Initialise skybox texture
-	m_skyboxTexture.LoadFromFile("assets/qwantani_morning_puresky_4k.hdr", TextureFormat::RGB16F, true);
+	m_skyboxTexture.LoadFromFile("assets/qwantani_morning_puresky_4k.hdr", TextureFormat::RGB32F, true);
 
 	// Initialise buffers
 	m_geometryContext.materials.Init(BufferType::SHADER_STORAGE);
@@ -62,15 +65,16 @@ void Renderer::Clear() const
 }
 
 
-template<typename T>
+template<typename Comp, typename GPU>
 void AssignData( const GL46_Buffer& buffer, uint32_t* count = nullptr )
 {
-	std::vector<T> vec;
-	ECS::Registry()->view<T>().each([&vec]( const T& o )
+	std::vector<GPU> vec;
+	ECS::Registry()->view<Comp>().each([&vec]( entt::entity e, const Comp& o )
 	{
-		vec.push_back(o);
+		const auto matrix = ECS::Registry()->get<Components::Transform>(e).GetMatrix();
+		vec.push_back(o.MakeGPU(matrix, e));
 	});
-	buffer.Fill(vec.size() * sizeof(T), vec.data());
+	buffer.Fill(vec.size() * sizeof(GPU), vec.data());
 	if (count)
 		*count = vec.size();
 };
@@ -79,22 +83,22 @@ void AssignData( const GL46_Buffer& buffer, uint32_t* count = nullptr )
 void Renderer::Render()
 {
 	// Fill/Override the geometry data
-	// Materials
-	AssignData<Components::Material>(m_geometryContext.materials, &m_geometryContext.numMaterials);
+	// // Materials
+	// AssignData<Components::Material>(m_geometryContext.materials, &m_geometryContext.numMaterials);
 	// Spheres
-	AssignData<Components::Sphere>(m_geometryContext.spheres, &m_geometryContext.numSpheres);
+	AssignData<Components::Sphere, Components::SphereGPU>(m_geometryContext.spheres, &m_geometryContext.numSpheres);
 
 	// TODO: Meshes, BVH Nodes, Vertices, Indices
 
-	// Fill/Override the lights context
-	// Directional lights
-	AssignData<Components::DirectionalLight>(m_lightsContext.directionalLights, &m_lightsContext.numDirectionalLights);
-
-	// Point lights
-	AssignData<Components::PointLight>(m_lightsContext.pointLights, &m_lightsContext.numPointLights);
-
-	// Spotlights
-	AssignData<Components::SpotLight>(m_lightsContext.spotLights, &m_lightsContext.numSpotLights);
+	// // Fill/Override the lights context
+	// // Directional lights
+	// AssignData<Components::DirectionalLight>(m_lightsContext.directionalLights, &m_lightsContext.numDirectionalLights);
+	//
+	// // Point lights
+	// AssignData<Components::PointLight>(m_lightsContext.pointLights, &m_lightsContext.numPointLights);
+	//
+	// // Spotlights
+	// AssignData<Components::SpotLight>(m_lightsContext.spotLights, &m_lightsContext.numSpotLights);
 
 	// Set default skybox info
 	m_skyboxInfo.groundColor      = glm::vec3(0.5, 0.5, 0.5);
@@ -113,6 +117,7 @@ void Renderer::Render()
 	    || m_renderTexture.GetHeight() != viewportSize.y)
 	{
 		m_renderTexture.FillBlank(viewportSize.x, viewportSize.y, 4, TextureFormat::RGBA32F, true);
+		m_hitTexture.FillBlank(viewportSize.x, viewportSize.y, 1, TextureFormat::RED32UI, false);
 		m_shader.SetUInt("ScreenWidth", viewportSize.x);
 		m_shader.SetUInt("ScreenHeight", viewportSize.y);
 		// Reset the frame to clear accumulator since the texture has a new size thus faulty data
@@ -131,10 +136,17 @@ void Renderer::Render()
 }
 
 
+entt::entity Renderer::GetEntityAtCursor( const glm::uvec2 position ) const
+{
+	return *m_hitTexture.GetPixel<entt::entity>(position);
+}
+
+
 void Renderer::SendData()
 {
 	// Bind textures
 	m_renderTexture.UseCompute(0);
+	m_hitTexture.UseCompute(1);
 	m_skyboxTexture.UseCompute(31);
 
 	// Bind general data
@@ -150,8 +162,7 @@ void Renderer::SendData()
 
 	m_shader.SetUInt("Frame", m_frame);
 
-	// TODO: Input
-	m_shader.SetBool("ClearAccumulator", true);
+	m_shader.SetBool("ClearAccumulator", m_window->GetKey(Key::Q) == 1);
 
 	// Bind geometry context
 	m_geometryContext.materials.BindBase(8);

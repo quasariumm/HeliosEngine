@@ -3,7 +3,7 @@
 #include "components/basic_components.hpp"
 
 
-namespace Engine::Components
+namespace Helios::Components
 {
 struct DirectionalLight final : BaseComponent
 {

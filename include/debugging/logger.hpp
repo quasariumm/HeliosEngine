@@ -19,7 +19,7 @@ static const std::string ANSI_WARN = "[\033[33mWARN\033[0m] ";
 static const std::string ANSI_INFO = "[\033[36mINFO\033[0m] ";
 
 
-namespace Engine::Log
+namespace Helios::Log
 {
 enum class LogType
 {

@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 
-namespace Engine::Resources
+namespace Helios::Resources
 {
 struct Resource
 {

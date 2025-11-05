@@ -2,7 +2,9 @@
 #include <algorithm>
 
 
-struct EngineStats
+namespace Helios
+{
+struct Stats
 {
 	// Assuming this is called each frame, will also auto count frames
 	void SetData( float fps, float dt )
@@ -50,3 +52,4 @@ private:
 	float m_averageFps        = 0.0f;
 	float m_averageDt         = 0.0f;
 };
+}

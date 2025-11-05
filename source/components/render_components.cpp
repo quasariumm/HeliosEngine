@@ -1,12 +1,10 @@
 #include "components/render_components.hpp"
 
-using namespace Engine::Components;
+using namespace Helios::Components;
 
 
 void Sphere::Inspector()
 {
-	ImGui::DragFloat("Radius", &radius, 0.01f);
-	ImGui::DragFloat3("Position", glm::value_ptr(position), 0.01f);
 	ImGui::InputInt("Material Index", &materialIdx);
 }
 
