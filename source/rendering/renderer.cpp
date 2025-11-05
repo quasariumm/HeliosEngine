@@ -71,7 +71,8 @@ void AssignData( const GL46_Buffer& buffer, uint32_t* count = nullptr )
 	std::vector<GPU> vec;
 	ECS::Registry()->view<Comp>().each([&vec]( entt::entity e, const Comp& o )
 	{
-		vec.push_back(o.MakeGPU(e));
+		const auto matrix = ECS::Registry()->get<Components::Transform>(e).GetMatrix();
+		vec.push_back(o.MakeGPU(matrix, e));
 	});
 	buffer.Fill(vec.size() * sizeof(GPU), vec.data());
 	if (count)

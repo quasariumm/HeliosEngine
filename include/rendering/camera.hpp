@@ -95,7 +95,7 @@ private:
 
 	const glm::vec3 m_worldUp = glm::vec3(0, 1, 0);
 	glm::vec3       m_camPos{};
-	float           m_yaw   = -90.f;
+	float           m_yaw   = 90.f;
 	float           m_pitch = 0.f;
 	glm::vec3       m_camFront{}, m_camUp{}, m_camRight{};
 	float           m_fov = 70.0f;

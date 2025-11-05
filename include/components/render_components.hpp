@@ -8,31 +8,32 @@ namespace Helios::Components
 #define COMPONENT_FIELD_DECL(type, name, value) type name{value};
 #define COMPONENT_FIELD_INIT(type, name, value) .name = name,
 
-#define RENDER_COMPONENT(name, fields_macro, gpu_padding) \
+// A render component with a transform and entity on the GPU
+#define RENDER_COMPONENT_TRANSFORM_ENTITY(name, fields_macro, gpu_padding) \
 	struct name##GPU final { \
+		glm::mat4 transform{1.f}; \
 		fields_macro(COMPONENT_FIELD_DECL) \
 		entt::entity entity{entt::null}; \
 		uint8_t padding[gpu_padding]; \
 	}; \
 	struct name final : BaseComponent { \
 		name() = default; \
-		name##GPU MakeGPU(entt::entity entity) const { \
-			return name##GPU{ fields_macro(COMPONENT_FIELD_INIT) .entity = entity }; \
+		name##GPU MakeGPU(const glm::mat4& transform, entt::entity entity) const { \
+			return name##GPU{ .transform = transform, fields_macro(COMPONENT_FIELD_INIT) .entity = entity }; \
 		} \
 		fields_macro(COMPONENT_FIELD_DECL) \
 		bool dirty = false;
+
 // Define your fields once
 #define SPHERE_FIELDS(F) \
-	F(glm::vec3, position, 0.f) \
-	F(float, radius, 1.f) \
 	F(int32_t, materialIdx, 0)
 
 // Usage
-RENDER_COMPONENT(Sphere, SPHERE_FIELDS, 8)
+RENDER_COMPONENT_TRANSFORM_ENTITY(Sphere, SPHERE_FIELDS, 8)
 
 
 	template <typename Archive>
-	void serialize( Archive& archive ) { archive(CEREAL_NVP(radius), CEREAL_NVP(position), CEREAL_NVP(materialIdx)); }
+	void serialize( Archive& archive ) { archive(CEREAL_NVP(materialIdx)); }
 
 
 	void Inspector() override;

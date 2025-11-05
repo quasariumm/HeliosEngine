@@ -17,9 +17,23 @@ void serialize( Archive& archive, vec3& v )
 
 
 template <class Archive>
+void serialize( Archive& archive, vec4& v )
+{
+	archive(CEREAL_NVP(v.x), CEREAL_NVP(v.y), CEREAL_NVP(v.z), CEREAL_NVP(v.w));
+}
+
+
+template <class Archive>
 void serialize( Archive& archive, quat& q )
 {
 	archive(CEREAL_NVP(q.w), CEREAL_NVP(q.x), CEREAL_NVP(q.y), CEREAL_NVP(q.z));
+}
+
+
+template <class Archive>
+void serialize( Archive& archive, mat4& m )
+{
+	archive(m[0], m[1], m[2], m[3]);
 }
 }
 
