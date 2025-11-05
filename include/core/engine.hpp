@@ -20,6 +20,29 @@ enum class Mode
 };
 
 
+class CoreCallbacks
+{
+	friend class Window;
+	friend class GL46_Window;
+
+	static void KeyDown( Window& w, Key key );
+
+	static void KeyUp( Window& w, Key key );
+
+	static void MouseMove( Window& w, glm::vec2 delta );
+
+	static void MouseDown( Window& w, MouseButton button );
+
+	static void MouseUp( Window& w, MouseButton button );
+
+	static void MouseScroll( Window& w, float x, float y );
+
+	static void Resize( Window& w, const glm::uvec2& size );
+
+	static void Focus( Window& w, bool focused );
+};
+
+
 class Core
 {
 public:

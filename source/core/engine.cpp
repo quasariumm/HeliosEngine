@@ -7,6 +7,7 @@
 #include "editor/editor_menus.hpp"
 #include "editor/engine_interface.hpp"
 #include "physics/physics.hpp"
+#include "rendering/camera.hpp"
 #include "rendering/renderer.hpp"
 #include "rendering/window.hpp"
 
@@ -49,8 +50,11 @@ void Core::Run()
 		m_engineStats.SetData(1.0f / dt, dt);
 
 		Systems::GetRenderer()->Prepare();
-		EditorInterface::Get()->StartFrame();
+		EditorInterface::StartFrame();
 		Systems::GetAudio()->Update();
+
+		// TODO(Quillan): Make the camera a system
+		Systems::GetCamera()->HandleInput(*Systems::GetRenderer()->GetWindow(), dt);
 
 		//m_input->Update();
 		//EditorInterface::StartFrame();
@@ -70,9 +74,9 @@ void Core::Run()
 
 		EditorInterface::Get()->DrawInterfaces();
 		Systems::GetViewport()->Draw();
-		EditorInterface::Get()->Render();
+		EditorInterface::Render();
 		Systems::GetRenderer()->Clear();
-		EditorInterface::Get()->EndFrame();
+		EditorInterface::EndFrame();
 		Systems::GetRenderer()->Render();
 
 		time = ctime;
