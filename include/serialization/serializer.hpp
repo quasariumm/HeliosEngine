@@ -18,7 +18,10 @@ public:
 	Serialize(const Obj& object)
 	{
 		std::string typeName = visit_struct::get_name(object);
-		visit_struct::for_each(object, [this, typeName](const char * name, const auto & value){ m_buffer[typeName][name] = value; });
+		visit_struct::for_each(object, [this, typeName](const char * name, const auto & value)
+		{
+			m_buffer[typeName][name] = value;
+		});
 	}
 
 	/// Deserialize the internal buffer into the given object
@@ -27,7 +30,10 @@ public:
 	Deserialize(Obj& object)
 	{
 		std::string typeName = visit_struct::get_name(object);
-		visit_struct::for_each(object, [this, typeName](const char* name, auto& value) { value = m_buffer[typeName][name]; });
+		visit_struct::for_each(object, [this, typeName](const char* name, auto& value)
+		{
+			value = m_buffer[typeName][name].get<std::decay_t<decltype(value)>>();
+		});
 	}
 
 	/// Check if the given type exists within the buffer

@@ -5,9 +5,19 @@
 
 #include "component_registry.hpp"
 
-COMPONENT(Transform, ICON_AXIS_ARROW" Transform", Engine::Components::INSPECTABLE)
+#include <visit_struct/visit_struct_intrusive.hpp>
+
+// Include is necessary for certain types to be serializable!
+#include "serialization/serializer_types.hpp"
+
+COMPONENT(Transform, ICON_AXIS_ARROW" Transform", SERIALIZABLE | INSPECTABLE)
 {
-	Transform() = default;
+	Transform()
+	{
+		position	= glm::vec3(0.0f);
+		rotation	= glm::identity<glm::quat>();
+		scale		= glm::vec3(1.0f);
+	}
 
 	// Setters
 	// Position
@@ -182,27 +192,28 @@ COMPONENT(Transform, ICON_AXIS_ARROW" Transform", Engine::Components::INSPECTABL
 
 	void Inspector() override;
 
-private:
+//private:
+
+	friend class visitable;
 
 	void MarkDirty() const
 	{
 		dirty = true;
 	}
 
-
 	entt::delegate<void()> onModified{};
 	bool                   onModifiedUsed = false;
 
-	glm::vec3 position = glm::vec3(0);
-	glm::quat rotation = glm::vec3(0);
-	glm::vec3 scale    = glm::vec3(1);
+	BEGIN_VISITABLES(Transform);
+	VISITABLE(glm::vec3, position);
+	VISITABLE(glm::quat, rotation);
+	VISITABLE(glm::vec3, scale);
+	END_VISITABLES;
 
 	mutable glm::mat4 transform = glm::identity<glm::mat4>();
 
 	mutable bool dirty = true;
 };
-
-//VISITABLE_STRUCT(Engine::Components::Transform, position, rotation, scale);
 
 COMPONENT(SceneObjectInfo, "SceneObject", SERIALIZABLE)
 {
@@ -215,25 +226,27 @@ COMPONENT(SceneObjectInfo, "SceneObject", SERIALIZABLE)
 
 VISITABLE_STRUCT(Engine::Components::SceneObjectInfo, name);
 
-COMPONENT(ParentObject, "Parent Object", NONE)
+COMPONENT(ParentObject, "Parent Object", SERIALIZABLE)
 {
-	void RemoveChild( const entt::entity child )
+	void RemoveChild( const SceneObject child )
 	{
 		children.erase(std::ranges::find(children, child));
 	}
 
-	void AddChild( const entt::entity child )
+	void AddChild( const SceneObject child )
 	{
 		children.push_back(child);
 	}
 
-	std::vector<entt::entity> children;
+	std::vector<SceneObject> children;
 };
+
+VISITABLE_STRUCT(Engine::Components::ParentObject, children);
 
 
 COMPONENT(ChildObject, "Child Object", SERIALIZABLE)
 {
-	entt::entity parent = entt::null;
+	SceneObject parent = entt::null;
 };
 
 VISITABLE_STRUCT(Engine::Components::ChildObject, parent);

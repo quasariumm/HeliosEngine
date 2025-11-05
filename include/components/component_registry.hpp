@@ -53,7 +53,7 @@ namespace Engine::Components
 				{
 					if (serializer.Contains<T>())
 					{
-						T& c = AddComponent<T>(object);
+						T& c = buffer.emplace<T>(object);
 						serializer.Deserialize(c);
 					}
 				});
