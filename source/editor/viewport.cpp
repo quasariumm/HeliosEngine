@@ -55,33 +55,33 @@ void Viewport::Draw()
 void Viewport::DrawGizmos() const
 {
 	// TODO(Quillan): Implement ImGuizmo
-    // Camera cam = ECS::Registry()->get<Camera>(systemsHandler.CameraSystem().GetEditorCamera());
-    // glm::mat4 cam_matrix = ECS::Registry()->get<Components::Transform>(Engine.CameraSystem().GetEditorCamera()).GetMatrix();
-    //
-    // glm::mat4 projection = CameraSystem::CalculateProjectionMatrix(cam, GetAspect());
-    // glm::mat4 view = CameraSystem::CalculateViewMatrix(cam_matrix);
-    //
-    // if (SceneGraph::selected == entt::null) return;
-    //
-    // Components::Transform& transform = ECS::Registry()->get<Components::Transform>(SceneGraph::selected);
-    //
-    // ImGuizmo::SetDrawlist();
-    // ImGuizmo::SetRect(posX, posY, static_cast<float>(width), static_cast<float>(height));
-    //
-    // glm::mat4 mat = GetGlobalTransform(SceneGraph::selected);
-    //
-    // const float* actualSnap = snapping ? &snapGrid : nullptr;
-    //
-    // ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), operation, ImGuizmo::MODE::WORLD, glm::value_ptr(mat), nullptr, actualSnap);
-    //
-    // if (ImGuizmo::IsUsing())
-    // {
-    //     glm::mat4 parentInverse = glm::inverse(GetParentGlobalTransform(SceneGraph::selected));
-    //     glm::mat4 newLocalMatrix = parentInverse * mat;
-    //
-    //     transform.SetMatrix(newLocalMatrix);
-    //     transform.MarkModified();
-    // }
+ //    Camera cam = ECS::Registry()->get<Camera>(systemsHandler.CameraSystem().GetEditorCamera());
+ //    glm::mat4 cam_matrix = ECS::Registry()->get<Components::Transform>(Engine.CameraSystem().GetEditorCamera()).GetMatrix();
+ //
+ //    glm::mat4 projection = CameraSystem::CalculateProjectionMatrix(cam, GetAspect());
+ //    glm::mat4 view = CameraSystem::CalculateViewMatrix(cam_matrix);
+ //
+ //    if (SceneGraph::selected == entt::null) return;
+ //
+ //    Components::Transform& transform = ECS::Registry()->get<Components::Transform>(SceneGraph::selected);
+ //
+ //    ImGuizmo::SetDrawlist();
+ //    ImGuizmo::SetRect(posX, posY, static_cast<float>(width), static_cast<float>(height));
+ //
+ //    glm::mat4 mat = GetGlobalTransform(SceneGraph::selected);
+ //
+ //    const float* actualSnap = snapping ? &snapGrid : nullptr;
+ //
+ //    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), operation, ImGuizmo::MODE::WORLD, glm::value_ptr(mat), nullptr, actualSnap);
+ //
+ //    if (ImGuizmo::IsUsing())
+ //    {
+ //        glm::mat4 parentInverse = glm::inverse(GetParentGlobalTransform(SceneGraph::selected));
+ //        glm::mat4 newLocalMatrix = parentInverse * mat;
+ //
+ //        transform.SetMatrix(newLocalMatrix);
+ //        transform.MarkModified();
+ //    }
 }
 
 

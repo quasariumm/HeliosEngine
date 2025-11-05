@@ -47,12 +47,6 @@ file(GLOB_RECURSE GL46_BACKEND CONFIGURE_DEPENDS backends/opengl46_glfw/*.cpp ba
 file(GLOB_RECURSE DX12_BACKEND CONFIGURE_DEPENDS src/Backends/DirectX12/*.cpp src/Backends/DirectX12/*.hpp)
 file(GLOB_RECURSE VK_BACKEND CONFIGURE_DEPENDS src/Backends/Vulkan/*.cpp src/Backends/Vulkan/*.hpp)
 
-file(GLOB LIBS CONFIGURE_DEPENDS
-		extern/imgui/*.cpp
-		extern/imgui/*.h
-)
-
-
 ##############################################
 ##				SSE/AVX flags				##
 ##############################################
@@ -108,16 +102,10 @@ foreach (file ${SOURCE})
 	message(STATUS "  ${REL_PATH}")
 endforeach ()
 
-message(STATUS "CMake is including the following library files:")
-foreach (file ${LIBS})
-	file(RELATIVE_PATH REL_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${file})
-	message(STATUS "  ${REL_PATH}")
-endforeach ()
-
 ##############################################
 ##  Create lib/exe based on launch option	##
 ##############################################
-add_library(Engine ${LIBS} ${HEADERS} ${SOURCE} ${BACKENDS})
+add_library(Engine ${HEADERS} ${SOURCE} ${BACKENDS})
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	set(TRACY_ENABLE ON)
@@ -224,13 +212,13 @@ target_link_libraries(Engine PUBLIC
 ## JOLT PHYSICS
 set(ENABLE_ALL_WARNINGS OFF)
 set(BUILD_SHARED_LIBS 	ON)
-fetchcontent_declare(
+FetchContent_Declare(
 		JoltPhysics
 		GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
 		GIT_TAG "v5.4.0"
 		SOURCE_SUBDIR "Build"
 )
-fetchcontent_makeavailable(JoltPhysics)
+FetchContent_MakeAvailable(JoltPhysics)
 
 ## FMT
 set(FMT_INSTALL ON)
@@ -255,9 +243,30 @@ FetchContent_Declare(
 		GIT_REPOSITORY "https://github.com/cbeck88/visit_struct.git"
 		GIT_TAG "1.2.0"
 )
+FetchContent_MakeAvailable(visit_struct)
 add_library(visit_struct INTERFACE)
 target_include_directories(visit_struct INTERFACE ${visit_struct_SOURCE_DIR}/include)
-FetchContent_MakeAvailable(visit_struct)
+
+## IMGUI
+FetchContent_Declare(
+		imgui
+		GIT_REPOSITORY "https://github.com/ocornut/imgui.git"
+		GIT_TAG "v1.92.4-docking"
+)
+FetchContent_MakeAvailable(imgui)
+add_library(imgui INTERFACE)
+target_include_directories(imgui INTERFACE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
+
+## IMGUIZMO
+FetchContent_Declare(
+		imguizmo
+		GIT_REPOSITORY "https://github.com/CedricGuillemet/ImGuizmo.git"
+		GIT_TAG "1.83"
+)
+FetchContent_MakeAvailable(imguizmo)
+add_library(imguizmo INTERFACE)
+target_include_directories(imguizmo INTERFACE ${imguizmo_SOURCE_DIR})
+
 
 ##############################################
 ##		      Copy external DLLs  			##
@@ -277,30 +286,6 @@ function(copy_engine_dlls PROJ)
 	)
 endfunction()
 
-
-###############################################
-###  	    		OpenCL		    		##
-###############################################
-#
-#find_package(OpenCL MODULE)
-#
-#if (NOT OpenCL_FOUND)
-#	message(FATAL_ERROR "OpenCL not found. See README.md for install instructions.")
-#endif()
-#
-#target_link_libraries(Engine PRIVATE OpenCL::OpenCL)
-#
-#math(EXPR CL_TARGET_VERSION "${OpenCL_VERSION_MAJOR} * 100 + ${OpenCL_VERSION_MINOR} * 10")
-#
-#target_compile_definitions(Engine PRIVATE
-#		CL_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
-#		CL_HPP_TARGET_OPENCL_VERSION=${CL_TARGET_VERSION}
-#		# TODO: Determine this minimum version based on implementation of the kernels
-#		CL_HPP_MINIMUM_OPENCL_VERSION=200
-#		#CL_HPP_ENABLE_EXCEPTIONS
-#		CL_VERSION_STR="${OpenCL_VERSION_MAJOR}.${OpenCL_VERSION_MINOR}"
-#)
-
 ##############################################
 ## Include directories + precompiled header ##
 ##############################################
@@ -309,7 +294,6 @@ target_include_directories(Engine PUBLIC
 		source
 		include
 		extern
-		extern/imgui
 		extern/nativefiledialog-extended/src/include
 		extern/glm
 		extern/fmt/include
@@ -338,4 +322,6 @@ target_link_libraries(Engine PUBLIC
 		Jolt
 		nlohmann_json
 		visit_struct
+		imgui
+		imguizmo
 )

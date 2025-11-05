@@ -125,9 +125,12 @@ using namespace Microsoft::WRL;
 #define IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_USE_WCHAR32
 #include <imgui.h>
-#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui_impl_glfw.h>
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui_impl_opengl3.h>
+
+// ImGuizmo
+#include <ImGuizmo.h>
 
 // Engine libraries
 #include "core/common.hpp"
