@@ -16,8 +16,8 @@ struct RayTracingMaterial
 	vec3 diffuseColor;
 	float shininess;
 	vec3 specularColor;
-	vec3 emissionColor;
 	float emissionStrength;
+	vec3 emissionColor;
 
 	float refractivity;
 	float refractionCoefficient;
@@ -25,8 +25,6 @@ struct RayTracingMaterial
 
 	float PBR_Roughness;
 	float PBR_Metallic;
-
-	float padding[3];
 };
 
 /*

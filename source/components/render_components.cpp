@@ -63,15 +63,15 @@ void Material::Inspector()
 	ImGui::Separator();
 
 	ImGui::ColorEdit3("Diffuse Color", glm::value_ptr(diffuseColor),
-	                  ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
+	                  ImGuiColorEditFlags_DisplayHSV);
 	ImGui::ColorEdit3("Specular Color", glm::value_ptr(specularColor),
-	                  ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
+	                  ImGuiColorEditFlags_DisplayHSV);
 
 	ImGui::SliderFloat("Specularity", &specularity, 0.0f, 1.0f);
 	ImGui::DragFloat("Shininess", &shininess, 0.01f);
 
 	ImGui::ColorEdit3("Emission Color", glm::value_ptr(emissionColor),
-	                  ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
+	                  ImGuiColorEditFlags_DisplayHSV);
 	ImGui::DragFloat("Emission Strength", &emissionStrength, 0.01f, 0.f, 1e6f);
 
 	ImGui::SliderFloat("Refractivity", &refractivity, 0.0f, 1.0f);
