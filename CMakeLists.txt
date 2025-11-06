@@ -320,6 +320,7 @@ target_include_directories(Engine PUBLIC
 		lib/fmod/studio/inc
 		${JoltPhysics_SOURCE_DIR}/..
 		${TRACY_PUBLIC_DIR}
+		${visit_struct_SOURCE_DIR}/include
 )
 
 target_precompile_headers(Engine PUBLIC

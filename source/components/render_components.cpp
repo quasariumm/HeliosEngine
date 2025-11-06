@@ -37,28 +37,28 @@ void Material::Inspector()
 
 	ImGui::Separator();
 	ImGui::Text("Microfacet model:");
-	if (ImGui::Selectable("Beckmann", microfacetModel.selector == 0))
-		microfacetModel.selector = 0;
+	if (ImGui::Selectable("Beckmann", properties.microfacetSelector == 0))
+		properties.microfacetSelector = 0;
 
-	if (ImGui::Selectable("Isotropic GGX", microfacetModel.selector == 1))
-		microfacetModel.selector = 1;
+	if (ImGui::Selectable("Isotropic GGX", properties.microfacetSelector == 1))
+		properties.microfacetSelector = 1;
 
-	if (ImGui::Selectable("Anisotropic GGX", microfacetModel.selector == 2))
-		microfacetModel.selector = 2;
+	if (ImGui::Selectable("Anisotropic GGX", properties.microfacetSelector == 2))
+		properties.microfacetSelector = 2;
 
-	if (ImGui::Selectable("Blinn-Phong", microfacetModel.selector == 3))
-		microfacetModel.selector = 3;
+	if (ImGui::Selectable("Blinn-Phong", properties.microfacetSelector == 3))
+		properties.microfacetSelector = 3;
 
-	microfacetModel.beckmann   = (microfacetModel.selector == 0) ? 1 : 0;
-	microfacetModel.ggx_iso    = (microfacetModel.selector == 1) ? 1 : 0;
-	microfacetModel.ggx_aniso  = (microfacetModel.selector == 2) ? 1 : 0;
-	microfacetModel.blinnphong = (microfacetModel.selector == 3) ? 1 : 0;
+	properties.beckmann   = (properties.microfacetSelector == 0) ? 1 : 0;
+	properties.ggx_iso    = (properties.microfacetSelector == 1) ? 1 : 0;
+	properties.ggx_aniso  = (properties.microfacetSelector == 2) ? 1 : 0;
+	properties.blinnphong = (properties.microfacetSelector == 3) ? 1 : 0;
 
-	if (microfacetModel.selector == 2)
+	if (properties.microfacetSelector == 2)
 	{
 		ImGui::Separator();
-		ImGui::InputFloat("Alpha X", &microfacetModel.alphaX);
-		ImGui::InputFloat("Alpha Y", &microfacetModel.alphaY);
+		ImGui::InputFloat("Alpha X", &properties.alphaX, 0.001f);
+		ImGui::InputFloat("Alpha Y", &properties.alphaY, 0.001f);
 	}
 	ImGui::Separator();
 
@@ -69,16 +69,15 @@ void Material::Inspector()
 
 	ImGui::SliderFloat("Specularity", &specularity, 0.0f, 1.0f);
 	ImGui::DragFloat("Shininess", &shininess, 0.01f);
-	ImGui::DragFloat("Glossiness", &glossiness, 0.01f);
 
 	ImGui::ColorEdit3("Emission Color", glm::value_ptr(emissionColor),
 	                  ImGuiColorEditFlags_InputHSV | ImGuiColorEditFlags_DisplayHSV);
-	ImGui::DragFloat("Emission Strength", &emissionStrength);
+	ImGui::DragFloat("Emission Strength", &emissionStrength, 0.01f, 0.f, 1e6f);
 
 	ImGui::SliderFloat("Refractivity", &refractivity, 0.0f, 1.0f);
-	ImGui::DragFloat("Refraction Coefficient", &refractionCoefficient);
+	ImGui::DragFloat("Refraction Coefficient", &refractionCoefficient, 0.01f, 0.f, 10.f);
 
-	ImGui::DragFloat("Absorption", &absorption, 0.01f);
+	ImGui::DragFloat("Absorption", &absorption, 0.01f, 0.f, 100.f);
 
 	ImGui::SliderFloat("PBR Roughness", &PBR_Roughness, 0.0f, 1.0f);
 	ImGui::SliderFloat("PBR Metallic", &PBR_Metallic, 0.0f, 1.0f);

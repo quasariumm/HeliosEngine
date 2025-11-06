@@ -8,10 +8,10 @@
 #include "/Engine/raytracing/materialStruct.glsl"
 
 // EXTENDS UPON MATERIAL_XXXX. THIS IS INCLUDED IN THE MATERIAL TYPE
-#define MICROFACET_BECKMANN		64		// Beckmann–Spizzichino model
-#define MICROFACET_GGX_ISO		128		// Trowbridge–Reitz 'GGX' model
-#define MICROFACET_GGX_ANISO	256		// Anisotropic version of GGX model
-#define MICROFACET_BLINNPHONG	512		// Blinn-Phong model
+#define MICROFACET_BECKMANN		0x100	// Beckmann–Spizzichino model
+#define MICROFACET_GGX_ISO		0x200	// Trowbridge–Reitz 'GGX' model
+#define MICROFACET_GGX_ANISO	0x400	// Anisotropic version of GGX model
+#define MICROFACET_BLINNPHONG	0x800	// Blinn-Phong model
 
 float BeckmannD(float alpha, float NdotH);
 float BeckmannG1(float alpha, float NdotW);
@@ -49,22 +49,22 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 	float OdotH = clamp(dot(wo, wh), 0.0, 1.0);
 
 	float DV = 0.0;
-	if ((material.type & MICROFACET_BECKMANN) != 0)
+	if ((material.materialProperties & MICROFACET_BECKMANN) != 0)
 	{
 		DV = BeckmannD(alpha, NdotH) * BeckmannG(alpha, NdotO, NdotI);
 		DV /= 4.0 * NdotO * NdotI;
 	}
-	if ((material.type & MICROFACET_GGX_ISO) != 0)
+	if ((material.materialProperties & MICROFACET_GGX_ISO) != 0)
 	{
 		DV = GGXIsoD(alpha, NdotH) * GGXIsoV(alpha, NdotO, NdotI);
 	}
-	if ((material.type & MICROFACET_GGX_ANISO) != 0)
+	if ((material.materialProperties & MICROFACET_GGX_ANISO) != 0)
 	{
 		vec3 anisoAlpha = vec3(material.alphaX, material.alphaY, sqrt(material.alphaX * material.alphaY));
 		DV = GGXAnisoD(anisoAlpha, normal, tangent, wh) * GGXAnisoG(anisoAlpha, normal, tangent, wo, wi);
 		DV /= 4.0 * NdotO * NdotI;
 	}
-	if ((material.type & MICROFACET_BLINNPHONG) != 0)
+	if ((material.materialProperties & MICROFACET_BLINNPHONG) != 0)
 	{
 		DV = BlinnPhongD(alpha, NdotH) * BlinnPhongG(alpha, NdotO, NdotI);
 		DV /= 4.0 * NdotO * NdotI;
@@ -93,23 +93,23 @@ float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 
 	float D = 0.0;
 	float G1 = 0.0;
-	if ((material.type & MICROFACET_BECKMANN) != 0)
+	if ((material.materialProperties & MICROFACET_BECKMANN) != 0)
 	{
 		D = BeckmannD(alpha, NdotH);
 		G1 = BeckmannG1(alpha, NdotO);
 	}
-	if ((material.type & MICROFACET_GGX_ISO) != 0)
+	if ((material.materialProperties & MICROFACET_GGX_ISO) != 0)
 	{
 		D = GGXIsoD(alpha, NdotH);
 		G1 = GGXIsoG1(alpha, NdotO);
 	}
-	if ((material.type & MICROFACET_GGX_ANISO) != 0)
+	if ((material.materialProperties & MICROFACET_GGX_ANISO) != 0)
 	{
 		vec3 anisoAlpha = vec3(material.alphaX, material.alphaY, sqrt(material.alphaX * material.alphaY));
 		D = GGXAnisoD(anisoAlpha, normal, tangent, wh);
 		G1 = GGXAnisoG1(anisoAlpha, normal, tangent, wo);
 	}
-	if ((material.type & MICROFACET_BLINNPHONG) != 0)
+	if ((material.materialProperties & MICROFACET_BLINNPHONG) != 0)
 	{
 		D = BlinnPhongD(alpha, NdotH);
 		G1 = BlinnPhongG1(alpha, NdotO);

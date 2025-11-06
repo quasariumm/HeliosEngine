@@ -122,7 +122,7 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay, out uint entity)
 
 			float specularity = material.specularity;
 			// Map specularity to roughness
-			if ((material.type & MATERIAL_MICROFACET) != 0)
+			if ((material.materialProperties & MATERIAL_MICROFACET) != 0)
 			{
 				specularity = 1.0 - material.PBR_Roughness;
 			}
@@ -271,10 +271,10 @@ void main()
         pixel.a = 1.0;
     }
     #elif defined(ACCUMULATION)
-		if (!ClearAccumulator)
+	if (!ClearAccumulator)
     {
         vec4 accumulatorColor = imageLoad(OutTexture, texelCoord);
-        pixel = mix(accumulatorColor, pixel, 1.0 / (Frame + 1));
+        pixel = mix(accumulatorColor, pixel, 1.0 / float(Frame + 1));
         pixel.a = 1.0;
     }
     #endif // ACCUMULATION

@@ -83,8 +83,8 @@ void AssignData( const GL46_Buffer& buffer, uint32_t* count = nullptr )
 void Renderer::Render()
 {
 	// Fill/Override the geometry data
-	// // Materials
-	// AssignData<Components::Material>(m_geometryContext.materials, &m_geometryContext.numMaterials);
+	// Materials
+	AssignData<Components::Material, Components::MaterialGPU>(m_geometryContext.materials, &m_geometryContext.numMaterials);
 	// Spheres
 	AssignData<Components::Sphere, Components::SphereGPU>(m_geometryContext.spheres, &m_geometryContext.numSpheres);
 
