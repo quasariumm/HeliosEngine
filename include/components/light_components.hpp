@@ -3,12 +3,12 @@
 #include "components/basic_components.hpp"
 
 
-namespace Engine::Components
+namespace Helios::Components
 {
 struct DirectionalLight final : BaseComponent
 {
-	template <typename Archive>
-	void serialise( Archive& archive ) { archive(CEREAL_NVP(color), CEREAL_NVP(intensity), CEREAL_NVP(direction)); }
+	// template <typename Archive>
+	// void serialise( Archive& archive ) { archive(CEREAL_NVP(color), CEREAL_NVP(intensity), CEREAL_NVP(direction)); }
 
 
 	void Inspector() override;
@@ -22,8 +22,8 @@ struct DirectionalLight final : BaseComponent
 
 struct PointLight final : BaseComponent
 {
-	template <typename Archive>
-	void serialise( Archive& archive ) { archive(CEREAL_NVP(color), CEREAL_NVP(intensity), CEREAL_NVP(position)); }
+	// template <typename Archive>
+	// void serialise( Archive& archive ) { archive(CEREAL_NVP(color), CEREAL_NVP(intensity), CEREAL_NVP(position)); }
 
 
 	void Inspector() override;
@@ -36,12 +36,12 @@ struct PointLight final : BaseComponent
 
 struct SpotLight final : BaseComponent
 {
-	template <typename Archive>
-	void serialise( Archive& archive )
-	{
-		archive(CEREAL_NVP(color), CEREAL_NVP(intensity), CEREAL_NVP(position), CEREAL_NVP(innerCutoff),
-		        CEREAL_NVP(direction), CEREAL_NVP(outerCutoff));
-	}
+	// template <typename Archive>
+	// void serialise( Archive& archive )
+	// {
+	// 	archive(CEREAL_NVP(color), CEREAL_NVP(intensity), CEREAL_NVP(position), CEREAL_NVP(innerCutoff),
+	// 	        CEREAL_NVP(direction), CEREAL_NVP(outerCutoff));
+	// }
 
 
 	void Inspector() override;

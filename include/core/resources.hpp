@@ -1,9 +1,7 @@
 #pragma once
 #include <filesystem>
-#include <cereal/cereal.hpp>
 
-
-namespace Engine::Resources
+namespace Helios::Resources
 {
 struct Resource
 {

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace Engine
+namespace Helios
 {
 
 enum class BufferType : uint8_t

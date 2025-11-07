@@ -1,52 +1,43 @@
 #include "core/ecs.hpp"
 
-#include "cereal/archives/json.hpp"
-
 #include "entt/entity/registry.hpp"
-#include "entt/entity/snapshot.hpp"
 
 #include "components/basic_components.hpp"
 
-using namespace Engine;
+using namespace Helios;
 using namespace Components;
 
 
 void EntityComponentSystem::SaveSnapshot()
 {
-	m_snapshot.str("");
-	m_snapshot.clear();
-	cereal::JSONOutputArchive output{m_snapshot};
+	nlohmann::json output;
 
-	auto tempSnapshot = entt::snapshot(*Registry());
+	auto view = m_registry.view<SceneObjectInfo>();
+	for (auto [e, info] : view.each())
+	{
+		Serialization::Serializer serializer;
+		for (const auto& component : serializeComponents)
+			component(e, serializer);
 
-	for (const auto& component : serializedComponentsOutput)
-		component(tempSnapshot, output);
+		std::string objName = info.name + "_" +  std::to_string(static_cast<uint32_t>(e));
+		output[objName] = serializer.GetBuffer();
+	}
+
+	m_snapshot = output;
 }
 
 
 void EntityComponentSystem::LoadSnapshot()
 {
-	m_snapshot.clear();
-	m_snapshot.seekg(0);
+	entt::registry temp;
 
-	cereal::JSONInputArchive input{m_snapshot};
-	entt::registry           temp;
-
-	auto l = entt::snapshot_loader(temp);
-
-	for (const auto& c : serializedComponentsInput)
-		c(l, input);
-
-	// Reparent because parent objects are not saved
-	for (const auto  objects = temp.view<SceneObjectInfo>();
-	     const auto& [e, s] : objects.each())
-		temp.emplace<ParentObject>(e);
-
-	for (const auto  children = temp.view<ChildObject>();
-	     const auto& [e, c] : children.each())
+	for (nlohmann::json entityData : m_snapshot)
 	{
-		ParentObject* p = &temp.get<ParentObject>(c.parent);
-		p->AddChild(e);
+		entt::entity e = temp.create();
+		Serialization::Serializer serializer = { entityData };
+
+		for (const auto& component : deserializeComponents)
+			component(e, serializer, temp);
 	}
 
 	m_registry.swap(temp);

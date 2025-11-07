@@ -11,7 +11,7 @@ static constexpr uint32_t EngineWindowFlags_Fullscreen         = 0x00000008u;
 static constexpr uint32_t EngineWindowFlags_WindowedBorderless = 0x00000010u;
 
 
-namespace Engine
+namespace Helios
 {
 // Predefine the windows for all the platforms
 class GL46_Window;

@@ -3,7 +3,7 @@
 #include "debugging/logger.hpp"
 #include "rendering/camera.hpp"
 
-using namespace Engine::Audio;
+using namespace Helios::Audio;
 
 // FMOD does not support MinGW
 #if !(defined __MINGW64__ || defined __MINGW32__)

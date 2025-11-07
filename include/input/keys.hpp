@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Engine
+namespace Helios
 {
 enum class Key
 {
@@ -153,7 +153,7 @@ enum class MouseButton
  * @return The GLFW key code, GLFW_KEY_UNKNOWN if the key is invalid
  */
 [[nodiscard]]
-int ConvertKeyGlfw( Engine::Key key );
+int ConvertKeyGlfw( Helios::Key key );
 
 /**
  * @brief Converts a key from GLFW to a Key enum value
@@ -161,7 +161,7 @@ int ConvertKeyGlfw( Engine::Key key );
  * @return The key code, Key::MAX if the key is invalid/not supported
  */
 [[nodiscard]]
-Engine::Key ConvertGlfwKey( int key );
+Helios::Key ConvertGlfwKey( int key );
 
 /**
  * @brief Converts a button from the MouseButton enum class to a GLFW button

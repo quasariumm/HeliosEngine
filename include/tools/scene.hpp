@@ -3,7 +3,7 @@
 #include "core/ecs.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 // Helper functions for the ECS
 
@@ -19,6 +19,7 @@ bool HasComponent( const SceneObject& object )
 template <typename T>
 T& AddComponent( const SceneObject& object )
 {
+	// TODO(Quillan): Find a return type to prevent crash
 	if (HasComponent<T>(object))
 		Log::Error("Object already has the requested Components!");
 

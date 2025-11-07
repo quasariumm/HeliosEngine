@@ -3,7 +3,7 @@
 #include "../backends/opengl46_glfw/core/gl46_window.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 const std::string& Window::GetTitle() const
 {

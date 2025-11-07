@@ -10,10 +10,10 @@
 
 struct Sphere
 {
-	vec3 position;
-	float radius;
+	mat4 transform;
 	int materialIndex;
-	int padding[3];
+	uint entity;
+	int padding[2];
 };
 uniform uint NumSpheres = 0;
 layout (std430, binding = 3) readonly buffer SpheresBuffer
@@ -24,9 +24,16 @@ layout (std430, binding = 3) readonly buffer SpheresBuffer
 void RaySphere(inout Ray ray, Sphere sphere)
 {
 	// Thanks for the code, Sebastian Lague
-	vec3 oc = ray.origin - sphere.position;
-	float b = dot(oc, ray.dir);
-	float d = b * b - (dot(oc, oc) - sphere.radius * sphere.radius);
+	// Transform the ray to local space
+	mat4 invTransform = inverse(sphere.transform);
+	vec3 localO = (invTransform * vec4(ray.origin, 1.f)).xyz;
+	vec3 localD = (invTransform * vec4(ray.dir, 0.f)).xyz;
+
+	float rayScale = length(localD);
+	localD = normalize(localD);
+
+	float b = dot(localO, localD);
+	float d = b * b - (dot(localO, localO) - 1);
 
 	if (d <= 0.0)
 		return;
@@ -35,37 +42,31 @@ void RaySphere(inout Ray ray, Sphere sphere)
 	float t1 = -b - sqrt_d;
 	float t2 = -b + sqrt_d;
 
-	if (t1 >= 0.0 && t1 < ray.hit.dst)
+	t1 /= rayScale;
+	t2 /= rayScale;
+
+	bool hit1 = (t1 >= 0.0 && t1 < ray.hit.dst);
+	bool hit2 = (t2 >= 0.0 && t2 < ray.hit.dst && t1 <= 0);
+
+	if (hit1 || hit2)
 	{
+		float t = (hit1) ? t1 : t2;
+
+		vec3 localHitPoint = localO + normalize(localD) * (t * rayScale);
+		vec3 localNormal = normalize(localHitPoint) * (hit2 ? -1.0 : 1.0);
+
 		ray.hit.didHit = true;
-		ray.hit.inside = b < 0.0;
+		ray.hit.inside = hit2;
 		ray.hit.materialIndex = sphere.materialIndex;
-		ray.hit.dst = t1;
-		ray.hit.hitPoint = ray.origin + ray.dir * t1;
-		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.position);
+		ray.hit.entity = sphere.entity;
+		ray.hit.dst = t;
+		ray.hit.hitPoint = (sphere.transform * vec4(localHitPoint, 1.0)).xyz;
+		ray.hit.normal = normalize(mat3(transpose(invTransform)) * localNormal);
 
 		// Calculate tangent vector
-		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
-		if (dot(ray.hit.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
-		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
-
-		ray.hit.tangent = normalize(cross(ray.hit.normal, arbitraryDirection));
-		return;
-	}
-
-	if (t2 >= 0.0 && t2 < ray.hit.dst && t1 <= 0)
-	{
-		ray.hit.didHit = true;
-		ray.hit.inside = b < 0.0;
-		ray.hit.materialIndex = sphere.materialIndex;
-		ray.hit.dst = t2;
-		ray.hit.hitPoint = ray.origin + ray.dir * t2;
-		ray.hit.normal = normalize(ray.hit.hitPoint - sphere.position) * sign(b);
-
-		// Calculate tangent vector
-		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
-		if (dot(ray.hit.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
-		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
+		vec3 arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose an arbitrary direction
+		if (abs(ray.hit.normal.y) > 0.99) // Check if it's too close to the normal
+			arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose another direction
 
 		ray.hit.tangent = normalize(cross(ray.hit.normal, arbitraryDirection));
 		return;
@@ -113,10 +114,10 @@ struct Mesh
 {
 	vec3 position;
 	int materialIndex;
-	uint indexCount;
 	uint firstIndex;
-	uint bvhNodeCount;
 	uint firstBvhNode;
+	uint indexNodeCount; // Combines indexCount (left 2 bytes) and bvhNodeCount (right 2 bytes)
+	uint entity;
 };
 
 uniform uint NumMeshes = 0;

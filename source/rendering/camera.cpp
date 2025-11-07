@@ -3,7 +3,7 @@
 #include "rendering/window.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 /*
  * Class: Camera

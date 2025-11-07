@@ -2,7 +2,7 @@
 
 #include "core/engine.hpp"
 
-using namespace Engine;
+using namespace Helios;
 using namespace Editor;
 
 
@@ -35,6 +35,19 @@ void EditorMenu::Draw()
 		{
 			ImGui::MenuItem("Style Editor", nullptr, &showStyleEditor);
 			ImGui::MenuItem("Metrics", nullptr, &showMetricsMenu);
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Debug output"))
+		{
+			if (ImGui::Selectable("None", engineHandle.debugView == 0))
+				engineHandle.debugView = 0;
+			if (ImGui::Selectable("Normals", engineHandle.debugView == 1))
+				engineHandle.debugView = 1;
+			if (ImGui::Selectable("Tangents", engineHandle.debugView == 2))
+				engineHandle.debugView = 2;
+			if (ImGui::Selectable("Bitangents", engineHandle.debugView == 3))
+				engineHandle.debugView = 3;
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenu();

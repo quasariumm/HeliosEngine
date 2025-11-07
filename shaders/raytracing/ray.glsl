@@ -18,9 +18,10 @@ struct RayHitInfo
 	vec3 lightVector;
 	vec2 barycentrics;
 	int materialIndex;
+	uint entity;
 };
 
-const RayHitInfo defaultHitInfo = RayHitInfo( false, false, 1e30, vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec2(0.0), -1 );
+const RayHitInfo defaultHitInfo = RayHitInfo( false, false, 1e30, vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec2(0.0), -1, 4294967295 );
 
 struct Ray
 {

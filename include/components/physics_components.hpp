@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <cereal/cereal.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -8,7 +7,7 @@
 #include "core/ecs.hpp"
 
 
-namespace Engine::Components
+namespace Helios::Components
 {
 using namespace JPH;
 using namespace Physics;
@@ -34,15 +33,15 @@ protected:
 	Transform* m_transform = nullptr;
 
 
-	template <typename Archive>
-	void serialize( Archive& archive )
-	{
-		auto value = static_cast<uint8>(motionType);
-		archive(CEREAL_NVP(value)); // serialize the byte form
-
-		if constexpr (Archive::is_loading::value)
-			motionType = static_cast<EMotionType>(value);
-	}
+	// template <typename Archive>
+	// void serialize( Archive& archive )
+	// {
+	// 	auto value = static_cast<uint8>(motionType);
+	// 	archive(CEREAL_NVP(value)); // serialize the byte form
+	//
+	// 	if constexpr (Archive::is_loading::value)
+	// 		motionType = static_cast<EMotionType>(value);
+	// }
 
 
 	void OnTransformModified() const;
@@ -70,12 +69,12 @@ struct PhysicsSphere : PhysicsComponent
 	}
 
 
-	template <typename Archive>
-	void serialize( Archive& archive )
-	{
-		PhysicsComponent::serialize(archive);
-		archive(CEREAL_NVP(size));
-	}
+	// template <typename Archive>
+	// void serialize( Archive& archive )
+	// {
+	// 	PhysicsComponent::serialize(archive);
+	// 	archive(CEREAL_NVP(size));
+	// }
 };
 
 
@@ -101,13 +100,15 @@ struct PhysicsCube : PhysicsComponent
 	}
 
 
-	template <typename Archive>
-	void serialize( Archive& archive )
-	{
-		PhysicsComponent::serialize(archive);
-		archive(CEREAL_NVP(size));
-	}
+	// template <typename Archive>
+	// void serialize( Archive& archive )
+	// {
+	// 	PhysicsComponent::serialize(archive);
+	// 	archive(CEREAL_NVP(size));
+	// }
 };
 
 
-REGISTER_COMPONENT(PhysicsCube, ICON_CUBE" Physics Cube", ADDABLE | INSPECTABLE)}
+REGISTER_COMPONENT(PhysicsCube, ICON_CUBE" Physics Cube", ADDABLE | INSPECTABLE)
+
+}

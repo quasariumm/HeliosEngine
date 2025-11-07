@@ -1,7 +1,7 @@
 #include "tools/random.hpp"
 
 
-namespace Engine
+namespace Helios
 {
 uint32_t RandomSeed( const uint32_t val )
 {

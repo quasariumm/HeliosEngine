@@ -4,7 +4,7 @@
 // TODO(Quillan): Debugger
 //#include "Debugger/Debugger.h"
 
-namespace Engine
+namespace Helios
 {
 std::string Demangle( const char* name );
 

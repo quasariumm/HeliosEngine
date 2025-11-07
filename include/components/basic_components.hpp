@@ -3,32 +3,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "cereal/archives/json.hpp"
-#include "core/ecs.hpp"
+#include "component_registry.hpp"
 
+#include <visit_struct/visit_struct_intrusive.hpp>
 
-namespace glm
+// Include is necessary for certain types to be serializable!
+#include "serialization/serializer_types.hpp"
+
+COMPONENT(Transform, ICON_AXIS_ARROW" Transform", SERIALIZABLE | INSPECTABLE)
 {
-template <class Archive>
-void serialize( Archive& archive, vec3& v )
-{
-	archive(CEREAL_NVP(v.x), CEREAL_NVP(v.y), CEREAL_NVP(v.z));
-}
-
-
-template <class Archive>
-void serialize( Archive& archive, quat& q )
-{
-	archive(CEREAL_NVP(q.w), CEREAL_NVP(q.x), CEREAL_NVP(q.y), CEREAL_NVP(q.z));
-}
-}
-
-
-namespace Engine::Components
-{
-struct Transform final : BaseComponent
-{
-	Transform() = default;
+	Transform()
+	{
+		position	= glm::vec3(0.0f);
+		rotation	= glm::identity<glm::quat>();
+		scale		= glm::vec3(1.0f);
+	}
 
 	// Setters
 	// Position
@@ -185,21 +174,6 @@ struct Transform final : BaseComponent
 	}
 
 
-	template <class Archive>
-	void save( Archive& ar ) const
-	{
-		ar(CEREAL_NVP(position), CEREAL_NVP(rotation), CEREAL_NVP(scale));
-	}
-
-
-	template <class Archive>
-	void load( Archive& ar )
-	{
-		MarkDirty();
-		ar(CEREAL_NVP(position), CEREAL_NVP(rotation), CEREAL_NVP(scale));
-	}
-
-
 	template <auto Candidate>
 	void SubscribeOnModify()
 	{
@@ -220,82 +194,69 @@ struct Transform final : BaseComponent
 
 private:
 
+	friend class visitable;
+
 	void MarkDirty() const
 	{
 		dirty = true;
 	}
 
-
 	entt::delegate<void()> onModified{};
 	bool                   onModifiedUsed = false;
 
-	glm::vec3 position = glm::vec3(0);
-	glm::quat rotation = glm::vec3(0);
-	glm::vec3 scale    = glm::vec3(1);
+	BEGIN_VISITABLES(Transform);
+	VISITABLE(glm::vec3, position);
+	VISITABLE(glm::quat, rotation);
+	VISITABLE(glm::vec3, scale);
+	END_VISITABLES;
 
 	mutable glm::mat4 transform = glm::identity<glm::mat4>();
 
 	mutable bool dirty = true;
 };
 
-
-REGISTER_COMPONENT(Transform, ICON_AXIS_ARROW" Transform", INSPECTABLE);
-
-
-struct SceneObjectInfo final : BaseComponent
+COMPONENT(SceneObjectInfo, "SceneObject", SERIALIZABLE)
 {
 	SceneObjectInfo() = default;
 
 	explicit SceneObjectInfo( const std::string& objectName ) { name = objectName; }
 
 	std::string name = "Object";
-
-
-	template <typename Archive>
-	void serialize( Archive& archive ) { archive(CEREAL_NVP(name)); }
 };
 
+VISITABLE_STRUCT(Helios::Components::SceneObjectInfo, name);
 
-REGISTER_COMPONENT(SceneObjectInfo, "SceneObject", NONE);
-
-
-// Add to object to hide from renderer
-struct Hidden
-{};
-
-
-struct ParentObject final : BaseComponent
+COMPONENT(ParentObject, "Parent Object", SERIALIZABLE)
 {
-	void RemoveChild( const entt::entity child )
+	void RemoveChild( const SceneObject child )
 	{
 		children.erase(std::ranges::find(children, child));
 	}
 
-
-	void AddChild( const entt::entity child )
+	void AddChild( const SceneObject child )
 	{
 		children.push_back(child);
 	}
 
-
-	std::vector<entt::entity> children;
+	std::vector<SceneObject> children;
 };
 
+VISITABLE_STRUCT(Helios::Components::ParentObject, children);
 
-struct ChildObject final : BaseComponent
+
+COMPONENT(ChildObject, "Child Object", SERIALIZABLE)
 {
-	entt::entity parent = entt::null;
-
-
-	template <typename Archive>
-	void serialize( Archive& archive ) { archive(CEREAL_NVP(parent)); }
+	SceneObject parent = entt::null;
 };
 
+VISITABLE_STRUCT(Helios::Components::ChildObject, parent);
 
-REGISTER_COMPONENT(ChildObject, "Child Object", NONE);
-
+namespace Helios::Components
+{
 
 // Add to object to mark for delete
-struct DeleteMarker
-{};
+struct DeleteMarker {};
+// Add to object to hide from renderer
+struct Hidden {};
+
 }

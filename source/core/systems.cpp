@@ -7,10 +7,10 @@
 #include "rendering/camera.hpp"
 #include "rendering/renderer.hpp"
 
-using namespace Engine;
+using namespace Helios;
 
 
-namespace Engine
+namespace Helios
 {
 SystemsCore systemsHandler;
 }
@@ -33,10 +33,10 @@ void SystemsCore::Initialize()
 
 void SystemsCore::Shutdown() const
 {
-	delete m_renderer;
-	delete m_logHandler;
-	delete m_physics;
-	delete m_camera;
-	delete m_audioPlayer;
-	delete m_viewport;
+	if (m_renderer)		delete m_renderer;
+	if (m_logHandler)	delete m_logHandler;
+	if (m_physics)		delete m_physics;
+	if (m_camera)		delete m_camera;
+	if (m_audioPlayer)	delete m_audioPlayer;
+	if (m_viewport)		delete m_viewport;
 }

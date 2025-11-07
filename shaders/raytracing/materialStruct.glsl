@@ -7,15 +7,17 @@
 
 struct RayTracingMaterial
 {
-	vec3 diffuseColor;
-	float specularity;
-	vec3 specularColor;
-	float shininess;
-	vec3 emissionColor;
-	float emissionStrength;
+	uint materialProperties;
 
-	int type;
-	float glossiness;
+	float alphaX;
+	float alphaY;
+
+	float specularity;
+	vec3 diffuseColor;
+	float shininess;
+	vec3 specularColor;
+	float emissionStrength;
+	vec3 emissionColor;
 
 	float refractivity;
 	float refractionCoefficient;
@@ -23,26 +25,18 @@ struct RayTracingMaterial
 
 	float PBR_Roughness;
 	float PBR_Metallic;
-
-	float alphaX;
-	float alphaY;
-	float _padding1;
-	float _padding2;
-	float _padding3;
 };
 
 /*
 	Houses material-related functions
 */
 
-#define MATERIAL_REFLECTION 	1
-#define MATERIAL_MICROFACET		2
-#define MATERIAL_TRANSMISSION 	4
-#define MATERIAL_DIFFUSE 		8
-#define MATERIAL_GLOSSY 		16
-#define MATERIAL_SPECULAR 		32
-
-#define MATERIAL_DEFAULT 		MATERIAL_REFLECTION | MATERIAL_TRANSMISSION | MATERIAL_DIFFUSE | MATERIAL_GLOSSY | MATERIAL_SPECULAR// | MATERIAL_MICROFACET | MICROFACET_BECKMANN
+#define MATERIAL_REFLECTION 	0x01
+#define MATERIAL_MICROFACET		0x02
+#define MATERIAL_TRANSMISSION 	0x04
+#define MATERIAL_DIFFUSE 		0x08
+#define MATERIAL_GLOSSY 		0x10
+#define MATERIAL_SPECULAR 		0x20
 
 layout (std430, binding = 8) readonly buffer MaterialsBuffer
 {

@@ -1,11 +1,11 @@
 #include "tools/scene.hpp"
 #include "components/basic_components.hpp"
 
-using namespace Engine;
+using namespace Helios;
 using namespace Components;
 
 
-void Engine::ReParent( const SceneObject& parent, const SceneObject& child )
+void Helios::ReParent( const SceneObject& parent, const SceneObject& child )
 {
 	// Make sure that you cannot make an objects parent their child
 	if (IsChildOf(child, parent))
@@ -32,7 +32,7 @@ void Engine::ReParent( const SceneObject& parent, const SceneObject& child )
 }
 
 
-bool Engine::IsChildOf( const SceneObject& parent, const SceneObject& possibleChild ) // NOLINT(*-no-recursion)
+bool Helios::IsChildOf( const SceneObject& parent, const SceneObject& possibleChild ) // NOLINT(*-no-recursion)
 {
 	const auto* c = TryGetComponent<ChildObject>(possibleChild);
 	if (!c)
@@ -45,7 +45,7 @@ bool Engine::IsChildOf( const SceneObject& parent, const SceneObject& possibleCh
 }
 
 
-bool Engine::IsVisible( const SceneObject& sceneObject ) // NOLINT(*-no-recursion)
+bool Helios::IsVisible( const SceneObject& sceneObject ) // NOLINT(*-no-recursion)
 {
 	for (const auto& [e] : ECS::Registry()->view<Hidden>().each())
 		if (e == sceneObject)
@@ -57,7 +57,7 @@ bool Engine::IsVisible( const SceneObject& sceneObject ) // NOLINT(*-no-recursio
 }
 
 
-void Engine::SetVisible( const SceneObject& sceneObject, bool visible )
+void Helios::SetVisible( const SceneObject& sceneObject, bool visible )
 {
 	if (IsVisible(sceneObject) == visible)
 		return;
@@ -69,7 +69,7 @@ void Engine::SetVisible( const SceneObject& sceneObject, bool visible )
 }
 
 
-glm::mat4 Engine::GetGlobalTransform( const SceneObject& sceneObject ) // NOLINT(*-no-recursion)
+glm::mat4 Helios::GetGlobalTransform( const SceneObject& sceneObject ) // NOLINT(*-no-recursion)
 {
 	const auto*     child = TryGetComponent<ChildObject>(sceneObject);
 	const glm::mat4 local = GetComponent<Transform>(sceneObject).GetMatrix();
@@ -82,7 +82,7 @@ glm::mat4 Engine::GetGlobalTransform( const SceneObject& sceneObject ) // NOLINT
 }
 
 
-SceneObject Engine::CreateSceneObject( const std::string& name )
+SceneObject Helios::CreateSceneObject( const std::string& name )
 {
 	auto* reg = ECS::Registry();
 
@@ -94,13 +94,13 @@ SceneObject Engine::CreateSceneObject( const std::string& name )
 }
 
 
-void Engine::DestroySceneObject( const SceneObject& object )
+void Helios::DestroySceneObject( const SceneObject& object )
 {
 	ECS::Registry()->emplace<DeleteMarker>(object);
 }
 
 
-void Engine::DestroyMarkedSceneObjects()
+void Helios::DestroyMarkedSceneObjects()
 {
 	for (const auto  view = ECS::Registry()->view<DeleteMarker>();
 	     const auto& [e] : view.each())
