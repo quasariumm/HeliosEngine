@@ -69,6 +69,8 @@ public:
 	[[nodiscard]] bool  GetUsingEditorCam() const { return m_usingEditorCam; }
 	[[nodiscard]] Stats GetEngineStats() const { return m_engineStats; }
 
+	uint32_t debugView = 0;
+
 private:
 
 	bool  m_usingEditorCam = true;

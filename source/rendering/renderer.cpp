@@ -2,6 +2,7 @@
 
 #include "components/light_components.hpp"
 #include "components/render_components.hpp"
+#include "core/engine.hpp"
 #include "editor/editor_menus.hpp"
 #include "rendering/camera.hpp"
 
@@ -131,6 +132,7 @@ void Renderer::Render()
 	m_shader.Dispatch({groups, 1});
 
 	m_frame++;
+	m_accumulationFrame++;
 
 	m_window->SwapBuffers();
 }
@@ -160,9 +162,16 @@ void Renderer::SendData()
 	m_shader.SetMat4("PrevVPMat", m_prevVp);
 	m_shader.SetVec3("ViewParams", Systems::GetCamera()->GetViewportParameters(viewportSize));
 
-	m_shader.SetUInt("Frame", m_frame);
+	const bool clearAccumulator = m_window->GetKey(Key::Q) == 1;
+	if (clearAccumulator)
+		m_accumulationFrame = 0;
 
-	m_shader.SetBool("ClearAccumulator", m_window->GetKey(Key::Q) == 1);
+	m_shader.SetUInt("Frame", m_frame);
+	m_shader.SetUInt("AccumulationFrame", m_accumulationFrame);
+
+	m_shader.SetBool("ClearAccumulator", clearAccumulator);
+
+	m_shader.SetUInt("DebugMode", engineHandle.debugView);
 
 	// Bind geometry context
 	m_geometryContext.materials.BindBase(8);

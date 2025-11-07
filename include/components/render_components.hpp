@@ -84,11 +84,11 @@ struct alignas(4) MaterialProperties
 	uint8_t specular     : 1 = 1u;
 	uint8_t bitPadding   : 2 = 0u;
 	// Microfacet model
-	uint8_t beckmann           : 1 = 1u;
-	uint8_t ggx_iso            : 1 = 0u;
+	uint8_t beckmann           : 1 = 0u;
+	uint8_t ggx_iso            : 1 = 1u;
 	uint8_t ggx_aniso          : 1 = 0u;
 	uint8_t blinnphong         : 1 = 0u;
-	uint8_t microfacetSelector : 4 = 0u; /* for use with Dear ImGUI */
+	uint8_t microfacetSelector : 4 = 1u; /* for use with Dear ImGUI */
 
 	char padding[2];
 

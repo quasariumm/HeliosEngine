@@ -24,8 +24,17 @@ uniform mat4 PrevVPMat;
 uniform vec3 ViewParams;
 
 uniform uint Frame = 0;
+uniform uint AccumulationFrame = 0;
 
 uniform bool ClearAccumulator = false;
+
+uniform uint DebugMode = 0;
+
+const uint DEBUG_NONE = 0;
+const uint DEBUG_NORMAL = 1;
+const uint DEBUG_TANGENT = 2;
+const uint DEBUG_BITANGENT = 3;
+const uint DEBUG_TEXTURE_COORDINATE = 4;
 
 #include "/Engine/core/common.glsl"
 #include "/Engine/core/random.glsl"
@@ -76,6 +85,24 @@ vec3 GetSkyboxColor(in Ray ray)
 	}
 }
 
+
+vec3 OutputDebug(in Ray ray)
+{
+	switch (DebugMode)
+	{
+	case DEBUG_NORMAL:
+		return 0.5 * ray.hit.normal + 0.5;
+	case DEBUG_TANGENT:
+		return 0.5 * ray.hit.tangent + 0.5;
+	case DEBUG_BITANGENT:
+		return 0.5 * cross(ray.hit.normal, ray.hit.tangent) + 0.5;
+	case DEBUG_TEXTURE_COORDINATE:
+		return vec3(0.0); // TODO:
+	};
+	return vec3(0.0);
+}
+
+
 vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay, out uint entity)
 {
 	vec3 incommingLight = vec3(0);
@@ -88,6 +115,10 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay, out uint entity)
 
 		if (i == 0)
 			entity = ray.hit.entity;
+
+		// Output debug if needed
+		if (DebugMode != 0)
+			return OutputDebug(ray);
 
 		if (ray.hit.didHit)
 		{
@@ -274,7 +305,7 @@ void main()
 	if (!ClearAccumulator)
     {
         vec4 accumulatorColor = imageLoad(OutTexture, texelCoord);
-        pixel = mix(accumulatorColor, pixel, 1.0 / float(Frame + 1));
+        pixel = mix(accumulatorColor, pixel, 1.0 / float(AccumulationFrame + 1));
         pixel.a = 1.0;
     }
     #endif // ACCUMULATION

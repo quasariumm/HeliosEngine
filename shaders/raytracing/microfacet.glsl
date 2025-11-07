@@ -41,7 +41,9 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 	const vec3 wh = normalize(wo + wi);
 	const vec3 F0 = mix( vec3(0.04), material.diffuseColor, material.PBR_Metallic );
 
-	float alpha = material.PBR_Roughness * material.PBR_Roughness;
+	const float roughness = max(0.001, material.PBR_Roughness);
+
+	float alpha = roughness * roughness;
 
 	float NdotO = clamp(dot(normal, wo), 0.0001, 1.0);
 	float NdotI = clamp(dot(normal, wi), 0.0001, 1.0);
@@ -70,14 +72,14 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 		DV /= 4.0 * NdotO * NdotI;
 	}
 
-	vec3 F = FresnelSchlickRoughness(OdotH, F0, material.PBR_Roughness);
+	vec3 F = FresnelSchlickRoughness(OdotH, F0, roughness);
 	vec3 specular = vec3(DV);
 
 	float kD = (1.f - material.PBR_Metallic);
 	vec3 diffuse = kD * material.diffuseColor * INVPI;
 
 	// Return the basic BRDF
-	return mix(diffuse * NdotI, specular * NdotI, F);
+	return NdotI * mix(diffuse, specular, F);
 }
 
 float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
@@ -85,7 +87,7 @@ float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 	if (dot(wo, wi) < 0.0) return 0.0;
 
 	const vec3 wh = normalize(wo + wi);
-	float alpha = material.PBR_Roughness * material.PBR_Roughness;
+	float alpha = max(0.001, material.PBR_Roughness * material.PBR_Roughness);
 
 	float NdotO = clamp(dot(normal, wo), 0.0001, 1.0);
 	float NdotH = clamp(dot(normal, wh), 0.0, 1.0);

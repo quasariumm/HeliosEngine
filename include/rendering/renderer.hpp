@@ -51,7 +51,8 @@ private:
 	GL46_Texture2D m_hitTexture;
 	GL46_Texture2D m_skyboxTexture;
 
-	uint64_t m_frame = 0;
+	uint32_t m_frame = 0;
+	uint32_t m_accumulationFrame = 0;
 
 	glm::mat4 m_prevVp{1.f};
 

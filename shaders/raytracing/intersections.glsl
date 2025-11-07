@@ -64,9 +64,9 @@ void RaySphere(inout Ray ray, Sphere sphere)
 		ray.hit.normal = normalize(mat3(transpose(invTransform)) * localNormal);
 
 		// Calculate tangent vector
-		vec3 arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose an arbitrary direction
-		if (dot(ray.hit.normal, arbitraryDirection) > 0.99) // Check if it's too close to the normal
-		arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose another direction
+		vec3 arbitraryDirection = vec3(0.0, 1.0, 0.0); // Choose an arbitrary direction
+		if (abs(ray.hit.normal.y) > 0.99) // Check if it's too close to the normal
+			arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose another direction
 
 		ray.hit.tangent = normalize(cross(ray.hit.normal, arbitraryDirection));
 		return;
