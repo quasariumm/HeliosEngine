@@ -336,7 +336,7 @@ void AssetPrep::CompressIndexData(const File& file, std::ofstream& stream)
 void AssetPrep::CreateMetaFile(const File& file, const std::string& outputDir)
 {
     
-	std::string metaPath = outputDir + "/" + file.uuid + ".meta";
+	std::string metaPath = pathToAssets + outputDir + "/" + file.uuid + ".meta";
 	std::ofstream metaFile(metaPath);
     
 	if (metaFile.is_open()) {
