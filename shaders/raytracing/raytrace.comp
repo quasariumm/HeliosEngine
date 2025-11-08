@@ -93,11 +93,11 @@ vec3 OutputDebug(in Ray ray)
 	case DEBUG_NORMAL:
 		return 0.5 * ray.hit.normal + 0.5;
 	case DEBUG_TANGENT:
-		return 0.5 * ray.hit.tangent + 0.5;
+		return 0.5 * ray.hit.tangent.xyz + 0.5;
 	case DEBUG_BITANGENT:
-		return 0.5 * cross(ray.hit.normal, ray.hit.tangent) + 0.5;
+		return 0.5 * cross(ray.hit.normal, ray.hit.tangent.xyz) * ray.hit.tangent.w + 0.5;
 	case DEBUG_TEXTURE_COORDINATE:
-		return vec3(0.0); // TODO:
+		return vec3(ray.hit.texcoords, 0.0);
 	};
 	return vec3(0.0);
 }

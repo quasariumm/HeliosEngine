@@ -68,7 +68,7 @@ void RaySphere(inout Ray ray, Sphere sphere)
 		if (abs(ray.hit.normal.y) > 0.99) // Check if it's too close to the normal
 			arbitraryDirection = vec3(1.0, 0.0, 0.0); // Choose another direction
 
-		ray.hit.tangent = normalize(cross(ray.hit.normal, arbitraryDirection));
+		ray.hit.tangent = vec4(normalize(cross(ray.hit.normal, arbitraryDirection)), 1.0);
 		return;
 	}
 }

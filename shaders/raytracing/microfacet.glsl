@@ -21,11 +21,11 @@ float GGXIsoD(float alpha, float NdotH);
 float GGXIsoG1(float alpha, float NdotW);
 float GGXIsoG(float alpha, float NdotO, float NdotI);
 float GGXIsoV(float alpha, float NdotO, float NdotI);
-vec3 SampleGGX(inout uint seed, vec3 N, vec3 T, vec3 wo, float roughness);
+vec3 SampleGGX(inout uint seed, vec3 N, vec4 T, vec3 wo, float roughness);
 
-float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh);
-float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 tangent, vec3 w);
-float GGXAnisoG(vec3 alpha, vec3 normal, vec3 tangent, vec3 wo, vec3 wi);
+float GGXAnisoD(vec3 alpha, vec3 normal, vec4 tangent, vec3 wh);
+float GGXAnisoG1(vec3 alpha, vec3 normal, vec4 tangent, vec3 w);
+float GGXAnisoG(vec3 alpha, vec3 normal, vec4 tangent, vec3 wo, vec3 wi);
 
 float BlinnPhongD(float alpha, float NdotH);
 float BlinnPhongG1(float alpha, float NdotW);
@@ -34,7 +34,7 @@ float BlinnPhongG(float alpha, float NdotO, float NdotI);
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
 
-vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
+vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3 wo, vec3 wi)
 {
 	if (dot(normal, wo) == 0.0 || dot(normal, wi) == 0.0) return vec3(0.0);
 
@@ -82,7 +82,7 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 	return NdotI * mix(diffuse, specular, F);
 }
 
-float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
+float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3 wo, vec3 wi)
 {
 	if (dot(wo, wi) < 0.0) return 0.0;
 

@@ -152,12 +152,13 @@ vec3 GetBRDFAndBounce(inout Ray ray, inout uint seed)
 	if ((material.materialProperties & MATERIAL_MICROFACET) != 0 && (material.materialProperties & MICROFACET_GGX_ANISO) != 0)
 	{
 		vec3 wh = normalize(-ray.dir + ray.hit.lightVector);
+		vec3 bitangent = cross(ray.hit.tangent.xyz, ray.hit.normal) * ray.hit.tangent.w;
 		vec3 wh_tangent = normalize(vec3(
 			dot(wh, ray.hit.tangent.xyz) * material.alphaX,
 			dot(wh, ray.hit.normal),
-			dot(wh, cross(ray.hit.tangent.xyz, ray.hit.normal) * ray.hit.tangent.w) * material.alphaY
+			dot(wh, bitangent) * material.alphaY
 		));
-		wh = wh_tangent.x * ray.hit.tangent + wh_tangent.y * ray.hit.normal + wh_tangent.z * cross(ray.hit.tangent, ray.hit.normal);
+		wh = wh_tangent.x * ray.hit.tangent.xyz + wh_tangent.y * ray.hit.normal + wh_tangent.z * bitangent;
 		vec3 reflected = Reflect(-ray.dir, wh);
 		ray.dir = diffuse.direction * diffuse.factor + reflected * specular.factor;
 	}
@@ -174,7 +175,7 @@ struct PDFInfo
 	float PDF;
 };
 
-float GetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
+float GetPDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3 wo, vec3 wi)
 {
 	PDFInfo diffuse = PDFInfo(
 		1.0 - material.specularity,
