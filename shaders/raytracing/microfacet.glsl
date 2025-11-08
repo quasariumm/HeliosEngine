@@ -188,17 +188,16 @@ float GGXIsoV(float alpha, float NdotO, float NdotI)
 	return mix(2.f * NdotO * NdotI, NdotO + NdotI, alpha * alpha);
 }
 
-vec3 SampleGGX(inout uint seed, vec3 N, vec3 T, vec3 wo, float roughness)
+vec3 SampleGGX(inout uint seed, vec3 N, vec4 T, vec3 wo, float roughness)
 {
 	// https://jcgt.org/published/0007/04/01/paper.pdf
 	float alpha = roughness * roughness;
 
 	// Orthonormal basis
-	vec3 B = normalize(cross(N, T));
-	T = normalize(cross(B, N));
+	vec3 B = normalize(cross(N, T.xyz) * T.w);
 
 	// Transform view direction to local space
-	vec3 wo_local = vec3(dot(wo, T), dot(wo, B), dot(wo, N));
+	vec3 wo_local = vec3(dot(wo, T.xyz), dot(wo, B), dot(wo, N));
 
 	// Section 3.2: transforming the view direction to the hemisphere configuration
 	vec3 wh = normalize(vec3(alpha * wo_local.x, alpha * wo_local.y, wo_local.z));
@@ -225,7 +224,7 @@ vec3 SampleGGX(inout uint seed, vec3 N, vec3 T, vec3 wo, float roughness)
 	vec3 Ne = normalize(vec3(alpha * Nh.x, alpha * Nh.y, max(0.0, Nh.z)));
 
 	// Transform back to world space
-	return normalize(Ne.x * T + Ne.y * B + Ne.z * N);
+	return normalize(Ne.x * T.xyz + Ne.y * B + Ne.z * N);
 }
 
 /*
@@ -243,10 +242,10 @@ float SinPhi(vec3 w) {
 	return (sinTheta == 0.0) ? 0.0 : clamp(w.z / sinTheta, -1.0, 1.0);
 }
 
-float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh)
+float GGXAnisoD(vec3 alpha, vec3 normal, vec4 tangent, vec3 wh)
 {
 	// Convert wh to tangent space
-	vec3 wh_tangent = normalize(vec3(dot(wh, tangent) * alpha.x, dot(wh, normal), dot(wh, cross(tangent, normal)) * alpha.y));
+	vec3 wh_tangent = normalize(vec3(dot(wh, tangent.xyz) * alpha.x, dot(wh, normal), dot(wh, cross(tangent.xyz, normal) * tangent.w) * alpha.y));
 	float cosTheta = wh_tangent.y;
 	float cos2Theta = cosTheta * cosTheta;
 	float cos4Theta = cosTheta * cosTheta * cosTheta * cosTheta;
@@ -264,12 +263,12 @@ float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh)
 	return 1.0 / (c * cos4Theta * d * d);
 }
 
-float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 tangent, vec3 w)
+float GGXAnisoG1(vec3 alpha, vec3 normal, vec4 tangent, vec3 w)
 {
 	return GGXIsoG1(alpha.z, dot(normal, w));
 }
 
-float GGXAnisoG(vec3 alpha, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
+float GGXAnisoG(vec3 alpha, vec3 normal, vec4 tangent, vec3 wo, vec3 wi)
 {
 	return GGXAnisoG1(alpha, normal, tangent, wo) * GGXAnisoG1(alpha, normal, tangent, wi);
 }

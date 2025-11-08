@@ -153,9 +153,9 @@ vec3 GetBRDFAndBounce(inout Ray ray, inout uint seed)
 	{
 		vec3 wh = normalize(-ray.dir + ray.hit.lightVector);
 		vec3 wh_tangent = normalize(vec3(
-			dot(wh, ray.hit.tangent) * material.alphaX,
+			dot(wh, ray.hit.tangent.xyz) * material.alphaX,
 			dot(wh, ray.hit.normal),
-			dot(wh, cross(ray.hit.tangent, ray.hit.normal)) * material.alphaY
+			dot(wh, cross(ray.hit.tangent.xyz, ray.hit.normal) * ray.hit.tangent.w) * material.alphaY
 		));
 		wh = wh_tangent.x * ray.hit.tangent + wh_tangent.y * ray.hit.normal + wh_tangent.z * cross(ray.hit.tangent, ray.hit.normal);
 		vec3 reflected = Reflect(-ray.dir, wh);

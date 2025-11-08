@@ -80,12 +80,13 @@ void RaySphere(inout Ray ray, Sphere sphere)
 struct Vertex
 {
 	vec3 position;
+	// Pack texture coordinates into one 4-bit int, becuase they are in the range of [0,1]
+	uint texCoords;
 	// The normal is in the first 16 bits of an axis, tangent in the other 16 bits
 	// This needs to be a uint because of parameter reasons
-	float texCoordX;
 	uvec3 normalTanget;
 	// Bitangent is cross(normal, tangent)
-	float texCoordY;
+	float tangentBias;
 };
 
 void UnpackNormalTangent(in uvec3 original, inout vec3 normal, inout vec3 tangent)
@@ -175,8 +176,17 @@ void RayTriangle(inout Ray ray, Mesh mesh, Vertex v0, Vertex v1, Vertex v2)
 		vec3 v1n = vec3(0.0); vec3 v1t = vec3(0.0); UnpackNormalTangent(v1.normalTanget, v1n, v1t);
 		vec3 v2n = vec3(0.0); vec3 v2t = vec3(0.0); UnpackNormalTangent(v2.normalTanget, v2n, v2t);
 
+		vec4 t0 = vec4(v0t, v0.tangentBias);
+		vec4 t1 = vec4(v1t, v1.tangentBias);
+		vec4 t2 = vec4(v2t, v2.tangentBias);
+
 		ray.hit.normal = normalize(u * v1n + v * v2n + w * v0n) * sign(det);
-		ray.hit.tangent = normalize(u * v1t + v * v2t + w * v0t);
+		ray.hit.tangent = normalize(u * t1 + v * t2 + w * t0);
+
+		vec2 tc0 = unpackHalf2x16(v0.texCoords);
+		vec2 tc1 = unpackHalf2x16(v0.texCoords);
+		vec2 tc2 = unpackHalf2x16(v0.texCoords);
+		ray.hit.texcoords = u * tc1 + v * tc2 + w * tc0;
 	}
 }
 
