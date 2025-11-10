@@ -31,10 +31,11 @@ uniform bool ClearAccumulator = false;
 uniform uint DebugMode = 0;
 
 const uint DEBUG_NONE = 0;
-const uint DEBUG_NORMAL = 1;
-const uint DEBUG_TANGENT = 2;
-const uint DEBUG_BITANGENT = 3;
-const uint DEBUG_TEXTURE_COORDINATE = 4;
+const uint DEBUG_DEPTH = 1;
+const uint DEBUG_NORMAL = 2;
+const uint DEBUG_TANGENT = 3;
+const uint DEBUG_BITANGENT = 4;
+const uint DEBUG_TEXTURE_COORDINATE = 5;
 
 #include "/Engine/core/common.glsl"
 #include "/Engine/core/random.glsl"
@@ -90,6 +91,8 @@ vec3 OutputDebug(in Ray ray)
 {
 	switch (DebugMode)
 	{
+	case DEBUG_DEPTH:
+		return vec3(min(1.0, ray.hit.dst / 1000.f));
 	case DEBUG_NORMAL:
 		return 0.5 * ray.hit.normal + 0.5;
 	case DEBUG_TANGENT:
@@ -103,7 +106,7 @@ vec3 OutputDebug(in Ray ray)
 }
 
 
-vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay, out uint entity)
+vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay, out uint entity, out float depth)
 {
 	vec3 incommingLight = vec3(0);
 	vec3 rayColor = vec3(1);
@@ -114,7 +117,10 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay, out uint entity)
 		RayCollision(ray);
 
 		if (i == 0)
+		{
 			entity = ray.hit.entity;
+			depth = ray.hit.dst;
+		}
 
 		// Output debug if needed
 		if (DebugMode != 0)
@@ -255,7 +261,12 @@ void main()
 	Ray firstRay; 
 
 	uint entity;
-	vec4 pixel = vec4(Trace(ray, seed, firstRay, entity), 1.0);
+	float depth = 1e30f;
+
+	vec3 traceColor = Trace(ray, seed, firstRay, entity, depth);
+
+	vec4 pixel = vec4(traceColor, depth / 1000.f);
+
 	pixel = max(pixel, vec4(0.0, 0.0, 0.0, 1.0));
 
 	imageStore(HitTexture, texelCoord, uvec4(entity));
