@@ -145,11 +145,13 @@ vec3 Trace(inout Ray ray, uint seed, inout Ray firstRay, out uint entity)
 			vec3 BRDF = GetBRDFAndBounce(ray, seed);
 			float PDF = GetPDF(material, ray.hit.normal, ray.hit.tangent, -ray.dir, ray.hit.lightVector);
 
+			light *= BRDF / PDF;
+
 			// Only mix PDF in if needed
 			if (PDF == 0.0)
 				incommingLight += emittance * mixedColor;
 			else
-				incommingLight += emittance * mixedColor + BRDF / PDF * light * rayColor * max(0.001, -dot(ray.hit.normal, ray.dir));
+				incommingLight += emittance * mixedColor + light * rayColor * max(0.001, -dot(ray.hit.normal, ray.dir));
 
 			float specularity = material.specularity;
 			// Map specularity to roughness

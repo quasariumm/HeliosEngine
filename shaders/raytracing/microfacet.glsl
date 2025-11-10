@@ -26,6 +26,7 @@ vec3 SampleGGX(inout uint seed, vec3 N, vec4 T, vec3 wo, float roughness);
 float GGXAnisoD(vec3 alpha, vec3 normal, vec4 tangent, vec3 wh);
 float GGXAnisoG1(vec3 alpha, vec3 normal, vec4 tangent, vec3 w);
 float GGXAnisoG(vec3 alpha, vec3 normal, vec4 tangent, vec3 wo, vec3 wi);
+float GGXAnisoV(float alpha, float NdotO, float NdotI);
 
 float BlinnPhongD(float alpha, float NdotH);
 float BlinnPhongG1(float alpha, float NdotW);
@@ -34,9 +35,13 @@ float BlinnPhongG(float alpha, float NdotO, float NdotI);
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
 
-vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3 wo, vec3 wi)
+vec3 MicrofacetBSDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3 wo, vec3 wi, bool refracted)
 {
 	if (dot(normal, wo) == 0.0 || dot(normal, wi) == 0.0) return vec3(0.0);
+
+	/*
+		BRDF
+	*/
 
 	const vec3 wh = normalize(wo + wi);
 	const vec3 F0 = mix( vec3(0.04), material.diffuseColor, material.PBR_Metallic );
@@ -63,8 +68,7 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3
 	if ((material.materialProperties & MICROFACET_GGX_ANISO) != 0)
 	{
 		vec3 anisoAlpha = vec3(material.alphaX, material.alphaY, sqrt(material.alphaX * material.alphaY));
-		DV = GGXAnisoD(anisoAlpha, normal, tangent, wh) * GGXAnisoG(anisoAlpha, normal, tangent, wo, wi);
-		DV /= 4.0 * NdotO * NdotI;
+		DV = GGXAnisoD(anisoAlpha, normal, tangent, wh) * GGXAnisoV(anisoAlpha.z, NdotO, NdotI);
 	}
 	if ((material.materialProperties & MICROFACET_BLINNPHONG) != 0)
 	{
@@ -77,6 +81,13 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3
 
 	float kD = (1.f - material.PBR_Metallic);
 	vec3 diffuse = kD * material.diffuseColor * INVPI;
+
+	// Transmission
+	if (refracted)
+	{
+		vec3 BTDF = GGXIsoD(alpha, NdotH) * GGXIsoV(alpha, NdotO, NdotI) * material.specularColor;
+		return mix(mix(diffuse, BTDF, material.refractivity), specular, F);
+	}
 
 	// Return the basic BRDF
 	return NdotI * mix(diffuse, specular, F);
@@ -174,8 +185,8 @@ float GGXIsoD(float alpha, float NdotH)
 
 float GGXIsoG1(float alpha, float NdotW)
 {
-	float k = 0.5 * alpha;
-	return (NdotW) / (NdotW * (1.0 - k) + k);
+	float alpha2 = alpha * alpha;
+	return (2.f * NdotW) / (NdotW + sqrt(alpha2 + (1.f - alpha2) * NdotW * NdotW));
 }
 
 float GGXIsoG(float alpha, float NdotO, float NdotI)
@@ -271,6 +282,11 @@ float GGXAnisoG1(vec3 alpha, vec3 normal, vec4 tangent, vec3 w)
 float GGXAnisoG(vec3 alpha, vec3 normal, vec4 tangent, vec3 wo, vec3 wi)
 {
 	return GGXAnisoG1(alpha, normal, tangent, wo) * GGXAnisoG1(alpha, normal, tangent, wi);
+}
+
+float GGXAnisoV(float alpha, float NdotO, float NdotI)
+{
+	return GGXIsoV(alpha, NdotO, NdotI);
 }
 
 /*
