@@ -34,7 +34,11 @@ void Viewport::Draw()
 					ImVec2(
 							static_cast<float>(m_renderedImage->GetWidth()) * scale,
 							static_cast<float>(m_renderedImage->GetHeight()) * scale
-							)
+							),
+							ImVec2(0, 0),
+							ImVec2(1, 1),
+							ImVec4(1, 1, 1, 1),
+							ImVec4(1, 1, 1, 0)
 					);
 		}
 		else

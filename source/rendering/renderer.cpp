@@ -37,7 +37,8 @@ void Renderer::Initialize()
 	m_hitTexture.FillBlank(viewportSize.x, viewportSize.y, 1, TextureFormat::RED32UI, false);
 
 	// Initialise skybox texture
-	m_skyboxTexture.LoadFromFile("assets/qwantani_morning_puresky_4k.hdr", TextureFormat::RGB32F, true);
+	m_skyboxTexture.LoadFromFile("assets/Footprint_Court_2k.hdr", TextureFormat::RGB32F, true);
+	// m_skyboxTexture.LoadFromFile("assets/qwantani_morning_puresky_4k.hdr", TextureFormat::RGB32F, true);
 
 	// Initialise buffers
 	m_geometryContext.materials.Init(BufferType::SHADER_STORAGE);

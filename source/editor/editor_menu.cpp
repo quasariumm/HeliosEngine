@@ -42,12 +42,16 @@ void EditorMenu::Draw()
 		{
 			if (ImGui::Selectable("None", engineHandle.debugView == 0))
 				engineHandle.debugView = 0;
-			if (ImGui::Selectable("Normals", engineHandle.debugView == 1))
+			if (ImGui::Selectable("Depth", engineHandle.debugView == 0))
 				engineHandle.debugView = 1;
-			if (ImGui::Selectable("Tangents", engineHandle.debugView == 2))
+			if (ImGui::Selectable("Normals", engineHandle.debugView == 1))
 				engineHandle.debugView = 2;
-			if (ImGui::Selectable("Bitangents", engineHandle.debugView == 3))
+			if (ImGui::Selectable("Tangents", engineHandle.debugView == 2))
 				engineHandle.debugView = 3;
+			if (ImGui::Selectable("Bitangents", engineHandle.debugView == 3))
+				engineHandle.debugView = 4;
+			if (ImGui::Selectable("Texture coordinates", engineHandle.debugView == 3))
+				engineHandle.debugView = 4;
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenu();

@@ -21,11 +21,12 @@ float GGXIsoD(float alpha, float NdotH);
 float GGXIsoG1(float alpha, float NdotW);
 float GGXIsoG(float alpha, float NdotO, float NdotI);
 float GGXIsoV(float alpha, float NdotO, float NdotI);
-vec3 SampleGGX(inout uint seed, vec3 N, vec3 T, vec3 wo, float roughness);
+vec3 SampleGGX(inout uint seed, vec3 N, vec4 T, vec3 wo, float roughness);
 
-float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh);
-float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 tangent, vec3 w);
-float GGXAnisoG(vec3 alpha, vec3 normal, vec3 tangent, vec3 wo, vec3 wi);
+float GGXAnisoD(vec3 alpha, vec3 normal, vec4 tangent, vec3 wh);
+float GGXAnisoG1(vec3 alpha, vec3 normal, vec4 tangent, vec3 w);
+float GGXAnisoG(vec3 alpha, vec3 normal, vec4 tangent, vec3 wo, vec3 wi);
+float GGXAnisoV(float alpha, float NdotO, float NdotI);
 
 float BlinnPhongD(float alpha, float NdotH);
 float BlinnPhongG1(float alpha, float NdotW);
@@ -34,9 +35,13 @@ float BlinnPhongG(float alpha, float NdotO, float NdotI);
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
 
-vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
+vec3 MicrofacetBSDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3 wo, vec3 wi, bool refracted)
 {
 	if (dot(normal, wo) == 0.0 || dot(normal, wi) == 0.0) return vec3(0.0);
+
+	/*
+		BRDF
+	*/
 
 	const vec3 wh = normalize(wo + wi);
 	const vec3 F0 = mix( vec3(0.04), material.diffuseColor, material.PBR_Metallic );
@@ -63,8 +68,7 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 	if ((material.materialProperties & MICROFACET_GGX_ANISO) != 0)
 	{
 		vec3 anisoAlpha = vec3(material.alphaX, material.alphaY, sqrt(material.alphaX * material.alphaY));
-		DV = GGXAnisoD(anisoAlpha, normal, tangent, wh) * GGXAnisoG(anisoAlpha, normal, tangent, wo, wi);
-		DV /= 4.0 * NdotO * NdotI;
+		DV = GGXAnisoD(anisoAlpha, normal, tangent, wh) * GGXAnisoV(anisoAlpha.z, NdotO, NdotI);
 	}
 	if ((material.materialProperties & MICROFACET_BLINNPHONG) != 0)
 	{
@@ -78,11 +82,18 @@ vec3 MicrofacetBRDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3
 	float kD = (1.f - material.PBR_Metallic);
 	vec3 diffuse = kD * material.diffuseColor * INVPI;
 
+	// Transmission
+	if (refracted)
+	{
+		vec3 BTDF = GGXIsoD(alpha, NdotH) * GGXIsoV(alpha, NdotO, NdotI) * material.specularColor;
+		return mix(mix(diffuse, BTDF, material.refractivity), specular, F);
+	}
+
 	// Return the basic BRDF
 	return NdotI * mix(diffuse, specular, F);
 }
 
-float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
+float MicrofacetPDF(RayTracingMaterial material, vec3 normal, vec4 tangent, vec3 wo, vec3 wi)
 {
 	if (dot(wo, wi) < 0.0) return 0.0;
 
@@ -174,8 +185,8 @@ float GGXIsoD(float alpha, float NdotH)
 
 float GGXIsoG1(float alpha, float NdotW)
 {
-	float k = 0.5 * alpha;
-	return (NdotW) / (NdotW * (1.0 - k) + k);
+	float alpha2 = alpha * alpha;
+	return (2.f * NdotW) / (NdotW + sqrt(alpha2 + (1.f - alpha2) * NdotW * NdotW));
 }
 
 float GGXIsoG(float alpha, float NdotO, float NdotI)
@@ -188,17 +199,16 @@ float GGXIsoV(float alpha, float NdotO, float NdotI)
 	return mix(2.f * NdotO * NdotI, NdotO + NdotI, alpha * alpha);
 }
 
-vec3 SampleGGX(inout uint seed, vec3 N, vec3 T, vec3 wo, float roughness)
+vec3 SampleGGX(inout uint seed, vec3 N, vec4 T, vec3 wo, float roughness)
 {
 	// https://jcgt.org/published/0007/04/01/paper.pdf
 	float alpha = roughness * roughness;
 
 	// Orthonormal basis
-	vec3 B = normalize(cross(N, T));
-	T = normalize(cross(B, N));
+	vec3 B = normalize(cross(N, T.xyz) * T.w);
 
 	// Transform view direction to local space
-	vec3 wo_local = vec3(dot(wo, T), dot(wo, B), dot(wo, N));
+	vec3 wo_local = vec3(dot(wo, T.xyz), dot(wo, B), dot(wo, N));
 
 	// Section 3.2: transforming the view direction to the hemisphere configuration
 	vec3 wh = normalize(vec3(alpha * wo_local.x, alpha * wo_local.y, wo_local.z));
@@ -225,7 +235,7 @@ vec3 SampleGGX(inout uint seed, vec3 N, vec3 T, vec3 wo, float roughness)
 	vec3 Ne = normalize(vec3(alpha * Nh.x, alpha * Nh.y, max(0.0, Nh.z)));
 
 	// Transform back to world space
-	return normalize(Ne.x * T + Ne.y * B + Ne.z * N);
+	return normalize(Ne.x * T.xyz + Ne.y * B + Ne.z * N);
 }
 
 /*
@@ -243,10 +253,10 @@ float SinPhi(vec3 w) {
 	return (sinTheta == 0.0) ? 0.0 : clamp(w.z / sinTheta, -1.0, 1.0);
 }
 
-float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh)
+float GGXAnisoD(vec3 alpha, vec3 normal, vec4 tangent, vec3 wh)
 {
 	// Convert wh to tangent space
-	vec3 wh_tangent = normalize(vec3(dot(wh, tangent) * alpha.x, dot(wh, normal), dot(wh, cross(tangent, normal)) * alpha.y));
+	vec3 wh_tangent = normalize(vec3(dot(wh, tangent.xyz) * alpha.x, dot(wh, normal), dot(wh, cross(tangent.xyz, normal) * tangent.w) * alpha.y));
 	float cosTheta = wh_tangent.y;
 	float cos2Theta = cosTheta * cosTheta;
 	float cos4Theta = cosTheta * cosTheta * cosTheta * cosTheta;
@@ -264,14 +274,19 @@ float GGXAnisoD(vec3 alpha, vec3 normal, vec3 tangent, vec3 wh)
 	return 1.0 / (c * cos4Theta * d * d);
 }
 
-float GGXAnisoG1(vec3 alpha, vec3 normal, vec3 tangent, vec3 w)
+float GGXAnisoG1(vec3 alpha, vec3 normal, vec4 tangent, vec3 w)
 {
 	return GGXIsoG1(alpha.z, dot(normal, w));
 }
 
-float GGXAnisoG(vec3 alpha, vec3 normal, vec3 tangent, vec3 wo, vec3 wi)
+float GGXAnisoG(vec3 alpha, vec3 normal, vec4 tangent, vec3 wo, vec3 wi)
 {
 	return GGXAnisoG1(alpha, normal, tangent, wo) * GGXAnisoG1(alpha, normal, tangent, wi);
+}
+
+float GGXAnisoV(float alpha, float NdotO, float NdotI)
+{
+	return GGXIsoV(alpha, NdotO, NdotI);
 }
 
 /*
