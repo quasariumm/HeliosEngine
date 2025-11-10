@@ -73,9 +73,9 @@ struct IntermediateHeader {
 struct Vertex
 {
 	glm::vec3 position;
-	float texCoordX;
+	uint32_t texCoords;
 	glm::uvec3 normalTangent;  // Packed normal and tangent
-	float texCoordY;
+	float tangentBias;
 	
 	// Helper: Pack a normalized vec3 into 16 bits using octahedral encoding
 	uint16_t PackNormalToUint16(const glm::vec3& normal);

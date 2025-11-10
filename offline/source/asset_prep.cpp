@@ -214,9 +214,9 @@ void AssetPrep::CompressTexture(const File& file, std::ofstream& stream)
 
 void AssetPrep::AlignData(const File& file, std::ofstream& stream)
 {
-	std::cout << "  - Alligning Data for " << file.name << std::endl;
+    std::cout << "  - Aligning Data for " << file.name << std::endl;
 
-// Load mesh using Assimp
+    // Load mesh using Assimp
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(file.path, 
         aiProcess_Triangulate |           // Convert to triangles
@@ -249,36 +249,59 @@ void AssetPrep::AlignData(const File& file, std::ofstream& stream)
                 mesh->mVertices[v].z
             );
             
-            // Normal and Tangent (packed)
+            // Texture coordinates - pack into single uint (16 bits each)
+            float u = 0.0f, v_coord = 0.0f;
+            if (mesh->HasTextureCoords(0)) {
+                u = glm::clamp(mesh->mTextureCoords[0][v].x, 0.0f, 1.0f);
+                v_coord = glm::clamp(mesh->mTextureCoords[0][v].y, 0.0f, 1.0f);
+            }
+            uint16_t u_packed = static_cast<uint16_t>(u * 65535.0f);
+            uint16_t v_packed = static_cast<uint16_t>(v_coord * 65535.0f);
+            vertex.texCoords = (static_cast<uint32_t>(u_packed) << 16) | v_packed;
+            
+            // Normal and Tangent
             glm::vec3 normal = glm::vec3(0, 1, 0);  // Default up
             glm::vec3 tangent = glm::vec3(1, 0, 0); // Default right
+            glm::vec3 bitangent = glm::vec3(0, 0, 1); // Default forward
             
             if (mesh->HasNormals()) {
-                normal = glm::vec3(
+                normal = glm::normalize(glm::vec3(
                     mesh->mNormals[v].x,
                     mesh->mNormals[v].y,
                     mesh->mNormals[v].z
-                );
+                ));
             }
             
             if (mesh->HasTangentsAndBitangents()) {
-                tangent = glm::vec3(
+                tangent = glm::normalize(glm::vec3(
                     mesh->mTangents[v].x,
                     mesh->mTangents[v].y,
                     mesh->mTangents[v].z
-                );
+                ));
+                bitangent = glm::normalize(glm::vec3(
+                    mesh->mBitangents[v].x,
+                    mesh->mBitangents[v].y,
+                    mesh->mBitangents[v].z
+                ));
             }
             
-            vertex.normalTangent = vertex.PackNormalAndTangent(normal, tangent);
+            // Pack normal and tangent into uvec3 (16 bits each per axis component)
+            auto packAxis = [](float normalVal, float tangentVal) -> uint32_t {
+                // Convert from [-1, 1] to [0, 1] then to 16-bit
+                float nNorm = (normalVal + 1.0f) * 0.5f;
+                float tNorm = (tangentVal + 1.0f) * 0.5f;
+                uint16_t nPacked = static_cast<uint16_t>(glm::clamp(nNorm, 0.0f, 1.0f) * 65535.0f);
+                uint16_t tPacked = static_cast<uint16_t>(glm::clamp(tNorm, 0.0f, 1.0f) * 65535.0f);
+                return (static_cast<uint32_t>(nPacked) << 16) | tPacked;
+            };
             
-            // Texture coordinates
-            if (mesh->HasTextureCoords(0)) {
-                vertex.texCoordX = mesh->mTextureCoords[0][v].x;
-                vertex.texCoordY = mesh->mTextureCoords[0][v].y;
-            } else {
-                vertex.texCoordX = 0.0f;
-                vertex.texCoordY = 0.0f;
-            }
+            vertex.normalTangent.x = packAxis(normal.x, tangent.x);
+            vertex.normalTangent.y = packAxis(normal.y, tangent.y);
+            vertex.normalTangent.z = packAxis(normal.z, tangent.z);
+            
+            // Calculate tangent bias (handedness for bitangent reconstruction)
+            glm::vec3 calculatedBitangent = glm::cross(normal, tangent);
+            vertex.tangentBias = glm::dot(bitangent, calculatedBitangent) > 0.0f ? 1.0f : -1.0f;
             
             vertices.push_back(vertex);
         }
@@ -305,7 +328,6 @@ void AssetPrep::AlignData(const File& file, std::ofstream& stream)
                  indexCount * sizeof(uint32_t));
     
     std::cout << "    Vertices: " << vertexCount << ", Indices: " << indexCount << std::endl;
-	
 }
 
 // Model processing functions
